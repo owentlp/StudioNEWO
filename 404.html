@@ -2,28 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>404 · STUDIO NEWO</title>
+<meta name="description" content="That page does not exist.">
+<meta name="theme-color" content="#e9e7e2">
 <meta name="robots" content="noindex">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
+<link rel="preload" href="/fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="/fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
+<!-- Every path here is ROOT-RELATIVE (leading /). GitHub Pages serves this same
+     file for a miss at ANY depth - /projects/kart/nope.usdz as readily as /nope -
+     so relative paths would resolve against the wrong folder and the page would
+     arrive unstyled with a broken logo. That is exactly what the old standalone
+     version did from anywhere but the site root. -->
+<link rel="stylesheet" href="/css/style.css?v=32">
 <style>
-@font-face{font-family:"GOST B";src:url("fonts/gost-typeb-italic.ttf") format("truetype");font-style:italic;font-display:swap;}
-@font-face{font-family:"OCR B";src:url("fonts/ocr-b.otf") format("opentype");font-display:swap;}
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:#e9e7e2;color:#141414;font-family:"OCR B","Courier New",monospace;text-align:center;}
-h1{font-family:"GOST B",Georgia,serif;font-style:italic;font-weight:400;font-size:clamp(40px,8vw,88px);margin:0 0 14px;}
-p{font-size:10px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 26px;}
-a{display:inline-block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;color:#fff;background:#e2191b;padding:8px 14px;}
-a:hover{opacity:.82;}
+  .fourofour{min-height:64vh; display:flex; flex-direction:column; justify-content:center;}
+  .fourofour .code{font-family:var(--disp); font-style:italic; font-weight:400;
+    font-size:clamp(96px,20vw,240px); line-height:.9; color:var(--red); margin:0;}
+  .fourofour .backlinks{margin-top:clamp(26px,5vh,46px); display:flex; flex-wrap:wrap; gap:10px 26px;}
+  .fourofour .backlinks a{font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink); text-decoration:none; border-bottom:1px solid var(--red); padding-bottom:3px; transition:color .15s ease;}
+  .fourofour .backlinks a:hover{color:var(--red);}
+  .fourofour .path{margin-top:24px; font-size:10px; letter-spacing:.1em; color:var(--ink-soft); word-break:break-all;}
 </style>
 </head>
 <body>
-<div>
-  <h1>404</h1>
-  <p>This page does not exist</p>
-  <a href="/">BACK TO THE INDEX &rarr;</a>
+<a class="skip-link" href="#content">Skip to content</a>
+<a class="site-home" href="/" aria-label="Studio NEWO home">
+  <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+</a>
+<div class="site-wordmark" aria-label="NEWO">
+  <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
+<button id="burger" aria-label="Open menu">
+  <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
+</button>
+<div id="menu-overlay"><a href="/about.html">INFO</a><a href="/materials.html">MATERIALS</a><a href="/contact.html">CONTACT</a></div>
+
+<main class="page wrap fourofour" id="content">
+  <span class="eyebrow">Error</span>
+  <p class="code">404</p>
+  <hr>
+  <p class="lead">This page does not exist. It may have been renamed, or the link that brought you here may be out of date.</p>
+  <div class="backlinks">
+    <a href="/">Index</a>
+    <a href="/about.html">Info</a>
+    <a href="/materials.html">Materials</a>
+    <a href="/contact.html">Contact</a>
+  </div>
+  <p class="path" id="badpath"></p>
+</main>
+
+<script src="/js/projects-data.js?v=9"></script>
+<script src="/js/main.js?v=3"></script>
+<script src="/js/menu.js?v=4"></script>
+<script>
+/* Echo back the path that missed - handy when a 404 comes from a typo or a
+   stale link, since you can see at a glance what was actually requested.
+   Written with textContent, never innerHTML, so a crafted URL cannot inject
+   markup into the page. */
+(function(){
+  var el = document.getElementById("badpath");
+  if(el) el.textContent = "Requested: " + location.pathname;
+})();
+</script>
 </body>
 </html>

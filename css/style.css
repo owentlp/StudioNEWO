@@ -484,6 +484,9 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .mv-qr-img img{width:100%; height:100%; display:block; image-rendering:pixelated;}
 .mv-qr-note{font-size:10px; line-height:1.5; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); margin:0;}
 .mv-qr-url{font-size:10px; word-break:break-all; color:var(--ink-soft);}
+/* ?ardebug readout - only ever rendered when the URL asks for it (see project.html) */
+.mv-ardebug{margin-top:10px; padding:10px; max-width:min(520px,88vw); background:var(--paper); border:1px solid var(--red);
+  font-family:var(--body); font-size:10px; line-height:1.6; white-space:pre-wrap; word-break:break-all; color:var(--ink);}
 
 /* ---------- HOW IT WORKS (mechanism, right column) ----------
    Figma: no section label. The graphic bleeds to the (now right-side) page

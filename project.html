@@ -31,7 +31,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=31">
+<link rel="stylesheet" href="css/style.css?v=32">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -606,18 +606,21 @@
         return false;
       }
 
-      // Open iOS Quick Look directly, bypassing model-viewer entirely.
+      /* Open iOS Quick Look directly, bypassing model-viewer.
+         Built to mirror model-viewer's own implementation exactly: create the
+         anchor, give it an empty <img> child (Apple requires one - Quick Look
+         silently ignores an anchor without it), and click it WITHOUT adding it
+         to the document. The previous version appended it to <body> with
+         display:none first, which is a plausible reason Safari ignored it -
+         a hidden element is a poor thing to hang a navigation off. */
       function openQuickLook(){
         var a = document.createElement("a");
         a.setAttribute("rel", "ar");
-        // #allowsContentScaling=0 is what pins the model to real-world size,
-        // matching the ar-scale="fixed" on the viewer.
-        a.href = iosSrc + "#allowsContentScaling=0";
-        a.appendChild(document.createElement("img"));   // required by Quick Look
-        a.style.display = "none";
-        document.body.appendChild(a);
+        // #allowsContentScaling=0 pins the model to real-world size, matching
+        // ar-scale="fixed" on the viewer.
+        a.setAttribute("href", iosSrc + "#allowsContentScaling=0");
+        a.appendChild(document.createElement("img"));
         a.click();
-        setTimeout(function(){ a.remove(); }, 1000);
       }
 
       // lazy: the QR library is only fetched if someone actually asks for the
@@ -668,6 +671,43 @@
       // opens the QR, on a phone it opens AR. Nothing to wait for.
       arBtn.hidden = false;
       arBtn.setAttribute("aria-expanded", "false");
+
+      /* ---------- ?ardebug ----------
+         Add &ardebug to the URL to print what this device actually detected,
+         right on the page. There is no console on an iPhone, so when AR "does
+         nothing" there is otherwise no way to tell whether the code took the
+         model-viewer path, the Quick Look path, or decided it could not do AR
+         at all - which is the difference between a broken file and broken
+         wiring. Off unless asked for; costs nothing otherwise. */
+      if(/[?&]ardebug\b/.test(location.search)){
+        var dbg = document.createElement("pre");
+        dbg.className = "mv-ardebug";
+        function refresh(note){
+          dbg.textContent =
+            "ios-src        : " + (iosSrc || "(none)") + "\n" +
+            "canActivateAR  : " + mv.canActivateAR + "\n" +
+            "rel=ar support : " + supportsQuickLook + "\n" +
+            "isAndroid      : " + isAndroid + "\n" +
+            "canDoAR()      : " + canDoAR() + "\n" +
+            "UA             : " + navigator.userAgent + "\n" +
+            (note ? ("\nlast tap  -> " + note) : "");
+        }
+        refresh("");
+        arBtn.parentNode.appendChild(dbg);
+        mv.addEventListener("ar-status", function(e){
+          refresh("ar-status: " + (e.detail && e.detail.status));
+        });
+        arBtn.addEventListener("click", function(){
+          // runs after the main handler above, so it reports what that chose
+          refresh(mv.canActivateAR ? "used mv.activateAR()"
+                : (supportsQuickLook && iosSrc) ? "used <a rel=ar> Quick Look"
+                : "no AR -> showed QR");
+        });
+        // surface script errors too - otherwise they are invisible on a phone
+        window.addEventListener("error", function(ev){
+          dbg.textContent += "\nJS ERROR: " + ev.message;
+        });
+      }
 
       // close the QR on Escape or on a click outside it
       document.addEventListener("keydown", function(e){ if(e.key === "Escape" && qrOpen) toggleQR(); });
