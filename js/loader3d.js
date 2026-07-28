@@ -84,6 +84,40 @@
 
   function pageStillLoading(){ return !document.body.classList.contains("ready"); }
 
+  /* ---- THE PIN, and why it is set HERE and not in init() ----
+     The loader is held fully visible by an inline opacity, which beats the
+     body.ready CSS fade. That pin used to be set inside init(), i.e. only AFTER
+     three.js had come down off the CDN and the STL had been fetched - roughly
+     500-800ms in. But the page's own reveal() adds body.ready at about 350ms.
+     So on a normal load the order was:
+
+        350ms  body.ready lands, the loader STARTS FADING OUT
+        ~600ms init() runs, sets opacity:1, the loader SNAPS BACK to full
+
+     which is exactly the flicker: it begins to disappear, then jumps back.
+     Pinning immediately, before the CDN request goes out, closes that window.
+
+     The safety net matters just as much: if anything on the 3D path fails or
+     is slow (no network, CDN blocked, bad STL, WebGL refuses a context) the
+     pin MUST come off or the loader would sit there forever. Every failure
+     path below calls unpin(), and PIN_CAP_MS is a backstop in case one is
+     missed. */
+  var PIN_CAP_MS = 2600;
+  var pinned = false, started3d = false, pinCap = null;
+  function pin(){
+    if(pinned) return;
+    pinned = true;
+    loaderEl.style.opacity = "1";
+    pinCap = setTimeout(function(){ if(!started3d) unpin(); }, PIN_CAP_MS);
+  }
+  function unpin(){
+    if(!pinned) return;
+    pinned = false;
+    if(pinCap){ clearTimeout(pinCap); pinCap = null; }
+    loaderEl.style.opacity = "";   // hand back to the body.ready CSS rule
+  }
+  pin();
+
   /* ---- binary STL -> two vertex lists, split by face normal ----
      A face whose normal is dominated by one axis (|n| > 0.99 on x, y or z) is
      one of the cube's flat faces; anything else is part of the sphere cut
@@ -138,17 +172,20 @@
     document.head.appendChild(s);
   }
 
+  // NOTE: every exit below unpins. The old code just returned, which was safe
+  // only because the pin was set late; now that it is set up front, an
+  // un-unpinned exit would freeze the loader on screen.
   loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js", function(){
-    if(!pageStillLoading()) return;   // the page beat us to it, don't bother
+    if(!pageStillLoading()){ unpin(); return; }   // the page beat us to it, don't bother
     fetch("logo/3d-logo.stl").then(function(r){ return r.arrayBuffer(); })
       .then(function(buf){
-        if(!pageStillLoading()) return;
+        if(!pageStillLoading()){ unpin(); return; }
         var parsed = parseSTL(buf);
-        if(!parsed) return;
+        if(!parsed){ unpin(); return; }           // malformed/ASCII STL
         init(parsed);
       })
-      .catch(function(){ /* keep the flat mark, no harm done */ });
-  }, function(){ /* CDN unreachable, keep the flat mark */ });
+      .catch(function(){ unpin(); });              // STL fetch failed
+  }, function(){ unpin(); });                      // CDN unreachable
 
   function init(parsed){
     var canvas = document.createElement("canvas");
@@ -158,7 +195,7 @@
     var renderer;
     try{
       renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    } catch(e){ canvas.remove(); return; }
+    } catch(e){ canvas.remove(); unpin(); return; }   // no WebGL context available
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
@@ -221,10 +258,10 @@
       window.addEventListener("resize", resize);
     }
 
-    // Pin the loader fully visible, overriding the page's own body.ready CSS
-    // fade (an inline style beats a class-selector rule), until the sequence
-    // below reaches a settle AND the page is ready.
-    loaderEl.style.opacity = "1";
+    // the 3D path made it: cancel the safety timer so the pin now stays on
+    // until the tumble reaches a settle (see the release in frame() below).
+    started3d = true;
+    if(pinCap){ clearTimeout(pinCap); pinCap = null; }
 
     /* ---- the tumble ----
        Each segment turns 90° about X and 90° about Y simultaneously. The four
@@ -293,7 +330,7 @@
             var pageReady = document.body.classList.contains("ready");
             if(turnCount >= MIN_TURNS && (pageReady || turnCount >= MAX_TURNS)){
               released = true;
-              loaderEl.style.opacity = "";   // hand back to the body.ready CSS rule, which now fades it
+              unpin();   // hand back to the body.ready CSS rule, which now fades it
             } else {
               phase = "turn";
               phaseElapsed = 0;
