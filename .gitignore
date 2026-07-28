@@ -3,5 +3,31 @@
 # ...except robots.txt, which MUST ship so search engines can read it
 !robots.txt
 
+# the whole docs folder is working notes for Owen only. It was previously
+# committed (only *.txt was ignored, not *.md), which meant the handoff notes
+# and publish walkthrough were readable by anyone at
+# studionewo.com/docs/PUBLISH_STEPS.md. Ignoring the folder stops NEW commits,
+# but files already in the repo stay there until deleted - see docs/ROADMAP.md
+# step 0 for the one-time cleanup.
+docs/
+
+# local build/maintenance scripts, not part of the site
+cleanup.ps1
+optimize-images.py
+push-to-repo.ps1
+PUSH.bat
+
+# the loader-animation prototype. Its motion is already ported into
+# js/loader3d.js and its 3D-LOGO.STL is byte-identical to logo/3d-logo.stl,
+# so shipping it would only add ~1.1 MB of screenshots and duplicate fonts to
+# the live site. Kept on disk as Owen's reference.
+logo/3D Logo Loading Animation/
+
 # local backups of pre-compression originals - kept on disk, never deployed
 _backup_originals/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+$null

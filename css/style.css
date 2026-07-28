@@ -93,12 +93,59 @@ img{display:block;}
   transition:opacity .18s ease, transform .2s ease;
 }
 #menu-overlay.menu-panel.open{opacity:1; transform:none; pointer-events:auto;}
-.menu-nav{display:flex; flex-direction:column; gap:clamp(16px,2.4vh,26px);}
-.menu-group{display:flex; flex-direction:column; gap:4px;}
-.menu-head{font-size:8px; letter-spacing:.24em; text-transform:uppercase; opacity:.48; margin-bottom:4px;}
-.menu-group a{font-family:var(--disp); font-style:italic; font-size:clamp(20px,2vw,27px); line-height:1.12; color:var(--ink); text-decoration:none; transition:color .15s ease;}
-.menu-group a:hover, .menu-group a:focus-visible{color:var(--red);}
-.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px;}
+.menu-nav{display:flex; flex-direction:column; gap:clamp(9px,1.3vh,14px);}
+
+/* ---- category dropdowns (built by js/menu.js off each project's `code`) ----
+   The heading is a real <button> so keyboard and screen readers get the
+   disclosure for free. It keeps the old .menu-head look (tiny, tracked-out,
+   uppercase) - the project titles underneath stay the big italic statement, so
+   opening a category still feels like the menu did before, just with the other
+   categories folded away. */
+.menu-cat{display:flex; flex-direction:column;}
+.menu-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  width:100%; background:none; border:0; padding:6px 0; margin:0;
+  font-family:inherit; font-size:8px; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--ink); opacity:.48; cursor:pointer; text-align:left;
+  transition:opacity .15s ease, color .15s ease;
+}
+.menu-head:hover, .menu-head:focus-visible{opacity:1; color:var(--red);}
+.menu-cat.open > .menu-head{opacity:.85;}
+/* the +/- mark: two 1px rules, the vertical one rotating away when open, so it
+   reads as a drawn cross rather than a UI glyph. */
+.menu-head-mark{position:relative; flex:0 0 auto; width:9px; height:9px;}
+.menu-head-mark::before, .menu-head-mark::after{
+  content:""; position:absolute; left:0; top:4px; width:9px; height:1px;
+  background:currentColor; transition:transform .25s cubic-bezier(.2,.8,.2,1);
+}
+.menu-head-mark::after{transform:rotate(90deg);}
+.menu-cat.open .menu-head-mark::after{transform:rotate(0deg);}
+
+/* collapse/expand. grid-template-rows 0fr -> 1fr animates to the content's
+   natural height with no hard-coded max-height and no JS measuring. Browsers
+   that don't animate it simply snap open/closed, which is fine. visibility is
+   what actually keeps collapsed links out of the tab order. */
+.menu-cat-wrap{
+  display:grid; grid-template-rows:0fr; visibility:hidden;
+  transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s linear .28s;
+}
+.menu-cat.open > .menu-cat-wrap{
+  grid-template-rows:1fr; visibility:visible;
+  transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s;
+}
+.menu-cat-list{min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; padding-bottom:6px;}
+.menu-cat-list a{font-family:var(--disp); font-style:italic; font-size:clamp(20px,2vw,27px); line-height:1.12; color:var(--ink); text-decoration:none; transition:color .15s ease, opacity .15s ease;}
+.menu-cat-list a:hover, .menu-cat-list a:focus-visible{color:var(--red);}
+/* the project you are already looking at, marked with a red rule rather than a
+   colour change so it doesn't read as a hover state */
+.menu-cat-list a.is-here{opacity:.55;}
+.menu-cat-list a.is-here::before{content:""; display:inline-block; width:14px; height:1px; background:var(--red); vertical-align:middle; margin-right:7px;}
+
+@media (prefers-reduced-motion:reduce){
+  .menu-cat-wrap, .menu-cat.open > .menu-cat-wrap, .menu-head-mark::before, .menu-head-mark::after{transition:none;}
+}
+
+.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px; margin-top:9px;}
 .menu-links a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-decoration:none; transition:color .15s ease;}
 .menu-links a:hover, .menu-links a:focus-visible{color:var(--red);}
 
@@ -107,7 +154,11 @@ body.ready .page{opacity:1;}
 
 /* ---------- LOADER (logo mark: static fallback + JS-driven 3D spin) ---------- */
 #loader{position:fixed; inset:0; z-index:60; display:grid; place-items:center; background:var(--paper); transition:opacity 650ms ease;}
-.ld-mark{position:relative; width:62px; height:62px;}
+.ld-mark{position:relative; width:62px; height:62px; transition:width .3s ease, height .3s ease;}
+/* js/loader3d.js adds .is3d once the WebGL mark is actually running. The flat
+   fallback silhouette reads fine at 62px; the tumbling solid does not, so it
+   gets more room. Change these two numbers to resize the animation. */
+.ld-mark.is3d{width:clamp(104px,15vmin,168px); height:clamp(104px,15vmin,168px);}
 .ld-mark svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
 .ld-logo path{fill:var(--ink);}
 body.ready #loader{opacity:0; pointer-events:none;}

@@ -158,7 +158,7 @@ const PROJECTS = {
     galleryVideo: "",
     model:     "model.glb",
     modelRender: "modelrender.glb",
-    modelUSDZ: "",
+    modelUSDZ: "model.usdz",
     modelV2:   "",
     mechanism: "mechanism.html",
     hiwVideo:  "",

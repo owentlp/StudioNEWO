@@ -151,17 +151,35 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
   transition:opacity .18s ease, transform .2s ease;
 }
 #menu-overlay.menu-panel.open{opacity:1; transform:none; pointer-events:auto;}
-.menu-nav{display:flex; flex-direction:column; gap:22px;}
-.menu-group{display:flex; flex-direction:column; gap:4px;}
-.menu-head{font-size:9px; letter-spacing:.24em; text-transform:uppercase; opacity:.48; margin-bottom:4px;}
-.menu-group a{font-family:var(--disp); font-style:italic; font-size:30px; line-height:1.12; color:var(--ink); text-decoration:none;}
-.menu-group a:hover{color:var(--red);}
-.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px;}
+.menu-nav{display:flex; flex-direction:column; gap:12px;}
+/* category dropdowns - see the matching, commented block in css/style.css.
+   This page carries its own copy because index.html is fully inline (no
+   stylesheet link), so the two must be kept in step when either changes. */
+.menu-cat{display:flex; flex-direction:column;}
+.menu-head{display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; background:none; border:0; padding:6px 0; margin:0; font-family:inherit; font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink); opacity:.48; cursor:pointer; text-align:left; transition:opacity .15s ease, color .15s ease;}
+.menu-head:hover, .menu-head:focus-visible{opacity:1; color:var(--red);}
+.menu-cat.open > .menu-head{opacity:.85;}
+.menu-head-mark{position:relative; flex:0 0 auto; width:9px; height:9px;}
+.menu-head-mark::before, .menu-head-mark::after{content:""; position:absolute; left:0; top:4px; width:9px; height:1px; background:currentColor; transition:transform .25s cubic-bezier(.2,.8,.2,1);}
+.menu-head-mark::after{transform:rotate(90deg);}
+.menu-cat.open .menu-head-mark::after{transform:rotate(0deg);}
+.menu-cat-wrap{display:grid; grid-template-rows:0fr; visibility:hidden; transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s linear .28s;}
+.menu-cat.open > .menu-cat-wrap{grid-template-rows:1fr; visibility:visible; transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s;}
+.menu-cat-list{min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; padding-bottom:6px;}
+.menu-cat-list a{font-family:var(--disp); font-style:italic; font-size:30px; line-height:1.12; color:var(--ink); text-decoration:none;}
+.menu-cat-list a:hover, .menu-cat-list a:focus-visible{color:var(--red);}
+.menu-cat-list a.is-here{opacity:.55;}
+.menu-cat-list a.is-here::before{content:""; display:inline-block; width:14px; height:1px; background:var(--red); vertical-align:middle; margin-right:7px;}
+.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px; margin-top:9px;}
 .menu-links a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-decoration:none;}
 .menu-links a:hover{color:var(--red);}
 
 #loader{position:fixed; inset:0; z-index:9; display:grid; place-items:center; background:#e9e7e2; transition:opacity 650ms ease;}
-.ld-mark{position:relative; width:62px; height:62px;}
+.ld-mark{position:relative; width:62px; height:62px; transition:width .3s ease, height .3s ease;}
+/* js/loader3d.js adds .is3d once the WebGL mark is running - the tumbling
+   solid needs more room than the flat fallback silhouette. Keep in step with
+   the matching rule in css/style.css. */
+.ld-mark.is3d{width:clamp(104px,15vmin,168px); height:clamp(104px,15vmin,168px);}
 .ld-mark svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
 .ld-logo path{fill:#141414;}
 body.ready #loader{opacity:0; pointer-events:none;}
@@ -233,7 +251,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js"></script>
+<script src="js/loader3d.js?v=2"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -265,8 +283,8 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<script src="js/projects-data.js?v=8"></script>
-<script src="js/menu.js?v=3"></script>
+<script src="js/projects-data.js?v=9"></script>
+<script src="js/menu.js?v=4"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -330,7 +348,7 @@ const CLIP_PICK = (function(){
       '</span>';
     a.addEventListener("mouseenter", function(){
       prefetch("project.html?p=" + key);
-      prefetch("css/style.css?v=25");
+      prefetch("css/style.css?v=27");
     }, { once:true });
     dock.appendChild(a);
   });

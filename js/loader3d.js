@@ -1,36 +1,43 @@
 /* ============================================================
    LOADING SCREEN · 3D LOGO (progressive enhancement)
    ------------------------------------------------------------
-   2026-07-22: replaced the old flat pulsing mark + red spinning
-   sweep line entirely, per Owen. Rewritten twice more the same
-   day, also per Owen - first to a fixed hold/turn/hold/turn/hold
-   sequence (always two 90° turns), then to the current ADAPTIVE
-   version below, because the fixed version always played both
-   turns even on a fast load. The loader now shows either the
-   flat static logo mark (.ld-mark > .ld-logo, instant-paint +
-   true fallback, no animation of its own), or - once three.js
-   and the STL both load in time - a real 3D render that plays:
-   hold on the front face, turn 90°, hold - and stops there if the
-   page is ready. If it isn't, it does another turn+hold, and
-   another, one at a time, until the page is ready. So the normal
-   case is exactly one 90° turn; extra turns only happen on a
-   slow connection/big first paint, which is exactly the "if it
-   needs more time to load then more will be necessary" Owen
-   asked for. It never stops mid-turn, only ever on a resting
-   "logo" pose (see MIN_TURNS/MAX_TURNS in init() below).
+   2026-07-28: the motion was replaced with Owen's new tumble
+   (prototyped in logo/3D Logo Loading Animation/). The old
+   version turned 90° about Y only. This one turns 90° about X
+   AND Y AT THE SAME TIME, so the mark tumbles diagonally through
+   its vertex/petal views instead of spinning like a carousel.
+   Ported changes, all from the prototype:
+     · orthographic camera (was perspective) - no foreshortening,
+       so the mark keeps the flat, drawn look of the 2D logo even
+       while it turns
+     · the STL is split into TWO meshes by face normal: axis-
+       aligned faces (the cube) get one material, curved faces
+       (the sphere cut through it) get a slightly different one,
+       so the recessed sphere walls read as depth rather than a
+       single flat silhouette
+     · new three-light rig, key from the upper LEFT front, low
+       ambient, so those recessed walls actually darken
+     · easeInOutCubic on each turn (was smoothstep)
+
+   WHY IT ALWAYS STOPS AT REST
+   Every settle point is a cube symmetry, so a landed pose is
+   always "the logo" again, never some odd in-between angle. The
+   loader is pinned fully visible (an inline opacity override on
+   #loader, which beats the body.ready CSS fade) and is only ever
+   released DURING A SETTLE HOLD - never mid-turn. So the sequence
+   is: turn, settle, and if the page is ready by then, release
+   from that settled pose; if it isn't, take another turn and
+   check again at the next settle. Normal fast load = exactly one
+   turn. Extra turns only happen when the page genuinely needs
+   the time. See SETTLE_MS / TURN_MS / MIN_TURNS / MAX_TURNS.
 
    IMPORTANT DEPARTURE FROM THE USUAL RULE: everywhere else on
    this site, loading-screen/decorative work is built to never
-   delay the page (see js/loader3d.js history and HANDOFF.txt).
-   This sequence is a deliberate exception Owen asked for: once
-   the 3D mark is actually running, the loader is held fully
-   visible (via an inline opacity override on #loader, which beats
-   the body.ready CSS fade) until at least one full turn+hold has
-   played AND the page itself is ready - whichever is later. On a
-   typical fast load that's just the one turn (~1.15s of motion
-   plus its two holds); it only runs longer when the page actually
-   needs longer. This trade-off (guaranteed animation-through vs.
-   fastest-possible reveal) was an explicit ask, not an oversight.
+   delay the page. This sequence is a deliberate exception Owen
+   asked for - once the 3D mark is running, the loader is held
+   until at least one full turn+settle has played AND the page is
+   ready, whichever is later. Guaranteed animation-through beats
+   fastest-possible reveal here, by explicit request.
 
    If WebGL isn't available, the visitor has reduced-motion or
    data-saver on, or the CDN script / STL fetch fails, none of
@@ -40,19 +47,26 @@
 
    Bring your own THREE: loads three.js r128 from cdnjs, plus a small
    hand-rolled binary STL parser below (instead of pulling in the separate
-   STLLoader addon file, one less thing that can 404) since the STL only
-   needs its raw triangle data, nothing STLLoader does beyond that.
+   STLLoader addon file, one less thing that can 404).
 
-   Source geometry: logo/3d-logo.stl. Owen also supplied a GLTF
-   export (3d-logo.gltf + data.bin) of the same model, but it uses
-   Draco mesh compression, which would need a separate DRACOLoader
-   + WASM decoder loaded as an ES module - a real architecture
-   change from the plain <script> three.js setup used sitewide,
-   for geometry that's otherwise identical to the STL already in
-   place. Skipped for now; the STL stays the source of truth
-   unless a reason to switch comes up later.
+   Source geometry: logo/3d-logo.stl - byte-identical to the
+   prototype's uploads/3D-LOGO.STL, so there is nothing to copy
+   across; the prototype folder is reference only and is not
+   deployed.
    ============================================================ */
 (function(){
+
+  /* ---- timing knobs. TURN_MS is one diagonal quarter-turn, SETTLE_MS is the
+     beat it rests on afterwards. The prototype ran a fixed 6s 4-turn loop
+     (1230ms turn / 270ms settle); the loader wants to be quicker off the mark
+     and to rest more obviously before handing over, hence the shorter turn and
+     the longer settle. Raise SETTLE_MS if the pause before the page appears
+     still feels rushed. */
+  var TURN_MS   = 900;   // one simultaneous 90°-X + 90°-Y turn
+  var SETTLE_MS = 380;   // rest on the landed pose before turning again / releasing
+  var MIN_TURNS = 1;     // always play at least one full turn, even on an instant load
+  var MAX_TURNS = 8;     // safety cap in case body.ready somehow never arrives
+
   function hasWebGL(){
     try{
       var c = document.createElement("canvas");
@@ -70,29 +84,51 @@
 
   function pageStillLoading(){ return !document.body.classList.contains("ready"); }
 
-  // ---- binary STL -> {positions, normals} Float32Arrays, no external loader ----
+  /* ---- binary STL -> two vertex lists, split by face normal ----
+     A face whose normal is dominated by one axis (|n| > 0.99 on x, y or z) is
+     one of the cube's flat faces; anything else is part of the sphere cut
+     through it. Splitting them here lets each get its own material, which is
+     what makes the recess read as depth instead of a flat silhouette.
+     Positions are centred on the geometry's own bounding box (the prototype
+     hard-coded -127 for a 0..254 cube; deriving it means a re-exported STL at
+     a different scale still centres correctly). */
   function parseSTL(buf){
     var dv = new DataView(buf);
     var triCount = dv.getUint32(80, true);
     // sanity check: a malformed/ASCII STL would make this wildly wrong
     if(84 + triCount*50 !== buf.byteLength) return null;
-    var positions = new Float32Array(triCount*9);
-    var normals   = new Float32Array(triCount*9);
-    var off = 84;
-    for(var i=0; i<triCount; i++){
-      var nx=dv.getFloat32(off,true), ny=dv.getFloat32(off+4,true), nz=dv.getFloat32(off+8,true);
-      off += 12;
-      for(var v=0; v<3; v++){
-        var vi = i*9 + v*3;
-        positions[vi]   = dv.getFloat32(off,   true);
-        positions[vi+1] = dv.getFloat32(off+4, true);
-        positions[vi+2] = dv.getFloat32(off+8, true);
-        normals[vi]=nx; normals[vi+1]=ny; normals[vi+2]=nz;
-        off += 12;
+
+    var flat = [], curved = [];
+    var min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+    var off = 84, i, v, p, x, y, z;
+
+    for(i = 0; i < triCount; i++){
+      var nx = dv.getFloat32(off, true), ny = dv.getFloat32(off+4, true), nz = dv.getFloat32(off+8, true);
+      var dom = Math.max(Math.abs(nx), Math.abs(ny), Math.abs(nz));
+      var target = (dom > 0.99) ? flat : curved;
+      for(v = 0; v < 3; v++){
+        p = off + 12 + v*12;
+        x = dv.getFloat32(p, true); y = dv.getFloat32(p+4, true); z = dv.getFloat32(p+8, true);
+        if(x < min[0]) min[0] = x; if(x > max[0]) max[0] = x;
+        if(y < min[1]) min[1] = y; if(y > max[1]) max[1] = y;
+        if(z < min[2]) min[2] = z; if(z > max[2]) max[2] = z;
+        target.push(x, y, z);
       }
-      off += 2; // attribute byte count, unused
+      off += 50;
     }
-    return { positions: positions, normals: normals };
+    if(!flat.length && !curved.length) return null;
+
+    var cx = (min[0]+max[0])/2, cy = (min[1]+max[1])/2, cz = (min[2]+max[2])/2;
+    function centre(arr){
+      for(var k = 0; k < arr.length; k += 3){ arr[k] -= cx; arr[k+1] -= cy; arr[k+2] -= cz; }
+      return arr;
+    }
+    // half the space diagonal, i.e. the furthest any corner swings from centre
+    // mid-tumble. The ortho frustum is sized off this so nothing ever clips.
+    var sx = max[0]-min[0], sy = max[1]-min[1], sz = max[2]-min[2];
+    var radius = Math.sqrt(sx*sx + sy*sy + sz*sz) / 2;
+
+    return { flat: centre(flat), curved: centre(curved), radius: radius };
   }
 
   function loadScript(src, ok, fail){
@@ -115,17 +151,6 @@
   }, function(){ /* CDN unreachable, keep the flat mark */ });
 
   function init(parsed){
-    var w = mark.clientWidth || 62, h = mark.clientHeight || 62;
-
-    var geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(parsed.positions, 3));
-    geo.setAttribute("normal",   new THREE.BufferAttribute(parsed.normals, 3));
-    geo.computeBoundingBox();
-    var bb = geo.boundingBox, center = new THREE.Vector3(), size = new THREE.Vector3();
-    bb.getCenter(center); bb.getSize(size);
-    geo.translate(-center.x, -center.y, -center.z);
-    var maxDim = Math.max(size.x, size.y, size.z) || 1;
-
     var canvas = document.createElement("canvas");
     canvas.className = "ld-3d";
     mark.appendChild(canvas);
@@ -134,89 +159,137 @@
     try{
       renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     } catch(e){ canvas.remove(); return; }
+    renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(w, h, false);
 
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(28, w/h, 0.1, maxDim*10);
-    camera.position.set(0, 0, maxDim*2.15);
+
+    // ORTHOGRAPHIC, per the prototype: no perspective foreshortening, so the
+    // mark stays flat and drawn-looking rather than photographic as it turns.
+    // The frustum is padded past the geometry's space-diagonal radius so a
+    // corner mid-tumble never clips the edge of the box.
+    var FRUST = parsed.radius * 1.06;
+    var camera = new THREE.OrthographicCamera(-FRUST, FRUST, FRUST, -FRUST, 1, parsed.radius * 20);
+    camera.position.set(0, 0, parsed.radius * 4);
     camera.lookAt(0, 0, 0);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.68));
-    var key = new THREE.DirectionalLight(0xffffff, 0.85);
-    key.position.set(0.6, 0.9, 1.2);
+    // key from the upper LEFT front with low ambient, so the sphere's recessed
+    // interior walls fall into shadow and the cut reads as a real void.
+    scene.add(new THREE.AmbientLight(0xffffff, 0.34));
+    var key = new THREE.DirectionalLight(0xffffff, 1.0);
+    key.position.set(-0.6, 0.8, 1.1);
     scene.add(key);
-    var fill = new THREE.DirectionalLight(0xffffff, 0.22);
-    fill.position.set(-0.8, -0.3, 0.6);
+    var fill = new THREE.DirectionalLight(0xffffff, 0.18);
+    fill.position.set(0.7, -0.5, 0.4);
     scene.add(fill);
 
-    var mat = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.6, metalness: 0.04 });
-    var mesh = new THREE.Mesh(geo, mat);
-    // starts at rotation (0,0,0): the STL's own front/top/side views are all
-    // identical (square with an inscribed circle cut through on every axis),
-    // same silhouette as the flat 2D mark, so this pose already "starts on
-    // the front face" with no calibration rotation needed - and, because of
-    // that same symmetry, landing on a 90°/180° turn also reads as "the
-    // logo" again rather than some odd in-between angle.
-    scene.add(mesh);
+    function meshFrom(arr, colour, roughness){
+      var g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3));
+      g.computeVertexNormals();
+      var m = new THREE.MeshStandardMaterial({
+        color: colour, roughness: roughness, metalness: 0.12, side: THREE.DoubleSide
+      });
+      return { mesh: new THREE.Mesh(g, m), geo: g, mat: m };
+    }
+
+    var group = new THREE.Group();
+    // the two materials are nearly the same ink; the difference that actually
+    // does the work is the roughness split plus the lighting above.
+    var cube   = meshFrom(parsed.flat,   0x141414, 0.32);
+    var sphere = meshFrom(parsed.curved, 0x161616, 0.30);
+    group.add(cube.mesh);
+    group.add(sphere.mesh);
+    scene.add(group);
+
+    function resize(){
+      var w = mark.clientWidth || 62, h = mark.clientHeight || 62;
+      renderer.setSize(w, h, false);
+      var a = w / h;
+      camera.left = -FRUST * a; camera.right = FRUST * a;
+      camera.top = FRUST; camera.bottom = -FRUST;
+      camera.updateProjectionMatrix();
+    }
+
+    // the 3D mark is given more room than the 62px flat one - a tumbling solid
+    // needs the size to read, where a static silhouette does not. See .ld-mark.is3d
+    // in the stylesheet (and index.html's inline copy).
+    mark.classList.add("is3d");
+    resize();
+    if(window.ResizeObserver){
+      var ro = new ResizeObserver(resize);
+      ro.observe(mark);
+    } else {
+      window.addEventListener("resize", resize);
+    }
 
     // now that the 3D mark can actually show something, hide the flat one
     // and reveal the canvas together, so there's no double-image frame.
     flatLogo.style.display = "none";
     canvas.style.opacity = "1";
 
-    // Pin the loader fully visible, overriding the page's own body.ready
-    // CSS fade (an inline style beats a class-selector rule), until the
-    // choreographed sequence below finishes AND the page is actually ready.
-    // See the file header for why this is a deliberate exception to the
-    // "never delay the page" rule used everywhere else.
+    // Pin the loader fully visible, overriding the page's own body.ready CSS
+    // fade (an inline style beats a class-selector rule), until the sequence
+    // below reaches a settle AND the page is ready.
     loaderEl.style.opacity = "1";
 
-    var EASE = function(t){ return t*t*(3-2*t); };            // smoothstep, ease-in-out
-    var HOLD_MS = 600;      // beat on each resting "logo" pose
-    var ROTATE_MS = 550;    // one 90° turn
-    var MIN_TURNS = 1;      // always play at least one turn, even on the fastest load
-    var MAX_TURNS = 8;      // hard safety cap, in case body.ready never appears - should never
-                             // actually get hit given the page's own reveal() hard caps
+    /* ---- the tumble ----
+       Each segment turns 90° about X and 90° about Y simultaneously. The four
+       (X,Y) sign pairs below cycle so the mark works its way around the cube's
+       symmetries rather than rocking between two poses; after four segments it
+       is back where it started, so running on indefinitely stays seamless.
+       Every landing is a cube symmetry, which is why any settle is a valid
+       place to stop. */
+    var AXIS_X = new THREE.Vector3(1, 0, 0);
+    var AXIS_Y = new THREE.Vector3(0, 1, 0);
+    var DIRX = [ 1, -1,  1, -1];
+    var DIRY = [ 1,  1, -1, -1];
+    var HALF_PI = Math.PI / 2;
+    function easeInOutCubic(x){ return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2; }
 
-    // Adaptive, not a fixed-length sequence: hold on the front face, do one
-    // 90° turn, hold again - and release right there if the page is ready.
-    // If it isn't (slow connection, big first paint, whatever), keep doing
-    // one more turn+hold at a time until it is. So the common case is
-    // exactly one turn; extra turns only happen when the page genuinely
-    // needs the extra time, per Owen's ask.
-    var turnCount = 0, phaseType = "hold", phaseElapsed = 0;
-    var rotateFrom = 0, rotateTo = 0, released = false;
-    mesh.rotation.y = 0;
+    var qBase = new THREE.Quaternion();   // the settled pose the current turn starts from
+    var qx = new THREE.Quaternion(), qy = new THREE.Quaternion(), qStep = new THREE.Quaternion();
+
+    function applyTurn(seg, e){
+      qy.setFromAxisAngle(AXIS_Y, e * DIRY[seg] * HALF_PI);
+      qx.setFromAxisAngle(AXIS_X, e * DIRX[seg] * HALF_PI);
+      qStep.copy(qx).multiply(qy);
+      group.quaternion.copy(qStep).multiply(qBase);
+    }
+
+    var turnCount = 0, phase = "settle", phaseElapsed = 0, released = false;
+    applyTurn(0, 0);   // start settled on the front face
 
     var lastTs = null, rafId = null, stopped = false;
     function frame(ts){
       if(stopped) return;
       if(lastTs === null) lastTs = ts;
-      var dt = Math.min((ts - lastTs) / 1000, 0.05) * 1000; // ms
+      var dt = Math.min(ts - lastTs, 50);   // ms, clamped so a stalled tab can't jump the animation
       lastTs = ts;
 
       if(!released){
         phaseElapsed += dt;
-        if(phaseType === "rotate"){
-          var t = Math.min(phaseElapsed / ROTATE_MS, 1);
-          mesh.rotation.y = rotateFrom + (rotateTo - rotateFrom) * EASE(t);
-          if(phaseElapsed >= ROTATE_MS){
-            mesh.rotation.y = rotateTo; // land exactly, no float drift
+        if(phase === "turn"){
+          var seg = turnCount % 4;
+          var t = Math.min(phaseElapsed / TURN_MS, 1);
+          applyTurn(seg, easeInOutCubic(t));
+          if(phaseElapsed >= TURN_MS){
+            // land EXACTLY on the settled quaternion and make it the new base,
+            // so repeated turns can't accumulate float drift off the symmetry
+            applyTurn(seg, 1);
+            qBase.copy(group.quaternion);
             turnCount++;
-            phaseType = "hold";
+            phase = "settle";
             phaseElapsed = 0;
           }
-        } else { // "hold"
-          if(phaseElapsed >= HOLD_MS){
+        } else {   // "settle" - the only phase the loader is ever allowed to release from
+          if(phaseElapsed >= SETTLE_MS){
             var pageReady = document.body.classList.contains("ready");
             if(turnCount >= MIN_TURNS && (pageReady || turnCount >= MAX_TURNS)){
               released = true;
-              loaderEl.style.opacity = ""; // hand back to the body.ready CSS rule, which now fades it
+              loaderEl.style.opacity = "";   // hand back to the body.ready CSS rule, which now fades it
             } else {
-              rotateFrom = mesh.rotation.y;
-              rotateTo = rotateFrom + Math.PI/2;
-              phaseType = "rotate";
+              phase = "turn";
               phaseElapsed = 0;
             }
           }
@@ -237,8 +310,8 @@
           stopped = true;
           if(rafId) cancelAnimationFrame(rafId);
           renderer.dispose();
-          geo.dispose();
-          mat.dispose();
+          cube.geo.dispose(); cube.mat.dispose();
+          sphere.geo.dispose(); sphere.mat.dispose();
         }, 700);
       } else {
         requestAnimationFrame(waitForReleased);
