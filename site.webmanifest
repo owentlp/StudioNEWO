@@ -1,0 +1,13 @@
+{
+  "name": "Studio NEWO",
+  "short_name": "NEWO",
+  "description": "Industrial design practice in Toronto. Products built for repair, disassembly, and long life.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e9e7e2",
+  "theme_color": "#e9e7e2",
+  "icons": [
+    { "src": "/logo/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/logo/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

@@ -1,0 +1,7 @@
+# reference docs, local only - never committed, never served on the live site
+*.txt
+# ...except robots.txt, which MUST ship so search engines can read it
+!robots.txt
+
+# local backups of pre-compression originals - kept on disk, never deployed
+_backup_originals/

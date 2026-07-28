@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>STUDIO NEWO</title>
+<meta name="description" content="Studio NEWO. Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta name="theme-color" content="#e9e7e2">
+<link rel="canonical" href="https://studionewo.com/project.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://studionewo.com/project.html">
+<meta property="og:site_name" content="Studio NEWO">
+<meta property="og:title" content="Studio NEWO">
+<meta property="og:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Studio NEWO">
+<meta name="twitter:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
+<!-- model-viewer powers the rendered 3D model + AR (iOS Quick Look / Android
+     Scene Viewer). It is now injected from the page script ONLY when the
+     current project actually has a GLB (see the cad block), so the four
+     model-less projects skip the ~700KB library entirely. Version pinned to
+     the v4 line so an upstream major release can't silently break the page.
+     To go fully offline, download model-viewer.min.js into js/vendor/ and
+     point MV_SRC in the script below at it. -->
+<link rel="stylesheet" href="css/style.css?v=25">
+</head>
+<body class="proj-body">
+<a class="skip-link" href="#content">Skip to content</a>
+
+<div id="loader" aria-hidden="true">
+  <div class="ld-mark">
+    <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+  </div>
+</div>
+<script src="js/loader3d.js"></script>
+
+<a class="site-home" href="index.html" aria-label="Studio NEWO home">
+  <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+</a>
+<div class="run-head" id="runHead" aria-hidden="true"></div>
+<div class="site-wordmark" aria-label="NEWO">
+  <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
+</div>
+<button id="burger" aria-label="Open menu">
+  <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
+</button>
+<div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+
+<main class="page proj" id="content"><!-- filled from data --></main>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lb-close" id="lbClose" aria-label="Close">CLOSE &times;</button>
+  <button class="lb-prev" id="lbPrev" aria-label="Previous image">&larr;</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-next" id="lbNext" aria-label="Next image">&rarr;</button>
+  <span class="lb-count" id="lbCount"></span>
+</div>
+
+<script src="js/projects-data.js?v=8"></script>
+<script src="js/materials-data.js?v=2"></script>
+<!-- project pages hold the loader until their hero image, hero video and 3D
+     model have loaded (see the readiness gate at the end of the page script);
+     this flag tells main.js to hand reveal control to this page. -->
+<script>window.__DEFER_REVEAL = true;</script>
+<script src="js/main.js?v=3"></script>
+<script src="js/menu.js?v=3"></script>
+<script>
+(function(){
+  var id = new URLSearchParams(location.search).get("p");
+  if(!id || !PROJECTS[id]) id = Object.keys(PROJECTS)[0];
+  var p = PROJECTS[id];
+  var base = "projects/" + id + "/";
+  document.title = p.title + " · STUDIO NEWO";
+
+  // WIREFRAME MODE: add &wire to the URL (project.html?p=kart&wire) to see the
+  // page as a layout skeleton - photos/video/model become labelled placeholder
+  // boxes, text keeps its real copy but every block is outlined, and the whole
+  // page (including the process section) is shown. Purely a planning view;
+  // non-destructive, styled entirely by the body.wire class (see css/style.css).
+  if(/[?&]wire\b/.test(location.search)) document.body.classList.add("wire");
+
+  function real(v){ return typeof v === "string" && v.trim() && !/^\s*\[/.test(v.trim()); }
+
+  // ---- per-project metadata. The static tags in <head> are sensible
+  // defaults (most link-preview scrapers do not run JS, so they fall back to
+  // those); this updates the tab title, canonical URL, social preview, and
+  // structured data for browsers and JS-aware crawlers on the actual project. ----
+  (function setMeta(){
+    var ORIGIN = "https://studionewo.com";
+    var pageUrl = ORIGIN + "/project.html?p=" + id;
+    var heroImg = ORIGIN + "/" + base + ((p.gallery && p.gallery[0]) ? p.gallery[0] : "hero.jpg");
+    var summary = real(p.summary) ? p.summary : (real(p.teaser) ? p.teaser : ("Studio NEWO project: " + p.title + "."));
+    function setMetaTag(sel, attr, val){
+      var el = document.head.querySelector(sel);
+      if(el){ el.setAttribute(attr, val); }
+    }
+    setMetaTag('link[rel="canonical"]', 'href', pageUrl);
+    setMetaTag('meta[property="og:url"]', 'content', pageUrl);
+    setMetaTag('meta[property="og:title"]', 'content', p.title + " · Studio NEWO");
+    setMetaTag('meta[property="og:description"]', 'content', summary);
+    setMetaTag('meta[property="og:image"]', 'content', heroImg);
+    setMetaTag('meta[name="twitter:title"]', 'content', p.title + " · Studio NEWO");
+    setMetaTag('meta[name="twitter:description"]', 'content', summary);
+    setMetaTag('meta[name="twitter:image"]', 'content', heroImg);
+    var descEl = document.head.querySelector('meta[name="description"]');
+    if(descEl){ descEl.setAttribute('content', summary); }
+    // CreativeWork structured data, for search engines
+    var ld = {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "name": p.title,
+      "url": pageUrl,
+      "image": heroImg,
+      "creator": { "@type": "Person", "name": "Owen Palmer" },
+      "publisher": { "@type": "Organization", "name": "Studio NEWO", "url": ORIGIN + "/" }
+    };
+    if(real(p.date)) ld.dateCreated = p.date;
+    if(real(p.summary)) ld.description = p.summary;
+    var s = document.createElement("script");
+    s.type = "application/ld+json";
+    s.textContent = JSON.stringify(ld);
+    document.head.appendChild(s);
+  })();
+  function keep(it){ return (it && typeof it === "object") ? real(it.src) : real(it); }
+  function img(src){ return base + src; }
+  function pad(n){ return n < 10 ? "0"+n : ""+n; }
+  // real HTML escaping (this used to be a passthrough): copy is all first-party
+  // so it's not a security issue, but a stray & or < in a caption would have
+  // silently broken the markup around it.
+  function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function isCut(src){ return /\.png$/i.test(src||""); }
+
+  // material name -> slug, built from js/materials-data.js, so a chip under
+  // the hero can link straight to its entry on the Material Guide
+  // (materials.html#<slug>) without Owen having to hand-maintain slugs here.
+  // materials-data.js is nested (category -> groups -> items); walk both the
+  // legacy flat `items` and the current `groups[].items`, and index each
+  // material's name AND any aliases, so a hero material chip can deep-link to
+  // the right entry even when the chip word differs from the material's name.
+  var MAT_SLUGS = {};
+  (typeof MATERIAL_CATEGORIES !== "undefined" ? MATERIAL_CATEGORIES : []).forEach(function(cat){
+    function idx(it){
+      MAT_SLUGS[String(it.name).toLowerCase()] = it.slug;
+      (it.aliases||[]).forEach(function(a){ MAT_SLUGS[String(a).toLowerCase()] = it.slug; });
+    }
+    (cat.items||[]).forEach(idx);
+    (cat.groups||[]).forEach(function(g){ (g.items||[]).forEach(idx); });
+  });
+
+  // ---- INFO ICON: a small button that reveals a longer description on
+  // click, so a long paragraph can be shown as a couple of sentences with
+  // the rest one tap away instead of cluttering the page, or so an unlabeled
+  // image can carry its full writeup without a caption sitting on the page
+  // at rest. Uses Owen's own icon (logo/info.svg).
+  var INFO_ICON = '<img src="logo/info.svg" alt="" aria-hidden="true">';
+  function withInfo(shortHtml, moreText){
+    if(!real(moreText)) return shortHtml;
+    return shortHtml +
+      '<span class="info-wrap">' +
+        '<button type="button" class="info-btn" aria-expanded="false" aria-label="More detail">'+INFO_ICON+'</button>' +
+        '<span class="info-panel"><span class="info-panel-in">'+esc(moreText)+'</span></span>' +
+      '</span>';
+  }
+
+  // deterministic per-project RNG so the auto scatter is random but stable
+  function seedFrom(s){ var h=2166136261; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+  function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function pick(rnd,arr){ return arr[Math.floor(rnd()*arr.length)]; }
+
+  var year = real(p.date) ? p.date : "";
+
+  // a looping inline video figure (a section's video slot)
+  function videoFig(src, ar){
+    return '<figure class="fig vid" style="aspect-ratio:'+(ar||"16/9")+'">' +
+      '<video src="'+img(src)+'" muted loop autoplay playsinline preload="metadata"></video></figure>';
+  }
+
+  // one figure. cut-outs sit on the paper with no crop and no box.
+  function figure(src, ar, cut, idxNum){
+    var idx = (idxNum != null) ? '<span class="idx">'+pad(idxNum)+'</span>' : '';
+    if(cut) return '<figure class="fig cut">'+idx+'<img src="'+img(src)+'" alt="" loading="lazy" decoding="async"></figure>';
+    return '<figure class="fig" style="aspect-ratio:'+(ar||"4/3")+'">'+idx+'<img src="'+img(src)+'" alt="" loading="lazy" decoding="async"></figure>';
+  }
+
+  // a component-spread image with positioned labels. Each label sits at an
+  // x/y percent of the image (tune in projects-data.js) and carries an info
+  // icon that opens a small panel with the part's real name + simple specs.
+  function compSpread(src, labels){
+    var tags = labels.map(function(L){
+      return '<div class="comp-label" style="left:'+L.x+'%;top:'+L.y+'%;">' +
+        '<button type="button" class="comp-info" aria-expanded="false">' +
+          '<span class="comp-name">'+esc((L.t||"").toUpperCase())+'</span>'+INFO_ICON +
+        '</button>' +
+        '<div class="comp-panel">' +
+          (real(L.name)?'<span class="comp-panel-name">'+esc(L.name)+'</span>':'') +
+          (real(L.spec)?'<span class="comp-panel-spec">'+esc(L.spec)+'</span>':'') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="comp-spread">' +
+      '<img src="'+img(src)+'" alt="'+esc(p.title)+' internal components" loading="lazy" decoding="async">' +
+      tags +
+    '</div>';
+  }
+
+  // SCATTER: string = auto-placed (random, stable); object = pinned anchor.
+  // Captions hug the side of the cell nearest the page edge (or sit under it).
+  function scatter(items, rnd, opts){
+    opts = opts || {};
+    return items.map(function(it, i){
+      var o   = (it && typeof it === "object") ? it : null;
+      var src = o ? o.src : it;
+      if(!real(src)) return "";
+
+      var cut    = (o && o.cut != null) ? !!o.cut : isCut(src);
+      var idxNum = (o && o.idx != null) ? (o.idx ? i+1 : null) : (opts.index ? i+1 : null);
+      var noteCap= (opts.notes && real(opts.notes[i])) ? opts.notes[i] : "";
+      var capTxt = (o && real(o.cap)) ? o.cap : noteCap;
+      var capOn  = !!(o && o.capOn) && capTxt && !cut;   // caption sits ON the image
+
+      var ar = o && o.ar ? o.ar : null;
+      var mt = (o && o.mt != null) ? o.mt : null;
+      // shift: negative vw pushes the cell's left edge OFF the window (the
+      // Figma's LED-matrix photo starts 21% off-canvas); html overflow-x is
+      // hidden, so the overhang crops cleanly.
+      var shift = (o && o.shift != null) ? "margin-left:" + o.shift + "vw;" : "";
+      var colStyle, capSide = "left", startCol = null, spanCols = null;
+
+      if(o && (o.col || o.bleed)){                       // ---- pinned anchor ----
+        var span = o.span || 6;
+        if(o.bleed === "full")       { colStyle = "grid-column:1 / -1;"; capSide="left"; }
+        else if(o.bleed === "left")  { colStyle = "grid-column:1 / span "+span+";"; capSide="left"; }
+        else if(o.bleed === "right") { colStyle = "grid-column:"+(13-span)+" / -1;"; capSide="right"; }
+        else { colStyle = "grid-column:"+o.col+";"; var m=String(o.col).match(/(\d+)\s*\/\s*(\d+)/); if(m){ startCol=+m[1]; spanCols=(+m[2])-(+m[1]); capSide = startCol<=2 ? "left" : (startCol+spanCols>=11 ? "right":"left"); } }
+        if(mt == null) mt = 0;
+        if(!ar) ar = "3/2";
+      } else {                                            // ---- seeded auto-scatter ----
+        var poolsBig   = [[3,4,5,6],[4,4,5,5,6],[3,5,4,6,4]];
+        var poolsSmall = [[2,3,4,5],[3,3,4,4,5],[2,4,3,5,3]];
+        var spanPool = (opts.big ? poolsBig : poolsSmall)[(opts.variant||0) % 3];
+        var sp = pick(rnd, spanPool);
+        var maxStart = 13 - sp;
+        var start = 1 + Math.floor(rnd()*maxStart);
+        var e = rnd();
+        if(e < 0.24) start = 1; else if(e < 0.48) start = maxStart;
+        if(!ar) ar = pick(rnd, ["4/3","16/9","3/2","1/1","4/3","3/2","3/4","2/1"]);
+        if(mt == null) mt = Math.floor(rnd() * (opts.big ? 150 : 130));
+        if(!cut && rnd() < 0.10){ colStyle = "grid-column:1 / -1;"; ar = pick(rnd, ["2/1","16/9","3/2"]); capSide="left"; }
+        else { colStyle = "grid-column:"+start+" / span "+sp+";"; capSide = (start+sp>=11) ? "right" : "left"; }
+      }
+
+      // captions are no longer shown under process images (removed by request).
+      // An image with a `labels` array becomes a component spread instead: the
+      // image with positioned, info-icon labels overlaid on it.
+      var inner = (o && o.labels && o.labels.length) ? compSpread(src, o.labels) : figure(src, ar, cut, idxNum);
+      // horizontal placement (grid-column) + aspect ratio only; vertical
+      // position is handled by the grid's dense auto-flow.
+      return '<div class="cell cap-'+capSide+'" style="'+colStyle+'">' + inner + '</div>';
+    }).filter(Boolean);
+  }
+  // same idea as an image cell, but for the materials note (design-tags row + one lifecycle
+  // sentence + a link to the Material Guide) that used to live in its own
+  // standalone MATERIALS section. It now rides inside the process scatter
+  // instead, same family of cell as the other process text.
+  function matlNoteCell(dTags, lifecycle, col, mt){
+    // text alignment follows whichever margin this cell is actually nearer:
+    // a cell starting at column 6+ sits on the right half of the page, so
+    // its last (ragged) line should align right instead of the site's left
+    // default, same rule the scatter() captions already use.
+    var m = String(col).match(/(\d+)\s*\/\s*(\d+)/);
+    var startCol = m ? +m[1] : 1;
+    var sideCls = startCol >= 6 ? " side-right" : "";
+    var tagsHtml = dTags.length ? '<div class="matl-tags">'+esc(dTags.map(function(t){ return t.toUpperCase(); }).join("   /   "))+'</div>' : '';
+    var lifeHtml = real(lifecycle) ? '<p class="desc'+sideCls+'">'+esc(lifecycle)+'</p>' : '';
+    if(!tagsHtml && !lifeHtml) return '';
+    return '<div class="cell proc-note matl-note" style="grid-column:'+col+';margin-top:'+mt+'px;">' +
+      tagsHtml + lifeHtml +
+      '<a class="matl-link" href="materials.html">MATERIAL GUIDE &rarr;</a>' +
+    '</div>';
+  }
+
+  var rnd = mulberry(seedFrom(id));
+
+  // give each project's body paragraphs a slightly different measure (29-36ch,
+  // stable per project via the same seed) so the page doesn't read as one
+  // rigid 32ch column repeated identically everywhere. Only the paragraph
+  // width varies, teaser/caption widths stay fixed so the hero still lines up.
+  document.getElementById("content").style.setProperty("--w-desc", (29 + (seedFrom(id+"-w") % 8)) + "ch");
+
+  // ---------- HERO (image bleeds left; text stuck to the right edge) ----------
+  var gal = (p.gallery||["hero.jpg"]).filter(real);
+  var heroSrc = gal[0] || "hero.jpg";
+
+  // per-project rhythm seed, still used by the process / aesthetics scatter
+  var gVar = seedFrom(id) % 3;
+  // gallery (everything after the hero): randomly sized and scattered across
+  // the 12-col grid below the hero, on its own seeded RNG so it does not shift
+  // the process / aesthetics composition. Each thumb still swaps the hero.
+  // gallery = the support shots after the hero, shown as a compact masonry
+  // (CSS columns, see style.css). The masonry packs them top-down and keeps
+  // each image's native aspect ratio, so there's no per-thumb column/span/crop
+  // math - just emit the thumbs in order. Each still swaps the hero on click.
+  var gthumbs = gal.slice(1).map(function(g,i){
+    return '<div class="gthumb">' +
+             '<img src="'+img(g)+'" alt="" loading="lazy" decoding="async" data-lb="'+(i+1)+'"></div>';
+  }).join("");
+  var galleryBlock = (gthumbs || real(p.galleryVideo)) ?
+    '<div class="hero-gallery">' + gthumbs +
+      (real(p.galleryVideo)?'<div class="cell" style="grid-column:8 / 13;">'+videoFig(p.galleryVideo,"16/9")+'</div>':'') +
+    '</div>' : '';
+
+  // material chips now sit directly under the hero image, single words, each
+  // linking to its own entry on the Material Guide when a matching material
+  // exists there (falls back to a plain link to the guide if not found, never
+  // a dead link).
+  var matlWords = real(p.materials) ? p.materials.split(",").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+  var heroMatl = matlWords.length ?
+    '<div class="hero-materials">' +
+      matlWords.map(function(w){
+        var slug = MAT_SLUGS[w.toLowerCase()];
+        return '<a href="materials.html'+(slug?'#'+slug:'')+'">'+esc(w.toUpperCase())+'</a>';
+      }).join('<span class="sep" aria-hidden="true">/</span>') +
+    '</div>' : '';
+
+  var hero =
+    '<section class="hero">' +
+      '<figure class="hero-main">' +
+        '<img src="'+img(heroSrc)+'" alt="'+esc(p.title)+'" fetchpriority="high" decoding="async" data-lb="0">' +
+      '</figure>' +
+      // specs + INQUIRE share one row directly under the image, the red
+      // INQUIRE block sitting at the row's right end (Figma: specs at the
+      // hero's left edge, inquire at its right edge, same baseline).
+      '<div class="hero-specs">' +
+        (year?'<span class="sp">'+esc(year)+'</span>':'') +
+        (real(p.size)?'<span class="sp">'+esc(p.size)+'</span>':'') +
+        '<a class="inq" href="contact.html">INQUIRE &rarr;</a>' +
+      '</div>' +
+      heroMatl +
+      // The aside fills the height of the hero image (align-self:stretch) and
+      // splits top/bottom: title + tagline stacked at the TOP, against the
+      // image's top-right; the summary paragraph + the demo video pinned to the
+      // BOTTOM, level with the image's bottom edge (paragraph left, video out
+      // at the right page margin).
+      '<div class="hero-aside">' +
+        '<div class="hero-aside-top">' +
+          '<h1 class="hero-title">'+esc(p.title)+'</h1>' +
+          (real(p.teaser)?'<p class="hero-tagline">'+esc(p.teaser)+'</p>':'') +
+        '</div>' +
+        '<div class="hero-aside-btm">' +
+          (real(p.summary)?'<p class="desc">'+withInfo(esc(p.summary), p.summaryMore)+'</p>':'') +
+          (real(p.heroVideo)?'<div class="hero-vid">'+videoFig(p.heroVideo,"16/9")+'</div>':'') +
+        '</div>' +
+      '</div>' +
+    '</section>' +
+    galleryBlock;
+
+  // ---------- MODEL + MECHANISM, SIDE BY SIDE ----------
+  // 2026-07-22: combined from two stacked sections (model above, mechanism
+  // below - each faking a "connected" feel with a vertical overlap hack)
+  // into ONE row, model on the left / mechanism on the right, per Owen's
+  // explicit request. Falls back to a single full-width column if only one
+  // half has content (only KART currently has either - see solo-model/
+  // solo-mech classes below and the matching CSS).
+  // The model-viewer element is deliberately bigger than its layout slot
+  // (.cad-stage) so a zoomed model floods past it and underlaps the page.
+  // To keep that flood from stealing the cursor everywhere, pointer input is
+  // gated to the compact slot box by a script further down (search
+  // "interaction contained"): the model only takes wheel/drag while the
+  // cursor is over the box, and is pointer-events:none everywhere else so
+  // the page scrolls and its links stay clickable through the flooded model.
+  var glbView = real(p.modelRender) ? p.modelRender : (real(p.model) ? p.model : "");
+  // load the model-viewer library only when there is actually a model to show
+  var MV_SRC = "https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js";
+  if(glbView && !document.querySelector('script[data-mv]')){
+    var mvs = document.createElement("script");
+    mvs.type = "module"; mvs.src = MV_SRC; mvs.setAttribute("data-mv","");
+    document.head.appendChild(mvs);
+  }
+  var modelHalf = glbView ?
+    '<div class="cad-hiw-model">' +
+      '<div class="cad-stage">' +
+        '<model-viewer id="mv" src="'+img(glbView)+'" ' +
+          (real(p.modelUSDZ)?'ios-src="'+img(p.modelUSDZ)+'" ':'') +
+          'alt="'+esc(p.title)+' 3D model" camera-controls touch-action="pan-y" ' +
+          // camera radius is set as a % of the auto-framing distance so the
+          // DEFAULT model size is decoupled from the (deliberately huge) element:
+          // 230% starts it small + clears the control bar; min 45% lets a zoom-in
+          // grow it well past the element so it floods/underlaps the page.
+          'interaction-prompt="none" camera-orbit="-25deg 76deg 130%" ' +
+          'min-camera-orbit="auto auto 45%" max-camera-orbit="auto auto 320%" ' +
+          'auto-rotate auto-rotate-delay="1200" rotation-per-second="10deg" ' +
+          'shadow-intensity="0" exposure="1" environment-image="neutral" tone-mapping="neutral" ' +
+          'ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="eager" reveal="auto">' +
+          '<button slot="ar-button" class="mv-ar">VIEW IN YOUR SPACE &rarr;</button>' +
+        '</model-viewer>' +
+      '</div>' +
+      // controls sit OUTSIDE the tilted stage on their own row: exploded +
+      // wireframe as quiet text, the material picker (and the light
+      // control) beside them. No borders or chips; these should read as
+      // printed text until touched.
+      '<div class="mv-bar">' +
+        '<div class="mv-group mv-left">' +
+          '<button class="mv-btn" data-act="explode" hidden>EXPLODED VIEW</button>' +
+          '<button class="mv-btn" data-act="wireframe">DRAWING VIEW</button>' +
+          '<button class="mv-btn" data-act="reset">RESET</button>' +
+        '</div>' +
+        '<div class="mv-group mv-mid">' +
+          '<select class="mv-sel" aria-label="Material" hidden></select>' +
+          '<button class="mv-btn" data-act="power">LIGHT ON</button>' +
+          '<input class="mv-dim" type="range" min="0" max="100" value="80" aria-label="Lamp brightness">' +
+        '</div>' +
+      '</div>' +
+    '</div>' : '';
+
+  var mechFile = p.mechanism || "";
+  var mechEl = real(mechFile)
+    ? (/\.html?$/i.test(mechFile)
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=11" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
+    : '';
+  // p.mechNotes (a numbered list under the intro) isn't part of the Figma
+  // reference - HOW IT WORKS there is just the graphic, the mode buttons, and
+  // one line of intro text - so it's no longer rendered here. The data can
+  // stay in projects-data.js, it's simply unused now.
+  var mechHalf = (mechEl || real(p.howItWorks) || real(p.hiwVideo)) ?
+    '<div class="cad-hiw-mech">' +
+      (real(p.howItWorks)?'<div class="hiw-text"><p class="desc">'+withInfo(esc(p.howItWorks), p.howItWorksMore)+'</p></div>':'') +
+      '<div class="hiw-graphic">'+mechEl+(real(p.hiwVideo)?videoFig(p.hiwVideo,"16/9"):'')+'</div>' +
+    '</div>' : '';
+
+  var cadHiwMode = (modelHalf && mechHalf) ? '' : (modelHalf ? ' solo-model' : (mechHalf ? ' solo-mech' : ''));
+  // kept as `cad`/`hiw` (hiw always '') rather than renaming everywhere
+  // below, since `sections` further down just does
+  // [hero, cad, hiw, ...].filter(Boolean) - smaller diff, same result.
+  var cad = (modelHalf || mechHalf) ?
+    '<section class="cad-hiw'+cadHiwMode+'">' + modelHalf + mechHalf + '</section>' : '';
+  var hiw = '';
+
+  // ---------- PROCESS (dense scatter; the writing lives INSIDE it) ----------
+  var procImgs = (p.process||[]).filter(keep);
+  var procVidCell = real(p.processVideo) ? '<div class="cell" style="grid-column:2 / 8;margin-top:90px;">'+videoFig(p.processVideo,"16/9")+'</div>' : '';
+  var procImgCells = scatter(procImgs, rnd, {notes:p.processNotes, variant:gVar}); // array of cells
+  // processText: keep it to TWO short paragraphs (blank line splits them).
+  // The first sits at the very TOP of the scatter, right under the mechanism
+  // graphic; the second sits at the very BOTTOM, near whatever the last
+  // process photo is (Figma reference: one block near the CAD/mechanism
+  // area, one lower near the breadboard shot). Putting them first/last in
+  // the cell array (rather than side by side under the first image) is what
+  // actually lands them at the top/bottom of the scatter, since the grid
+  // flows in DOM order. No PROCESS label, no lede block. processMore
+  // (optional) hangs the fuller story behind the info icon on the first
+  // block; anything past two paragraphs in processText is unused, keep it
+  // to two.
+  // processText is the short top block; processMore is the fuller detail shown
+  // as its own block lower in the scatter. Both are archive-only content.
+  var procTextTop = real(p.processText) ?
+    '<div class="cell proc-note" style="grid-column:7 / 10;margin-top:0;">' +
+      '<p class="desc">'+esc(p.processText)+'</p></div>' : '';
+  var procTextBottom = real(p.processMore) ?
+    '<div class="cell proc-note" style="grid-column:3 / 6;">' +
+      '<p class="desc">'+esc(p.processMore)+'</p></div>' : '';
+  var procCells = (procTextTop ? [procTextTop] : []).concat(procImgCells).concat(procTextBottom ? [procTextBottom] : []);
+  // designTags: short, provable claims (Designed for disassembly, Repairable,
+  // Open source, etc), shown as small red tags, plus the one-line lifecycle/
+  // end-of-life note. This used to be its own standalone MATERIALS section;
+  // it now rides inside the process scatter as one more text cell (the
+  // per-material name chips moved up under the hero image instead, see
+  // heroMatl above). Only list designTags that are actually true for THIS
+  // project, this is a claim, not a mood board.
+  // designTags are no longer shown (not part of the current copy); only the
+  // one-line lifecycle note rides in the process scatter, archive pages only.
+  var matlCell = matlNoteCell([], p.lifecycle, (gVar % 2 === 0) ? "2 / 8" : "6 / 12", 0);
+  if(matlCell) procCells.push(matlCell);
+  if(procVidCell) procCells.push(procVidCell);
+  var process = (procImgCells.length || procVidCell || procTextTop || procTextBottom) ?
+    '<section class="proc">' +
+      '<div class="scatter">'+ procCells.join('') +'</div>' +
+    '</section>' : '';
+
+  // ---------- READ MORE: one page. The storefront content (hero + gallery +
+  // CAD/graphic) shows first; this button reveals the fuller process /
+  // portfolio section below it, on the same page. Hidden entirely if a
+  // project has no process content to reveal. ----------
+  var hasMore = !!process;
+  var readmore = hasMore ?
+    '<div class="readmore" id="readmoreWrap">' +
+      '<button type="button" class="read-more-link" id="readMoreBtn" aria-expanded="false" aria-controls="procReveal">Read more, process and detail</button>' +
+    '</div>' : '';
+  var processReveal = hasMore ? '<div class="proc-reveal" id="procReveal" hidden>' + process + '</div>' : '';
+
+  // ---------- assemble: hero, CAD/graphic, the read-more button, then the
+  // (revealed on click) process section. Material swatches, the component
+  // spread, and V2 are retired. ----------
+  var sections = [hero, cad, readmore, processReveal].filter(Boolean);
+  var content = document.getElementById("content");
+  content.innerHTML = sections.join('');
+
+  // footer mirrors the header: logo bottom-left, wordmark centre, hamburger right
+  var foot = document.createElement("footer");
+  foot.className = "site-foot";
+  foot.innerHTML =
+    '<a class="foot-home" href="index.html" aria-label="Studio NEWO home"></a>' +
+    '<div class="foot-wordmark" aria-label="NEWO"></div>' +
+    '<button class="foot-burger" aria-label="Open menu"></button>';
+  var hSvg = document.querySelector(".site-home svg");
+  var wSvg = document.querySelector(".site-wordmark svg");
+  var bSvg = document.querySelector("#burger svg");
+  if(hSvg) foot.querySelector(".foot-home").appendChild(hSvg.cloneNode(true));
+  if(wSvg) foot.querySelector(".foot-wordmark").appendChild(wSvg.cloneNode(true));
+  if(bSvg) foot.querySelector(".foot-burger").appendChild(bSvg.cloneNode(true));
+  content.appendChild(foot);
+  // the footer burger opens the same top-right dropdown as the header burger;
+  // js/menu.js wires both via a delegated listener, nothing to bind here.
+
+  // the full-width mechanism reports its own height from inside the iframe
+  var mechFrame = document.getElementById("mechFrame");
+  if(mechFrame){
+    window.addEventListener("message", function(ev){
+      if(ev.source !== mechFrame.contentWindow) return;   // only trust our own iframe
+      var d = ev.data;
+      if(d && d.type === "mechHeight" && typeof d.height === "number"){
+        mechFrame.style.height = Math.ceil(d.height) + "px";
+        mechFrame.style.minHeight = "0";
+      }
+    });
+  }
+
+  // ---------- model-viewer: variants + reset + explode (baked animation) ----------
+  var mv = document.getElementById("mv");
+  if(mv){
+    var stage = mv.closest(".cad-hiw-model");
+    var exBtn = stage.querySelector('[data-act="explode"]');
+    var rsBtn = stage.querySelector('[data-act="reset"]');
+    var pwrBtn= stage.querySelector('[data-act="power"]');
+    var wfBtn = stage.querySelector('[data-act="wireframe"]');
+    var dim   = stage.querySelector('.mv-dim');
+    var sel   = stage.querySelector('.mv-sel');
+    var defaultOrbit = mv.getAttribute("camera-orbit");
+
+    // ---------- click to interact ----------
+    // The <model-viewer> element is larger than its slot so a zoomed model can
+    // flood past it and underlap the page. By default the model is INERT
+    // (pointer-events:none): the page scrolls and its links stay clickable
+    // straight through it, so hovering the model never hijacks the scroll. A
+    // click inside the compact .cad-stage box "engages" it (pointer-events:auto)
+    // so you can rotate + wheel-zoom; a click anywhere outside disengages it,
+    // handing scrolling back. A small hint shows until it's engaged.
+    (function(){
+      var box = mv.parentElement;   // .cad-stage (the compact slot)
+      var hint = document.createElement("div");
+      hint.className = "mv-hint";
+      hint.textContent = "CLICK TO INTERACT";
+      box.appendChild(hint);
+      var live = false;
+      function inBox(e){
+        var r = box.getBoundingClientRect();
+        return e.clientX >= r.left && e.clientX <= r.right &&
+               e.clientY >= r.top  && e.clientY <= r.bottom;
+      }
+      function setLive(on){
+        if(live === on) return;
+        live = on;
+        mv.style.pointerEvents = on ? "auto" : "none";
+        box.classList.toggle("mv-live", on);
+      }
+      window.addEventListener("pointerdown", function(e){ setLive(inBox(e)); }, true);
+    })();
+
+    rsBtn.addEventListener("click", function(){ mv.cameraOrbit = defaultOrbit; mv.resetTurntableRotation && mv.resetTurntableRotation(); });
+
+    // WIREFRAME / render toggle: model-viewer has no real wireframe shader
+    // mode, so until there's an actual wireframe-textured export (or a second
+    // GLB) to switch to, this flips a desaturated, high-contrast look that
+    // reads as "technical drawing" next to the textured render, same idea as
+    // the reference's wireframe/render button. Swap this for a real asset
+    // swap whenever one exists, this is a stand-in, not the final behaviour.
+    if(wfBtn){
+      var wireOn = false;
+      wfBtn.addEventListener("click", function(){
+        wireOn = !wireOn;
+        wfBtn.classList.toggle("active", wireOn);
+        mv.style.filter = wireOn ? "grayscale(1) contrast(1.35) brightness(1.08)" : "";
+        mv.exposure = wireOn ? 1.6 : 1;
+      });
+    }
+
+    mv.addEventListener("load", function(){
+      // ---- lamp on / off / dim ----
+      // The render's LED material is emissive; scaling its emissiveFactor dims
+      // the glow through the frosted-glass shade. If the emissive material can't
+      // be read for some reason, fall back to dimming the whole scene exposure.
+      var emis = [], base = [];
+      try {
+        (mv.model && mv.model.materials || []).forEach(function(m){
+          var ef = null; try { ef = m.emissiveFactor; } catch(e){}
+          var lit = ef && (ef[0]>0 || ef[1]>0 || ef[2]>0);
+          if(!lit && /255_0_0|emis|led|glow/i.test(m.name||"")) { lit = true; ef = [1,1,1]; }
+          if(lit){ emis.push(m); base.push([ef[0],ef[1],ef[2]]); }
+        });
+      } catch(e){}
+      var lampOn = true, level = (dim ? (+dim.value)/100 : 0.8);
+      function applyLamp(){
+        var v = lampOn ? level : 0;
+        if(emis.length){ emis.forEach(function(m,i){ var b=base[i]; try{ m.setEmissiveFactor([b[0]*v,b[1]*v,b[2]*v]); }catch(e){} }); }
+        else { mv.exposure = 0.3 + 1.1*v; }   // fallback: dim the whole scene
+      }
+      function setPwr(on){ lampOn=on; pwrBtn.classList.toggle("active",on); pwrBtn.textContent = on?"LIGHT ON":"LIGHT OFF"; applyLamp(); }
+      if(pwrBtn) pwrBtn.addEventListener("click", function(){ setPwr(!lampOn); });
+      if(dim) dim.addEventListener("input", function(){ level=(+dim.value)/100; if(!lampOn) lampOn=true; setPwr(true); });
+      setPwr(true);
+
+      // material variants (KHR_materials_variants): show a picker if the GLB
+      // carries them. Author them in Blender / gltf-transform; nothing to wire
+      // here beyond this once the file has them.
+      var vs = mv.availableVariants || [];
+      if(vs.length > 1){
+        sel.hidden = false;
+        sel.innerHTML = vs.map(function(v){ return '<option value="'+v+'">'+String(v).toUpperCase()+'</option>'; }).join("");
+        sel.value = mv.variantName || vs[0];
+        sel.addEventListener("change", function(){ mv.variantName = sel.value; });
+      }
+
+      // explode: plays a baked glTF animation whose name contains "explode".
+      // model-viewer has no built-in explode, so the clean path is to keyframe
+      // the parts apart in Blender and export the animation; this scrubs it.
+      var anims = mv.availableAnimations || [];
+      var exName = anims.filter(function(a){ return /explode/i.test(a); })[0];
+      if(exName){
+        exBtn.hidden = false;
+        mv.animationName = exName;
+        mv.pause();
+        try { mv.currentTime = 0; } catch(e){}
+        var open = false, raf = null;
+        exBtn.addEventListener("click", function(){
+          open = !open;
+          exBtn.classList.toggle("active", open);
+          var dur = mv.duration || 1, from = mv.currentTime || 0, to = open ? dur : 0;
+          var t0 = performance.now(), D = 620;
+          cancelAnimationFrame(raf);
+          (function step(now){
+            var k = Math.min(1, (now - t0) / D);
+            var e = k < .5 ? 2*k*k : -1 + (4 - 2*k)*k;
+            try { mv.currentTime = from + (to - from) * e; } catch(err){}
+            if(k < 1) raf = requestAnimationFrame(step);
+          })(performance.now());
+        });
+      }
+    });
+  }
+
+  // project title: now a real on-page h1 at the top of the hero's text
+  // column (Figma: title box at 570,155). The docked-beside-the-logo running
+  // title is therefore OFF to avoid saying the name twice; delete the next
+  // line's comment markers to bring it back.
+  var runHead = document.getElementById("runHead");
+  // if(runHead){ runHead.innerHTML = '<span class="rh-in">'+esc(p.title)+'</span>'; runHead.classList.add("on"); }
+
+  // info icon: click reveals the fuller "more" text sitting beside whatever
+  // short line it's attached to (mechanism copy, a component note, etc).
+  // One delegated listener covers every instance built into the page.
+  content.addEventListener("click", function(e){
+    var btn = e.target.closest(".info-btn");
+    if(!btn) return;
+    var panel = btn.parentElement.querySelector(".info-panel");
+    var open = !btn.classList.contains("open");
+    btn.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if(panel) panel.classList.toggle("open", open);
+  });
+
+  // component-spread labels: click a label's info icon to open its spec panel;
+  // opening one closes any other that's open so panels don't stack.
+  content.addEventListener("click", function(e){
+    var ci = e.target.closest(".comp-info");
+    if(!ci) return;
+    var label = ci.closest(".comp-label");
+    var open = !label.classList.contains("open");
+    content.querySelectorAll(".comp-label.open").forEach(function(l){ if(l !== label) l.classList.remove("open"); });
+    label.classList.toggle("open", open);
+    ci.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  // read more: reveal the process / portfolio section, then retire the button
+  var readMoreBtn = document.getElementById("readMoreBtn");
+  if(readMoreBtn){
+    readMoreBtn.addEventListener("click", function(){
+      var wrap = document.getElementById("procReveal");
+      if(wrap){ wrap.hidden = false; requestAnimationFrame(function(){ wrap.classList.add("open"); }); }
+      readMoreBtn.setAttribute("aria-expanded", "true");
+      var rm = document.getElementById("readmoreWrap");
+      if(rm) rm.style.display = "none";
+    });
+  }
+
+  // ---------- LIGHTBOX: click the hero image or any gallery thumb to open a
+  // near-fullscreen viewer. data-lb="N" on each <img> indexes into `gal`
+  // (gal[0] is the hero, gal[1..] are the thumbs, same order they're built in
+  // above), so the viewer always cycles the FULL project gallery regardless
+  // of which image was clicked first. ----------
+  (function(){
+    var items = gal.map(function(s){ return img(s); });
+    if(!items.length) return;
+    var lb = document.getElementById("lightbox");
+    var lbImg = document.getElementById("lbImg");
+    var lbCount = document.getElementById("lbCount");
+    var lbPrev = document.getElementById("lbPrev");
+    var lbNext = document.getElementById("lbNext");
+    var lbClose = document.getElementById("lbClose");
+    var cur = 0, lastFocus = null;
+
+    function render(){
+      lbImg.src = items[cur];
+      lbImg.alt = p.title + " - image " + (cur+1) + " of " + items.length;
+      lbCount.textContent = (cur+1<10?"0":"")+(cur+1) + " / " + (items.length<10?"0":"")+items.length;
+      lbPrev.disabled = items.length < 2;
+      lbNext.disabled = items.length < 2;
+    }
+    function open(i){
+      cur = ((i % items.length) + items.length) % items.length;
+      lastFocus = document.activeElement;
+      render();
+      lb.classList.add("open");
+      lb.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(function(){ lb.classList.add("show"); lb.classList.add("imgshow"); });
+      lbClose.focus();
+    }
+    function close(){
+      lb.classList.remove("show"); lb.classList.remove("imgshow");
+      lb.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      setTimeout(function(){ lb.classList.remove("open"); }, 220);
+      if(lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    function step(d){
+      lb.classList.remove("imgshow");
+      cur = ((cur + d) % items.length + items.length) % items.length;
+      setTimeout(function(){ render(); lb.classList.add("imgshow"); }, 120);
+    }
+
+    content.querySelectorAll("[data-lb]").forEach(function(el){
+      el.addEventListener("click", function(e){
+        e.preventDefault();
+        open(+el.getAttribute("data-lb"));
+      });
+    });
+    lbPrev.addEventListener("click", function(){ step(-1); });
+    lbNext.addEventListener("click", function(){ step(1); });
+    lbClose.addEventListener("click", close);
+    lb.addEventListener("click", function(e){ if(e.target === lb) close(); });
+    document.addEventListener("keydown", function(e){
+      if(!lb.classList.contains("open")) return;
+      if(e.key === "Escape") close();
+      else if(e.key === "ArrowLeft") step(-1);
+      else if(e.key === "ArrowRight") step(1);
+    });
+  })();
+
+  // ---------- inline loop videos: only play while on screen. autoplay still
+  // starts them the normal way; this pauses any that scroll out of view and
+  // resumes them as they come back, so a page with several loops never has
+  // them all decoding at once. ----------
+  if("IntersectionObserver" in window){
+    var vio = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        var v = en.target;
+        if(en.isIntersecting){ v.play && v.play().catch(function(){}); }
+        else { v.pause && v.pause(); }
+      });
+    }, {rootMargin:"120px 0px"});
+    content.querySelectorAll(".fig.vid video").forEach(function(v){ vio.observe(v); });
+  }
+
+  // ---------- LAYOUT SANDBOX (opt-in via ?sandbox in the URL) ----------
+  // Lets Owen drag/resize the process scatter + V2 media directly on the
+  // real page, then export a description of the new layout to send back.
+  // See js/sandbox.js. Absent entirely unless the URL asks for it.
+  if(/[?&]sandbox\b/.test(location.search)){
+    var sbx = document.createElement("script");
+    sbx.src = "js/sandbox.js";
+    sbx.onload = function(){ if(window.NEWO_SANDBOX) window.NEWO_SANDBOX.init({ id:id, title:p.title }); };
+    document.body.appendChild(sbx);
+  }
+
+  // ---------- HOLD THE LOADER until the above-the-fold assets are actually
+  // loaded, so the page never reveals with the hero image, hero video or 3D
+  // model still popping in. Each wait has its own timeout and main.js keeps a
+  // global 12s hard cap, so one stalled asset can never strand the loader.
+  // (main.js hands us reveal control because window.__DEFER_REVEAL is set in
+  // the head; if for any reason it isn't, this simply does nothing and the
+  // page reveals on the normal timing.) ----------
+  (function holdLoader(){
+    if(typeof window.__revealPage !== "function") return;
+    function settle(el, ev, ms){
+      return new Promise(function(res){
+        if(!el) return res();
+        var t = setTimeout(res, ms);
+        function ok(){ clearTimeout(t); res(); }
+        el.addEventListener(ev, ok, {once:true});
+        el.addEventListener("error", ok, {once:true});
+      });
+    }
+    var waits = [];
+    var heroImg = content.querySelector(".hero-main img");
+    if(heroImg){
+      if(heroImg.complete && heroImg.naturalWidth) waits.push(Promise.resolve());
+      else waits.push(settle(heroImg, "load", 8000));
+    }
+    var heroVid = content.querySelector(".hero-aside-btm video, .hero-vid video");
+    if(heroVid) waits.push(settle(heroVid, "canplay", 8000));   // first frame ready, not full download
+    if(mv) waits.push(settle(mv, "load", 11000));               // the 3D model (now eager-loaded)
+    Promise.all(waits).then(function(){ window.__revealPage(); });
+  })();
+})();
+</script>
+</body>
+</html>

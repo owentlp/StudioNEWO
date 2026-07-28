@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KART · light behaviour</title>
+<style>
+  /* OCR-B, loaded relative to projects/kart/ so the iframe is self-contained */
+  @font-face{
+    font-family:"OCR-B Local";
+    src:url("../../fonts/ocr-b.otf") format("opentype");
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  :root{
+    --paper:#e9e7e2;
+    --ink:#141414;
+    --red:#e2191b;
+    --mono:"OCR-B Local","OCR B","OCR-B",ui-monospace,"Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  /* transparent so the demo prints onto the page paper like an inline svg */
+  html,body{margin:0;padding:0;background:transparent;color:var(--ink);
+    font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:none;margin:0;padding:0;}
+  .stage{position:relative;background:transparent;}
+  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:none;}
+  /* the controls float OVER the canvas, moved to match Owen's 2026-07-11
+     Figma screenshot: the mode buttons sit in a row left-of-centre (not a
+     right-aligned column), with the mode description directly under them,
+     full width of that same row, both left-aligned. No borders or chips:
+     the buttons read as printed text, red when active. pointer-events pass
+     through the empty areas to the canvas. */
+  /* controls sit inside the graphic. TOP-anchored so the mode buttons stay put
+     and a longer mode description just adds a line BELOW them (bottom-anchoring
+     grew the block upward, which shoved the buttons up when Shadow wrapped to a
+     third line). cursor:none so the custom canvas cursor stays hidden-arrow over
+     the controls too. */
+  .ui{position:absolute;left:6%;top:67%;z-index:2;pointer-events:none;cursor:none;
+    display:flex;flex-direction:column;align-items:flex-start;max-width:56%;}
+  .ui .modes button{pointer-events:auto;cursor:none;}
+  .modes{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:clamp(15px,1.5vw,22px);margin:0 0 10px;}
+  /* held near 10px to sit in step with the site's body copy (.desc is 10px),
+     with a mild vw term so it still tracks the graphic a little across sizes. */
+  .modes button{font-family:var(--mono);font-size:clamp(12px,1.1vw,14px);letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink);background:none;border:0;padding:4px 0;cursor:pointer;border-radius:0;
+    text-shadow:0 0 5px var(--paper),0 0 5px var(--paper);
+    transition:color .12s ease;}
+  .modes button:hover{color:var(--red);}
+  .modes button[aria-pressed="true"]{color:var(--red);}
+  .modes button:focus-visible{outline:2px solid var(--red);outline-offset:3px;}
+  .meta{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin:0;max-width:46ch;
+    font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-align:left;
+    text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);}
+  /* small windows: the canvas is too small to carry an overlay, so the
+     controls drop into normal flow BELOW the graphic instead of stacking on
+     top of it, with a fixed readable size. The height message includes them. */
+  @media (max-width:640px){
+    .ui{position:static;padding:10px 0 0;max-width:none;}
+    .modes{gap:16px;margin:0 0 10px;}
+    .modes button{font-size:13px;padding:4px 0;cursor:pointer;}
+    .meta{font-size:13px;}
+    .ui{cursor:auto;}
+    canvas{cursor:default;}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage">
+      <canvas id="c"></canvas>
+      <div class="ui">
+        <div class="modes" id="modes" role="group" aria-label="Light mode">
+          <button data-mode="follow" aria-pressed="false">Lighthouse</button>
+          <button data-mode="shadow" aria-pressed="false">Shadow</button>
+          <button data-mode="dimToward" aria-pressed="false">Dim Toward</button>
+          <button data-mode="dimAway" aria-pressed="true">Dim Away</button>
+        </div>
+        <div class="meta">
+          <span class="desc" id="desc"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // the logical "room" is 760x500, but the canvas itself is padded well
+  // beyond it on every side (BUF_*) so the lamp's glow has real room to
+  // fade to nothing before it reaches the canvas edge, instead of being
+  // hard-clipped by an invisible boundary that happened to sit right where
+  // the light was still bright.
+  //
+  // 2026-07-13: buffers sized off the actual light-throw math, not guessed.
+  // radialGlow's max radius is 34+326=360px from the lamp (dimAway/dimToward/
+  // shadow's ambient fill). lighthouse/shadow's beam wedge reaches even
+  // further, up to 560-580px from the lamp, and CONE (aimed at the bed
+  // corner) spans a wide enough arc that it includes a near-straight-down
+  // angle, so that full 560-580px throw applies to the bottom buffer too, not
+  // just the shorter ambient radius. With the lamp sitting 132px below the
+  // room's top edge and 368px above its bottom edge, the old BUF_TOP=140 was
+  // ~90-220px short of containing the glow/beam before the canvas edge cut
+  // them off, and BUF_BOT=50 was ~500px short for the beam case specifically
+  // (the ambient radius alone was fine at the bottom, the beam wasn't).
+  // BUF_TOP=300 and BUF_BOT=340 comfortably contain both. This makes the
+  // canvas taller than the room needs on its own, and it's expected to
+  // overlap neighbouring sections (Owen confirmed that's fine, this
+  // graphic just needs the room to not clip its own light).
+  // BUF_BOT trimmed 340->210: still contains the follow/shadow beam throw
+  // (~560-580px below the lamp) with no hard clip, but cuts ~130px of dead
+  // space under the radar so the graphic reads tighter and the UI sits close.
+  // BUF_TOP=250 fully contains the proximity glow above the lamp (needs >=228
+  // so its 360px radius clears the canvas top - at 130 the glow's upper edge was
+  // being hard-clipped). This taller top band no longer wastes space because the
+  // whole graphic is pulled up to underlap the how-it-works text on the page
+  // (see .hiw-graphic margin-top in style.css), so the extra transparent top
+  // just tucks behind that text. BUF_BOT holds the downward beam.
+  const BUF_X=90, BUF_TOP=250, BUF_BOT=210;
+  const ROOM_W=760, ROOM_H=500;
+  const W=ROOM_W+BUF_X*2, H=ROOM_H+BUF_TOP+BUF_BOT;
+  const canvas=document.getElementById('c');
+  const ctx=canvas.getContext('2d');
+  const descEl=document.getElementById('desc');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const ROOM={x:BUF_X,y:BUF_TOP,w:ROOM_W,h:ROOM_H};
+  const lamp={x:455+BUF_X,y:132+BUF_TOP};
+  const bed={x:498+BUF_X,y:92+BUF_TOP,w:212,h:196};
+
+  // mmWave field of view: exactly 120deg, aimed down-left into the room
+  // 120deg FOV; right edge (a0) aimed just past the bed's bottom-left corner,
+  // a few px clear of it rather than exactly on it.
+  const bedCorner={x:bed.x-6, y:bed.y+bed.h+6};
+  const CONE={ half:Math.PI/3, edge:0.10 };
+  CONE.center=Math.atan2(bedCorner.y-lamp.y, bedCorner.x-lamp.x)+CONE.half;
+  const a0=CONE.center-CONE.half, a1=CONE.center+CONE.half;
+
+  const modes={
+    follow:"A column of light tracks your position and widens as you move closer.",
+    dimAway:"Brightness fades as you walk away. Leave the room and it sleeps.",
+    dimToward:"Brightness fades as you move toward the lamp, brightest from across the room.",
+    shadow:"The lamp fills the room and casts a dark column toward you, widening as you approach."
+  };
+
+  let mode='dimAway';
+  let cursor={x:250+BUF_X,y:330+BUF_TOP};
+  let pointerOn=true;
+  let scale=1;
+  const s={bright:0, beam:0, ang:CONE.center};
+
+  function postHeight(){
+    // Report the ACTUAL content height (the .wrap box = canvas, plus the static
+    // UI only on the mobile stacked layout). Do NOT Math.max with
+    // documentElement.scrollHeight: once the parent sets the iframe height, the
+    // document grows to match it, so maxing them ratcheted the reported height
+    // upward and it got stuck taller (adding white space between sections that
+    // never shrank back, even when zoom returned). .wrap's border box ignores
+    // the absolutely-positioned overlay, so this stays stable.
+    var wrap = document.querySelector('.wrap');
+    var h = wrap ? Math.ceil(wrap.getBoundingClientRect().height) : document.body.scrollHeight;
+    if(window.parent !== window) window.parent.postMessage({type:'mechHeight', height:h}, '*');
+  }
+
+  function resize(){
+    const cssW=canvas.parentElement.clientWidth;
+    const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    canvas.style.width=cssW+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssW*(H/W)*dpr);
+    scale=canvas.width/W;
+    postHeight();
+  }
+  // no clamp: cursor may leave the room
+  function toLogical(cx,cy){
+    const r=canvas.getBoundingClientRect();
+    return { x:(cx-r.left)/r.width*W, y:(cy-r.top)/r.height*H };
+  }
+
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  function smoothstep(e0,e1,x){const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
+  function ease(c,t,tau,dt){return reduce?t:c+(t-c)*(1-Math.exp(-dt/tau));}
+  // ease an angle along the shortest path (avoids a full spin at the +/-PI seam)
+  function easeAngle(c,t,tau,dt){
+    if(reduce) return t;
+    let d=t-c; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+    return c+d*(1-Math.exp(-dt/tau));
+  }
+  function inRoom(p){return p.x>=ROOM.x&&p.x<=ROOM.x+ROOM.w&&p.y>=ROOM.y&&p.y<=ROOM.y+ROOM.h;}
+  // angular presence, soft at the cone edges (wrap-safe)
+  function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return Math.abs(d);}
+  function coneFactor(ang){
+    const off=angDiff(ang,CONE.center);
+    return 1-smoothstep(CONE.half-CONE.edge,CONE.half+CONE.edge,off);
+  }
+  function wedge(cx,cy,as,ae,len){ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,len,as,ae);ctx.closePath();}
+
+  function radialGlow(k){
+    if(k<=0.001)return;
+    const r=34+326*k, a=0.18+0.62*k;
+    const g=ctx.createRadialGradient(lamp.x,lamp.y,0,lamp.x,lamp.y,r);
+    g.addColorStop(0,`rgba(255,168,66,${a})`);
+    g.addColorStop(0.45,`rgba(255,142,44,${a*0.55})`);
+    g.addColorStop(1,'rgba(255,142,44,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+
+  // soft-edged beam built from non-overlapping angular slices (gradient sides, no hard line)
+  const SLICES=28;
+  function beamSweep(ang,half,len,k,paint){
+    for(let i=0;i<SLICES;i++){
+      const fa=i/SLICES, fb=(i+1)/SLICES;
+      const as=ang-half+2*half*fa;
+      const ae=ang-half+2*half*fb;
+      const x=((fa+fb)/2)*2-1;                 // -1..1 across width
+      const prof=0.5*(1+Math.cos(Math.PI*x));   // 1 at centre -> 0 at edges
+      paint(as,ae,prof*k);
+    }
+  }
+
+  function lighthouse(ang,half,len,k){
+    if(k<=0.001)return;
+    beamSweep(ang,half,len,k,(as,ae,p)=>{
+      ctx.save(); wedge(lamp.x,lamp.y,as,ae,len); ctx.clip();
+      const g=ctx.createRadialGradient(lamp.x,lamp.y,0,lamp.x,lamp.y,len);
+      g.addColorStop(0,`rgba(255,182,78,${0.95*p})`);
+      g.addColorStop(0.5,`rgba(255,146,46,${0.5*p})`);
+      g.addColorStop(1,'rgba(255,140,40,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.restore();
+    });
+    const b=ctx.createRadialGradient(lamp.x,lamp.y,0,lamp.x,lamp.y,42);
+    b.addColorStop(0,`rgba(255,195,95,${0.7*k})`); b.addColorStop(1,'rgba(255,195,95,0)');
+    ctx.fillStyle=b; ctx.fillRect(0,0,W,H);
+  }
+
+  function shadow(ang,half,len,k){
+    if(k<=0.001)return;
+    radialGlow(k);                       // ambient fill
+    beamSweep(ang,half,len,k,(as,ae,p)=>{ // carve a soft-sided shadow
+      ctx.save(); ctx.globalCompositeOperation='destination-out';
+      wedge(lamp.x,lamp.y,as,ae,len); ctx.clip();
+      const g=ctx.createRadialGradient(lamp.x,lamp.y,0,lamp.x,lamp.y,len);
+      g.addColorStop(0,`rgba(0,0,0,${0.45*p})`);
+      g.addColorStop(0.2,`rgba(0,0,0,${0.96*p})`);
+      g.addColorStop(1,`rgba(0,0,0,${0.98*p})`);
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.restore();
+    });
+  }
+
+  function lineArt(){
+    ctx.lineWidth=1.2; ctx.strokeStyle='#141414'; ctx.lineJoin='round';
+    // radar cone, clipped to the room so it reads as a bounded sensing area
+    ctx.save();
+    ctx.beginPath(); ctx.rect(ROOM.x,ROOM.y,ROOM.w,ROOM.h); ctx.clip();
+    ctx.strokeStyle='rgba(20,20,20,0.42)'; ctx.lineWidth=1;
+    const fr=900;
+    ctx.beginPath();
+    ctx.moveTo(lamp.x,lamp.y); ctx.lineTo(lamp.x+Math.cos(a0)*fr,lamp.y+Math.sin(a0)*fr);
+    ctx.moveTo(lamp.x,lamp.y); ctx.lineTo(lamp.x+Math.cos(a1)*fr,lamp.y+Math.sin(a1)*fr);
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(lamp.x,lamp.y,150,a0,a1); ctx.stroke();
+    ctx.restore();
+    // bed
+    ctx.strokeRect(bed.x,bed.y,bed.w,bed.h);
+    const pw=(bed.w-30)/2;
+    ctx.strokeRect(bed.x+10,bed.y+12,pw,46);
+    ctx.strokeRect(bed.x+20+pw,bed.y+12,pw,46);
+    ctx.beginPath(); ctx.moveTo(bed.x+8,bed.y+78); ctx.lineTo(bed.x+bed.w-8,bed.y+78); ctx.stroke();
+    // lamp
+    ctx.fillStyle='#e9e7e2'; ctx.strokeRect(lamp.x-12,lamp.y-12,24,24);
+    ctx.beginPath(); ctx.arc(lamp.x,lamp.y,4.5,0,Math.PI*2); ctx.fillStyle='#e2191b'; ctx.fill();
+  }
+
+  function drawPerson(detected){
+    ctx.save(); ctx.translate(cursor.x,cursor.y);
+    ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle='#e9e7e2'; ctx.fill();
+    ctx.lineWidth=1.4; ctx.strokeStyle=detected?'#e2191b':'#141414'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,2.4,0,Math.PI*2); ctx.fillStyle=detected?'#e2191b':'#141414'; ctx.fill();
+    ctx.restore();
+  }
+
+  let lastT=performance.now();
+  function frame(now){
+    const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+
+    const ang=Math.atan2(cursor.y-lamp.y,cursor.x-lamp.x);
+    const d=dist(cursor,lamp);
+    const inside = pointerOn && inRoom(cursor);
+    const present = inside ? coneFactor(ang) : 0;
+
+    const dmax=Math.hypot(ROOM.w,ROOM.h)*0.82;
+    const t=Math.min(d/dmax,1), w=1-t;
+    // dimAway: bright near, fades as you leave. dimToward: bright far, fades as you approach.
+    const distInten=(mode==='dimAway')?w:(mode==='dimToward')?t:0;
+
+    // beam half-angle scales with distance: wider near, narrower far
+    const lhHalf=0.04+0.82*w;   // far edge unchanged, ~2x wider right next to the lamp
+    const shHalf=0.03+0.67*w;
+
+    const isDim=(mode==='dimAway'||mode==='dimToward');
+    const brightTarget=isDim?present*distInten:0;
+    const beamTarget=(mode==='follow'||mode==='shadow')?present:0;
+
+    s.bright=ease(s.bright,brightTarget,0.35,dt);
+    s.beam=ease(s.beam,beamTarget,0.30,dt);
+    if(present>0.02) s.ang=easeAngle(s.ang,ang,0.12,dt);
+
+    ctx.setTransform(scale,0,0,scale,0,0);
+    // transparent background: clear only. No paper fill, so only the lines,
+    // glow and cursor draw and the (flooding) 3D model shows through behind.
+    ctx.clearRect(0,0,W,H);
+
+    ctx.save();
+    if(isDim) radialGlow(s.bright);
+    else if(mode==='follow') lighthouse(s.ang,lhHalf,540,s.beam);
+    else if(mode==='shadow') shadow(s.ang,shHalf,560,s.beam);
+    ctx.restore();
+
+    lineArt();
+    if(pointerOn) drawPerson(present>0.5);
+
+    requestAnimationFrame(frame);
+  }
+
+  document.getElementById('modes').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    mode=b.dataset.mode;
+    [...e.currentTarget.querySelectorAll('button')].forEach(x=>
+      x.setAttribute('aria-pressed',x===b?'true':'false'));
+    descEl.textContent=modes[mode];
+  });
+  // listen on the whole stage (canvas + the overlaid UI), not just the canvas,
+  // so moving over the mode buttons keeps tracking the cursor and drawing the
+  // custom marker instead of stopping the moment the pointer hits a control.
+  const stage=document.querySelector('.stage');
+  stage.addEventListener('pointermove',e=>{cursor=toLogical(e.clientX,e.clientY); pointerOn=true;});
+  stage.addEventListener('pointerdown',e=>{cursor=toLogical(e.clientX,e.clientY); pointerOn=true;});
+  stage.addEventListener('pointerleave',()=>{ pointerOn=false; });
+  stage.addEventListener('pointerenter',()=>{ pointerOn=true; });
+  window.addEventListener('resize',resize);
+
+  descEl.textContent=modes[mode];
+  resize();
+  requestAnimationFrame(frame);
+
+  window.addEventListener("load", postHeight);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(postHeight);
+  setTimeout(postHeight, 300);
+  if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+})();
+</script>
+</body>
+</html>

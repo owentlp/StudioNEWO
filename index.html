@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>STUDIO NEWO</title>
+<meta name="description" content="Studio NEWO. Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta name="theme-color" content="#e9e7e2">
+<link rel="canonical" href="https://studionewo.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://studionewo.com/">
+<meta property="og:site_name" content="Studio NEWO">
+<meta property="og:title" content="Studio NEWO">
+<meta property="og:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Studio NEWO">
+<meta name="twitter:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
+
+<!--
+  STUDIO NEWO · home / index
+  The home IS the project index: one of the camera clips in /videos plays as
+  the full-page background. Project cards live in a bottom dock: mostly
+  hidden below the bottom edge of the window at rest (just a sliver of each
+  image peeking up), rising on hover to sit flush with the bottom of the
+  page and show the title/description. Every card is the same size and
+  built straight off the PROJECTS list, so adding a project is just adding
+  its key to the ORDER array in the script below, no hand-placed coordinates
+  needed. Copy -> js/projects-data.js.
+-->
+
+<style>
+@font-face{font-family:"GOST B";src:url("fonts/gost-typeb-italic.ttf") format("truetype");font-style:italic;font-display:swap;}
+@font-face{font-family:"OCR B";src:url("fonts/ocr-b.otf") format("opentype");font-display:swap;}
+
+:root{ --ink:#141414; --red:#e2191b; --disp:"GOST B",Georgia,serif; --body:"OCR B","Courier New",monospace; }
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hidden; letter-spacing:.02em; -webkit-font-smoothing:antialiased;}
+
+/* full-page background video: two layers of the SAME clip, self-crossfaded
+   so it loops with no seam (see the script). Paper shows until the first
+   frame is ready, then the video fades in over it. */
+.bgvid{position:fixed; inset:0; z-index:-1; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 900ms ease; pointer-events:none;}
+.bgvid.show{opacity:1;}
+
+/* ---- header: real logo (left) · wordmark (centre) · hamburger (right); all the SAME height ---- */
+#home{position:fixed; z-index:5; top:24px; left:34px; display:block; width:45px; height:45px; color:var(--ink); cursor:pointer;}
+#home svg{width:100%; height:100%; display:block; fill:currentColor;}
+#wordmark{position:fixed; z-index:5; top:24px; left:50%; transform:translateX(-50%); height:45px; color:var(--ink); pointer-events:none;}
+#wordmark svg{height:100%; width:auto; display:block; fill:currentColor;}
+#burger{position:fixed; z-index:50; top:24px; right:34px; width:45px; height:45px; background:none; border:0; padding:0; cursor:pointer; color:var(--ink);}
+#burger svg{width:100%; height:100%; display:block; fill:currentColor;}
+
+/* sound toggle: a small, deliberately quiet easter egg in the corner, not a
+   real UI control - sound defaults OFF (the videos stay muted) and this is
+   the only way to turn the ambient audio on. Low opacity at rest so it reads
+   as a mark rather than a button, brightens on hover/when on so it's still
+   findable. mix-blend-difference like the other fixed marks so it stays
+   visible over any part of the background video. */
+#soundToggle{position:fixed; z-index:6; bottom:26px; right:34px; width:20px; height:20px; background:none; border:0; padding:0; cursor:pointer; color:var(--ink); mix-blend-mode:difference; opacity:.32; transition:opacity .25s ease;}
+#soundToggle:hover, #soundToggle.on{opacity:.9;}
+#soundToggle svg{width:100%; height:100%; display:block;}
+#soundToggle .wave{opacity:0; transition:opacity .2s ease;}
+#soundToggle .mute-x{opacity:1; transition:opacity .2s ease;}
+#soundToggle.on .wave{opacity:1;}
+#soundToggle.on .mute-x{opacity:0;}
+
+/* ---- bottom dock: project cards fanned out along the bottom edge,
+   overlapping like a hand of cards, mostly hidden below the window at rest.
+   Rest state shows a sliver of each card set by --dock-peek - the title
+   overlays the top of it (so that sliver is a readable title tab, not a
+   bare strip of photo) with a bit of the photo showing beneath. Hover
+   straightens the card, brings it to the front of the fan, and raises it to
+   sit flush with the bottom of the page at --dock-rise, showing the full
+   title, description, and photo. Every card is the same fixed size, so a
+   new project just adds another card, no hand-placed coordinates needed.
+   The card is taller than the dock's own box and simply overflows below the
+   viewport edge at rest - nothing needs explicit clipping, it's off-canvas
+   until it rises. IMPORTANT: #dock must keep overflow:visible (not auto/
+   scroll on just one axis) - setting overflow-x without also leaving
+   overflow-y as visible makes the browser silently clip overflow-y too
+   (that's a CSS spec rule, not a bug), which stops the hover rise from
+   working at all since it depends on cards extending above the dock's own
+   (short) box. */
+:root{ --dock-peek:clamp(140px,18vh,190px); --dock-rise:clamp(320px,44vh,520px); --dock-w:clamp(255px,27vw,360px); }
+#dock{
+  position:fixed; left:0; right:0; bottom:0; z-index:3; height:var(--dock-peek);
+  display:flex; justify-content:center; align-items:flex-start;
+  padding:0; overflow:visible; pointer-events:none;
+}
+.dc{
+  position:relative; flex:0 0 auto; width:var(--dock-w); height:var(--dock-rise);
+  overflow:hidden; text-decoration:none; color:var(--ink);
+  pointer-events:auto; transform:translateY(0);
+  transition:transform .45s cubic-bezier(.2,.8,.2,1);
+  /* title band on top, photo filling the rest below it (a column, not an
+     overlay) so the title never covers the top of the photo. */
+  display:flex; flex-direction:column;
+}
+/* overlapping stack, flat across the top: every card after the first pulls
+   left under the one before it, tops all in a straight line, no rotation.
+   Later cards sit on top of earlier ones (normal DOM order) and STAY on top
+   even when an earlier card behind them rises - no z-index bump on hover,
+   so a card lower in the stack keeps its bottom corner tucked behind
+   whichever card is already in front of it, rather than snapping above
+   everything. Reads as the card rising up from its place in the stack
+   instead of popping to the front of it. */
+.dc:not(:first-child){ margin-left:calc(-1 * var(--dock-w) * .35); }
+.dc:hover, .dc:focus-visible{ transform:translateY(calc(var(--dock-peek) - var(--dock-rise))); }
+/* the photo fills whatever height is left under the title band. The title
+   band is a fixed-height sibling (title + date only, no animating text), so
+   the photo doesn't reflow on hover - the whole card just slides up. */
+.dc-media{position:relative; flex:1 1 auto; min-height:0; z-index:0; overflow:hidden;}
+.dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1); transition:filter .25s ease, transform .5s cubic-bezier(.2,.8,.2,1);}
+.dc:hover .dc-media img, .dc:focus-visible .dc-media img{filter:saturate(1.05); transform:scale(1.08);}
+/* title (+ date) is a paper band at the TOP of the card, ABOVE the photo (not
+   over it), so the photo's top is never covered. It's what shows in the peeking
+   sliver at rest, with the photo starting just beneath it. No catch-phrase/
+   teaser line on the home page (that lives on each project page). */
+.dc-body{
+  position:relative; z-index:1; flex:0 0 auto;
+  background:#e9e7e2;   /* opaque paper (index.html has no --paper var) */
+  padding:10px 10px 12px;
+}
+.dc-title{display:block; font-family:var(--disp); font-style:italic; font-size:20px; line-height:1.1;}
+.dc-date{display:block; font-size:11px; letter-spacing:.16em; opacity:.7; margin-top:4px;}
+/* the fan bleeds ~24px off each window edge (sizeDock adds +48). Inset the
+   first card's title so it clears the left edge instead of being clipped. */
+.dc:first-child .dc-body{padding-left:38px;}
+@media (max-width:760px){ .dc:first-child .dc-body{padding-left:0;} }
+.dc:focus-visible{outline:1px solid var(--red); outline-offset:-2px;}
+
+/* top-right dropdown menu (shared markup, built by js/menu.js) */
+#menu-overlay{display:none;}
+#menu-overlay.menu-panel{
+  display:block; position:fixed; top:0; right:0; z-index:40;
+  width:min(300px,82vw); max-height:100vh; overflow-y:auto;
+  background:#e9e7e2; color:var(--ink);
+  padding:89px 26px 28px;
+  box-shadow:-2px 3px 22px rgba(0,0,0,.16);
+  opacity:0; transform:translateY(-10px); pointer-events:none;
+  transition:opacity .18s ease, transform .2s ease;
+}
+#menu-overlay.menu-panel.open{opacity:1; transform:none; pointer-events:auto;}
+.menu-nav{display:flex; flex-direction:column; gap:22px;}
+.menu-group{display:flex; flex-direction:column; gap:4px;}
+.menu-head{font-size:9px; letter-spacing:.24em; text-transform:uppercase; opacity:.48; margin-bottom:4px;}
+.menu-group a{font-family:var(--disp); font-style:italic; font-size:30px; line-height:1.12; color:var(--ink); text-decoration:none;}
+.menu-group a:hover{color:var(--red);}
+.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px;}
+.menu-links a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-decoration:none;}
+.menu-links a:hover{color:var(--red);}
+
+#loader{position:fixed; inset:0; z-index:9; display:grid; place-items:center; background:#e9e7e2; transition:opacity 650ms ease;}
+.ld-mark{position:relative; width:62px; height:62px;}
+.ld-mark svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
+.ld-logo path{fill:#141414;}
+body.ready #loader{opacity:0; pointer-events:none;}
+/* 3D logo (js/loader3d.js): swaps the static mark above for a real 3D
+   render of the logo, front-on at first, then spinning - see that file's
+   header comment. Absent entirely unless/until it loads. */
+.ld-3d{position:absolute; inset:0; width:100%; height:100%; display:block; opacity:0; transition:opacity .25s ease;}
+
+/* skip link: hidden until keyboard-focused, then drops in top-left */
+.skip-link{position:absolute; left:8px; top:-60px; z-index:20; background:var(--ink); color:#e9e7e2; font-size:10px; letter-spacing:.16em; text-transform:uppercase; text-decoration:none; padding:8px 12px; transition:top .15s ease;}
+.skip-link:focus{top:8px; outline:2px solid var(--red); outline-offset:2px;}
+
+.fade-in{opacity:0; transform:translateY(6px); transition:opacity 700ms ease, transform 700ms ease;}
+body.ready .fade-in{opacity:1; transform:none;}
+body.ready .fade-in.d1{transition-delay:.05s;}
+body.ready .fade-in.d2{transition-delay:.2s;}
+
+@media (max-width:760px){
+  body{overflow:auto;}
+  #home{top:24px; left:22px; width:20px; height:20px;}
+  #burger{top:24px; right:22px; width:20px; height:20px;}
+  #wordmark{top:24px; height:20px;}
+  /* the background video (and its audio) is skipped entirely under 760px,
+     see the script, so there's nothing for this to control here. */
+  #soundToggle{display:none;}
+  /* the peek/rise/fan trick depends on hover, which touch devices don't
+     really have - on mobile the dock just becomes a plain static stack,
+     every card fully visible, no overlap or rotation, title + photo both
+     showing at once, in normal page flow below the header. */
+  #dock{position:static; height:auto; padding:108px 26px 80px; display:flex; flex-direction:column; align-items:stretch; gap:28px; overflow:visible; pointer-events:auto;}
+  .dc{position:static; display:block; width:100% !important; height:auto !important; margin-left:0 !important; transform:none !important; pointer-events:auto;}
+  /* absolute overlay layout is a desktop-only trick (needs a fixed-height
+     card); on mobile both go back to plain stacked flow, text above image. */
+  .dc-body{position:static; background:none; -webkit-backdrop-filter:none; backdrop-filter:none; padding:0 0 8px;}
+  .dc-media{position:relative; aspect-ratio:4/3;}
+  .dc-media img{transform:none !important;}
+}
+@media (prefers-reduced-motion:reduce){ .bgvid{display:none;} }
+</style>
+
+<link rel="prefetch" href="about.html" as="document">
+<link rel="prefetch" href="contact.html" as="document">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Studio NEWO",
+  "alternateName": "NEWO",
+  "url": "https://studionewo.com/",
+  "logo": "https://studionewo.com/logo/apple-touch-icon.png",
+  "image": "https://studionewo.com/projects/kart/hero.jpg",
+  "description": "Industrial design practice in Toronto. Products built for repair, disassembly, and long life.",
+  "founder": { "@type": "Person", "name": "Owen Palmer" },
+  "address": { "@type": "PostalAddress", "addressLocality": "Toronto", "addressCountry": "CA" },
+  "sameAs": [ "https://www.instagram.com/studio.newo" ]
+}
+</script>
+</head>
+
+<body>
+<a class="skip-link" href="#dock">Skip to content</a>
+
+<video class="bgvid" id="vidA" muted playsinline preload="auto"></video>
+<video class="bgvid" id="vidB" muted playsinline preload="metadata"></video>
+
+<div id="loader" aria-hidden="true">
+  <div class="ld-mark">
+    <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+  </div>
+</div>
+<script src="js/loader3d.js"></script>
+
+<a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
+  <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+</a>
+
+<div id="wordmark" class="fade-in d1" aria-label="NEWO">
+  <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
+</div>
+
+<button id="burger" class="fade-in d1" aria-label="Open menu">
+  <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
+</button>
+
+<!-- easter egg: sound is off by default (the background videos stay muted),
+     this is the only way to turn the ambient audio on. Deliberately unlabeled
+     beyond the aria-label, not called out anywhere in the UI. -->
+<button id="soundToggle" class="fade-in d1" aria-label="Toggle ambient sound" aria-pressed="false">
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path class="spk" d="M3.5 9.5v5h3.2l4.6 3.6V5.9L6.7 9.5H3.5z" fill="currentColor" stroke="none"/>
+    <path class="wave" d="M15.5 8.3a5.4 5.4 0 0 1 0 7.4"/>
+    <path class="mute-x" d="M16.3 8.3l4.6 4.6m0-4.6l-4.6 4.6"/>
+  </svg>
+</button>
+
+<!-- BOTTOM DOCK. Cards are built in the script below, straight off PROJECTS
+     in ORDER - add a project's key to ORDER to add its card, nothing else
+     to place by hand. -->
+<main id="dock" class="fade-in d2"></main>
+
+<div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+
+<script src="js/projects-data.js?v=8"></script>
+<script src="js/menu.js?v=3"></script>
+<script>
+/* ==========================================================================
+   BACKGROUND CLIPS - the one array on this page you hand-edit. One is
+   picked at random per load and plays behind everything. To preview a
+   specific clip while tuning, add ?clip=0 (or 1, 2) to the URL.
+   ========================================================================== */
+const CLIPS = [
+  { src: "videos/apple-blossom-baker-web.mp4" },
+  { src: "videos/comox-glacier-web.mp4" },
+  { src: "videos/apple-blossom-sky-web.mp4" }
+];
+
+const CLIP_PICK = (function(){
+  var m = location.search.match(/[?&]clip=(\d+)/);
+  if(m){ var n = parseInt(m[1], 10); if(n >= 0 && n < CLIPS.length) return n; }
+  return Math.floor(Math.random() * CLIPS.length);
+})();
+</script>
+
+<script>
+/* build the bottom dock. ORDER controls which projects show and in what
+   order - add a project's key here to give it a card, nothing else to set
+   by hand, every card is the same fixed size (see --dock-peek/--dock-rise
+   in the CSS above). */
+(function(){
+  // storefront OBJECTS only, chronological most recent first: kart/amsalp
+  // 2026, omni 2025, neb 2024. NAF is archive-only (academic) so it is not
+  // shown on the home page; it lives only in the Archive menu.
+  var ORDER = ["kart","amsalp","omni","neb"];
+  function real(s){ return s && String(s).charAt(0)!=="["; }
+  function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  // hover-to-prefetch: the moment the pointer lands on a card, warm the project
+  // page's document + stylesheet (index uses inline CSS, so style.css isn't
+  // cached yet) so the click feels instant. The card image is already the hero
+  // image, so that's cached too. Deduped; prefetch (not preload) so it never
+  // fights the current page for bandwidth.
+  var _pf = {};
+  function prefetch(href){
+    if(!href || _pf[href]) return; _pf[href] = 1;
+    var l = document.createElement("link"); l.rel = "prefetch"; l.href = href;
+    document.head.appendChild(l);
+  }
+
+  var dock = document.getElementById("dock");
+  ORDER.forEach(function(key, i){
+    var p = PROJECTS[key]; if(!p) return;
+    var date   = real(p.date) ? p.date : "";
+    var first  = (p.gallery && p.gallery[0]) ? p.gallery[0] : "hero.jpg";
+
+    var a = document.createElement("a");
+    a.className = "dc";
+    a.href = "project.html?p=" + key;
+    a.innerHTML =
+      '<span class="dc-body">' +
+        '<span class="dc-title">'+esc(p.title)+'</span>' +
+        (date ? '<span class="dc-date">'+esc(date)+'</span>' : '') +
+      '</span>' +
+      '<span class="dc-media">' +
+        '<img src="projects/'+key+'/'+first+'" alt="'+esc(p.title)+'" loading="lazy" decoding="async">' +
+      '</span>';
+    a.addEventListener("mouseenter", function(){
+      prefetch("project.html?p=" + key);
+      prefetch("css/style.css?v=25");
+    }, { once:true });
+    dock.appendChild(a);
+  });
+
+  // size the cards so the overlapping fan spans the full width of the screen.
+  // Each card after the first overlaps the previous by 35% (see the .dc
+  // margin-left rule), so N cards occupy width * (1 + (N-1)*0.65). Solve that
+  // for the viewport width and set --dock-w. Recompute on resize. On mobile
+  // the dock is a plain stacked column (CSS), so leave it to the stylesheet.
+  function sizeDock(){
+    var n = dock.children.length;
+    if(!n) return;
+    if(window.innerWidth <= 760){ dock.style.removeProperty("--dock-w"); return; }
+    // +48px so the fan runs a touch past both window edges (no side gap)
+    var w = (window.innerWidth + 48) / (1 + (n - 1) * 0.65);
+    dock.style.setProperty("--dock-w", Math.ceil(w) + "px");
+  }
+  sizeDock();
+  window.addEventListener("resize", sizeDock);
+})();
+</script>
+
+<script>
+/* ---- background video: the picked clip, self-crossfaded in a loop ---- */
+(function(){
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  // the clips are ~3-25MB each: on a phone (or with the browser's data saver
+  // on) skip the video entirely and keep the paper background, which costs
+  // nothing instead.
+  if(window.innerWidth <= 760) return;
+  if(navigator.connection && navigator.connection.saveData) return;
+
+  /* ONE clip, looped with a crossfade onto itself across two layers. Both
+     layers play the SAME clip offset by FADE: as one layer nears its end the
+     other starts from 0 and fades up underneath it, so the end of the clip
+     dissolves into its own start with no seam and nothing ever hides.
+     Playback is slowed so the motion reads as gentle drift. */
+  var clip = CLIPS[CLIP_PICK].src;
+  var a = document.getElementById("vidA"), c = document.getElementById("vidB");
+  var FADE = 1.4;          // crossfade window, seconds
+  var RATE = 0.6;          // slow the footage so it drifts gently
+  var layers = [a, c];
+  var active = 0, armed = false;
+
+  // Sound: OFF by default and stays off until the visitor finds and clicks
+  // the small #soundToggle mark in the corner (a deliberate easter egg, not
+  // called out anywhere) - fully opt-in. The hidden crossfade layer stays
+  // muted regardless, so the two overlapping copies of the clip never play
+  // audio at once.
+  var AUDIO_VOL = 0.18;
+  var soundOn = false, graphBuilt = false, audioCtx = null;
+
+  // EQ: the raw clips carry low-frequency wind/traffic drone that reads as
+  // noise more than ambience, and the bird activity that IS in them sits
+  // quiet in comparison. Rather than bake an EQ into the mp4s (re-encoding
+  // loses quality and can't be un-done from here), this runs the audio
+  // through the Web Audio API live: a cascaded high-pass cuts the low-end
+  // rumble, a small dip around 350Hz further tames residual mid-low drone,
+  // two presence boosts lift the 3-8kHz band most birdsong sits in, and a
+  // compressor stops those boosts from ever clipping. Applies to both
+  // video layers identically so the crossfade doesn't change the tone.
+  function buildEqChain(ctx, videoEl){
+    var src = ctx.createMediaElementSource(videoEl);
+    var hp1 = ctx.createBiquadFilter(); hp1.type = "highpass"; hp1.frequency.value = 180; hp1.Q.value = 0.7;
+    var hp2 = ctx.createBiquadFilter(); hp2.type = "highpass"; hp2.frequency.value = 180; hp2.Q.value = 0.7;
+    var dip = ctx.createBiquadFilter(); dip.type = "peaking"; dip.frequency.value = 350; dip.Q.value = 1.0; dip.gain.value = -5;
+    var birdMid = ctx.createBiquadFilter(); birdMid.type = "peaking"; birdMid.frequency.value = 4500; birdMid.Q.value = 1.2; birdMid.gain.value = 6;
+    var birdHigh = ctx.createBiquadFilter(); birdHigh.type = "peaking"; birdHigh.frequency.value = 7500; birdHigh.Q.value = 1.2; birdHigh.gain.value = 4;
+    var limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -8; limiter.knee.value = 6; limiter.ratio.value = 4; limiter.attack.value = 0.003; limiter.release.value = 0.15;
+    src.connect(hp1); hp1.connect(hp2); hp2.connect(dip); dip.connect(birdMid); birdMid.connect(birdHigh); birdHigh.connect(limiter); limiter.connect(ctx.destination);
+  }
+  function ensureGraph(){
+    if(graphBuilt) return;
+    graphBuilt = true;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(AC){
+        audioCtx = new AC();
+        layers.forEach(function(v){ buildEqChain(audioCtx, v); });
+      }
+    } catch(e){ /* Web Audio unsupported: falls back to the plain volume below, no EQ */ }
+  }
+  function applySound(){
+    var cur = layers[active];
+    cur.volume = AUDIO_VOL;
+    cur.muted = !soundOn;
+  }
+  var soundBtn = document.getElementById("soundToggle");
+  if(soundBtn){
+    soundBtn.addEventListener("click", function(){
+      ensureGraph();                                    // needs a user gesture to start, this click IS one
+      if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      soundOn = !soundOn;
+      applySound();
+      soundBtn.classList.toggle("on", soundOn);
+      soundBtn.setAttribute("aria-pressed", soundOn ? "true" : "false");
+    });
+  }
+
+  function prep(v){ v.src = clip; v.loop = false; v.playbackRate = RATE; v.load(); }
+
+  function arm(v){
+    // hand off to the other layer: both videos sit at the SAME z-index, so
+    // whichever is later in the DOM always paints on top regardless of which
+    // one is "active." Starting both the fade-out and fade-in at the same
+    // instant, over the same CSS transition length, makes the handoff look
+    // identical every time no matter which layer is in front.
+    var nextI = active ^ 1, next = layers[nextI], cur = layers[active];
+    try { next.currentTime = 0; } catch(e){}
+    // audio follows the visible layer only: unmute the incoming one (if the
+    // visitor has already opted in via #soundToggle) and mute the outgoing
+    // one before it disappears, so the two overlapping copies never sound
+    // at once.
+    if(soundOn){ next.volume = AUDIO_VOL; next.muted = false; }
+    next.classList.add("show");
+    next.play().catch(function(){});
+    cur.classList.remove("show");
+    cur.muted = true;
+    active = nextI; armed = false;
+  }
+
+  function tick(v){
+    if(layers[active] !== v) return;
+    if(!v.duration || !isFinite(v.duration)) return;
+    if(!armed && v.currentTime >= v.duration - FADE){ armed = true; arm(v); }
+  }
+  layers.forEach(function(v){ v.addEventListener("timeupdate", function(){ tick(v); }); });
+
+  // start the first layer once its metadata is in, jumping to a random point
+  // so the footage differs on each visit.
+  a.addEventListener("loadedmetadata", function once(){
+    a.removeEventListener("loadedmetadata", once);
+    if(isFinite(a.duration) && a.duration > FADE + 1){
+      try { a.currentTime = Math.random() * (a.duration - FADE - 0.6); } catch(e){}
+    }
+    a.classList.add("show");
+    a.play().catch(function(){});
+  });
+  // layer B keeps preload="metadata" until A is actually playing, so the two
+  // layers don't race each other for the same bytes on page load; it then has
+  // the whole first pass of the clip to buffer before the first crossfade.
+  a.addEventListener("playing", function onceP(){
+    a.removeEventListener("playing", onceP);
+    c.preload = "auto"; c.load();
+  });
+  // stop decoding entirely while the tab is hidden
+  document.addEventListener("visibilitychange", function(){
+    var cur = layers[active];
+    if(document.hidden){ layers.forEach(function(v){ v.pause(); }); }
+    else { cur.play().catch(function(){}); }
+  });
+  prep(a); prep(c);
+})();
+
+(function(){
+  var done = false;
+  function reveal(){ if(done) return; done = true; document.body.classList.add("ready"); }
+  // lift the loader once the page is parsed plus a short beat. The background
+  // video fades itself in when its first frame is ready, so we never wait on it.
+  if(document.readyState !== "loading") setTimeout(reveal, 350);
+  else document.addEventListener("DOMContentLoaded", function(){ setTimeout(reveal, 350); });
+  window.addEventListener("load", reveal);   // safety net
+  setTimeout(reveal, 1800);                   // hard cap
+})();
+
+/* the top-right dropdown menu (burger toggle, links, close-on-escape) is
+   built and wired by js/menu.js, shared with every other page. */
+</script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MATERIALS · STUDIO NEWO</title>
+<meta name="description" content="The Studio NEWO material guide: the woods, metals, and other materials used across the studio products.">
+<meta name="theme-color" content="#e9e7e2">
+<link rel="canonical" href="https://studionewo.com/materials.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://studionewo.com/materials.html">
+<meta property="og:site_name" content="Studio NEWO">
+<meta property="og:title" content="Materials · Studio NEWO">
+<meta property="og:description" content="The Studio NEWO material guide: the woods, metals, and other materials used across the studio products.">
+<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Materials · Studio NEWO">
+<meta name="twitter:description" content="The Studio NEWO material guide: the woods, metals, and other materials used across the studio products.">
+<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=25">
+<style>
+  /* page-specific layout only: the shared editorial grammar (12-col grid,
+     .cap/.desc type, .fig frames) lives in css/style.css and is reused as-is
+     so this page reads like a project page, not a separate "about" style
+     stacked-paragraph page. */
+  .matg{max-width:none; margin:0; padding:clamp(140px,17vh,210px) var(--mar) clamp(80px,12vh,140px);}
+  .matg-intro{max-width:calc(46ch + var(--mar)); margin-bottom:clamp(60px,9vh,110px);}
+  .matg-intro h1{font-size:clamp(28px,4.4vw,48px); line-height:1.05; margin-top:14px;}
+  .matg-intro .lead{margin-top:16px;}
+  /* categories are collapsed by default - a clickable head row (label, a
+     quiet preview of what's inside, and a count) that expands to reveal the
+     full material entries below it. The height animation uses the CSS grid
+     0fr/1fr trick so it works with content of any length with no JS
+     measuring. No borders: the head row is set apart by weight/spacing only,
+     matching the rest of the site's "no rules or boxes" grammar. */
+  .matcat{margin-top:clamp(28px,4vh,44px);}
+  .matcat:first-of-type{margin-top:0;}
+  .matcat-head{
+    display:flex; align-items:baseline; gap:clamp(14px,2vw,26px); width:100%;
+    background:none; border:0; padding:clamp(14px,2.2vh,20px) 0; margin:0; text-align:left;
+    font-family:var(--body); color:var(--ink); cursor:pointer;
+  }
+  .matcat-head:hover{color:var(--red);}
+  .matcat-head .cap.lbl{margin-bottom:0; flex:0 0 auto;}
+  .matcat-names{flex:1 1 auto; min-width:0; font-size:9px; letter-spacing:.03em; color:var(--ink); opacity:.55; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .matcat.open .matcat-names{opacity:0;}
+  .matcat-count{flex:0 0 auto; font-size:9px; letter-spacing:.1em; opacity:.55;}
+  .matcat-chev{flex:0 0 auto; font-size:13px; width:1em; text-align:center; transition:transform .3s ease;}
+  .matcat.open .matcat-chev{transform:rotate(45deg);}   /* + becomes x */
+
+  /* categories and subgroups reveal with a show + fade rather than a height
+     animation: nesting two CSS height-collapse tricks made the inner one
+     degenerate to zero height, and display:none is fully robust at any depth. */
+  .matcat-body{display:none;}
+  .matcat.open .matcat-body{display:block; animation:matReveal .32s ease;}
+  .matcat-inner{padding-top:clamp(8px,1.4vh,16px); padding-bottom:clamp(12px,2vh,22px);}
+  @keyframes matReveal{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  .matg-legend{font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); opacity:.55; margin-top:14px;}
+
+  /* ---- OPEN CATEGORY: hero image (tree/ore/etc) + intro text ---- */
+  .matcat-intro{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); align-items:start; margin-bottom:clamp(32px,5vh,58px);}
+  .matcat-hero{grid-column:1 / 5; aspect-ratio:4/3; overflow:hidden;}
+  .matcat-hero img{width:100%; height:100%; object-fit:cover; display:block;}
+  .matcat-intro-text{grid-column:6 / 13; display:flex; flex-direction:column; gap:9px;}
+  .matcat-intro-text .desc{max-width:54ch;}
+  .mi-k{font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-right:7px;}
+
+  /* ---- GROUP (the dropdown subgroup: Hardwood, Aluminum, etc). Collapsed by
+     default inside an open category; its own head toggles its materials open,
+     a second accordion level nested inside the category one. ---- */
+  .matgroup{margin-top:clamp(2px,0.6vh,8px);}
+  .matgroup:first-of-type{margin-top:0;}
+  .matgroup-head{
+    display:flex; align-items:baseline; gap:clamp(12px,1.6vw,22px); width:100%;
+    background:none; border:0; padding:clamp(9px,1.4vh,14px) 0; margin:0; text-align:left;
+    font-family:var(--body); color:var(--ink); cursor:pointer;
+  }
+  .matgroup-head:hover{color:var(--red);}
+  .matgroup-label{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(16px,1.8vw,22px); line-height:1; flex:0 0 auto;}
+  .matgroup-names{flex:1 1 auto; min-width:0; font-size:9px; letter-spacing:.03em; color:var(--ink); opacity:.5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .matgroup.open .matgroup-names{opacity:0;}
+  .matgroup-count{flex:0 0 auto; font-size:9px; letter-spacing:.1em; opacity:.5;}
+  .matgroup-chev{flex:0 0 auto; font-size:12px; width:1em; text-align:center; transition:transform .3s ease;}
+  .matgroup.open .matgroup-chev{transform:rotate(45deg);}   /* + becomes x */
+  .matgroup-body{display:none;}
+  .matgroup.open .matgroup-body{display:block; animation:matReveal .3s ease;}
+  .matgroup-inner{padding-top:clamp(6px,1vh,12px); padding-bottom:clamp(10px,1.8vh,20px);}
+  .matgroup-meta{font-size:9px; line-height:1.55; letter-spacing:.02em; color:var(--ink); opacity:.72; max-width:74ch; margin-bottom:clamp(16px,2.4vh,24px);}
+  .matgroup-meta .mg-k{color:var(--red); letter-spacing:.12em; text-transform:uppercase; margin-right:6px;}
+  .matgroup-meta .mg-sep{opacity:.35; margin:0 9px;}
+
+  /* ---- MATERIAL ITEM: small thumbnail + text, two per row ---- */
+  .matgrid{display:grid; grid-template-columns:1fr 1fr; column-gap:clamp(24px,3vw,54px); row-gap:clamp(26px,4vh,44px);}
+  .matitem{display:grid; grid-template-columns:clamp(72px,8vw,104px) 1fr; column-gap:clamp(14px,1.6vw,22px); align-items:start; scroll-margin-top:120px;}
+  .matitem-media{aspect-ratio:1/1; overflow:hidden;}
+  .matitem-media img{width:100%; height:100%; object-fit:cover; display:block;}
+  .matitem-text{min-width:0;}
+  .mi-name{display:block; font-family:var(--disp); font-style:italic; font-size:clamp(15px,1.5vw,19px); line-height:1.08; margin-bottom:4px;}
+  .mi-use{font-family:var(--body); font-style:normal; font-size:7px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); vertical-align:middle; margin-left:8px; border:1px solid var(--red); padding:1px 5px; white-space:nowrap;}
+  .mi-in{display:block; font-size:9px; letter-spacing:.05em; margin-bottom:6px;}
+  .mi-in a{color:var(--ink); text-decoration:underline; text-decoration-color:rgba(20,20,20,.3); text-underline-offset:2px;}
+  .mi-in a:hover{color:var(--red); text-decoration-color:var(--red);}
+  .matitem-text .desc{max-width:100%;}
+
+  /* colour swatch fallback, shown when a photo is missing (img onerror) */
+  .matcat-hero, .matitem-media{background:#dcd8d0;}
+  .matcat-hero.wood,.matitem-media.wood{background:linear-gradient(135deg,#8a5a34,#5e3a1f);}
+  .matcat-hero.metal,.matitem-media.metal{background:linear-gradient(135deg,#c9cdd1,#82878d);}
+  .matcat-hero.bio,.matitem-media.bio{background:linear-gradient(135deg,#7f8f56,#4d5c34);}
+  .matcat-hero.glass,.matitem-media.glass{background:linear-gradient(135deg,#eef3f4,#c3cfd2);}
+  .matcat-hero.plastic,.matitem-media.plastic{background:linear-gradient(135deg,#eee9df,#cfc8b7);}
+  .matcat-hero.soft,.matitem-media.soft{background:linear-gradient(135deg,#cbb995,#96835a);}
+
+  @media (max-width:900px){
+    .matcat-intro{display:block;}
+    .matcat-hero{width:100%; max-width:340px; margin-bottom:18px;}
+    .matgrid{grid-template-columns:1fr;}
+    .matcat-names{display:none;}   /* no room next to the label at this width */
+  }
+  @media (max-width:520px){
+    .matitem{grid-template-columns:58px 1fr; column-gap:12px;}
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#matg-content">Skip to content</a>
+<a class="site-home" href="index.html" aria-label="Studio NEWO home">
+  <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+</a>
+<div class="site-wordmark" aria-label="NEWO">
+  <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
+</div>
+<button id="burger" aria-label="Open menu">
+  <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
+</button>
+<div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+
+<main class="page matg" id="matg-content">
+  <div class="matg-intro">
+    <span class="eyebrow">MATERIALS INDEX</span>
+    <h1>Material selection dictates a product's lifecycle.</h1>
+    <p class="lead">We prioritize raw materials that perform predictably, age clearly, and can be repaired or recycled at the end of their usable life.</p>
+    <p class="matg-legend">An "In use" mark denotes a material currently used in a Studio NEWO product.</p>
+  </div>
+  <div id="matg-cats"></div>
+</main>
+
+<script src="js/materials-data.js?v=2"></script>
+<script src="js/projects-data.js?v=8"></script>
+<script src="js/main.js?v=3"></script>
+<script src="js/menu.js?v=3"></script>
+<script>
+(function(){
+  function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function real(s){ return s && String(s).trim() !== ""; }
+  var root = document.getElementById("matg-cats");
+
+  // one media figure. The colour-swatch fallback is baked into the figure's
+  // own background (see CSS); if the photo 404s, onerror removes the <img> and
+  // the swatch shows through, so a missing image never breaks the layout.
+  // The src is held in data-src and set only when the section opens (loadImgs
+  // below): the accordion hides content with display:none, and browsers never
+  // fetch a loading="lazy" image inside a display:none subtree, so we defer and
+  // load on reveal instead. This also keeps hidden sections from loading.
+  function media(cls, file, alt){
+    return '<figure class="'+cls+'"><img data-src="materials/'+esc(file)+'" alt="'+esc(alt)+'" decoding="async" onerror="this.remove()"></figure>';
+  }
+  function loadImgs(scope){
+    if(!scope) return;
+    scope.querySelectorAll('img[data-src]').forEach(function(img){
+      img.src = img.getAttribute("data-src");
+      img.removeAttribute("data-src");
+    });
+  }
+
+  var html = MATERIAL_CATEGORIES.map(function(cat){
+    var total = cat.groups.reduce(function(a,g){ return a + g.items.length; }, 0);
+    var groupNames = cat.groups.map(function(g){ return g.label; }).join("  /  ");
+
+    var introText = [
+      real(cat.intro.properties) ? '<p class="desc"><span class="mi-k">Properties</span>'+esc(cat.intro.properties)+'</p>' : '',
+      real(cat.intro.finishes)   ? '<p class="desc"><span class="mi-k">Finishes</span>'+esc(cat.intro.finishes)+'</p>' : '',
+      real(cat.intro.lifecycle)  ? '<p class="desc"><span class="mi-k">Lifecycle</span>'+esc(cat.intro.lifecycle)+'</p>' : ''
+    ].join("");
+    var intro = '<div class="matcat-intro">' +
+      media("matcat-hero "+esc(cat.swatch), cat.image, cat.label) +
+      '<div class="matcat-intro-text">'+introText+'</div></div>';
+
+    var groups = cat.groups.map(function(g){
+      var meta = [
+        real(g.properties) ? '<span class="mg-k">Properties</span>'+esc(g.properties) : '',
+        real(g.bestUses)   ? '<span class="mg-k">Best uses</span>'+esc(g.bestUses) : '',
+        real(g.lifecycle)  ? '<span class="mg-k">Lifecycle</span>'+esc(g.lifecycle) : ''
+      ].filter(Boolean).join('<span class="mg-sep">/</span>');
+
+      var items = g.items.map(function(it){
+        var use = it.used ? '<span class="mi-use">In use</span>' : '';
+        var usedIn = (it.usedIn && it.usedIn.length)
+          ? '<span class="mi-in">Used in: '+it.usedIn.map(function(u){ return '<a href="project.html?p='+esc(u.id)+'">'+esc(u.title)+'</a>'; }).join(", ")+'</span>'
+          : '';
+        return '<div class="matitem" id="'+esc(it.slug)+'">' +
+                 media("matitem-media "+esc(cat.swatch), it.image, it.name) +
+                 '<div class="matitem-text">' +
+                   '<span class="mi-name">'+esc(it.name)+use+'</span>' +
+                   usedIn +
+                   '<p class="desc">'+esc(it.copy)+'</p>' +
+                 '</div>' +
+               '</div>';
+      }).join("");
+
+      // each subgroup is its own collapsible: its head (label + material-name
+      // preview + count + chevron) toggles the body (meta + material grid).
+      var groupPreview = g.items.map(function(it){ return it.name; }).join("  /  ");
+      return '<div class="matgroup">' +
+               '<button class="matgroup-head" aria-expanded="false">' +
+                 '<span class="matgroup-label">'+esc(g.label)+'</span>' +
+                 '<span class="matgroup-names">'+esc(groupPreview)+'</span>' +
+                 '<span class="matgroup-count">'+g.items.length+'</span>' +
+                 '<span class="matgroup-chev">+</span>' +
+               '</button>' +
+               '<div class="matgroup-body"><div class="matgroup-inner">' +
+                 (meta ? '<p class="matgroup-meta">'+meta+'</p>' : '') +
+                 '<div class="matgrid">'+items+'</div>' +
+               '</div></div>' +
+             '</div>';
+    }).join("");
+
+    return '<section class="matcat">' +
+             '<button class="matcat-head" aria-expanded="false">' +
+               '<span class="cap lbl">'+esc(cat.label)+'</span>' +
+               '<span class="matcat-names">'+esc(groupNames)+'</span>' +
+               '<span class="matcat-count">'+total+' MATERIALS</span>' +
+               '<span class="matcat-chev">+</span>' +
+             '</button>' +
+             '<div class="matcat-body"><div class="matcat-inner">'+intro+groups+'</div></div>' +
+           '</section>';
+  }).join("");
+  root.innerHTML = html;
+
+  // click a head to expand/collapse its category. Opening one does not close
+  // the others; this is a reference page, someone comparing two categories
+  // shouldn't have to fight the accordion for it.
+  // click a category head to reveal its description + the list of subgroups.
+  // Opening it loads the category's hero image (the material thumbnails wait
+  // until their own subgroup is opened).
+  root.querySelectorAll(".matcat-head").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var cat = btn.closest(".matcat");
+      var open = !cat.classList.contains("open");
+      cat.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if(open) loadImgs(cat.querySelector(".matcat-intro"));
+    });
+  });
+
+  // click a subgroup head to reveal its materials (second level), loading that
+  // subgroup's thumbnails.
+  root.querySelectorAll(".matgroup-head").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var g = btn.closest(".matgroup");
+      var open = !g.classList.contains("open");
+      g.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if(open) loadImgs(g.querySelector(".matgroup-body"));
+    });
+  });
+
+  // deep-link support: materials.html#<slug> opens that material's category
+  // AND its subgroup, then scrolls to it, so a material chip on a project page
+  // can point straight at the right entry through both accordion levels.
+  if(location.hash){
+    var target = document.getElementById(location.hash.slice(1));
+    if(target){
+      var cat = target.closest(".matcat");
+      if(cat){ cat.classList.add("open"); var h=cat.querySelector(".matcat-head"); if(h) h.setAttribute("aria-expanded","true"); loadImgs(cat.querySelector(".matcat-intro")); }
+      var grp = target.closest(".matgroup");
+      if(grp){ grp.classList.add("open"); var gh=grp.querySelector(".matgroup-head"); if(gh) gh.setAttribute("aria-expanded","true"); loadImgs(grp.querySelector(".matgroup-body")); }
+      setTimeout(function(){ target.scrollIntoView({block:"center"}); }, 300);
+    }
+  }
+})();
+</script>
+</body>
+</html>
