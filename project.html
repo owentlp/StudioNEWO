@@ -31,7 +31,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=30">
+<link rel="stylesheet" href="css/style.css?v=31">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -564,16 +564,25 @@
     var defaultOrbit = mv.getAttribute("camera-orbit");
 
     /* ---------- AR, on phones AND on desktop ----------
-       On an AR-capable device (iOS Safari -> Quick Look, Android Chrome ->
-       Scene Viewer) the button launches AR directly through model-viewer's
-       activateAR(). On a desktop there is no AR to launch, so instead of
-       hiding the button - which left desktop visitors with no idea the feature
-       existed - it reveals a QR code of THIS page. Scan it, the phone opens the
-       same project page, and the button there launches AR for real.
+       Phone -> launches AR (iOS Quick Look / Android Scene Viewer).
+       Desktop -> there is no AR to launch, so the button opens a QR code of
+       THIS page instead; scan it and the phone lands here with a button that
+       does the real thing.
 
-       canActivateAR is only meaningful once model-viewer has worked out what
-       the device supports, which is why this waits for its ar-status event
-       rather than reading the property immediately. */
+       TWO THINGS THIS GETS RIGHT THAT THE FIRST VERSION DID NOT:
+
+       1) The decision is made AT CLICK TIME, not once at load. Before, it read
+          mv.canActivateAR during a load/ar-status handler and permanently wired
+          one behaviour or the other. model-viewer had not finished working out
+          AR support at that moment on iOS, so canActivateAR was still false and
+          iPhones got permanently wired to the QR panel - which is exactly the
+          "Safari shows the QR instead of opening the viewer" bug.
+
+       2) It does not trust canActivateAR alone. iOS Quick Look is driven by a
+          plain <a rel="ar"> anchor, so if model-viewer has not (or will not)
+          claim AR support, we can still open Quick Look ourselves. The anchor
+          MUST contain an <img> child - that is Apple's requirement, not ours,
+          and Quick Look silently does nothing without it. */
     (function(){
       var arBtn = stage.querySelector('.mv-ar');
       var qrBox = stage.querySelector('.mv-qr');
@@ -581,8 +590,38 @@
       var qrImg = qrBox.querySelector('.mv-qr-img');
       var qrDrawn = false, qrOpen = false;
 
-      // lazy: the QR library is only fetched if a desktop visitor actually
-      // asks for the code, so phones (which never show it) never pay for it.
+      // does this browser support Apple's <a rel="ar"> Quick Look hand-off?
+      // True on iOS Safari, false everywhere else.
+      var supportsQuickLook = (function(){
+        var a = document.createElement("a");
+        return !!(a.relList && a.relList.supports && a.relList.supports("ar"));
+      })();
+      var isAndroid = /android/i.test(navigator.userAgent || "");
+      var iosSrc = mv.getAttribute("ios-src") || "";
+
+      function canDoAR(){
+        if(mv.canActivateAR) return true;                 // model-viewer says yes
+        if(supportsQuickLook && iosSrc) return true;       // iOS: we can do it ourselves
+        if(isAndroid) return true;                         // Android: Scene Viewer intent
+        return false;
+      }
+
+      // Open iOS Quick Look directly, bypassing model-viewer entirely.
+      function openQuickLook(){
+        var a = document.createElement("a");
+        a.setAttribute("rel", "ar");
+        // #allowsContentScaling=0 is what pins the model to real-world size,
+        // matching the ar-scale="fixed" on the viewer.
+        a.href = iosSrc + "#allowsContentScaling=0";
+        a.appendChild(document.createElement("img"));   // required by Quick Look
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){ a.remove(); }, 1000);
+      }
+
+      // lazy: the QR library is only fetched if someone actually asks for the
+      // code, so phones (which go straight to AR) never pay for it.
       var QR_SRC = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
       function drawQR(){
         if(qrDrawn) return; qrDrawn = true;
@@ -593,7 +632,7 @@
             q.make();
             qrImg.innerHTML = q.createImgTag(5, 0);
           } catch(e){
-            // no QR? fall back to the plain URL, which is still scannable by eye
+            // no QR? fall back to the plain URL, still readable by eye
             qrImg.innerHTML = '<code class="mv-qr-url">' + esc(location.href) + '</code>';
           }
         }
@@ -605,37 +644,38 @@
         document.head.appendChild(s);
       }
 
-      function showButton(canAR){
-        arBtn.hidden = false;
-        if(canAR){
-          arBtn.textContent = "VIEW IN YOUR SPACE →";
-          arBtn.addEventListener("click", function(){
-            try { mv.activateAR(); } catch(e){}
-          });
-        } else {
-          arBtn.textContent = "VIEW IN YOUR SPACE →";
-          arBtn.setAttribute("aria-expanded", "false");
-          arBtn.addEventListener("click", function(){
-            qrOpen = !qrOpen;
-            if(qrOpen) drawQR();
-            qrBox.hidden = !qrOpen;
-            arBtn.setAttribute("aria-expanded", qrOpen ? "true" : "false");
-            arBtn.classList.toggle("active", qrOpen);
-          });
-        }
+      function toggleQR(){
+        qrOpen = !qrOpen;
+        if(qrOpen) drawQR();
+        qrBox.hidden = !qrOpen;
+        arBtn.setAttribute("aria-expanded", qrOpen ? "true" : "false");
+        arBtn.classList.toggle("active", qrOpen);
       }
 
-      // model-viewer fires ar-status once it knows; if it never does (older
-      // build, or no AR at all) fall back to the desktop/QR behaviour so the
-      // button is never simply missing.
-      var decided = false;
-      function decide(){
-        if(decided) return; decided = true;
-        showButton(!!mv.canActivateAR);
-      }
-      mv.addEventListener("ar-status", decide);
-      mv.addEventListener("load", decide);
-      setTimeout(decide, 2500);
+      arBtn.addEventListener("click", function(){
+        if(canDoAR()){
+          // prefer model-viewer (it handles Scene Viewer + WebXR properly);
+          // fall back to opening Quick Look ourselves on iOS.
+          if(mv.canActivateAR){
+            try { mv.activateAR(); return; } catch(e){}
+          }
+          if(supportsQuickLook && iosSrc){ openQuickLook(); return; }
+        }
+        toggleQR();
+      });
+
+      // The button itself is always shown once there is a model - on desktop it
+      // opens the QR, on a phone it opens AR. Nothing to wait for.
+      arBtn.hidden = false;
+      arBtn.setAttribute("aria-expanded", "false");
+
+      // close the QR on Escape or on a click outside it
+      document.addEventListener("keydown", function(e){ if(e.key === "Escape" && qrOpen) toggleQR(); });
+      document.addEventListener("click", function(e){
+        if(!qrOpen) return;
+        if(e.target.closest(".mv-ar-row")) return;
+        toggleQR();
+      });
     })();
 
     // ---------- click to interact ----------

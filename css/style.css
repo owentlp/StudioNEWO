@@ -467,12 +467,16 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    here means it can only ever sit above the model, whatever the model does.
    The button is hidden until project.html decides what it does: launch AR on a
    phone, or open the QR panel on a desktop. */
-.mv-ar-row{position:relative; z-index:3; display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:0 var(--mar); margin-bottom:clamp(10px,1.4vw,18px);}
+.mv-ar-row{position:relative; z-index:6; display:flex; flex-direction:column; align-items:flex-start; padding:0 var(--mar); margin-bottom:clamp(10px,1.4vw,18px);}
 .mv-ar{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; transition:opacity .15s ease;}
 .mv-ar:hover{opacity:.82;}
 .mv-ar[hidden]{display:none;}
-/* QR panel: only ever shown to desktop visitors, who have no AR to launch. */
-.mv-qr{display:flex; align-items:center; gap:14px; padding:12px; background:var(--paper); border:1px solid rgba(20,20,20,.16);}
+/* QR panel. ABSOLUTE, hanging off the bottom of the button, so opening it
+   floats OVER the model instead of pushing the model (and everything under it)
+   down the page. z-index clears the flooding <model-viewer> and .mv-bar. */
+.mv-qr{position:absolute; top:100%; left:var(--mar); margin-top:10px; z-index:7;
+  display:flex; align-items:center; gap:14px; padding:12px; width:max-content; max-width:min(360px,80vw);
+  background:var(--paper); border:1px solid rgba(20,20,20,.16); box-shadow:0 6px 26px rgba(0,0,0,.14);}
 .mv-qr[hidden]{display:none;}
 .mv-qr-img{flex:0 0 auto; width:112px; height:112px; display:grid; place-items:center;}
 /* the library emits a plain <img> of the code - keep its pixels crisp rather
