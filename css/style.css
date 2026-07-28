@@ -154,18 +154,22 @@ body.ready .page{opacity:1;}
 
 /* ---------- LOADER (logo mark: static fallback + JS-driven 3D spin) ---------- */
 #loader{position:fixed; inset:0; z-index:60; display:grid; place-items:center; background:var(--paper); transition:opacity 650ms ease;}
-.ld-mark{position:relative; width:62px; height:62px; transition:width .3s ease, height .3s ease;}
-/* js/loader3d.js adds .is3d once the WebGL mark is actually running. The flat
-   fallback silhouette reads fine at 62px; the tumbling solid does not, so it
-   gets more room. Change these two numbers to resize the animation. */
-.ld-mark.is3d{width:clamp(104px,15vmin,168px); height:clamp(104px,15vmin,168px);}
+/* ONE size for both the flat mark and the 3D canvas. They must match exactly:
+   the flat SVG (square with a circular hole) is the same silhouette as the 3D
+   model seen front-on, which is the pose the animation starts settled in. So
+   the static mark IS the animation's first frame, and the handoff to WebGL is
+   a dissolve in place rather than a jump. Change this one value to resize the
+   whole loader mark. */
+#loader{--ld-size:clamp(104px,15vmin,168px);}
+.ld-mark{position:relative; width:var(--ld-size); height:var(--ld-size);}
 .ld-mark svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
 .ld-logo path{fill:var(--ink);}
 body.ready #loader{opacity:0; pointer-events:none;}
-/* 3D logo (js/loader3d.js): swaps the static mark above for a real 3D
-   render of the logo, front-on at first, then spinning - see that file's
-   header comment. Absent entirely unless/until it loads. */
-.ld-3d{position:absolute; inset:0; width:100%; height:100%; display:block; opacity:0; transition:opacity .25s ease;}
+/* 3D logo (js/loader3d.js). It sits ON TOP of the flat mark at the same size
+   and fades in over it once its first frame is actually rendered; the flat one
+   is only hidden after that fade finishes, so there is never a frame showing
+   bare paper. Absent entirely unless/until it loads. */
+.ld-3d{position:absolute; inset:0; width:100%; height:100%; display:block; opacity:0; transition:opacity .22s ease;}
 
 .wrap{max-width:1100px; margin:0 auto; padding:150px 48px 120px;}
 .lead{font-size:22px; max-width:60ch; text-align:justify; text-align-last:left;}

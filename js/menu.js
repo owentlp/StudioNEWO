@@ -165,7 +165,7 @@
     }
     overlay.addEventListener("mouseover", function(e){
       var a = e.target.closest && e.target.closest('a[href^="project.html"]');
-      if(a){ prefetch(a.getAttribute("href")); prefetch("css/style.css?v=27"); }
+      if(a){ prefetch(a.getAttribute("href")); prefetch("css/style.css?v=28"); }
     });
 
     // category dropdowns. Handled here rather than with a checkbox/details

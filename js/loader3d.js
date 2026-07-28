@@ -203,7 +203,7 @@
     scene.add(group);
 
     function resize(){
-      var w = mark.clientWidth || 62, h = mark.clientHeight || 62;
+      var w = mark.clientWidth || 104, h = mark.clientHeight || 104;
       renderer.setSize(w, h, false);
       var a = w / h;
       camera.left = -FRUST * a; camera.right = FRUST * a;
@@ -211,10 +211,8 @@
       camera.updateProjectionMatrix();
     }
 
-    // the 3D mark is given more room than the 62px flat one - a tumbling solid
-    // needs the size to read, where a static silhouette does not. See .ld-mark.is3d
-    // in the stylesheet (and index.html's inline copy).
-    mark.classList.add("is3d");
+    // the canvas and the flat mark are the SAME size (one --ld-size in the CSS),
+    // so nothing resizes at the handoff - see the note by .ld-mark in style.css.
     resize();
     if(window.ResizeObserver){
       var ro = new ResizeObserver(resize);
@@ -222,11 +220,6 @@
     } else {
       window.addEventListener("resize", resize);
     }
-
-    // now that the 3D mark can actually show something, hide the flat one
-    // and reveal the canvas together, so there's no double-image frame.
-    flatLogo.style.display = "none";
-    canvas.style.opacity = "1";
 
     // Pin the loader fully visible, overriding the page's own body.ready CSS
     // fade (an inline style beats a class-selector rule), until the sequence
@@ -259,6 +252,19 @@
 
     var turnCount = 0, phase = "settle", phaseElapsed = 0, released = false;
     applyTurn(0, 0);   // start settled on the front face
+
+    /* ---- the handoff from the flat mark to WebGL ----
+       The static SVG mark and the model's front-on pose are the same silhouette
+       (a square with a circular hole), and the animation starts settled in
+       exactly that pose - so the flat mark IS the animation's first frame.
+       Order matters here: render ONE frame first so the canvas actually has
+       that pose in it, THEN fade the canvas up over the still-visible flat
+       mark, and only hide the flat mark once the fade is done. Hiding it first
+       (which is what this did before) left a frame or two of bare paper and
+       read as a flicker. */
+    renderer.render(scene, camera);
+    canvas.style.opacity = "1";
+    setTimeout(function(){ flatLogo.style.display = "none"; }, 260);
 
     var lastTs = null, rafId = null, stopped = false;
     function frame(ts){
