@@ -169,7 +169,11 @@ body.ready #loader{opacity:0; pointer-events:none;}
    and fades in over it once its first frame is actually rendered; the flat one
    is only hidden after that fade finishes, so there is never a frame showing
    bare paper. Absent entirely unless/until it loads. */
-.ld-3d{position:absolute; inset:0; width:100%; height:100%; display:block; opacity:0; transition:opacity .22s ease;}
+/* size and position are set by js/loader3d.js, not here: the canvas is ~1.84x
+   the mark (so the model's front-on face lands at exactly --ld-size while the
+   tumble still has room to swing past it) and is centred on the mark. It
+   deliberately overflows .ld-mark, which has no overflow:hidden. */
+.ld-3d{display:block; opacity:0; transition:opacity .22s ease; pointer-events:none;}
 
 .wrap{max-width:1100px; margin:0 auto; padding:150px 48px 120px;}
 .lead{font-size:22px; max-width:60ch; text-align:justify; text-align-last:left;}
@@ -455,8 +459,27 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .mv-dim{-webkit-appearance:none; appearance:none; width:96px; height:1px; background:var(--ink); cursor:pointer; align-self:center;}
 .mv-dim::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:11px; height:11px; background:var(--red); border:0; border-radius:50%; cursor:pointer;}
 .mv-dim::-moz-range-thumb{width:11px; height:11px; background:var(--red); border:0; border-radius:50%; cursor:pointer;}
-/* AR call-to-action floats on the model; model-viewer shows it only on AR-capable devices */
-.mv-ar{position:absolute; right:0; top:0; font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer;}
+/* ---- AR row -------------------------------------------------------------
+   Sits in NORMAL FLOW directly above .cad-stage. It used to be slotted inside
+   <model-viewer> at position:absolute;right:0 - but that element is ~1500px
+   wide and overflows its slot on purpose, so right:0 landed the button off the
+   right edge of the window and widened the page on Safari. Keeping it in flow
+   here means it can only ever sit above the model, whatever the model does.
+   The button is hidden until project.html decides what it does: launch AR on a
+   phone, or open the QR panel on a desktop. */
+.mv-ar-row{position:relative; z-index:3; display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:0 var(--mar); margin-bottom:clamp(10px,1.4vw,18px);}
+.mv-ar{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; transition:opacity .15s ease;}
+.mv-ar:hover{opacity:.82;}
+.mv-ar[hidden]{display:none;}
+/* QR panel: only ever shown to desktop visitors, who have no AR to launch. */
+.mv-qr{display:flex; align-items:center; gap:14px; padding:12px; background:var(--paper); border:1px solid rgba(20,20,20,.16);}
+.mv-qr[hidden]{display:none;}
+.mv-qr-img{flex:0 0 auto; width:112px; height:112px; display:grid; place-items:center;}
+/* the library emits a plain <img> of the code - keep its pixels crisp rather
+   than letting the browser smooth them into mush */
+.mv-qr-img img{width:100%; height:100%; display:block; image-rendering:pixelated;}
+.mv-qr-note{font-size:10px; line-height:1.5; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); margin:0;}
+.mv-qr-url{font-size:10px; word-break:break-all; color:var(--ink-soft);}
 
 /* ---------- HOW IT WORKS (mechanism, right column) ----------
    Figma: no section label. The graphic bleeds to the (now right-side) page
@@ -592,7 +615,9 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   .cad-stage model-viewer:hover{transform:translate(-50%,-50%);}
   .mv-bar{gap:14px 24px; margin-top:14px;}
   .mv-bar .mv-left,.mv-bar .mv-mid{display:contents;}
-  .mv-ar{right:0;}
+  /* AR row is in normal flow now, so nothing to reposition - just let the QR
+     panel (desktop-only anyway) wrap rather than squeeze on a narrow window. */
+  .mv-qr{flex-wrap:wrap;}
   .hiw-text{max-width:none; margin-bottom:28px;}
   .proc{margin-top:70px;}      /* no collage overlap on small screens */
   .site-foot{margin-top:72px;}

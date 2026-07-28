@@ -157,12 +157,17 @@
       for(var k = 0; k < arr.length; k += 3){ arr[k] -= cx; arr[k+1] -= cy; arr[k+2] -= cz; }
       return arr;
     }
-    // half the space diagonal, i.e. the furthest any corner swings from centre
-    // mid-tumble. The ortho frustum is sized off this so nothing ever clips.
     var sx = max[0]-min[0], sy = max[1]-min[1], sz = max[2]-min[2];
+    // radius = half the space DIAGONAL: the furthest any corner swings from
+    // centre mid-tumble, so the ortho frustum sized off it never clips.
+    // half   = half the widest FACE: how much of that frustum the mark fills
+    //          when it is sitting still, front-on. The gap between the two is
+    //          what made the 3D mark render smaller than the flat one - see
+    //          the canvas sizing in init().
     var radius = Math.sqrt(sx*sx + sy*sy + sz*sz) / 2;
+    var half = Math.max(sx, sy, sz) / 2;
 
-    return { flat: centre(flat), curved: centre(curved), radius: radius };
+    return { flat: centre(flat), curved: centre(curved), radius: radius, half: half };
   }
 
   function loadScript(src, ok, fail){
@@ -239,17 +244,36 @@
     group.add(sphere.mesh);
     scene.add(group);
 
+    /* ---- canvas sizing, and why the canvas is BIGGER than the mark ----
+       The ortho frustum has to clear the model's space diagonal (220) so a
+       corner never clips mid-tumble, but sitting still front-on the model only
+       shows its face (half-width 127). So the mark fills just 127/233 = 54% of
+       the canvas. Sizing the canvas to the mark - which is what this did before
+       - therefore drew the 3D logo at 54% of the flat SVG's size, and for the
+       ~260ms both were on screen you saw the small 3D square nested inside the
+       big flat one. That was the flash.
+
+       Fix: blow the canvas up by frustum/face so the front-on face lands at
+       exactly --ld-size, and let the canvas overflow the mark (nothing clips
+       it) to give the tumble its room back. Derived from the geometry rather
+       than hard-coded, so a re-exported STL still lines up. */
+    var OVERSCAN = FRUST / (parsed.half || 1);   // ~1.84 for the current logo
+    canvas.style.position = "absolute";
+    canvas.style.left = "50%";
+    canvas.style.top = "50%";
+    canvas.style.transform = "translate(-50%, -50%)";
+
     function resize(){
-      var w = mark.clientWidth || 104, h = mark.clientHeight || 104;
-      renderer.setSize(w, h, false);
-      var a = w / h;
-      camera.left = -FRUST * a; camera.right = FRUST * a;
+      var m = mark.clientWidth || 104;
+      var px = Math.round(m * OVERSCAN);
+      canvas.style.width = px + "px";
+      canvas.style.height = px + "px";
+      renderer.setSize(px, px, false);
+      camera.left = -FRUST; camera.right = FRUST;
       camera.top = FRUST; camera.bottom = -FRUST;
       camera.updateProjectionMatrix();
     }
 
-    // the canvas and the flat mark are the SAME size (one --ld-size in the CSS),
-    // so nothing resizes at the handoff - see the note by .ld-mark in style.css.
     resize();
     if(window.ResizeObserver){
       var ro = new ResizeObserver(resize);
@@ -300,6 +324,12 @@
        (which is what this did before) left a frame or two of bare paper and
        read as a flicker. */
     renderer.render(scene, camera);
+    // A CSS transition only runs if the browser has computed a STARTING value
+    // for the property first. The canvas was appended and its opacity set in
+    // the same frame, so there was no starting value and the .22s fade was
+    // skipped entirely - it cut in hard. Reading offsetWidth forces the style
+    // flush that gives opacity:0 a chance to exist before we set it to 1.
+    void canvas.offsetWidth;
     canvas.style.opacity = "1";
     setTimeout(function(){ flatLogo.style.display = "none"; }, 260);
 

@@ -187,7 +187,9 @@ body.ready #loader{opacity:0; pointer-events:none;}
 /* 3D logo (js/loader3d.js): swaps the static mark above for a real 3D
    render of the logo, front-on at first, then spinning - see that file's
    header comment. Absent entirely unless/until it loads. */
-.ld-3d{position:absolute; inset:0; width:100%; height:100%; display:block; opacity:0; transition:opacity .22s ease;}
+/* size/position set by js/loader3d.js - the canvas is ~1.84x the mark so the
+   front-on face lands at exactly --ld-size, and overflows it during the tumble. */
+.ld-3d{display:block; opacity:0; transition:opacity .22s ease; pointer-events:none;}
 
 /* skip link: hidden until keyboard-focused, then drops in top-left */
 .skip-link{position:absolute; left:8px; top:-60px; z-index:20; background:var(--ink); color:#e9e7e2; font-size:10px; letter-spacing:.16em; text-transform:uppercase; text-decoration:none; padding:8px 12px; transition:top .15s ease;}
@@ -252,7 +254,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=4"></script>
+<script src="js/loader3d.js?v=5"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -349,7 +351,7 @@ const CLIP_PICK = (function(){
       '</span>';
     a.addEventListener("mouseenter", function(){
       prefetch("project.html?p=" + key);
-      prefetch("css/style.css?v=28");
+      prefetch("css/style.css?v=30");
     }, { once:true });
     dock.appendChild(a);
   });

@@ -31,7 +31,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=28">
+<link rel="stylesheet" href="css/style.css?v=30">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -41,7 +41,7 @@
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=4"></script>
+<script src="js/loader3d.js?v=5"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -387,6 +387,20 @@
   }
   var modelHalf = glbView ?
     '<div class="cad-hiw-model">' +
+      // AR row, in NORMAL FLOW above the stage. It used to be slotted inside
+      // <model-viewer> with position:absolute;right:0 - but that element is
+      // deliberately ~1500px wide and overflows its slot, so "right:0" put the
+      // button off the right of the window and widened the page on Safari.
+      // Out here it can only ever sit above the model. The button is hidden
+      // until the script below decides what it should do (launch AR, or show
+      // the QR panel for a desktop visitor).
+      '<div class="mv-ar-row">' +
+        '<button class="mv-ar" type="button" hidden>VIEW IN YOUR SPACE &rarr;</button>' +
+        '<div class="mv-qr" hidden>' +
+          '<div class="mv-qr-img"></div>' +
+          '<p class="mv-qr-note">Scan to open this page on your phone,<br>then tap View in your space.</p>' +
+        '</div>' +
+      '</div>' +
       '<div class="cad-stage">' +
         '<model-viewer id="mv" src="'+img(glbView)+'" ' +
           (real(p.modelUSDZ)?'ios-src="'+img(p.modelUSDZ)+'" ':'') +
@@ -400,7 +414,10 @@
           'auto-rotate auto-rotate-delay="1200" rotation-per-second="10deg" ' +
           'shadow-intensity="0" exposure="1" environment-image="neutral" tone-mapping="neutral" ' +
           'ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="eager" reveal="auto">' +
-          '<button slot="ar-button" class="mv-ar">VIEW IN YOUR SPACE &rarr;</button>' +
+          // an EMPTY ar-button slot: model-viewer still needs the slot to exist
+          // to consider AR wired up, but we drive it from our own button above
+          // via activateAR() so the layout is ours to control.
+          '<span slot="ar-button" hidden></span>' +
         '</model-viewer>' +
       '</div>' +
       // controls sit OUTSIDE the tilted stage on their own row: exploded +
@@ -545,6 +562,81 @@
     var dim   = stage.querySelector('.mv-dim');
     var sel   = stage.querySelector('.mv-sel');
     var defaultOrbit = mv.getAttribute("camera-orbit");
+
+    /* ---------- AR, on phones AND on desktop ----------
+       On an AR-capable device (iOS Safari -> Quick Look, Android Chrome ->
+       Scene Viewer) the button launches AR directly through model-viewer's
+       activateAR(). On a desktop there is no AR to launch, so instead of
+       hiding the button - which left desktop visitors with no idea the feature
+       existed - it reveals a QR code of THIS page. Scan it, the phone opens the
+       same project page, and the button there launches AR for real.
+
+       canActivateAR is only meaningful once model-viewer has worked out what
+       the device supports, which is why this waits for its ar-status event
+       rather than reading the property immediately. */
+    (function(){
+      var arBtn = stage.querySelector('.mv-ar');
+      var qrBox = stage.querySelector('.mv-qr');
+      if(!arBtn || !qrBox) return;
+      var qrImg = qrBox.querySelector('.mv-qr-img');
+      var qrDrawn = false, qrOpen = false;
+
+      // lazy: the QR library is only fetched if a desktop visitor actually
+      // asks for the code, so phones (which never show it) never pay for it.
+      var QR_SRC = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
+      function drawQR(){
+        if(qrDrawn) return; qrDrawn = true;
+        function make(){
+          try{
+            var q = qrcode(0, "M");
+            q.addData(location.href);
+            q.make();
+            qrImg.innerHTML = q.createImgTag(5, 0);
+          } catch(e){
+            // no QR? fall back to the plain URL, which is still scannable by eye
+            qrImg.innerHTML = '<code class="mv-qr-url">' + esc(location.href) + '</code>';
+          }
+        }
+        if(window.qrcode){ make(); return; }
+        var s = document.createElement("script");
+        s.src = QR_SRC;
+        s.onload = make;
+        s.onerror = function(){ qrDrawn = false; qrImg.innerHTML = '<code class="mv-qr-url">' + esc(location.href) + '</code>'; };
+        document.head.appendChild(s);
+      }
+
+      function showButton(canAR){
+        arBtn.hidden = false;
+        if(canAR){
+          arBtn.textContent = "VIEW IN YOUR SPACE →";
+          arBtn.addEventListener("click", function(){
+            try { mv.activateAR(); } catch(e){}
+          });
+        } else {
+          arBtn.textContent = "VIEW IN YOUR SPACE →";
+          arBtn.setAttribute("aria-expanded", "false");
+          arBtn.addEventListener("click", function(){
+            qrOpen = !qrOpen;
+            if(qrOpen) drawQR();
+            qrBox.hidden = !qrOpen;
+            arBtn.setAttribute("aria-expanded", qrOpen ? "true" : "false");
+            arBtn.classList.toggle("active", qrOpen);
+          });
+        }
+      }
+
+      // model-viewer fires ar-status once it knows; if it never does (older
+      // build, or no AR at all) fall back to the desktop/QR behaviour so the
+      // button is never simply missing.
+      var decided = false;
+      function decide(){
+        if(decided) return; decided = true;
+        showButton(!!mv.canActivateAR);
+      }
+      mv.addEventListener("ar-status", decide);
+      mv.addEventListener("load", decide);
+      setTimeout(decide, 2500);
+    })();
 
     // ---------- click to interact ----------
     // The <model-viewer> element is larger than its slot so a zoomed model can
