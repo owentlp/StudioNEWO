@@ -50,10 +50,26 @@
 }
 
 *{box-sizing:border-box; margin:0; padding:0;}
-html{scroll-behavior:smooth; overflow-x:hidden;}
+/* ---- horizontal overflow containment ----
+   This page is built out of things that deliberately bleed past the page
+   margin: full-bleed 100vw bands, scatter cells with negative `shift`, and a
+   <model-viewer> that is 190% of its slot so a zoomed model can flood the
+   page. On desktop that is the intent and there is room for it. On a phone it
+   became a real horizontal scroll - a dead margin on the right you could drag
+   the whole page into.
+
+   overflow-x on `html` ALONE does not contain this on iOS Safari; it has to be
+   on BOTH html and body, which is a long-standing WebKit quirk rather than
+   anything about this layout. `clip` is preferred over `hidden` because it does
+   not turn the element into a scroll container, so position:sticky keeps
+   working; `hidden` stays as the fallback for older browsers. */
+html, body{overflow-x:hidden;}
+@supports (overflow:clip){ html, body{overflow-x:clip;} }
+html{scroll-behavior:smooth;}
 body{
   font-family:var(--body); color:var(--ink); background:var(--paper);
   letter-spacing:.02em; -webkit-font-smoothing:antialiased; line-height:1.55; min-height:100vh;
+  max-width:100%;
 }
 h1,h2,h3{font-family:var(--disp); font-style:italic; font-weight:400; line-height:1.05;}
 a{color:inherit;}
