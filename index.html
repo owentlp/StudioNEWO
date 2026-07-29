@@ -205,9 +205,9 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   #home{top:24px; left:22px; width:20px; height:20px;}
   #burger{top:24px; right:22px; width:20px; height:20px;}
   #wordmark{top:24px; height:20px;}
-  /* the background video (and its audio) is skipped entirely under 760px,
-     see the script, so there's nothing for this to control here. */
-  #soundToggle{display:none;}
+  /* the background video plays on mobile now, so the sound toggle has
+     something to control again. It sits above the scrolling dock. */
+  #soundToggle{position:fixed; z-index:6; bottom:22px; right:22px;}
   /* the peek/rise/fan trick depends on hover, which touch devices don't
      really have - on mobile the dock just becomes a plain static stack,
      every card fully visible, no overlap or rotation, title + photo both
@@ -215,8 +215,11 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   #dock{position:static; height:auto; padding:108px 26px 80px; display:flex; flex-direction:column; align-items:stretch; gap:28px; overflow:visible; pointer-events:auto;}
   .dc{position:static; display:block; width:100% !important; height:auto !important; margin-left:0 !important; transform:none !important; pointer-events:auto;}
   /* absolute overlay layout is a desktop-only trick (needs a fixed-height
-     card); on mobile both go back to plain stacked flow, text above image. */
-  .dc-body{position:static; background:none; -webkit-backdrop-filter:none; backdrop-filter:none; padding:0 0 8px;}
+     card); on mobile both go back to plain stacked flow, text above image.
+     The title band keeps an opaque paper backing here: with the background
+     video now playing on mobile, ink-on-blossom would be unreadable wherever
+     the footage happens to be bright. */
+  .dc-body{position:static; background:#e9e7e2; -webkit-backdrop-filter:none; backdrop-filter:none; padding:8px 10px 10px;}
   .dc-media{position:relative; aspect-ratio:4/3;}
   .dc-media img{transform:none !important;}
 }
@@ -295,14 +298,24 @@ body.ready .fade-in.d2{transition-delay:.2s;}
    specific clip while tuning, add ?clip=0 (or 1, 2) to the URL.
    ========================================================================== */
 const CLIPS = [
-  { src: "videos/apple-blossom-baker-web.mp4" },
-  { src: "videos/comox-glacier-web.mp4" },
-  { src: "videos/apple-blossom-sky-web.mp4" }
+  { src: "videos/apple-blossom-baker-web.mp4", mb: 4.9 },
+  { src: "videos/comox-glacier-web.mp4",       mb: 3.2 },
+  { src: "videos/apple-blossom-sky-web.mp4",   mb: 12  }
 ];
+
+// phones are likely on cellular, so they get the LIGHTEST clip rather than a
+// random one - a 12MB background on a phone plan is not a fair trade for
+// ambience. Desktop still gets a random pick each visit.
+const IS_SMALL = window.innerWidth <= 760;
 
 const CLIP_PICK = (function(){
   var m = location.search.match(/[?&]clip=(\d+)/);
   if(m){ var n = parseInt(m[1], 10); if(n >= 0 && n < CLIPS.length) return n; }
+  if(IS_SMALL){
+    var light = 0;
+    for(var i = 1; i < CLIPS.length; i++){ if(CLIPS[i].mb < CLIPS[light].mb) light = i; }
+    return light;
+  }
   return Math.floor(Math.random() * CLIPS.length);
 })();
 </script>
@@ -351,7 +364,7 @@ const CLIP_PICK = (function(){
       '</span>';
     a.addEventListener("mouseenter", function(){
       prefetch("project.html?p=" + key);
-      prefetch("css/style.css?v=32");
+      prefetch("css/style.css?v=33");
     }, { once:true });
     dock.appendChild(a);
   });
@@ -378,10 +391,11 @@ const CLIP_PICK = (function(){
 /* ---- background video: the picked clip, self-crossfaded in a loop ---- */
 (function(){
   if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  // the clips are ~3-25MB each: on a phone (or with the browser's data saver
-  // on) skip the video entirely and keep the paper background, which costs
-  // nothing instead.
-  if(window.innerWidth <= 760) return;
+  // 2026-07-28: the video used to be skipped entirely under 760px, back when
+  // the clips were 3-25MB each. They are 3-12MB now and the phone gets the
+  // lightest one (see CLIP_PICK), so mobile plays it too. Data saver still
+  // opts out completely - that is an explicit request from the visitor, not a
+  // guess about their connection.
   if(navigator.connection && navigator.connection.saveData) return;
 
   /* ONE clip, looped with a crossfade onto itself across two layers. Both

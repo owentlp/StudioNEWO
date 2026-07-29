@@ -31,7 +31,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=32">
+<link rel="stylesheet" href="css/style.css?v=33">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -590,19 +590,25 @@
       var qrImg = qrBox.querySelector('.mv-qr-img');
       var qrDrawn = false, qrOpen = false;
 
-      // does this browser support Apple's <a rel="ar"> Quick Look hand-off?
-      // True on iOS Safari, false everywhere else.
+      /* Does this browser advertise Apple's <a rel="ar"> hand-off? True in iOS
+         Safari. NOT true in Chrome or Firefox on iOS, even though those are
+         WebKit underneath and the device can absolutely do Quick Look - which
+         is exactly why Chrome on the iPhone was being handed the desktop QR
+         panel. So the device itself is detected separately below. */
       var supportsQuickLook = (function(){
         var a = document.createElement("a");
         return !!(a.relList && a.relList.supports && a.relList.supports("ar"));
       })();
+      // iPadOS 13+ reports itself as "MacIntel", hence the touch-point check
+      var isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent || "") ||
+                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
       var isAndroid = /android/i.test(navigator.userAgent || "");
       var iosSrc = mv.getAttribute("ios-src") || "";
 
       function canDoAR(){
-        if(mv.canActivateAR) return true;                 // model-viewer says yes
-        if(supportsQuickLook && iosSrc) return true;       // iOS: we can do it ourselves
-        if(isAndroid) return true;                         // Android: Scene Viewer intent
+        if(mv.canActivateAR) return true;         // model-viewer says yes
+        if(isIOS && iosSrc) return true;          // ANY iOS browser, not just Safari
+        if(isAndroid) return true;                // Android: Scene Viewer intent
         return false;
       }
 
@@ -614,13 +620,21 @@
          display:none first, which is a plausible reason Safari ignored it -
          a hidden element is a poor thing to hang a navigation off. */
       function openQuickLook(){
-        var a = document.createElement("a");
-        a.setAttribute("rel", "ar");
         // #allowsContentScaling=0 pins the model to real-world size, matching
         // ar-scale="fixed" on the viewer.
-        a.setAttribute("href", iosSrc + "#allowsContentScaling=0");
-        a.appendChild(document.createElement("img"));
-        a.click();
+        var href = iosSrc + "#allowsContentScaling=0";
+        if(supportsQuickLook){
+          var a = document.createElement("a");
+          a.setAttribute("rel", "ar");
+          a.setAttribute("href", href);
+          a.appendChild(document.createElement("img"));
+          a.click();
+          return;
+        }
+        // iOS browser that doesn't advertise rel="ar" (Chrome, Firefox):
+        // navigating straight at the .usdz hands it to Quick Look anyway,
+        // because the OS owns that file type regardless of which browser asked.
+        window.location.href = href;
       }
 
       // lazy: the QR library is only fetched if someone actually asks for the
@@ -662,7 +676,7 @@
           if(mv.canActivateAR){
             try { mv.activateAR(); return; } catch(e){}
           }
-          if(supportsQuickLook && iosSrc){ openQuickLook(); return; }
+          if(isIOS && iosSrc){ openQuickLook(); return; }
         }
         toggleQR();
       });
@@ -700,7 +714,7 @@
         arBtn.addEventListener("click", function(){
           // runs after the main handler above, so it reports what that chose
           refresh(mv.canActivateAR ? "used mv.activateAR()"
-                : (supportsQuickLook && iosSrc) ? "used <a rel=ar> Quick Look"
+                : (isIOS && iosSrc) ? (supportsQuickLook ? "used <a rel=ar> Quick Look" : "navigated to .usdz (iOS non-Safari)")
                 : "no AR -> showed QR");
         });
         // surface script errors too - otherwise they are invisible on a phone
