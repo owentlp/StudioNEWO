@@ -229,12 +229,17 @@ body.ready .fade-in.d2{transition-delay:.2s;}
      floating above the photo. Backing the card instead makes each project a
      paper card sitting on the footage, which is a deliberate-looking object. */
   .dc{position:static; display:block; width:100% !important; height:auto !important; margin-left:0 !important; transform:none !important; pointer-events:auto; background:#e9e7e2;}
-  /* absolute overlay layout is a desktop-only trick (needs a fixed-height
-     card); on mobile both go back to plain stacked flow, text above image.
-     Transparent again here - the card behind it is already paper. */
-  .dc-body{position:static; background:none; -webkit-backdrop-filter:none; backdrop-filter:none; padding:10px 12px 8px;}
-  .dc-media{margin:0;}
-  .dc-media{position:relative; aspect-ratio:4/3;}
+  /* THE display:block IS NOT OPTIONAL.
+     .dc-body and .dc-media are <span> elements. On desktop .dc is a flex
+     container, so the browser blockifies them automatically and everything
+     behaves. Switching .dc to display:block above removes that, and the spans
+     fall back to being plain INLINE - at which point aspect-ratio does not
+     apply to .dc-media at all (it is not a valid property on a non-replaced
+     inline box), so the 4/3 photo frame silently vanished and the image sized
+     itself from an inline parent with height:100%. That is what made the cards
+     look wrong on a phone. Declaring them block restores the intended layout. */
+  .dc-body{display:block; position:static; background:none; -webkit-backdrop-filter:none; backdrop-filter:none; padding:10px 12px 8px;}
+  .dc-media{display:block; position:relative; aspect-ratio:4/3; margin:0;}
   .dc-media img{transform:none !important;}
 }
 @media (prefers-reduced-motion:reduce){ .bgvid{display:none;} }
@@ -303,7 +308,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<script src="js/projects-data.js?v=9"></script>
+<script src="js/projects-data.js?v=10"></script>
 <script src="js/menu.js?v=4"></script>
 <script>
 /* ==========================================================================
@@ -314,7 +319,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 const CLIPS = [
   { src: "videos/apple-blossom-baker-web.mp4", mb: 4.9 },
   { src: "videos/comox-glacier-web.mp4",       mb: 3.2 },
-  { src: "videos/apple-blossom-sky-web.mp4",   mb: 12  }
+  { src: "videos/apple-blossom-sky-web.mp4",   mb: 6.2 }
 ];
 
 // Every clip is in the rotation on every device, phones included (Owen's call,
@@ -372,7 +377,7 @@ const CLIP_PICK = (function(){
       '</span>';
     a.addEventListener("mouseenter", function(){
       prefetch("project.html?p=" + key);
-      prefetch("css/style.css?v=34");
+      prefetch("css/style.css?v=36");
     }, { once:true });
     dock.appendChild(a);
   });

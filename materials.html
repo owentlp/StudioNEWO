@@ -24,16 +24,19 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=34">
+<link rel="stylesheet" href="css/style.css?v=36">
 <style>
   /* page-specific layout only: the shared editorial grammar (12-col grid,
      .cap/.desc type, .fig frames) lives in css/style.css and is reused as-is
      so this page reads like a project page, not a separate "about" style
      stacked-paragraph page. */
   .matg{max-width:none; margin:0; padding:clamp(140px,17vh,210px) var(--mar) clamp(80px,12vh,140px);}
-  .matg-intro{max-width:calc(46ch + var(--mar)); margin-bottom:clamp(60px,9vh,110px);}
-  .matg-intro h1{font-size:clamp(28px,4.4vw,48px); line-height:1.05; margin-top:14px;}
-  .matg-intro .lead{margin-top:16px;}
+  /* label + one line of .desc (the same justified body type the project pages
+     use), and nothing else. No headline, no third size. */
+  .matg-intro{margin-bottom:clamp(60px,9vh,110px);}
+  /* wider than the default 32ch --w-desc cap, but still a readable measure -
+     this line is the only body copy on the page at rest */
+  .matg-intro .desc{margin-top:14px; max-width:58ch;}
   /* categories are collapsed by default - a clickable head row (label, a
      quiet preview of what's inside, and a count) that expands to reveal the
      full material entries below it. The height animation uses the CSS grid
@@ -43,12 +46,35 @@
   .matcat{margin-top:clamp(28px,4vh,44px);}
   .matcat:first-of-type{margin-top:0;}
   .matcat-head{
-    display:flex; align-items:baseline; gap:clamp(14px,2vw,26px); width:100%;
-    background:none; border:0; padding:clamp(14px,2.2vh,20px) 0; margin:0; text-align:left;
+    display:block; width:100%;
+    background:none; border:0; padding:clamp(14px,2.2vh,20px) 0 0; margin:0; text-align:left;
     font-family:var(--body); color:var(--ink); cursor:pointer;
   }
+  .matcat-head-row{display:flex; align-items:baseline; gap:clamp(14px,2vw,26px); width:100%;}
   .matcat-head:hover{color:var(--red);}
   .matcat-head .cap.lbl{margin-bottom:0; flex:0 0 auto;}
+
+  /* ---- SLIVER: a band of the category photo under the collapsed head ----
+     At rest the index was nothing but rows of words; this puts the actual
+     material on the page before anyone clicks. It grows a little on hover so
+     the row reads as openable, and collapses to nothing once the category is
+     open, where the full hero image takes over inside. */
+  .matcat-sliver{
+    display:block; margin-top:clamp(10px,1.4vh,15px);
+    height:clamp(44px,7vh,72px); overflow:hidden;
+    transition:height .34s cubic-bezier(.2,.8,.2,1), margin-top .34s cubic-bezier(.2,.8,.2,1), opacity .24s ease;
+  }
+  .matcat-sliver img{
+    width:100%; height:100%; object-fit:cover; object-position:center 62%; display:block;
+    filter:saturate(.92); transition:filter .3s ease, transform .5s cubic-bezier(.2,.8,.2,1);
+  }
+  .matcat-head:hover .matcat-sliver{height:clamp(58px,9.5vh,96px);}
+  .matcat-head:hover .matcat-sliver img{filter:saturate(1.04); transform:scale(1.03);}
+  /* open: the sliver folds away, the hero inside the body takes its place */
+  .matcat.open .matcat-sliver{height:0; margin-top:0; opacity:0;}
+  @media (prefers-reduced-motion:reduce){
+    .matcat-sliver, .matcat-sliver img{transition:none;}
+  }
   .matcat-names{flex:1 1 auto; min-width:0; font-size:9px; letter-spacing:.03em; color:var(--ink); opacity:.55; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .matcat.open .matcat-names{opacity:0;}
   .matcat-count{flex:0 0 auto; font-size:9px; letter-spacing:.1em; opacity:.55;}
@@ -63,7 +89,6 @@
   .matcat-inner{padding-top:clamp(8px,1.4vh,16px); padding-bottom:clamp(12px,2vh,22px);}
   @keyframes matReveal{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
 
-  .matg-legend{font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); opacity:.55; margin-top:14px;}
 
   /* ---- OPEN CATEGORY: hero image (tree/ore/etc) + intro text ---- */
   .matcat-intro{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); align-items:start; margin-bottom:clamp(32px,5vh,58px);}
@@ -144,17 +169,20 @@
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page matg" id="matg-content">
+  <!-- Two type sizes, nothing else: the eyebrow label and one line of copy.
+       This used to be four stacked blocks at four sizes (label, headline, lead,
+       and a legend explaining the "In use" mark), which made the top of the page
+       heavier than the index it was introducing. The headline is gone, and so is
+       the legend - the red "In use" tag explains itself where it appears. -->
   <div class="matg-intro">
     <span class="eyebrow">MATERIALS INDEX</span>
-    <h1>Material selection dictates a product's lifecycle.</h1>
-    <p class="lead">We prioritize raw materials that perform predictably, age clearly, and can be repaired or recycled at the end of their usable life.</p>
-    <p class="matg-legend">An "In use" mark denotes a material currently used in a Studio NEWO product.</p>
+    <p class="desc">Every material used across the studio's products. Chosen for how each one ages, wears, and comes apart, not for how it looks new.</p>
   </div>
   <div id="matg-cats"></div>
 </main>
 
 <script src="js/materials-data.js?v=2"></script>
-<script src="js/projects-data.js?v=9"></script>
+<script src="js/projects-data.js?v=10"></script>
 <script src="js/main.js?v=3"></script>
 <script src="js/menu.js?v=4"></script>
 <script>
@@ -233,12 +261,26 @@
              '</div>';
     }).join("");
 
+    // SLIVER: a thin band of the category photo under the collapsed head, so a
+    // closed index still shows wood/metal/glass instead of a list of words.
+    // It loads eagerly (unlike the full hero inside, which waits for the
+    // category to open) because it is visible on arrival - these are the only
+    // images on the page at rest. Colour-swatch fallback via onerror, same as
+    // the hero, so a missing photo degrades to the category's colour rather
+    // than a broken image.
+    var sliver = '<span class="matcat-sliver ' + esc(cat.swatch) + '">' +
+                   (cat.image ? '<img src="materials/'+esc(cat.image)+'" alt="" loading="eager" decoding="async" onerror="this.remove()">' : '') +
+                 '</span>';
+
     return '<section class="matcat">' +
              '<button class="matcat-head" aria-expanded="false">' +
-               '<span class="cap lbl">'+esc(cat.label)+'</span>' +
-               '<span class="matcat-names">'+esc(groupNames)+'</span>' +
-               '<span class="matcat-count">'+total+' MATERIALS</span>' +
-               '<span class="matcat-chev">+</span>' +
+               '<span class="matcat-head-row">' +
+                 '<span class="cap lbl">'+esc(cat.label)+'</span>' +
+                 '<span class="matcat-names">'+esc(groupNames)+'</span>' +
+                 '<span class="matcat-count">'+total+' MATERIALS</span>' +
+                 '<span class="matcat-chev">+</span>' +
+               '</span>' +
+               sliver +
              '</button>' +
              '<div class="matcat-body"><div class="matcat-inner">'+intro+groups+'</div></div>' +
            '</section>';

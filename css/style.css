@@ -526,6 +526,18 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      the graphic scales with its column like the images (was capped at 720px,
      which made it small at 100% zoom). It now stays balanced with the model. */
   margin-top:-25%;}
+/* OMNI (mechanism with no model beside it, so .solo-mech, full page width).
+   Its mechanism.html now carries a big transparent buffer around the art so the
+   sound waves are not clipped at the frame edge - see the long note in that
+   file. These negative margins crop that buffer back out of the page flow, so
+   the waves spill OVER the sections above and below instead of pushing them
+   away. Deliberately a little less than the full buffer (buffer is 18.7% top /
+   20.8% bottom / 20.8% sides of the frame width), so a margin of live wave
+   field still reads around the artwork rather than being entirely tucked
+   behind neighbouring content. Raise these toward the buffer values to pull
+   the page tighter, lower them to let more of the wave field show. */
+.cad-hiw.solo-mech .cad-hiw-mech .hiw-graphic{position:relative; z-index:1;
+  margin-top:-13%; margin-bottom:-15%; margin-left:-9%; margin-right:-9%;}
 .fignotes{list-style:none;}
 .fignotes li{position:relative; padding:0 0 16px 22px; font-size:14px; line-height:1.45; max-width:var(--w-desc);}
 .fignotes .fn{position:absolute; left:0; top:1px; font-size:11px; letter-spacing:.1em; color:var(--red);}

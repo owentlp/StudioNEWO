@@ -273,7 +273,7 @@ const PROJECTS = {
     process:   [
       { src:"scatter-01.jpg", col:"1 / 6",                     mt:0,   cap:"Dowel framework" },
       { src:"scatter-02.jpg", bleed:"right", span:6, ar:"3/2", mt:70,  cap:"Cut members" },
-      { src:"scatter-03.png", col:"2 / 8",                     mt:100, cap:"Drawings" },
+      { src:"scatter-03.webp", cut:true, col:"2 / 8",           mt:100, cap:"Drawings" },
       { src:"scatter-04.jpg", bleed:"left",  span:5, ar:"1/1", mt:50,  cap:"Floor texture" },
       { src:"scatter-05.jpg", bleed:"right", span:7, ar:"3/2", mt:60,   cap:"Plywood grain" },
       { src:"scatter-06.png", col:"1 / 6",                     mt:60,  cap:"Dimensions" },

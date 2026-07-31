@@ -31,7 +31,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=34">
+<link rel="stylesheet" href="css/style.css?v=36">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -65,7 +65,7 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=9"></script>
+<script src="js/projects-data.js?v=10"></script>
 <script src="js/materials-data.js?v=2"></script>
 <!-- project pages hold the loader until their hero image, hero video and 3D
      model have loaded (see the readiness gate at the end of the page script);
@@ -441,7 +441,7 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=11" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=12" title="mechanism" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma

@@ -12,13 +12,37 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:transparent;color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
   .wrap{max-width:none;margin:0;padding:0;}
-  .stage{position:relative;background:transparent;}
+  /* ---- TRANSPARENT BUFFER (same trick as KART's mechanism) ----
+     The wavefronts are circles up to r=410 (omni) and arcs up to r=500
+     (stereo) thrown from emitters at x=115/358, y=287 - far outside the art's
+     own 563.75 x 399.81 viewBox. They used to be hard-clipped at the frame
+     edge, which read as the sound stopping at an invisible wall.
+
+     An iframe cannot paint outside itself, so the only way to let the waves
+     run is to make the iframe BIGGER than the art and keep the extra
+     transparent. That is what this padding is: a buffer of 200 art-units left
+     and right, 180 above, 200 below, expressed as a % of the frame width
+     (padding percentages always resolve against width, so all four stay in
+     proportion at any size). The art then occupies the middle 58.5%.
+     project.html's .hiw-graphic negative margins crop most of that buffer back
+     out of the page flow, so the waves overlap neighbouring sections instead
+     of leaving a hole - Owen's ask. */
+  .stage{position:relative;background:transparent;
+    padding:18.677% 20.752% 20.752%;}
   /* two stacked full-size layers: animated waves BEHIND, the scene art
-     (people + logo-shaped speakers) on top. overflow clips waves cleanly at
-     the frame edge so they never spill onto neighbouring page content. */
-  .scene{position:relative;width:100%;overflow:hidden;}
+     (people + logo-shaped speakers) on top. overflow is VISIBLE now - the
+     buffer above is what stops the waves escaping the iframe, not a clip. */
+  .scene{position:relative;width:100%;overflow:visible;}
   .scene .layer{display:block;width:100%;height:auto;}
-  .scene .waves{position:absolute;inset:0;height:100%;overflow:visible;pointer-events:none;}
+  /* The waves svg is deliberately LARGER than .scene and hangs outside it on
+     every side. Its box and its viewBox are expanded by exactly the same
+     buffer, so its scale matches the art layer's exactly and the emitters stay
+     locked to the speakers. Horizontal %s resolve against .scene's width and
+     vertical against its height, which is why the two pairs differ. */
+  .scene .waves{position:absolute;
+    left:-35.478%; width:170.955%;
+    top:-45.022%;  height:195.046%;
+    overflow:visible;pointer-events:none;}
   /* STEREO speaker blocks: plain rectangular speakers drawn OVER the scene's
      logo-shaped speakers. Shown in STEREO, hidden in OMNI (revealing the logo
      speakers) - so only OMNI reads as the logo, matching the original. */
@@ -49,7 +73,11 @@
     <div class="stage">
       <div class="scene">
         <!-- animated wavefronts (behind the art) -->
-        <svg class="waves" viewBox="-46 0 563.75 399.81" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g id="sw-waves"></g></svg>
+        <!-- viewBox = the art's (-46 0 563.75 399.81) grown by the buffer:
+             200 units left/right, 180 top, 200 bottom. Its aspect ratio matches
+             the CSS box above exactly, so xMidYMid meet scales it identically to
+             the art layer and the emitters stay on the speakers. -->
+        <svg class="waves" viewBox="-246 -180 963.75 779.81" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g id="sw-waves"></g></svg>
         <!-- the scene: people + logo-shaped speakers (Owen's artwork, unchanged) -->
         <svg class="layer" viewBox="-46 0 563.75 399.81" xmlns="http://www.w3.org/2000/svg" fill="#141414" role="img" aria-label="Two people listening to a pair of OMNI speakers">
 <defs>
