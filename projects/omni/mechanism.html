@@ -220,7 +220,29 @@
     return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r.toFixed(2)} ${r.toFixed(2)} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
   }
 
+  /* ---------- RUN ONLY WHEN THERE IS SOMETHING TO SHOW ----------
+     Same problem the KART mechanism had: this loop ran forever, rewriting SVG
+     path/circle attributes every frame whether or not the graphic was on
+     screen, and whether or not any wavefronts were actually in flight. Now the
+     parent page reports visibility (see project.html) and the loop stands down
+     when the graphic is scrolled away, the tab is hidden, or the volume is at
+     zero with nothing left mid-flight. Any interaction calls wake(). */
+  let running=false, visible=true;
+  function wake(){
+    if(!running && visible){ running=true; requestAnimationFrame(tick); }
+  }
+  window.addEventListener("message",function(ev){
+    const d=ev.data;
+    if(!d || d.type!=="mechVisible") return;
+    visible=!!d.visible;
+    if(visible) wake();
+  });
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){ visible=false; } else { visible=true; wake(); }
+  });
+
   function tick(now){
+    if(!visible){ running=false; return; }
     const cfg=MODES[mode];
     if(volume>0 && !reduce){
       const reach=cfg.maxR*(0.32 + volume/100*0.68);   // volume grows size only
@@ -243,9 +265,21 @@
       if(!node || node.tagName.toLowerCase()!==type){ if(node) node.remove(); node=document.createElementNS(SVGNS,type); pool[k]=node; wavesG.appendChild(node); }
       node.style.display=''; node.setAttribute('opacity',op);
       if(w.arc){ node.setAttribute('stroke-linecap','round'); node.setAttribute('d', arcPath(e.cx,e.cy,r,w.arc[0],w.arc[1])); }
-      else { node.setAttribute('cx',e.cx); node.setAttribute('cy',e.cy); node.setAttribute('r',r.toFixed(2)); }
+      else {
+        // cx/cy are the fixed speaker positions - they never change for the
+        // life of the node, so only write them when this node is newly a circle
+        // for this emitter. Only r moves. Skipping two redundant attribute
+        // writes per wave per frame sounds trivial, but each one invalidates
+        // the SVG element and it adds up across a dozen live wavefronts.
+        if(node.__e !== w.i){ node.setAttribute('cx',e.cx); node.setAttribute('cy',e.cy); node.__e = w.i; }
+        node.setAttribute('r',r.toFixed(2));
+      }
     }
     for(let k=active.length;k<pool.length;k++){ if(pool[k]) pool[k].style.display='none'; }
+
+    // nothing sounding and nothing still fading out: stand down until something
+    // changes (mode click, volume drag, scrolled back into view)
+    if(active.length===0 && (volume<=0 || reduce)){ running=false; return; }
     requestAnimationFrame(tick);
   }
 
@@ -255,13 +289,14 @@
     [...ev.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
     descEl.textContent=MODES[mode].desc;
     paintSpeakers();
-    waves=[]; last=[-1e7,-1e7]; pool.forEach(n=>n.style.display='none');   // clear + respawn at once
+    waves=[]; last=[-1e7,-1e7]; pool.forEach(n=>{n.style.display='none'; n.__e=undefined;});   // clear + respawn at once
+    wake();
   });
-  volEl.addEventListener('input',function(){ volume=+volEl.value; });
+  volEl.addEventListener('input',function(){ volume=+volEl.value; wake(); });
 
   descEl.textContent=MODES[mode].desc;
   paintSpeakers();
-  requestAnimationFrame(tick);
+  wake();
 
   window.addEventListener('load', postHeight);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(postHeight);

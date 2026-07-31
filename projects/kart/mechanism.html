@@ -162,11 +162,21 @@
 
   function resize(){
     const cssW=canvas.parentElement.clientWidth;
-    const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    /* DPR cap lowered 2.5 -> 2, and the total backing store capped as well.
+       This canvas is 940 x 960 logical units and every single frame repaints
+       ALL of it, including two or three fresh radial gradients. At dpr 2.5 on
+       a wide window that was ~5 million pixels per frame, which is what the
+       choppiness was - not the animation logic. dpr 2 is already past the
+       point where anyone can see the difference on this line art. */
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    let w=Math.round(cssW*dpr), h=Math.round(cssW*(H/W)*dpr);
+    const MAX_PX=2600000;                       // hard ceiling on area
+    if(w*h>MAX_PX){ const k=Math.sqrt(MAX_PX/(w*h)); w=Math.round(w*k); h=Math.round(h*k); }
     canvas.style.width=cssW+'px';
-    canvas.width=Math.round(cssW*dpr);
-    canvas.height=Math.round(cssW*(H/W)*dpr);
+    canvas.width=w;
+    canvas.height=h;
     scale=canvas.width/W;
+    wake();          // size changed, so one repaint is owed
     postHeight();
   }
   // no clamp: cursor may leave the room
@@ -277,9 +287,38 @@
     ctx.restore();
   }
 
+  /* ---------- RUN ONLY WHEN THERE IS SOMETHING TO SHOW ----------
+     This loop used to run forever: every frame it cleared a multi-million-pixel
+     canvas, built fresh radial gradients, and redrew the whole room - even when
+     the pointer was elsewhere, the eased values had long since settled and
+     nothing on screen was changing, and even when the graphic had been scrolled
+     past entirely.
+
+     Two gates now. `visible` is set by the parent page (see the
+     IntersectionObserver in project.html) and shuts the loop down when the
+     graphic is off screen or the tab is hidden. `settled` stops it once the
+     eased values have converged and the pointer is idle - any interaction calls
+     wake() and it picks straight back up. The animation is unchanged; it simply
+     stops paying for frames nobody is looking at. */
+  let running=false, visible=true, idleFrames=0;
+  function wake(){
+    idleFrames=0;
+    if(!running && visible){ running=true; lastT=performance.now(); requestAnimationFrame(frame); }
+  }
+  window.addEventListener("message",function(ev){
+    const d=ev.data;
+    if(!d || d.type!=="mechVisible") return;
+    visible=!!d.visible;
+    if(visible) wake();
+  });
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){ visible=false; } else { visible=true; wake(); }
+  });
+
   let lastT=performance.now();
   function frame(now){
     const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+    if(!visible){ running=false; return; }
 
     const ang=Math.atan2(cursor.y-lamp.y,cursor.x-lamp.x);
     const d=dist(cursor,lamp);
@@ -299,9 +338,19 @@
     const brightTarget=isDim?present*distInten:0;
     const beamTarget=(mode==='follow'||mode==='shadow')?present:0;
 
+    const pb=s.bright, pm=s.beam, pa=s.ang;
     s.bright=ease(s.bright,brightTarget,0.35,dt);
     s.beam=ease(s.beam,beamTarget,0.30,dt);
     if(present>0.02) s.ang=easeAngle(s.ang,ang,0.12,dt);
+
+    // Has anything actually moved this frame? Thresholds are well below one
+    // display step, so "settled" always means visually identical, never a
+    // visible freeze part-way through a fade.
+    const moved = Math.abs(s.bright-pb)>0.0005 ||
+                  Math.abs(s.beam-pm)>0.0005 ||
+                  Math.abs(s.ang-pa)>0.0008;
+    // the cursor marker follows the pointer, so a live pointer is never idle
+    idleFrames = (moved || pointerOn) ? 0 : idleFrames+1;
 
     ctx.setTransform(scale,0,0,scale,0,0);
     // transparent background: clear only. No paper fill, so only the lines,
@@ -317,6 +366,9 @@
     lineArt();
     if(pointerOn) drawPerson(present>0.5);
 
+    // ~12 still frames (a fifth of a second) before standing down, so a brief
+    // pause mid-gesture never costs a restart
+    if(idleFrames > 12){ running=false; return; }
     requestAnimationFrame(frame);
   }
 
@@ -326,20 +378,21 @@
     [...e.currentTarget.querySelectorAll('button')].forEach(x=>
       x.setAttribute('aria-pressed',x===b?'true':'false'));
     descEl.textContent=modes[mode];
+    wake();
   });
   // listen on the whole stage (canvas + the overlaid UI), not just the canvas,
   // so moving over the mode buttons keeps tracking the cursor and drawing the
   // custom marker instead of stopping the moment the pointer hits a control.
   const stage=document.querySelector('.stage');
-  stage.addEventListener('pointermove',e=>{cursor=toLogical(e.clientX,e.clientY); pointerOn=true;});
-  stage.addEventListener('pointerdown',e=>{cursor=toLogical(e.clientX,e.clientY); pointerOn=true;});
-  stage.addEventListener('pointerleave',()=>{ pointerOn=false; });
-  stage.addEventListener('pointerenter',()=>{ pointerOn=true; });
+  stage.addEventListener('pointermove',e=>{cursor=toLogical(e.clientX,e.clientY); pointerOn=true; wake();});
+  stage.addEventListener('pointerdown',e=>{cursor=toLogical(e.clientX,e.clientY); pointerOn=true; wake();});
+  stage.addEventListener('pointerleave',()=>{ pointerOn=false; wake(); });
+  stage.addEventListener('pointerenter',()=>{ pointerOn=true; wake(); });
   window.addEventListener('resize',resize);
 
   descEl.textContent=modes[mode];
   resize();
-  requestAnimationFrame(frame);
+  wake();
 
   window.addEventListener("load", postHeight);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(postHeight);

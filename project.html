@@ -31,7 +31,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=36">
+<link rel="stylesheet" href="css/style.css?v=37">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -41,7 +41,7 @@
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=5"></script>
+<script src="js/loader3d.js?v=7"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -409,7 +409,14 @@
           // DEFAULT model size is decoupled from the (deliberately huge) element:
           // 230% starts it small + clears the control bar; min 45% lets a zoom-in
           // grow it well past the element so it floods/underlaps the page.
-          'interaction-prompt="none" camera-orbit="-25deg 76deg 130%" ' +
+          // disable-pan: the model TURNS, it never slides around.
+          // model-viewer calls translating the model "pan" and rotating the
+          // camera around it "orbit". Panning was on by default (two-finger
+          // drag on touch, right-click drag on desktop), so on a phone the
+          // lamp kept getting shoved off-centre with no obvious way back -
+          // which is not a thing you want a product viewer to do. Orbit and
+          // zoom stay; only the translation is gone.
+          'disable-pan interaction-prompt="none" camera-orbit="-25deg 76deg 130%" ' +
           'min-camera-orbit="auto auto 45%" max-camera-orbit="auto auto 320%" ' +
           'auto-rotate auto-rotate-delay="1200" rotation-per-second="10deg" ' +
           'shadow-intensity="0" exposure="1" environment-image="neutral" tone-mapping="neutral" ' +
@@ -441,7 +448,7 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=12" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=13" title="mechanism" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
@@ -549,6 +556,33 @@
         mechFrame.style.minHeight = "0";
       }
     });
+
+    /* ---------- tell the mechanism when it is actually on screen ----------
+       The mechanisms run requestAnimationFrame loops that repaint a large
+       canvas (KART) or a field of SVG wavefronts (OMNI) every frame. Inside an
+       iframe they have no reliable way to know they have been scrolled past -
+       browsers throttle offscreen iframes inconsistently - so they were still
+       painting while you were reading something else further down the page,
+       competing with model-viewer's WebGL loop and whatever else is running.
+       The parent can see it clearly, so it just tells them. */
+    (function(){
+      function post(vis){
+        try { mechFrame.contentWindow.postMessage({ type:"mechVisible", visible:!!vis }, "*"); } catch(e){}
+      }
+      if(window.IntersectionObserver){
+        // generous margin so it is already running by the time it scrolls in
+        new IntersectionObserver(function(entries){
+          post(entries[0].isIntersecting);
+        }, { rootMargin: "200px 0px" }).observe(mechFrame);
+      } else {
+        post(true);   // no IO: leave it running, same as before
+      }
+      // a hidden tab should not be animating either
+      document.addEventListener("visibilitychange", function(){
+        if(document.hidden) post(false);
+      });
+      mechFrame.addEventListener("load", function(){ post(true); });
+    })();
   }
 
   // ---------- model-viewer: variants + reset + explode (baked animation) ----------
@@ -761,7 +795,14 @@
       window.addEventListener("pointerdown", function(e){ setLive(inBox(e)); }, true);
     })();
 
-    rsBtn.addEventListener("click", function(){ mv.cameraOrbit = defaultOrbit; mv.resetTurntableRotation && mv.resetTurntableRotation(); });
+    rsBtn.addEventListener("click", function(){
+      mv.cameraOrbit = defaultOrbit;
+      // also recentre. Panning is disabled now, but anyone who shifted the
+      // model before this change still has that offset stored in cameraTarget,
+      // and resetting the orbit alone would leave it stuck off-centre.
+      mv.cameraTarget = "auto auto auto";
+      mv.resetTurntableRotation && mv.resetTurntableRotation();
+    });
 
     // WIREFRAME / render toggle: model-viewer has no real wireframe shader
     // mode, so until there's an actual wireframe-textured export (or a second

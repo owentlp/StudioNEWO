@@ -104,6 +104,15 @@
      missed. */
   var PIN_CAP_MS = 2600;
   var pinned = false, started3d = false, pinCap = null;
+
+  // where this script lives, so the worker can be pointed at its siblings
+  // without hard-coding "/js/" (the pages sit at the site root today, but a
+  // relative path survives being moved)
+  var BASE = (function(){
+    var s = document.currentScript;
+    if(s && s.src) return s.src.replace(/[^\/]*$/, "");
+    return new URL("js/", location.href).href;
+  })();
   function pin(){
     if(pinned) return;
     pinned = true;
@@ -177,6 +186,113 @@
     document.head.appendChild(s);
   }
 
+  /* ================= WORKER PATH (the normal one) =================
+     Hand the whole animation to a worker thread via OffscreenCanvas. This is
+     the actual fix for loader stutter: the animation stops sharing a thread
+     with HTML parsing, font loading, image decoding and model-viewer's parse,
+     so page work physically cannot stall it. Everything DOM stays here.
+
+     If anything at all goes wrong - no OffscreenCanvas, worker blocked, no
+     WebGL on the worker thread, three.js unreachable - it falls through to the
+     main-thread version below, which is the code that shipped before. Nothing
+     regresses; it just stops being smooth on those browsers. */
+  var workerTried = false;
+  function tryWorker(){
+    workerTried = true;
+    if(!window.Worker || !window.OffscreenCanvas) return false;
+
+    var canvas = document.createElement("canvas");
+    canvas.className = "ld-3d";
+    if(typeof canvas.transferControlToOffscreen !== "function") return false;
+    mark.appendChild(canvas);
+
+    // sizing lives here because only the main thread can read layout; the
+    // worker is told the numbers and never touches the DOM
+    var cssSize = mark.clientWidth || 104;
+    canvas.style.position = "absolute";
+    canvas.style.left = "50%";
+    canvas.style.top = "50%";
+    canvas.style.transform = "translate(-50%, -50%)";
+
+    var w;
+    try { w = new Worker(BASE + "loader3d.worker.js?v=1"); }
+    catch(e){ canvas.remove(); return false; }
+
+    var handedOff;
+    try { handedOff = canvas.transferControlToOffscreen(); }
+    catch(e){ w.terminate(); canvas.remove(); return false; }
+
+    var settled = false;
+    w.onmessage = function(ev){
+      var d = ev.data || {};
+      if(d.type === "firstFrame"){
+        started3d = true;
+        if(pinCap){ clearTimeout(pinCap); pinCap = null; }
+        // size the element now that we know the overscan is applied worker-side
+        sizeCanvasEl();
+        // one frame exists, so fade it up over the still-visible flat mark and
+        // only hide that once the fade is done - same handoff as the fallback
+        void canvas.offsetWidth;
+        canvas.style.opacity = "1";
+        setTimeout(function(){ flatLogo.style.display = "none"; }, 260);
+      } else if(d.type === "released"){
+        settled = true;
+        unpin();
+        setTimeout(function(){ try { w.terminate(); } catch(e){} }, 900);
+      } else if(d.type === "failed"){
+        // worker could not do it: clean up and let the main-thread path try
+        try { w.terminate(); } catch(e){}
+        canvas.remove();
+        if(!started3d){ startMainThread(); }
+        else { unpin(); }
+      }
+    };
+    w.onerror = function(){
+      try { w.terminate(); } catch(e){}
+      canvas.remove();
+      if(!started3d) startMainThread(); else unpin();
+    };
+
+    function sizeCanvasEl(){
+      var s = mark.clientWidth || 104;
+      // OVERSCAN is 1.836 for this logo - kept in step with loader3d-core
+      var px = Math.round(s * 1.836);
+      canvas.style.width = px + "px";
+      canvas.style.height = px + "px";
+    }
+    sizeCanvasEl();
+
+    w.postMessage({
+      type: "init",
+      canvas: handedOff,
+      dpr: Math.min(window.devicePixelRatio || 1, 1.5),
+      cssSize: cssSize,
+      stlUrl: new URL("logo/3d-logo.stl", location.href).href,
+      coreUrl: BASE + "loader3d-core.js?v=1"
+    }, [handedOff]);
+
+    // tell it when the page is ready; it releases at its next settle
+    (function watchReady(){
+      if(document.body.classList.contains("ready")){ w.postMessage({ type:"pageReady" }); return; }
+      setTimeout(watchReady, 60);
+    })();
+
+    window.addEventListener("resize", function(){
+      sizeCanvasEl();
+      w.postMessage({ type:"resize", dpr: Math.min(window.devicePixelRatio || 1, 1.5), cssSize: mark.clientWidth || 104 });
+    });
+
+    return true;
+  }
+
+  if(tryWorker()){
+    mark.classList.add("has3d");
+  } else {
+    startMainThread();
+  }
+
+  // ================= MAIN-THREAD FALLBACK =================
+  function startMainThread(){
   // NOTE: every exit below unpins. The old code just returned, which was safe
   // only because the pin was set late; now that it is set up front, an
   // un-unpinned exit would freeze the loader on screen.
@@ -202,7 +318,14 @@
       renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     } catch(e){ canvas.remove(); unpin(); return; }   // no WebGL context available
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    /* Pixel ratio capped at 1.5, not 2. This animation is unusual in that it
+       runs during the single busiest moment of the page's life - HTML parsing,
+       font loading, hero image decoding and (on project pages) model-viewer's
+       ~700KB parse all land in the same window. It is competing for the main
+       thread with all of it, which is where the choppiness comes from, not from
+       the geometry. Asking for 44% fewer pixels per frame buys real headroom,
+       and at this size the difference is not visible on a matte ink logo. */
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
 
     var scene = new THREE.Scene();
 
@@ -391,4 +514,5 @@
       }
     })();
   }
+  }   // end startMainThread
 })();

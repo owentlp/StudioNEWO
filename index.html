@@ -127,7 +127,14 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
    band is a fixed-height sibling (title + date only, no animating text), so
    the photo doesn't reflow on hover - the whole card just slides up. */
 .dc-media{position:relative; flex:1 1 auto; min-height:0; z-index:0; overflow:hidden;}
-.dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1); transition:filter .25s ease, transform .5s cubic-bezier(.2,.8,.2,1);}
+/* Only `transform` is transitioned. `filter` was being animated too, and a
+   filter transition on a large photo cannot run on the compositor - the browser
+   re-rasterises the whole image every frame of the quarter-second fade, on four
+   cards at once if you sweep across the dock. The saturate value still changes
+   on hover, it just switches rather than ramping, which is not something you can
+   see on a 6% shift. The scale, which you can see, stays smooth because
+   transform is compositor-only. */
+.dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1); transition:transform .5s cubic-bezier(.2,.8,.2,1);}
 .dc:hover .dc-media img, .dc:focus-visible .dc-media img{filter:saturate(1.05); transform:scale(1.08);}
 /* title (+ date) is a paper band at the TOP of the card, ABOVE the photo (not
    over it), so the photo's top is never covered. It's what shows in the peeking
@@ -142,8 +149,18 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
 .dc-date{display:block; font-size:11px; letter-spacing:.16em; opacity:.7; margin-top:4px;}
 /* the fan bleeds ~24px off each window edge (sizeDock adds +48). Inset the
    first card's title so it clears the left edge instead of being clipped. */
-.dc:first-child .dc-body{padding-left:38px;}
-@media (max-width:760px){ .dc:first-child .dc-body{padding-left:0;} }
+/* DESKTOP ONLY. On desktop the fan bleeds ~24px off each window edge, so the
+   first card's title needs an inset to clear it. On mobile the dock is a plain
+   stacked column with no bleed, so it needs no inset at all.
+
+   This used to be an unconditional rule plus a `padding-left:0` override in
+   the mobile block. That override was written when the mobile .dc-body had no
+   horizontal padding, and it kept winning on specificity (0,3,0 beats 0,1,0)
+   after the mobile padding became 12px - which is why KART, the first card,
+   sat flush against the left edge while every other card was inset. Scoping
+   the rule to desktop means mobile just uses the normal .dc-body padding and
+   there is nothing left to override. */
+@media (min-width:761px){ .dc:first-child .dc-body{padding-left:38px;} }
 .dc:focus-visible{outline:1px solid var(--red); outline-offset:-2px;}
 
 /* top-right dropdown menu (shared markup, built by js/menu.js) */
@@ -276,7 +293,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=5"></script>
+<script src="js/loader3d.js?v=7"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -377,7 +394,7 @@ const CLIP_PICK = (function(){
       '</span>';
     a.addEventListener("mouseenter", function(){
       prefetch("project.html?p=" + key);
-      prefetch("css/style.css?v=36");
+      prefetch("css/style.css?v=37");
     }, { once:true });
     dock.appendChild(a);
   });
