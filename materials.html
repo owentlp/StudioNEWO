@@ -22,9 +22,9 @@
 <link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
-<link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=37">
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=40">
 <style>
   /* page-specific layout only: the shared editorial grammar (12-col grid,
      .cap/.desc type, .fig frames) lives in css/style.css and is reused as-is
@@ -43,7 +43,12 @@
      0fr/1fr trick so it works with content of any length with no JS
      measuring. No borders: the head row is set apart by weight/spacing only,
      matching the rest of the site's "no rules or boxes" grammar. */
-  .matcat{margin-top:clamp(28px,4vh,44px);}
+  /* This must stay comfortably LARGER than the gap space-between opens up
+     between the properties and lifecycle paragraphs inside a category
+     (currently ~55-60px), or the two read as the same separation and you
+     cannot tell which text belongs to which category. If you raise
+     BAND_FRACTION in the script, raise this too. */
+  .matcat{margin-top:clamp(76px,10vh,120px);}
   .matcat:first-of-type{margin-top:0;}
   .matcat-head{
     display:block; width:100%;
@@ -54,27 +59,12 @@
   .matcat-head:hover{color:var(--red);}
   .matcat-head .cap.lbl{margin-bottom:0; flex:0 0 auto;}
 
-  /* ---- SLIVER: a band of the category photo under the collapsed head ----
-     At rest the index was nothing but rows of words; this puts the actual
-     material on the page before anyone clicks. It grows a little on hover so
-     the row reads as openable, and collapses to nothing once the category is
-     open, where the full hero image takes over inside. */
-  .matcat-sliver{
-    display:block; margin-top:clamp(10px,1.4vh,15px);
-    height:clamp(44px,7vh,72px); overflow:hidden;
-    transition:height .34s cubic-bezier(.2,.8,.2,1), margin-top .34s cubic-bezier(.2,.8,.2,1), opacity .24s ease;
-  }
-  .matcat-sliver img{
-    width:100%; height:100%; object-fit:cover; object-position:center 62%; display:block;
-    filter:saturate(.92); transition:filter .3s ease, transform .5s cubic-bezier(.2,.8,.2,1);
-  }
-  .matcat-head:hover .matcat-sliver{height:clamp(58px,9.5vh,96px);}
-  .matcat-head:hover .matcat-sliver img{filter:saturate(1.04); transform:scale(1.03);}
-  /* open: the sliver folds away, the hero inside the body takes its place */
-  .matcat.open .matcat-sliver{height:0; margin-top:0; opacity:0;}
-  @media (prefers-reduced-motion:reduce){
-    .matcat-sliver, .matcat-sliver img{transition:none;}
-  }
+  /* Height of a category's collapsed state: how much of the hero image shows,
+     and the box the properties/lifecycle text is fitted into. Set by the script
+     at the bottom of this page to the tallest text block across ALL categories,
+     so every closed category is the same height. The value here is only used
+     for the instant before that script runs. See .matcat-intro below. */
+  :root{ --matcat-band:132px; }
   .matcat-names{flex:1 1 auto; min-width:0; font-size:9px; letter-spacing:.03em; color:var(--ink); opacity:.55; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .matcat.open .matcat-names{opacity:0;}
   .matcat-count{flex:0 0 auto; font-size:9px; letter-spacing:.1em; opacity:.55;}
@@ -90,13 +80,68 @@
   @keyframes matReveal{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
 
 
-  /* ---- OPEN CATEGORY: hero image (tree/ore/etc) + intro text ---- */
-  .matcat-intro{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); align-items:start; margin-bottom:clamp(32px,5vh,58px);}
-  .matcat-hero{grid-column:1 / 5; aspect-ratio:4/3; overflow:hidden;}
-  .matcat-hero img{width:100%; height:100%; object-fit:cover; display:block;}
-  .matcat-intro-text{grid-column:6 / 13; display:flex; flex-direction:column; gap:9px;}
-  .matcat-intro-text .desc{max-width:54ch;}
+  /* ---- CATEGORY INTRO: hero image + properties/lifecycle ------------------
+     ALWAYS IN THE DOM AND NEVER MOVED. This is the whole point of the design:
+     the image and the text sit in exactly one place, and opening the category
+     only grows the image DOWNWARD to its full height. Nothing crossfades,
+     nothing is duplicated, so there is no jump.
+
+     (It used to be two separate blocks - a collapsed "preview band" inside the
+     head button and a second copy inside the body - which is why opening read
+     as the image and text jumping rather than revealing.)
+
+     The image box is short at rest (--matcat-band) and grows to the image's
+     real 4:3 height (--matcat-full) when open. --matcat-full is measured per
+     category by the script at the bottom, because CSS cannot transition a
+     height to `auto`. The <img> itself always carries the full 4:3 ratio, so
+     what you see at rest is genuinely the top slice of the final image, not a
+     re-crop, and the reveal lines up exactly. */
+  .matcat-intro{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); align-items:start;
+    margin-top:clamp(10px,1.4vh,15px); margin-bottom:0;
+    transition:margin-bottom .34s cubic-bezier(.2,.8,.2,1);}
+  .matcat.open .matcat-intro{margin-bottom:clamp(32px,5vh,58px);}
+  .matcat-hero{grid-column:1 / 5; overflow:hidden; height:var(--matcat-band); cursor:pointer;
+    transition:height .34s cubic-bezier(.2,.8,.2,1);}
+  .matcat.open .matcat-hero{height:var(--matcat-full,auto);}
+  .matcat-hero img{width:100%; aspect-ratio:4/3; height:auto; object-fit:cover; display:block;
+    filter:saturate(.92); transition:filter .3s ease;}
+  .matcat-hero:hover img{filter:saturate(1.04);}
+  /* The text block is sized to sit flush with the image: its font-size is
+     scaled by the script so the block's top and bottom line up with the top and
+     bottom of the collapsed image. Hence font-size:inherit on the children -
+     they must scale with the container rather than holding their own px size. */
+  /* space-between is what makes the text sit FLUSH with the image top and
+     bottom without needing an enormous font. The first paragraph starts at the
+     image's top edge, the last ends at its bottom edge, and the gap between
+     them absorbs the difference. Stretching the font alone to fill the band
+     pushed it to ~20px, far heavier than the rest of the site's type; this
+     keeps the bump modest and still lines the block up exactly. */
+  /* The text block is IDENTICAL open or closed - same height, same
+     justification, same font. It must not move when the category opens; only
+     the image grows. (An earlier version switched to flex-start and auto height
+     when open, which snapped the two paragraphs back together - that was the
+     jump.) There is deliberately no `.matcat.open` rule for this element.
+
+     space-between puts the first paragraph's top on the image's top edge and
+     the last paragraph's bottom on its bottom edge, so the block lines up with
+     the photo at the page's normal 15px body size. The font is NOT scaled up to
+     fill - that made it far heavier than the rest of the page's type. */
+  .matcat-intro-text{grid-column:6 / 13; display:flex; flex-direction:column;
+    justify-content:space-between;
+    height:var(--matcat-band); overflow:hidden;}
+  .matcat-intro-text .desc{max-width:none;}
   .mi-k{font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-right:7px;}
+  @media (prefers-reduced-motion:reduce){
+    .matcat-intro, .matcat-hero, .matcat-hero img{transition:none;}
+  }
+  @media (max-width:900px){
+    /* stacked: a quarter-width image beside text does not work here, so the
+       intro becomes image-then-text in normal flow and the text is no longer
+       height-matched to the image. */
+    .matcat-intro{display:block;}
+    .matcat-hero{width:100%; max-width:340px; margin-bottom:18px; height:auto;}
+    .matcat-intro-text{height:auto; overflow:visible; font-size:inherit !important;}
+  }
 
   /* ---- GROUP (the dropdown subgroup: Hardwood, Aluminum, etc). Collapsed by
      default inside an open category; its own head toggles its materials open,
@@ -129,7 +174,6 @@
   .matitem-media img{width:100%; height:100%; object-fit:cover; display:block;}
   .matitem-text{min-width:0;}
   .mi-name{display:block; font-family:var(--disp); font-style:italic; font-size:clamp(15px,1.5vw,19px); line-height:1.08; margin-bottom:4px;}
-  .mi-use{font-family:var(--body); font-style:normal; font-size:7px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); vertical-align:middle; margin-left:8px; border:1px solid var(--red); padding:1px 5px; white-space:nowrap;}
   .mi-in{display:block; font-size:9px; letter-spacing:.05em; margin-bottom:6px;}
   .mi-in a{color:var(--ink); text-decoration:underline; text-decoration-color:rgba(20,20,20,.3); text-underline-offset:2px;}
   .mi-in a:hover{color:var(--red); text-decoration-color:var(--red);}
@@ -145,8 +189,7 @@
   .matcat-hero.soft,.matitem-media.soft{background:linear-gradient(135deg,#cbb995,#96835a);}
 
   @media (max-width:900px){
-    .matcat-intro{display:block;}
-    .matcat-hero{width:100%; max-width:340px; margin-bottom:18px;}
+    /* .matcat-intro / .matcat-hero stacking is handled in the intro block above */
     .matgrid{grid-template-columns:1fr;}
     .matcat-names{display:none;}   /* no room next to the label at this width */
   }
@@ -171,9 +214,10 @@
 <main class="page matg" id="matg-content">
   <!-- Two type sizes, nothing else: the eyebrow label and one line of copy.
        This used to be four stacked blocks at four sizes (label, headline, lead,
-       and a legend explaining the "In use" mark), which made the top of the page
-       heavier than the index it was introducing. The headline is gone, and so is
-       the legend - the red "In use" tag explains itself where it appears. -->
+       and a legend explaining an "In use" mark), which made the top of the page
+       heavier than the index it was introducing. The headline, the legend and
+       the mark itself are all gone; where a material is used, the entry says
+       "Used in: <project>", which carries the same fact and more. -->
   <div class="matg-intro">
     <span class="eyebrow">MATERIALS INDEX</span>
     <p class="desc">Every material used across the studio's products. Chosen for how each one ages, wears, and comes apart, not for how it looks new.</p>
@@ -181,7 +225,7 @@
   <div id="matg-cats"></div>
 </main>
 
-<script src="js/materials-data.js?v=2"></script>
+<script src="js/materials-data.js?v=3"></script>
 <script src="js/projects-data.js?v=10"></script>
 <script src="js/main.js?v=3"></script>
 <script src="js/menu.js?v=4"></script>
@@ -213,13 +257,21 @@
     var total = cat.groups.reduce(function(a,g){ return a + g.items.length; }, 0);
     var groupNames = cat.groups.map(function(g){ return g.label; }).join("  /  ");
 
+    // Properties + lifecycle only. "Finishes" was dropped by request: it is the
+    // least useful of the three at a glance, and with the text block now sized
+    // to sit flush with the image, two blocks is what fits cleanly.
+    // cat.intro.finishes is still in the data, simply unused.
     var introText = [
       real(cat.intro.properties) ? '<p class="desc"><span class="mi-k">Properties</span>'+esc(cat.intro.properties)+'</p>' : '',
-      real(cat.intro.finishes)   ? '<p class="desc"><span class="mi-k">Finishes</span>'+esc(cat.intro.finishes)+'</p>' : '',
       real(cat.intro.lifecycle)  ? '<p class="desc"><span class="mi-k">Lifecycle</span>'+esc(cat.intro.lifecycle)+'</p>' : ''
     ].join("");
+    // The hero image loads EAGERLY and is never deferred: it is visible at rest
+    // now (as the collapsed slice), so data-src/loadImgs would leave a blank
+    // box on arrival. Material thumbnails inside the groups still defer.
     var intro = '<div class="matcat-intro">' +
-      media("matcat-hero "+esc(cat.swatch), cat.image, cat.label) +
+      '<figure class="matcat-hero '+esc(cat.swatch)+'">' +
+        (cat.image ? '<img src="materials/'+esc(cat.image)+'" alt="'+esc(cat.label)+'" loading="eager" decoding="async" onerror="this.remove()">' : '') +
+      '</figure>' +
       '<div class="matcat-intro-text">'+introText+'</div></div>';
 
     var groups = cat.groups.map(function(g){
@@ -230,14 +282,17 @@
       ].filter(Boolean).join('<span class="mg-sep">/</span>');
 
       var items = g.items.map(function(it){
-        var use = it.used ? '<span class="mi-use">In use</span>' : '';
+        // the "In use" tag was removed by request: where a material is actually
+        // used, the "Used in: <project>" line below says so with more
+        // information and no extra visual weight. `it.used` stays in the data,
+        // unused here, in case a future filter wants it.
         var usedIn = (it.usedIn && it.usedIn.length)
           ? '<span class="mi-in">Used in: '+it.usedIn.map(function(u){ return '<a href="project.html?p='+esc(u.id)+'">'+esc(u.title)+'</a>'; }).join(", ")+'</span>'
           : '';
         return '<div class="matitem" id="'+esc(it.slug)+'">' +
                  media("matitem-media "+esc(cat.swatch), it.image, it.name) +
                  '<div class="matitem-text">' +
-                   '<span class="mi-name">'+esc(it.name)+use+'</span>' +
+                   '<span class="mi-name">'+esc(it.name)+'</span>' +
                    usedIn +
                    '<p class="desc">'+esc(it.copy)+'</p>' +
                  '</div>' +
@@ -261,17 +316,10 @@
              '</div>';
     }).join("");
 
-    // SLIVER: a thin band of the category photo under the collapsed head, so a
-    // closed index still shows wood/metal/glass instead of a list of words.
-    // It loads eagerly (unlike the full hero inside, which waits for the
-    // category to open) because it is visible on arrival - these are the only
-    // images on the page at rest. Colour-swatch fallback via onerror, same as
-    // the hero, so a missing photo degrades to the category's colour rather
-    // than a broken image.
-    var sliver = '<span class="matcat-sliver ' + esc(cat.swatch) + '">' +
-                   (cat.image ? '<img src="materials/'+esc(cat.image)+'" alt="" loading="eager" decoding="async" onerror="this.remove()">' : '') +
-                 '</span>';
-
+    // The intro (image + text) sits OUTSIDE both the head button and the
+    // collapsible body, so it is always present and never moves. The button is
+    // just the label row; the body holds only the subgroups. Opening the
+    // category grows the image and reveals the groups beneath it.
     return '<section class="matcat">' +
              '<button class="matcat-head" aria-expanded="false">' +
                '<span class="matcat-head-row">' +
@@ -280,12 +328,90 @@
                  '<span class="matcat-count">'+total+' MATERIALS</span>' +
                  '<span class="matcat-chev">+</span>' +
                '</span>' +
-               sliver +
              '</button>' +
-             '<div class="matcat-body"><div class="matcat-inner">'+intro+groups+'</div></div>' +
+             intro +
+             '<div class="matcat-body"><div class="matcat-inner">'+groups+'</div></div>' +
            '</section>';
   }).join("");
   root.innerHTML = html;
+
+  /* ---- UNIFORM PREVIEW BAND HEIGHT ------------------------------------
+     Every collapsed category band is the same height, and that height is
+     whatever the TALLEST properties+lifecycle block needs. Measuring is the
+     only way to get both: the copy differs per category, so a hard-coded
+     height would either clip the longest or leave the shortest floating in
+     space, and CSS cannot size a row to the tallest of several siblings that
+     live in separate sections.
+
+     How: let each text block go to its natural height for one frame, read the
+     largest, then write that back as --matcat-band on :root so every band
+     (image and text alike) picks it up. Runs after the fonts settle, because
+     measuring before OCR-B loads gives a height for the fallback font.
+     Re-measured on resize, debounced, since the copy re-wraps at every width. */
+  var cats  = [].slice.call(root.querySelectorAll(".matcat"));
+  // NOTE: there is no font scaling here any more. Growing the type to fill the
+  // band made it much heavier than the rest of the page; space-between in the
+  // CSS aligns the block's top and bottom to the image at the normal body size.
+  // How much of the hero image the collapsed state shows, as a fraction of its
+  // full 4:3 height. Driven by the IMAGE, not the text: at 17% (which is what
+  // the text height alone produced) the slice was so shallow it read as a flat
+  // colour band rather than a photograph. Raise for a deeper slice.
+  // The band height sets TWO things at once, which is why this number matters
+  // more than it looks: how much photo shows, and - because the text is
+  // space-between inside it - how far apart the properties and lifecycle
+  // paragraphs sit. 0.22 keeps the slice clearly photographic while holding
+  // that inner gap at roughly half the gap BETWEEN categories (see .matcat
+  // margin-top), so the two separations read as different things. Raising this
+  // pushes the two paragraphs apart; raise .matcat margin-top with it.
+  var BAND_FRACTION = 0.22;
+
+  function sizeBands(){
+    if(!cats.length) return;
+    if(window.matchMedia("(max-width:900px)").matches){
+      // stacked layout: image and text are not side by side, so neither the
+      // shared band height nor the font fitting applies. Clear both.
+      document.documentElement.style.removeProperty("--matcat-band");
+      cats.forEach(function(c){
+        var h = c.querySelector(".matcat-hero");
+        if(h) h.style.removeProperty("--matcat-full");
+      });
+      return;
+    }
+
+    // 1. BAND HEIGHT: one height for every collapsed category. It is a fixed
+    //    fraction of the hero image's full height, so the slice always reads as
+    //    a photograph, but never shorter than the tallest text block needs at
+    //    the base font - otherwise the copy would be clipped.
+    document.documentElement.style.setProperty("--matcat-band", "auto");
+    var tallest = 0, imageBand = 0;
+    cats.forEach(function(c){
+      var t = c.querySelector(".matcat-intro-text");
+      if(t && t.scrollHeight > tallest) tallest = t.scrollHeight;
+      var hero = c.querySelector(".matcat-hero");
+      if(hero) imageBand = Math.max(imageBand, hero.clientWidth * 0.75 * BAND_FRACTION);
+    });
+    tallest = Math.max(Math.ceil(tallest), Math.round(imageBand), 96);
+    document.documentElement.style.setProperty("--matcat-band", tallest + "px");
+
+    cats.forEach(function(c){
+      // 2. FULL IMAGE HEIGHT, so the open state can transition to a real px
+      //    value (CSS cannot animate height to `auto`). The image is 4:3 at
+      //    100% of its column, so its full height is width * 3/4.
+      var hero = c.querySelector(".matcat-hero");
+      if(hero) hero.style.setProperty("--matcat-full", Math.round(hero.clientWidth * 0.75) + "px");
+
+    });
+  }
+
+  sizeBands();
+  // re-run once the real fonts are in: measuring against the fallback face
+  // gives the wrong line count and therefore the wrong fitted size.
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(sizeBands);
+  var bandTimer = null;
+  window.addEventListener("resize", function(){
+    clearTimeout(bandTimer);
+    bandTimer = setTimeout(sizeBands, 150);
+  });
 
   // click a head to expand/collapse its category. Opening one does not close
   // the others; this is a reference page, someone comparing two categories
@@ -293,14 +419,21 @@
   // click a category head to reveal its description + the list of subgroups.
   // Opening it loads the category's hero image (the material thumbnails wait
   // until their own subgroup is opened).
+  function toggleCat(cat, force){
+    var btn = cat.querySelector(".matcat-head");
+    var open = (force != null) ? force : !cat.classList.contains("open");
+    cat.classList.toggle("open", open);
+    if(btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    // the hero is eager now, but the open state may still reveal the group
+    // thumbnails' container - those load on their own subgroup click.
+  }
   root.querySelectorAll(".matcat-head").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      var cat = btn.closest(".matcat");
-      var open = !cat.classList.contains("open");
-      cat.classList.toggle("open", open);
-      btn.setAttribute("aria-expanded", open ? "true" : "false");
-      if(open) loadImgs(cat.querySelector(".matcat-intro"));
-    });
+    btn.addEventListener("click", function(){ toggleCat(btn.closest(".matcat")); });
+  });
+  // the image is part of the same control: clicking it reveals the rest of
+  // itself, which is the whole gesture the collapsed slice is inviting.
+  root.querySelectorAll(".matcat-hero").forEach(function(hero){
+    hero.addEventListener("click", function(){ toggleCat(hero.closest(".matcat")); });
   });
 
   // click a subgroup head to reveal its materials (second level), loading that
@@ -322,7 +455,7 @@
     var target = document.getElementById(location.hash.slice(1));
     if(target){
       var cat = target.closest(".matcat");
-      if(cat){ cat.classList.add("open"); var h=cat.querySelector(".matcat-head"); if(h) h.setAttribute("aria-expanded","true"); loadImgs(cat.querySelector(".matcat-intro")); }
+      if(cat){ toggleCat(cat, true); }
       var grp = target.closest(".matgroup");
       if(grp){ grp.classList.add("open"); var gh=grp.querySelector(".matgroup-head"); if(gh) gh.setAttribute("aria-expanded","true"); loadImgs(grp.querySelector(".matgroup-body")); }
       setTimeout(function(){ target.scrollIntoView({block:"center"}); }, 300);

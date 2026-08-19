@@ -7,7 +7,7 @@
 <style>
   /* OCR-B, loaded relative to projects/omni/ so the iframe is self-contained,
      matching the KART mechanism. */
-  @font-face{ font-family:"OCR-B Local"; src:url("../../fonts/ocr-b.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+  @font-face{ font-family:"OCR-B Local"; src:url("../../fonts/ocr-b.woff2") format("woff2"),url("../../fonts/ocr-b.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
   :root{ --paper:#e9e7e2; --ink:#141414; --red:#e2191b; --mono:"OCR-B Local","OCR B","OCR-B",ui-monospace,"Courier New",monospace; }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:transparent;color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
@@ -52,7 +52,17 @@
   #sw-waves *{fill:none;stroke:var(--ink);stroke-width:1.2;vector-effect:non-scaling-stroke;}
   /* controls: same grammar as KART - mode buttons in a row, description under
      them, then the volume line. Bottom-left, red when active, no boxes. */
-  .ui{position:absolute;left:5%;bottom:8%;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;max-width:72%;gap:12px;}
+  /* left must be >= the .stage left padding above (20.752%), or the controls
+     land in the TRANSPARENT BUFFER rather than on the artwork. That is not
+     just a cosmetic misalignment: project.html crops the buffer back off the
+     page with a negative margin, so anything sitting in it gets pushed off the
+     left edge of the window and clipped by the page's overflow-x:hidden. It
+     read as "STEREO" rendering as "TEREO" with the description lines sliced.
+     22% puts the controls just inside the art's left edge, so they line up
+     with the leftmost figure and survive the crop with room to spare.
+     max-width is measured from there, so it drops to keep the right edge in
+     the same place it was before. */
+  .ui{position:absolute;left:22%;bottom:8%;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;max-width:58%;gap:12px;}
   .ui > *{pointer-events:auto;}
   .modes{display:flex;flex-wrap:wrap;gap:20px;margin:0;}
   .modes button{font-family:var(--mono);font-size:clamp(12px,1.1vw,14px);letter-spacing:.16em;text-transform:uppercase;color:var(--ink);background:none;border:0;padding:4px 0;cursor:pointer;text-shadow:0 0 5px var(--paper),0 0 5px var(--paper);transition:color .12s ease;}
@@ -66,6 +76,19 @@
   .vol input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;background:var(--red);border:0;cursor:pointer;}
   .vol input::-moz-range-thumb{width:12px;height:12px;background:var(--red);border:0;border-radius:0;cursor:pointer;}
   @media (max-width:640px){ .ui{position:static;padding:12px 0 0;max-width:none;} }
+
+  /* ---- TOUCH/DRAG HINT ----
+     This graphic is interactive but gives no sign of it at rest, so people
+     scrolled straight past. A quiet mark, in the same voice as the mode
+     buttons, that disappears the first time anyone actually touches it and
+     never comes back. Wording follows the input device. */
+  .hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:3;
+    pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink);opacity:.62;white-space:nowrap;
+    text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);
+    transition:opacity .3s ease;}
+  .hint.gone{opacity:0;}
+  @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
 </style>
 </head>
 <body>
@@ -303,6 +326,23 @@
   setTimeout(postHeight, 300);
   window.addEventListener('resize', postHeight);
   if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+
+  /* the interaction hint: fades on the first real touch/drag, then stays gone */
+  (function(){
+    var stageEl = document.querySelector('.stage');
+    if(!stageEl) return;
+    var h = document.createElement('div');
+    h.className = 'hint';
+    h.textContent = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+      ? 'TOUCH TO INTERACT' : 'DRAG TO INTERACT';
+    stageEl.appendChild(h);
+    function gone(){ h.classList.add('gone'); }
+    stageEl.addEventListener('pointerdown', gone, { once:true });
+    stageEl.addEventListener('touchstart',  gone, { once:true, passive:true });
+    stageEl.addEventListener('pointermove', function(e){
+      if(e.pointerType === 'mouse') gone();
+    }, { once:true });
+  })();
 })();
 </script>
 </body>

@@ -8,7 +8,7 @@
   /* OCR-B, loaded relative to projects/kart/ so the iframe is self-contained */
   @font-face{
     font-family:"OCR-B Local";
-    src:url("../../fonts/ocr-b.otf") format("opentype");
+    src:url("../../fonts/ocr-b.woff2") format("woff2"),url("../../fonts/ocr-b.otf") format("opentype");
     font-weight:400; font-style:normal; font-display:swap;
   }
   :root{
@@ -62,6 +62,19 @@
     .ui{cursor:auto;}
     canvas{cursor:default;}
   }
+
+  /* ---- TOUCH/DRAG HINT ----
+     This graphic is interactive but gives no sign of it at rest, so people
+     scrolled straight past. A quiet mark, in the same voice as the mode
+     buttons, that disappears the first time anyone actually touches it and
+     never comes back. Wording follows the input device. */
+  .hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:3;
+    pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink);opacity:.62;white-space:nowrap;
+    text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);
+    transition:opacity .3s ease;}
+  .hint.gone{opacity:0;}
+  @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
 </style>
 </head>
 <body>
@@ -398,6 +411,23 @@
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(postHeight);
   setTimeout(postHeight, 300);
   if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+
+  /* the interaction hint: fades on the first real touch/drag, then stays gone */
+  (function(){
+    var stageEl = document.querySelector('.stage');
+    if(!stageEl) return;
+    var h = document.createElement('div');
+    h.className = 'hint';
+    h.textContent = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+      ? 'TOUCH TO INTERACT' : 'DRAG TO INTERACT';
+    stageEl.appendChild(h);
+    function gone(){ h.classList.add('gone'); }
+    stageEl.addEventListener('pointerdown', gone, { once:true });
+    stageEl.addEventListener('touchstart',  gone, { once:true, passive:true });
+    stageEl.addEventListener('pointermove', function(e){
+      if(e.pointerType === 'mouse') gone();
+    }, { once:true });
+  })();
 })();
 </script>
 </body>

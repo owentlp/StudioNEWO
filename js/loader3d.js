@@ -117,13 +117,23 @@
     if(pinned) return;
     pinned = true;
     loaderEl.style.opacity = "1";
+    /* visibility must be pinned TOO, not just opacity. css/style.css sets
+       `body.ready #loader{opacity:0; visibility:hidden}` (visibility delayed to
+       the end of the fade, so the finished loader stops costing the compositor
+       a full-viewport layer). An inline opacity beats the opacity half of that
+       rule, but says nothing about visibility - so as soon as body.ready landed
+       the loader went invisible MID-TURN even though it was pinned, and the
+       guaranteed full rotation never got shown. Pinning both is what keeps the
+       animation on screen until this file decides to release it. */
+    loaderEl.style.visibility = "visible";
     pinCap = setTimeout(function(){ if(!started3d) unpin(); }, PIN_CAP_MS);
   }
   function unpin(){
     if(!pinned) return;
     pinned = false;
     if(pinCap){ clearTimeout(pinCap); pinCap = null; }
-    loaderEl.style.opacity = "";   // hand back to the body.ready CSS rule
+    loaderEl.style.opacity = "";      // hand back to the body.ready CSS rule
+    loaderEl.style.visibility = "";   // ...including the delayed visibility flip
   }
   pin();
 

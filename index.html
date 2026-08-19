@@ -22,8 +22,8 @@
 <link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
-<link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
 
 <!--
   STUDIO NEWO · home / index
@@ -38,8 +38,8 @@
 -->
 
 <style>
-@font-face{font-family:"GOST B";src:url("fonts/gost-typeb-italic.ttf") format("truetype");font-style:italic;font-display:swap;}
-@font-face{font-family:"OCR B";src:url("fonts/ocr-b.otf") format("opentype");font-display:swap;}
+@font-face{font-family:"GOST B";src:url("fonts/gost-typeb-italic.woff2") format("woff2"),url("fonts/gost-typeb-italic.ttf") format("truetype");font-style:italic;font-display:swap;}
+@font-face{font-family:"OCR B";src:url("fonts/ocr-b.woff2") format("woff2"),url("fonts/ocr-b.otf") format("opentype");font-display:swap;}
 
 :root{ --ink:#141414; --red:#e2191b; --disp:"GOST B",Georgia,serif; --body:"OCR B","Courier New",monospace; }
 *{box-sizing:border-box; margin:0; padding:0;}
@@ -134,8 +134,29 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
    on hover, it just switches rather than ramping, which is not something you can
    see on a 6% shift. The scale, which you can see, stays smooth because
    transform is compositor-only. */
-.dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1); transition:transform .5s cubic-bezier(.2,.8,.2,1);}
-.dc:hover .dc-media img, .dc:focus-visible .dc-media img{filter:saturate(1.05); transform:scale(1.08);}
+/* See the long note on .hero-gallery in css/style.css: only transform and
+   opacity animate on the compositor, so `filter` deliberately snaps rather
+   than transitioning, and the cards are promoted to their own layer only
+   while the pointer is inside the dock - not permanently, which would keep a
+   full-resolution texture per card alive for the life of the page. */
+/* TWO causes of the border flicker during the zoom, both fixed here:
+
+   1. `will-change` was being ADDED on #dock:hover. That makes Chrome rebuild
+      the compositing layer at the instant the animation starts, which shows as
+      a flash along the image edges. It was redundant anyway - translateZ(0)
+      below already promotes the layer permanently. Promote once and leave it.
+
+   2. At scale(1) the image sat EXACTLY flush with .dc-media's overflow:hidden
+      clip. On the first frames of the zoom, subpixel rounding put the image
+      edge right on the clip boundary, so a hairline of background appeared and
+      disappeared frame to frame. Resting at a hair over 1 keeps the edges
+      permanently outside the clip, so there is no boundary to shimmer. The
+      hover value is raised to match, keeping the same visual zoom.
+
+   Do not add contain/will-change back here; both were tried and made it worse. */
+.dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1.015) translateZ(0); backface-visibility:hidden; transition:transform .5s cubic-bezier(.2,.8,.2,1);}
+.dc{backface-visibility:hidden;}
+.dc:hover .dc-media img, .dc:focus-visible .dc-media img{filter:saturate(1.05); transform:scale(1.096) translateZ(0);}
 /* title (+ date) is a paper band at the TOP of the card, ABOVE the photo (not
    over it), so the photo's top is never covered. It's what shows in the peeking
    sliver at rest, with the photo starting just beneath it. No catch-phrase/
@@ -207,7 +228,12 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
 .ld-mark{position:relative; width:var(--ld-size); height:var(--ld-size);}
 .ld-mark svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
 .ld-logo path{fill:#141414;}
-body.ready #loader{opacity:0; pointer-events:none;}
+/* visibility flips only AFTER the 650ms fade finishes (the 0s transition with
+   a 650ms delay sequences that without JS). Without it the loader stays a
+   full-viewport composited layer on top of the page forever at opacity 0,
+   which the compositor keeps paying for on every frame of the background
+   video. Appearance is unchanged, it is already invisible by then. */
+body.ready #loader{opacity:0; pointer-events:none; visibility:hidden; transition:opacity 650ms ease, visibility 0s linear 650ms;}
 /* 3D logo (js/loader3d.js): swaps the static mark above for a real 3D
    render of the logo, front-on at first, then spinning - see that file's
    header comment. Absent entirely unless/until it loads. */
@@ -293,7 +319,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=7"></script>
+<script src="js/loader3d.js?v=8"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -326,6 +352,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <script src="js/projects-data.js?v=10"></script>
+<script src="js/image-sizes.js?v=1"></script>
 <script src="js/menu.js?v=4"></script>
 <script>
 /* ==========================================================================
@@ -363,6 +390,26 @@ const CLIP_PICK = (function(){
   function real(s){ return s && String(s).charAt(0)!=="["; }
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
+  /* A dock card is only ever ~360px wide, but its image is the project's
+     full-resolution hero (up to 2400px). srcset points the browser at the
+     600px copy in projects/<key>/sm/ instead, with the original still listed
+     as the largest candidate so a high-DPR screen is unaffected. Same
+     mechanism as the project page, see the comment on srcAttrs() there.
+     Dimensions come from js/image-sizes.js; no entry means no srcset and the
+     plain full-size src is used, so a newly added image can never break this.
+     The cards are the page's main content and sit in the viewport at rest, so
+     they are NOT lazy-loaded - lazy would delay the one thing worth seeing. */
+  function cardSrc(key, file){
+    var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[key]) ? IMG_SIZES[key][file] : null;
+    if(!dims) return "";
+    var w = dims[0], h = dims[1], b = "projects/"+key+"/", set = [];
+    if(w > 600)  set.push(b + "sm/" + file + " 600w");
+    if(w > 1200) set.push(b + "md/" + file + " 1200w");
+    set.push(b + file + " " + w + "w");
+    return (set.length > 1 ? ' srcset="'+set.join(", ")+'" sizes="(max-width:760px) 100vw, 27vw"' : '') +
+           ' width="'+w+'" height="'+h+'"';
+  }
+
   // hover-to-prefetch: the moment the pointer lands on a card, warm the project
   // page's document + stylesheet (index uses inline CSS, so style.css isn't
   // cached yet) so the click feels instant. The card image is already the hero
@@ -390,11 +437,11 @@ const CLIP_PICK = (function(){
         (date ? '<span class="dc-date">'+esc(date)+'</span>' : '') +
       '</span>' +
       '<span class="dc-media">' +
-        '<img src="projects/'+key+'/'+first+'" alt="'+esc(p.title)+'" loading="lazy" decoding="async">' +
+        '<img src="projects/'+key+'/'+first+'"'+cardSrc(key, first)+' alt="'+esc(p.title)+'" decoding="async">' +
       '</span>';
     a.addEventListener("mouseenter", function(){
       prefetch("project.html?p=" + key);
-      prefetch("css/style.css?v=37");
+      prefetch("css/style.css?v=40");
     }, { once:true });
     dock.appendChild(a);
   });
@@ -515,6 +562,16 @@ const CLIP_PICK = (function(){
     next.play().catch(function(){});
     cur.classList.remove("show");
     cur.muted = true;
+    /* PAUSE THE OUTGOING LAYER once it has finished fading out. Without this it
+       kept playing forever at opacity 0, so from the first crossfade onward the
+       page was decoding and compositing TWO full-screen videos at all times
+       while only one was ever visible. That constant double load is what made
+       hovering the project cards feel choppy - the compositor was already busy
+       every frame. The delay must clear the .bgvid opacity transition (900ms)
+       or you would see the outgoing layer freeze before it is gone. It is
+       re-armed safely later: arm() sets currentTime = 0 and calls play() on
+       whichever layer comes back in. */
+    setTimeout(function(){ if(!cur.classList.contains("show")) cur.pause(); }, 1000);
     active = nextI; armed = false;
   }
 

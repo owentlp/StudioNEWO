@@ -112,16 +112,6 @@ const MATERIAL_CATEGORIES = [
           { name:"Stainless steel", slug:"stainless-steel", used:false, image:"steel-stainless.jpg", usedIn:[], aliases:[],
             copy:"High rust resistance. Used for exposed hardware and high-moisture environments." }
         ]
-      },
-      {
-        label: "Brass & Copper",
-        properties: "Dense, naturally antimicrobial. Develops surface patina via oxidation.",
-        bestUses:   "",
-        lifecycle:  "",
-        items: [
-          { name:"Brass", slug:"brass", used:false, image:"brass.jpg", usedIn:[], aliases:[],
-            copy:"Low friction coefficient. Ideal for mechanical pivot points and threaded inserts." }
-        ]
       }
     ]
   },
@@ -142,32 +132,6 @@ const MATERIAL_CATEGORIES = [
         items: [
           { name:"Vegetable-tanned leather", slug:"vegetable-tanned-leather", used:false, image:"leather-veg.jpg", usedIn:[], aliases:[],
             copy:"Tanned using natural organic tannins. 100% biodegradable." },
-          { name:"Chrome-tanned leather", slug:"chrome-tanned-leather", used:false, image:"leather-chrome.jpg", usedIn:[], aliases:[],
-            copy:"Highly water-resistant but relies on heavy metals during tanning. Avoided." }
-        ]
-      },
-      {
-        label: "Bio-plastics",
-        properties: "Polymers derived from biological sources rather than petroleum.",
-        bestUses:   "",
-        lifecycle:  "",
-        items: [
-          { name:"Cellulose acetate", slug:"cellulose-acetate", used:false, image:"cellulose-acetate.jpg", usedIn:[], aliases:[],
-            copy:"Derived from wood pulp or cotton linters. High impact resistance. Easily machined and polished. Slowly biodegradable under natural conditions." },
-          { name:"PHA", slug:"pha", used:false, image:"pha.jpg", usedIn:[], aliases:["polyhydroxyalkanoate"],
-            copy:"Polyhydroxyalkanoate, a thermoplastic synthesized by microbial fermentation. Extrudable for 3D printing. Unlike PLA, it is fully marine and soil biodegradable, breaking down naturally without industrial heating facilities." }
-        ]
-      },
-      {
-        label: "Bio-composites",
-        properties: "Natural fibers or structures bound together using biological processes.",
-        bestUses:   "",
-        lifecycle:  "",
-        items: [
-          { name:"Mycelium composite", slug:"mycelium", used:false, image:"mycelium.jpg", usedIn:[], aliases:[],
-            copy:"Fungal root networks grown through agricultural waste. Lightweight, fire-resistant, and high acoustic absorption. Fully home-compostable." },
-          { name:"Linoleum", slug:"linoleum", used:false, image:"linoleum.jpg", usedIn:[], aliases:[],
-            copy:"Cured mixture of oxidized linseed oil, pine rosin, and wood flour on a jute backing. High wear and friction resistance. 100% biodegradable." }
         ]
       }
     ]
@@ -222,8 +186,6 @@ const MATERIAL_CATEGORIES = [
             copy:"Polylactic acid, a bio-based thermoplastic. Low glass transition temperature. Ideal for rapid prototyping and internal brackets. Requires industrial facilities to compost." },
           { name:"ABS / PETG", slug:"abs-petg", used:false, image:"abs-petg.jpg", usedIn:[], aliases:[],
             copy:"High impact and heat resistance. Used for functional parts requiring structural flexibility." },
-          { name:"Acrylic", slug:"acrylic", used:false, image:"acrylic.jpg", usedIn:[], aliases:[],
-            copy:"Optically clear, rigid. Shatters rather than bends." }
         ]
       }
     ]
@@ -245,8 +207,6 @@ const MATERIAL_CATEGORIES = [
         items: [
           { name:"Heavyweight canvas", slug:"canvas", used:true, image:"canvas.jpg", usedIn:[{id:"neb",title:"NEB"}], aliases:["canvas","heavyweight canvas (cotton)"],
             copy:"Cotton. Breathable, high tensile strength. Used for suspended sling seating. Easily removable for washing or replacement." },
-          { name:"Wool", slug:"wool", used:false, image:"wool.jpg", usedIn:[], aliases:[],
-            copy:"Naturally flame-retardant and temperature-regulating." }
         ]
       },
       {

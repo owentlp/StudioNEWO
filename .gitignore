@@ -11,11 +11,18 @@
 # step 0 for the one-time cleanup.
 docs/
 
-# local build/maintenance scripts, not part of the site
+# local build/maintenance scripts, not part of the site.
+# NOTE: make-image-variants.py only WRITES files that do ship (the sm/ and md/
+# copies and js/image-sizes.js); the script itself never needs to be served.
 cleanup.ps1
 optimize-images.py
+make-image-variants.py
 push-to-repo.ps1
 PUSH.bat
+
+# intermediate written by an earlier run of the variant script; the real
+# output is js/image-sizes.js. cleanup.ps1 deletes this.
+js/image-sizes.json
 
 # the loader-animation prototype. Its motion is already ported into
 # js/loader3d.js and its 3D-LOGO.STL is byte-identical to logo/3d-logo.stl,

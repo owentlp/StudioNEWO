@@ -382,7 +382,7 @@ window.NEWO_SANDBOX = (function(){
           lines.push(n+". "+(info.label||"widget").toUpperCase()+" (interactive - position/size only, can't change its own content here)");
           lines.push("   "+colTxt+"   height "+h+"px   top ~"+Math.round(top)+"px");
         } else {
-          lines.push(n+". TEXT - "+(info.label||"text block")+' — "'+excerpt(info.el)+'" (content unchanged, only position/width below)');
+          lines.push(n+". TEXT - "+(info.label||"text block")+' - "'+excerpt(info.el)+'" (content unchanged, only position/width below)');
           lines.push("   "+colTxt+"   top ~"+Math.round(top)+"px");
         }
       });

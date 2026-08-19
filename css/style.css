@@ -6,14 +6,21 @@
    folios. No rules / borders / boxes. You never edit this file;
    copy + image sizes live in js/projects-data.js.
    ============================================================ */
+/* woff2 first, the original .ttf/.otf second as a fallback. woff2 is the same
+   glyph data brotli-compressed, so this is byte-identical typography for a
+   third of the bytes (67KB -> 24KB). The <head> preload on every page points
+   at the woff2 ONLY - listing both there would download each font twice.
+   Keep this order and the preloads in step; see fonts/README.txt. */
 @font-face{
   font-family:"GOST B";
-  src:url("../fonts/gost-typeb-italic.ttf") format("truetype");
+  src:url("../fonts/gost-typeb-italic.woff2") format("woff2"),
+      url("../fonts/gost-typeb-italic.ttf") format("truetype");
   font-style:italic; font-display:swap;
 }
 @font-face{
   font-family:"OCR B";
-  src:url("../fonts/ocr-b.otf") format("opentype");
+  src:url("../fonts/ocr-b.woff2") format("woff2"),
+      url("../fonts/ocr-b.otf") format("opentype");
   font-display:swap;
 }
 
@@ -64,7 +71,23 @@
    not turn the element into a scroll container, so position:sticky keeps
    working; `hidden` stays as the fallback for older browsers. */
 html, body{overflow-x:hidden;}
-@supports (overflow:clip){ html, body{overflow-x:clip;} }
+@supports (overflow:clip){
+  html, body{overflow-x:clip;}
+  /* Clip the BODY vertically too. The 3D viewer element is absolutely
+     positioned and much taller than the page (see .cad-stage model-viewer) so
+     that the model has room to be zoomed into. Horizontal overflow was already
+     contained by the rule above, but VERTICAL overflow still grew the
+     document, which left a large empty white band below the Read more button
+     on project pages - the page was as tall as the invisible viewer element,
+     not as tall as its content.
+     Clipping body cuts the viewer off at the bottom of the real content, which
+     is exactly the wanted behaviour: the model runs off the bottom edge of the
+     page and no further. Press Read more, the page gets longer, and more of it
+     shows.
+     `clip` specifically, NEVER `hidden`: hidden would turn body into a scroll
+     container and break page scrolling. clip only clips. */
+  body{overflow-y:clip;}
+}
 html{scroll-behavior:smooth;}
 body{
   font-family:var(--body); color:var(--ink); background:var(--paper);
@@ -80,6 +103,12 @@ img{display:block;}
    straight to the page content. Invisible to mouse users. ---------- */
 .skip-link{position:absolute; left:8px; top:-60px; z-index:20; background:var(--ink); color:var(--paper); font-size:10px; letter-spacing:.16em; text-transform:uppercase; text-decoration:none; padding:8px 12px; transition:top .15s ease;}
 .skip-link:focus{top:8px; outline:2px solid var(--red); outline-offset:2px;}
+/* .vh - visually hidden, but still read by search engines and screen readers.
+   The about and contact pages had their visible headlines removed, so each
+   keeps its <h1> with this class: a page still needs one heading, and dropping
+   it would be a real regression nobody can see. Standard clip-rect technique -
+   do NOT swap it for display:none, which hides it from assistive tech too. */
+.vh{position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0;}
 
 /* ---------- HEADER + NAV (logo left · wordmark centre · hamburger right) ----------
    Logo + burger are fixed so they follow the scroll; they sit right at the edge
@@ -180,7 +209,13 @@ body.ready .page{opacity:1;}
 .ld-mark{position:relative; width:var(--ld-size); height:var(--ld-size);}
 .ld-mark svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
 .ld-logo path{fill:var(--ink);}
-body.ready #loader{opacity:0; pointer-events:none;}
+/* visibility flips only AFTER the 650ms fade finishes (the 0s transition with
+   a 650ms delay is how you sequence that without JS). Without it the loader
+   stays a full-viewport composited layer sitting on top of the page forever
+   at opacity 0, which the compositor keeps paying for on every scroll and
+   every frame of the 3D model. Appearance is unchanged: it is already
+   invisible by the time this takes effect. */
+body.ready #loader{opacity:0; pointer-events:none; visibility:hidden; transition:opacity 650ms ease, visibility 0s linear 650ms;}
 /* 3D logo (js/loader3d.js). It sits ON TOP of the flat mark at the same size
    and fades in over it once its first frame is actually rendered; the flat one
    is only hidden after that fade finishes, so there is never a frame showing
@@ -318,8 +353,10 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    clip (941,612) 488x275 sits cols 9-13, bottom-aligned with the photo. */
 .hero{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:22px; align-content:start; align-items:start;}
 .hero-main{grid-column:1 / 7; grid-row:1; align-self:start; position:relative; cursor:zoom-in;}
-.hero-main img{display:block; width:100%; height:auto; object-fit:contain; transition:transform .35s ease, filter .3s ease; filter:saturate(.97);}
-.hero-main:hover img{transform:scale(1.035); filter:saturate(1.05);}
+/* same rule as the gallery: transform animates, filter snaps. See the note on
+   .hero-gallery .gthumb img below. */
+.hero-main img{display:block; width:100%; height:auto; object-fit:contain; transform:translateZ(0); backface-visibility:hidden; transition:transform .35s ease; filter:saturate(.97);}
+.hero-main:hover img{transform:scale(1.035) translateZ(0); filter:saturate(1.05);}
 /* specs + INQUIRE share one row directly under the hero image (same width as
    the image); the red inquire block sits at the row's far right. */
 .hero-specs{grid-column:1 / 7; grid-row:2; align-self:start; display:flex; flex-wrap:wrap; align-items:center; gap:3px 16px; font-size:13px; letter-spacing:.04em; line-height:1.35; text-transform:uppercase; color:var(--ink);}
@@ -385,12 +422,54 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    caused the right-edge gap when the count floated to 5). The columns are a
    share of the width, so the photos resize slightly with zoom to keep 4
    columns filling the page, and the layout stays the same at any zoom. */
-.hero-gallery{grid-column:1 / -1; grid-row:5; width:100vw; margin-left:calc(50% - 50vw); padding:0 var(--mar); columns:4; column-gap:var(--gut); margin-top:64px;}
-.hero-gallery .gthumb{padding:0; border:0; background:#00000008; opacity:.9; overflow:visible; position:relative; transition:opacity .2s; cursor:zoom-in; break-inside:avoid; margin-bottom:var(--gallery-gap);}
-.hero-gallery .gthumb img{display:block; width:100%; height:auto; filter:saturate(.94); transform-origin:center center; transition:transform .3s ease, filter .3s ease; will-change:transform;}
+/* Explicit flex columns, not CSS multi-column. Multi-column balances its
+   content across the available columns, which meant a gallery of five tall
+   thumbs filled only three of four columns and left a dead strip down the
+   right of the page. Each .gcol is flex:1, so N columns always divide the full
+   width exactly, whatever N is. Which thumb lands in which column is decided
+   in project.html from the known aspect ratios (see buildColumns there). */
+.hero-gallery{grid-column:1 / -1; grid-row:5; width:100vw; margin-left:calc(50% - 50vw); padding:0 var(--mar); margin-top:64px;}
+.hero-gallery .gcols{display:flex; align-items:flex-start; gap:var(--gut);}
+.hero-gallery .gcol{flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:var(--gallery-gap);}
+.hero-gallery .gallery-vid{margin-top:var(--gallery-gap);}
+/* no margin-bottom / break-inside here any more: the column is a flex stack
+   with `gap`, so a margin would double the spacing between thumbs and
+   break-inside is meaningless outside multi-column. */
+/* no background tint behind the thumb. It was a placeholder for before the
+   photo arrived, which the intrinsic width/height attributes now handle - and
+   a faint dark rectangle sitting directly behind an image that scales is a
+   flicker source: any subpixel mismatch between the image edge and the box
+   underneath it shows up as a shimmering border during the zoom. */
+.hero-gallery .gthumb{padding:0; border:0; opacity:.9; overflow:visible; position:relative; transition:opacity .2s; cursor:zoom-in;}
+/* HOVER SMOOTHNESS - three deliberate choices here, all for the same reason:
+   only `transform` and `opacity` can be animated by the compositor alone. Any
+   other animated property makes the browser re-rasterize the image on EVERY
+   frame, which on a photo this large is what reads as choppy.
+
+   1. `filter` is NOT in the transition list. It still changes on hover, it just
+      snaps instead of animating - imperceptible going from .94 to 1.05, and it
+      takes a per-frame raster down to a single one.
+   2. Promotion is PERMANENT, via translateZ(0) in the resting transform, and
+      `will-change` is not used at all. Toggling will-change on hover (which an
+      earlier version did, scoped to the gallery) makes Chrome rebuild the
+      layer the moment the pointer arrives, and that rebuild is visible as a
+      flash on the image's edges. A permanent layer costs texture memory, which
+      is affordable now only because srcset serves these thumbs at 600-1200px
+      instead of the original 2000-2400px. If the served sizes ever grow again,
+      revisit this - but do not go back to toggling the hint.
+   3. No background behind the thumb, so there is no box edge for a subpixel
+      mismatch to reveal mid-zoom.
+   If you add another hover effect here, animate transform/opacity or nothing. */
+/* NO `will-change` here, and none on :hover either. Adding will-change when the
+   pointer arrives makes Chrome tear down and rebuild the compositing layer at
+   the exact moment the zoom starts, which is visible as a flash along the edges
+   of the image - the "flicker on the border during the enlarging animation".
+   translateZ(0) in the resting transform already gives the element a permanent
+   layer, so the hint added nothing and cost that flash. Promote once, stay
+   promoted, animate transform only. */
+.hero-gallery .gthumb img{display:block; width:100%; height:auto; filter:saturate(.94); transform-origin:center center; transform:translateZ(0); backface-visibility:hidden; transition:transform .3s ease;}
 .hero-gallery .gthumb:hover{opacity:1; z-index:6;}
-.hero-gallery .gthumb:hover img{transform:scale(1.35); filter:saturate(1.05);}
-.hero-gallery .cell{column-span:all; margin-bottom:var(--gallery-gap);}
+.hero-gallery .gthumb:hover img{transform:scale(1.35) translateZ(0); filter:saturate(1.05);}
 
 /* ---------- MODEL + MECHANISM, SIDE BY SIDE ----------
    2026-07-22: restructured from two stacked sections (model above,
@@ -443,13 +522,17 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   margin-bottom:calc(var(--model-slot) * 0.72);}
 .cad-stage model-viewer{
   position:absolute; left:50%; top:50%; z-index:1;
-  /* the element is deliberately much taller/wider than its slot so a tall
-     product (the lamp) has room to render + zoom without the top and bottom
-     being clipped. It overflows the slot on every side and floods/underlaps
-     the page; the transparent margins don't intrude, only the model pixels
-     show. Kept a fixed multiple of the slot (no vh floor) so sizing/spacing
-     scale together across window sizes. */
-  width:min(1500px,190%); height:calc(var(--model-slot) * 2.9);
+  /* The element is MUCH bigger than its slot on purpose: it runs the full width
+     of the window and past both edges, and is several times the slot's height.
+     That size is the whole zoom budget - the model is only ever clipped by the
+     edge of this element, so the bigger it is, the further you can zoom in
+     before anything is cut off. Owen's ask: let it be zoomed all the way in.
+     The overhang costs nothing visually; the element is transparent apart from
+     the model itself, and html/body overflow-x:clip trims the sides.
+     If you change these numbers, change the camera-orbit percentage in
+     project.html by the same factor or the model's default size will jump:
+     apparent size is elementSize / cameraRadius. */
+  width:130vw; height:calc(var(--model-slot) * 5);
   transform:translate(-50%,-50%) rotate(-5deg) scale(.94);
   transition:transform .5s ease; background:transparent; --poster-color:transparent;
   pointer-events:none;   /* enabled only over the slot box, in project.html */
@@ -519,7 +602,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    Knobs: the -clamp(...) margin-top is how far it underlaps; the +6vw / -6vw
    pair is how much bigger it gets. */
 .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-text{position:relative; z-index:2;}
-.cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic{position:relative; z-index:1;
+.cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech{position:relative; z-index:1;
   width:100%; margin-left:0;
   /* underlap as a % of width (not fixed px) so the transparent top buffer tucks
      under the text by the same proportion at any mechanism size - and no cap, so
@@ -535,9 +618,21 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    20.8% bottom / 20.8% sides of the frame width), so a margin of live wave
    field still reads around the artwork rather than being entirely tucked
    behind neighbouring content. Raise these toward the buffer values to pull
-   the page tighter, lower them to let more of the wave field show. */
-.cad-hiw.solo-mech .cad-hiw-mech .hiw-graphic{position:relative; z-index:1;
-  margin-top:-13%; margin-bottom:-15%; margin-left:-9%; margin-right:-9%;}
+   the page tighter, lower them to let more of the wave field show.
+
+   SCOPED TO .has-mech ON PURPOSE. Every project with how-it-works text but no
+   mechanism also gets .solo-mech, and this rule used to hit their empty
+   graphic box too - which collapsed the section and pulled the process grid up
+   over the paragraph above it. project.html now only emits the box when there
+   is a graphic, and only tags it .has-mech when a real mechanism is inside.
+
+   margin-bottom was -15%, which pulled the Read more button and the first
+   process image up INTO the wave field (measured 87px of collision on OMNI at
+   1900px wide). -5% keeps the waves bleeding over the section below without
+   letting the next section's content collide with the artwork. If you raise it
+   again, re-check that .readmore still clears the graphic's bottom edge. */
+.cad-hiw.solo-mech .cad-hiw-mech .hiw-graphic.has-mech{position:relative; z-index:1;
+  margin-top:-13%; margin-bottom:-5%; margin-left:-9%; margin-right:-9%;}
 .fignotes{list-style:none;}
 .fignotes li{position:relative; padding:0 0 16px 22px; font-size:14px; line-height:1.45; max-width:var(--w-desc);}
 .fignotes .fn{position:absolute; left:0; top:1px; font-size:11px; letter-spacing:.1em; color:var(--red);}
@@ -644,9 +739,23 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      the radar. Negative margins crop that reserved space (the buffer is
      transparent, so overlapping the text/next section is invisible). Tune the
      -% values if the radar sits too high/low in a narrow window. */
-  .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic{width:auto; margin-left:0; margin-top:-20%; margin-bottom:-12%;}
-  /* keep the centring translate on mobile, just drop the rotate/scale tilt */
-  .cad-stage model-viewer{transform:translate(-50%,-50%);}
+  .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech{width:auto; margin-left:0; margin-top:-20%; margin-bottom:-12%;}
+  /* stacked OMNI: drop the sideways crop entirely. It exists on desktop to
+     pull the artwork out toward the page edges, but in one narrow column a
+     negative side margin just pushes the mode buttons off the left of the
+     screen, which is the same clipping the desktop rule had. */
+  .cad-hiw.solo-mech .cad-hiw-mech .hiw-graphic.has-mech{margin-left:0; margin-right:0; margin-top:-14%; margin-bottom:-6%;}
+  /* Keep the centring translate on mobile, drop the rotate/scale tilt - and
+     rein the element in close to its slot. On desktop it is deliberately ~190%
+     wide and 2.9x tall so a zoomed model floods past and underlaps the page,
+     with pointer-events gated so that flood never steals clicks. On touch the
+     model is live from the first tap (see the note in project.html), so an
+     element that big would be sitting invisibly on top of whatever is next to
+     it and swallowing touches meant for the page. Contained here instead. */
+  .cad-stage model-viewer{
+    transform:translate(-50%,-50%);
+    width:100%; height:calc(var(--model-slot) * 1.55);
+  }
   .cad-stage model-viewer:hover{transform:translate(-50%,-50%);}
   .mv-bar{gap:14px 24px; margin-top:14px;}
   .mv-bar .mv-left,.mv-bar .mv-mid{display:contents;}
@@ -669,7 +778,10 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   .proj{padding-top:92px;}
   .scatter{grid-template-columns:repeat(2,1fr);}
   .scatter .cell{grid-column:auto !important; margin-top:0 !important; margin-left:0 !important; margin-right:0 !important; width:auto !important; text-align:left !important;}
-  .hero-gallery{columns:2;}
+  /* column COUNT on mobile is set in project.html (it rebuilds the columns at
+     the 760px breakpoint), not here - the columns are real elements now, so
+     CSS cannot re-deal them. This only tightens the gutter between them. */
+  .hero-gallery .gcols{gap:var(--gallery-gap);}
 }
 
 @media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto;} .page{transition:none;} }
@@ -685,12 +797,18 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 }
 .lightbox.open{display:flex;}
 .lightbox.show{opacity:1;}
-.lightbox img{
+/* videos sit in the same set as the photos and get the same treatment - only
+   whichever matches the current item is shown (the other carries [hidden]) */
+.lightbox img, .lightbox video{
   max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain;
   -webkit-user-select:none; user-select:none;
   opacity:0; transform:scale(.98); transition:opacity .2s ease, transform .2s ease;
 }
-.lightbox.imgshow img{opacity:1; transform:none;}
+.lightbox video[hidden], .lightbox img[hidden]{display:none;}
+.lightbox.imgshow img, .lightbox.imgshow video{opacity:1; transform:none;}
+/* any inline video that is part of the lightbox set reads as openable */
+.fig.vid[data-lb]{cursor:zoom-in;}
+.fig.vid[data-lb] video{pointer-events:none;}   /* let the click reach the figure */
 .lb-close,.lb-prev,.lb-next{
   position:fixed; z-index:301; background:none; border:0; padding:0; margin:0;
   color:#eceae5; font-family:var(--body); cursor:pointer; -webkit-tap-highlight-color:transparent;

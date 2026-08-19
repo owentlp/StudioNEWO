@@ -22,9 +22,9 @@
 <link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
-<link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=37">
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=40">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -62,9 +62,11 @@
   .principle:nth-child(2){grid-column:7 / 12; margin-top:clamp(20px,4vh,52px);}
   .principle:nth-child(3){grid-column:2 / 7;}
   .principle:nth-child(4){grid-column:8 / 13; margin-top:clamp(20px,4vh,52px);}
-  /* the index number, in the same [NN] language as the figure marks */
-  .principle .pn{display:block; font-size:13px; letter-spacing:.16em; color:var(--red); margin-bottom:9px;}
-  .principle h2{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(19px,2.4vw,27px); line-height:1.05; margin-bottom:10px;}
+  /* .vh (visually hidden) moved to css/style.css - about and contact both use
+     it now for their hidden <h1>. */
+  /* red, matching the [NN] marks these headings replaced - the numbers carried
+     the only red on the page and it went with them, so the titles take it on. */
+  .principle h2{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(19px,2.4vw,27px); line-height:1.05; margin-bottom:10px; color:var(--red);}
 
   @media (max-width:860px){
     .ab-statement, .ab-who{grid-column:1 / -1;}
@@ -88,45 +90,40 @@
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page wrap" id="content">
-  <span class="eyebrow">INFO</span>
-  <h1 style="font-size:clamp(36px,6vw,72px); margin-top:14px;">Studio NEWO</h1>
-  <hr>
+  <!-- The visible "INFO" eyebrow and the big "Studio NEWO" headline were
+       removed by request: the wordmark is already fixed at the top of every
+       page, so both were saying the name a second and third time. The <h1> is
+       kept but visually hidden - a page still needs one heading for search
+       engines and screen readers, and losing it would be a real regression
+       nobody can see. -->
+  <h1 class="vh">Studio NEWO</h1>
   <div class="ab-grid">
-    <p class="desc ab-statement">Studio NEWO is an industrial design practice focused on structural integrity, material honesty, and lifecycle impact. Operating at the intersection of mechanical logic and domestic utility, the studio leverages emerging technologies and raw, high-quality materials to build products that justify their own existence. Delivering functional value is the baseline; considering how an object is manufactured, repaired, and eventually recycled is the mission.</p>
+    <p class="desc ab-statement">Studio NEWO is an industrial design practice in Toronto. It makes furniture, lighting, and objects out of raw materials and current technology, built to be opened, repaired, and kept. Working is the minimum. How a thing gets made, fixed, and eventually taken apart is the actual problem.</p>
     <div class="ab-who">
       <span class="cap">Owen Palmer, designer</span>
-      <p class="desc">I am not your typical industrial designer. Currently based in Toronto, studying industrial design, with a foundation in mechanical engineering. I approach design through a lens of pragmatic fabrication, my work prioritizes honesty, tactile materials, and mechanical longevity over planned obsolescence. I want to create great products that offer exceptional value, solve a real problem, and exceed people's expectations.</p>
+      <p class="desc">I came to industrial design from two years of mechanical engineering, and I still think like that. I build things before I model them. I would rather a product be worth the material it is made from than be new.</p>
     </div>
   </div>
 
+  <!-- the [01]-[04] index numbers were removed by request: the principles are
+       not an ordered list and the titles already separate them, so the numerals
+       were only decoration. The .pn style went with them. -->
   <div class="principles">
     <div class="principle">
-      <span class="pn">[01]</span>
-      
-        <h2>Spatial prototyping</h2>
-        <p class="desc">Design is resolved in physical space. Mechanical interlocks, tolerances, and structural constraints are worked out through rapid prototyping and mental modeling first. CAD is utilized to document and refine a physically solved problem, rather than searching for one on a screen.</p>
-      
+      <h2>Spatial prototyping</h2>
+      <p class="desc">Design gets resolved in physical space. Interlocks, tolerances, and structure are worked out by hand first. CAD documents a solved problem, it does not go looking for one.</p>
     </div>
     <div class="principle">
-      <span class="pn">[02]</span>
-      
-        <h2>Constraint-driven form</h2>
-        <p class="desc">Form follows manufacturing logic. The fabrication method, material properties, and ergonomic requirements set strict boundaries. When a desired aesthetic conflicts with a structural requirement, the design adapts to the mechanics.</p>
-      
+      <h2>Constraint-driven form</h2>
+      <p class="desc">Form follows the way a thing is made. The fabrication method, the material, and the hand using it set the boundaries. When the look fights the mechanics, the mechanics win.</p>
     </div>
     <div class="principle">
-      <span class="pn">[03]</span>
-      
-        <h2>Pragmatism and value</h2>
-        <p class="desc">Every component and line of firmware must earn its place. If a feature does not meaningfully improve function or longevity, it is removed. Fewer parts result in fewer points of failure, cleaner aesthetics, and lower production complexity.</p>
-      
+      <h2>Pragmatism and value</h2>
+      <p class="desc">Every part and every line of firmware earns its place. If it does not improve how the thing works or how long it lasts, it comes out. Fewer parts, fewer failures.</p>
     </div>
     <div class="principle">
-      <span class="pn">[04]</span>
-      
-        <h2>Lifecycle</h2>
-        <p class="desc">Products are designed with their entire lifecycle in mind. This means considering how long the product will be used for, what happens if a part is damaged or worn out, and what materials make the most sense functionally and environmentally. Utilizing mechanical fasteners, selecting raw metals, and designing sub-assemblies that can be swapped independently rather than discarding the entire object is the goal.</p>
-      
+      <h2>Lifecycle</h2>
+      <p class="desc">Products are designed for their whole life, not the sale. Mechanical fasteners, raw metal, and sub-assemblies that swap out on their own, so one worn part does not condemn the object.</p>
     </div>
   </div>
 </main>

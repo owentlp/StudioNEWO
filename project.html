@@ -22,8 +22,8 @@
 <link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
-<link rel="preload" href="fonts/gost-typeb-italic.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="fonts/ocr-b.otf" as="font" type="font/otf" crossorigin>
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
 <!-- model-viewer powers the rendered 3D model + AR (iOS Quick Look / Android
      Scene Viewer). It is now injected from the page script ONLY when the
      current project actually has a GLB (see the cad block), so the four
@@ -31,7 +31,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=37">
+<link rel="stylesheet" href="css/style.css?v=40">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -41,7 +41,7 @@
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=7"></script>
+<script src="js/loader3d.js?v=8"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -59,14 +59,21 @@
 
 <div class="lightbox" id="lightbox" aria-hidden="true">
   <button class="lb-close" id="lbClose" aria-label="Close">CLOSE &times;</button>
-  <button class="lb-prev" id="lbPrev" aria-label="Previous image">&larr;</button>
+  <button class="lb-prev" id="lbPrev" aria-label="Previous item">&larr;</button>
   <img id="lbImg" src="" alt="">
-  <button class="lb-next" id="lbNext" aria-label="Next image">&rarr;</button>
+  <!-- videos share the lightbox with the photos; whichever matches the current
+       item is shown and the other is hidden. Controls on, because at full
+       screen you want scrubbing, unlike the muted inline loops. -->
+  <video id="lbVid" playsinline controls loop hidden></video>
+  <button class="lb-next" id="lbNext" aria-label="Next item">&rarr;</button>
   <span class="lb-count" id="lbCount"></span>
 </div>
 
 <script src="js/projects-data.js?v=10"></script>
-<script src="js/materials-data.js?v=2"></script>
+<script src="js/materials-data.js?v=3"></script>
+<!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
+     reserved before the files land (no reflow) and srcset can be emitted -->
+<script src="js/image-sizes.js?v=1"></script>
 <!-- project pages hold the loader until their hero image, hero video and 3D
      model have loaded (see the readiness gate at the end of the page script);
      this flag tells main.js to hand reveal control to this page. -->
@@ -132,6 +139,36 @@
   })();
   function keep(it){ return (it && typeof it === "object") ? real(it.src) : real(it); }
   function img(src){ return base + src; }
+
+  /* ---- RESPONSIVE IMAGES ------------------------------------------------
+     Every hero + gallery photo has two pre-generated downscaled copies beside
+     it, in projects/<id>/sm/ (600px wide) and projects/<id>/md/ (1200px wide).
+     The ORIGINAL file is never touched and is always the last, largest srcset
+     candidate, so nothing here can cost image quality: the browser simply
+     picks the smallest copy whose pixel width still covers the box at this
+     screen size and pixel density, exactly as it would have used the original
+     otherwise. The lightbox deliberately bypasses this and loads the original.
+
+     `sizes` tells the browser how wide the image will actually be BEFORE it
+     has the CSS, which is what makes the choice correct rather than a guess.
+     Keep these in step with the matching CSS if the layout changes:
+       gallery  = a 4-column masonry across the full window (2 columns <=760px)
+       hero     = columns 1-7 of the 12-column hero grid, roughly 58vw
+     Dimensions come from js/image-sizes.js; if an image has no entry there
+     (a new file added before the script was re-run) this quietly emits a plain
+     src with no srcset, so the page still works, just without the saving. */
+  var GAL_SIZES  = "(max-width:760px) 50vw, 25vw";
+  var HERO_SIZES = "(max-width:760px) 100vw, 58vw";
+  function srcAttrs(file, sizes){
+    var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][file] : null;
+    if(!dims) return "";
+    var w = dims[0], h = dims[1], set = [];
+    if(w > 600)  set.push(base + "sm/" + file + " 600w");
+    if(w > 1200) set.push(base + "md/" + file + " 1200w");
+    set.push(base + file + " " + w + "w");
+    return (set.length > 1 ? ' srcset="' + set.join(", ") + '" sizes="' + sizes + '"' : '') +
+           ' width="' + w + '" height="' + h + '"';
+  }
   function pad(n){ return n < 10 ? "0"+n : ""+n; }
   // real HTML escaping (this used to be a passthrough): copy is all first-party
   // so it's not a security issue, but a stray & or < in a caption would have
@@ -179,9 +216,20 @@
   var year = real(p.date) ? p.date : "";
 
   // a looping inline video figure (a section's video slot)
+  /* Every video on the page is registered into the SAME lightbox set as the
+     gallery images (see LB below), so tapping one opens it full screen and the
+     arrows carry on through the rest of the project's media rather than
+     stopping at the photos. Gallery images take indices 0..n-1; each video
+     appends itself and stamps its own index onto the figure. */
   function videoFig(src, ar){
-    return '<figure class="fig vid" style="aspect-ratio:'+(ar||"16/9")+'">' +
-      '<video src="'+img(src)+'" muted loop autoplay playsinline preload="metadata"></video></figure>';
+    var u = img(src), i = -1;
+    // reuse an existing slot if this clip is already in the set. That is how
+    // the hero video picks up the index reserved for it above (and it keeps a
+    // clip that appears in two places from being listed twice).
+    for(var k = 0; k < LB.length; k++){ if(LB[k].type === "video" && LB[k].src === u){ i = k; break; } }
+    if(i < 0) i = LB.push({ type:"video", src:u }) - 1;
+    return '<figure class="fig vid" style="aspect-ratio:'+(ar||"16/9")+'" data-lb="'+i+'">' +
+      '<video src="'+u+'" muted loop autoplay playsinline preload="metadata"></video></figure>';
   }
 
   // one figure. cut-outs sit on the paper with no crop and no box.
@@ -298,6 +346,20 @@
 
   // ---------- HERO (image bleeds left; text stuck to the right edge) ----------
   var gal = (p.gallery||["hero.jpg"]).filter(real);
+
+  /* ---- The lightbox set: images and videos in ONE ordered list ----
+     Order is hero image, then the hero video, then the rest of the gallery,
+     then any other video on the page. The hero video's slot is RESERVED here
+     rather than being appended whenever videoFig() happens to emit it - the
+     hero markup is built after the thumbs, so left to itself the demo landed
+     last, behind eight photos, when it belongs beside the shot it demonstrates.
+
+     galOffset is where the gallery thumbs start, so their data-lb stamps stay
+     correct whether or not this project has a hero video. */
+  var LB = [{ type:"img", src: img(gal[0]) }];
+  if(real(p.heroVideo)) LB.push({ type:"video", src: img(p.heroVideo) });
+  var galOffset = LB.length;
+  gal.slice(1).forEach(function(s){ LB.push({ type:"img", src: img(s) }); });
   var heroSrc = gal[0] || "hero.jpg";
 
   // per-project rhythm seed, still used by the process / aesthetics scatter
@@ -309,13 +371,64 @@
   // (CSS columns, see style.css). The masonry packs them top-down and keeps
   // each image's native aspect ratio, so there's no per-thumb column/span/crop
   // math - just emit the thumbs in order. Each still swaps the hero on click.
-  var gthumbs = gal.slice(1).map(function(g,i){
-    return '<div class="gthumb">' +
-             '<img src="'+img(g)+'" alt="" loading="lazy" decoding="async" data-lb="'+(i+1)+'"></div>';
-  }).join("");
-  var galleryBlock = (gthumbs || real(p.galleryVideo)) ?
-    '<div class="hero-gallery">' + gthumbs +
-      (real(p.galleryVideo)?'<div class="cell" style="grid-column:8 / 13;">'+videoFig(p.galleryVideo,"16/9")+'</div>':'') +
+  // Each thumb is emitted with a srcset (sm/ 600px, md/ 1200px, plus the
+  // full-resolution original) and its intrinsic width/height. The srcset lets
+  // the browser download the smallest copy that still covers the box it is
+  // actually painted into, which on a masonry of ~250-450px thumbs is a large
+  // saving with no visible difference; a high-DPR screen still pulls the
+  // bigger candidate, and the lightbox always opens the untouched original.
+  // width/height reserve the correct box before the file arrives, so the
+  // CSS-columns masonry lays out once instead of reflowing on every load.
+  /* ---- GALLERY COLUMNS -------------------------------------------------
+     This used to be a CSS multi-column (`columns:4`) masonry. Multi-column
+     BALANCES: it works out an even height and fills columns to it, so five
+     thumbs across four columns packed 2/2/1 and left the fourth column empty,
+     which is where NEB's and NAF's big dead strip on the right came from. It
+     also could not be reasoned about in advance, because the balance depends
+     on image heights that are not known until the files load.
+
+     So the columns are built explicitly instead. Each thumb goes into whichever
+     column is currently shortest, using its aspect ratio from js/image-sizes.js
+     as the height - that is known up front, so the packing is decided before a
+     single byte of image arrives and never reshuffles afterwards. The columns
+     are flex children with `flex:1`, so whatever the count, they always span
+     the full width edge to edge with no leftover margin.
+
+     Column count is capped at the number of thumbs, so three photos make three
+     full-width columns rather than three quarters of the page. */
+  function buildColumns(files, colCount){
+    var cols = [], heights = [];
+    for(var c = 0; c < colCount; c++){ cols.push([]); heights.push(0); }
+    files.forEach(function(entry){
+      var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][entry.file] : null;
+      // ratio = height per unit width. Unknown files get 1 (square-ish), which
+      // is a reasonable neutral guess and never breaks the layout.
+      var ratio = dims ? (dims[1] / dims[0]) : 1;
+      var shortest = 0;
+      for(var c = 1; c < colCount; c++){ if(heights[c] < heights[shortest]) shortest = c; }
+      cols[shortest].push(entry);
+      heights[shortest] += ratio;
+    });
+    return cols;
+  }
+  var galFiles = gal.slice(1).map(function(g, i){ return { file:g, lb:galOffset + i }; });
+  function galleryHTML(colCount){
+    return buildColumns(galFiles, colCount).map(function(col){
+      return '<div class="gcol">' + col.map(function(e){
+        return '<div class="gthumb">' +
+                 '<img src="'+img(e.file)+'"'+srcAttrs(e.file, GAL_SIZES)+
+                 ' alt="" loading="lazy" decoding="async" data-lb="'+e.lb+'"></div>';
+      }).join("") + '</div>';
+    }).join("");
+  }
+  // 4 columns on desktop, 2 on a phone, never more than there are photos (so
+  // three photos make three full-width columns, not three quarters of a page).
+  var galMQ = window.matchMedia("(max-width:760px)");
+  function galColCount(){ return Math.min(galMQ.matches ? 2 : 4, galFiles.length) || 1; }
+  var galleryBlock = (galFiles.length || real(p.galleryVideo)) ?
+    '<div class="hero-gallery" id="heroGallery">' +
+      '<div class="gcols">' + galleryHTML(galColCount()) + '</div>' +
+      (real(p.galleryVideo)?'<div class="gallery-vid">'+videoFig(p.galleryVideo,"16/9")+'</div>':'') +
     '</div>' : '';
 
   // material chips now sit directly under the hero image, single words, each
@@ -334,7 +447,7 @@
   var hero =
     '<section class="hero">' +
       '<figure class="hero-main">' +
-        '<img src="'+img(heroSrc)+'" alt="'+esc(p.title)+'" fetchpriority="high" decoding="async" data-lb="0">' +
+        '<img src="'+img(heroSrc)+'"'+srcAttrs(heroSrc, HERO_SIZES)+' alt="'+esc(p.title)+'" fetchpriority="high" decoding="async" data-lb="0">' +
       '</figure>' +
       // specs + INQUIRE share one row directly under the image, the red
       // INQUIRE block sitting at the row's right end (Figma: specs at the
@@ -416,8 +529,24 @@
           // lamp kept getting shoved off-centre with no obvious way back -
           // which is not a thing you want a product viewer to do. Orbit and
           // zoom stay; only the translation is gone.
-          'disable-pan interaction-prompt="none" camera-orbit="-25deg 76deg 130%" ' +
-          'min-camera-orbit="auto auto 45%" max-camera-orbit="auto auto 320%" ' +
+          // 228%, not the old 130%: the viewer element is now ~1.72x taller.
+          // The framing distance (100%) is INDEPENDENT of element size - it
+          // only depends on the model and the field of view - so apparent size
+          // works out as elementHeight / radius. That means the radius has to
+          // grow by the FULL element-height factor to keep the model looking
+          // the same size at rest. Change the element size in css/style.css
+          // (.cad-stage model-viewer) and this has to move with it.
+          'disable-pan interaction-prompt="none" camera-orbit="-25deg 76deg 228%" ' +
+          // These attribute values are only a first frame's worth of defaults -
+          // the real limits are set in metres once the model loads, because
+          // model-viewer does not clamp radius percentages here reliably.
+          // See setZoomRange() further down.
+          // These are only placeholders for the first frame. They must be WIDER
+          // than the real range or they will clamp the default before the JS
+          // runs - a too-low max here quietly pulled the camera in and made the
+          // model render bigger than intended. The real limits are set in
+          // metres once the model loads: see setZoomRange().
+          'min-camera-orbit="auto auto 20%" max-camera-orbit="auto auto 600%" ' +
           'auto-rotate auto-rotate-delay="1200" rotation-per-second="10deg" ' +
           'shadow-intensity="0" exposure="1" environment-image="neutral" tone-mapping="neutral" ' +
           'ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="eager" reveal="auto">' +
@@ -448,17 +577,28 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=13" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=15" title="mechanism" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
   // reference - HOW IT WORKS there is just the graphic, the mode buttons, and
   // one line of intro text - so it's no longer rendered here. The data can
   // stay in projects-data.js, it's simply unused now.
-  var mechHalf = (mechEl || real(p.howItWorks) || real(p.hiwVideo)) ?
+  /* The .hiw-graphic box is emitted ONLY when there is something to put in it.
+     This matters more than it looks: css/style.css pulls .hiw-graphic upward
+     and downward with large negative margins, to crop the transparent buffer
+     that a mechanism file carries around its artwork. An EMPTY .hiw-graphic
+     still received those margins, which collapsed the section and dragged the
+     process grid up over the how-it-works text above it. That was the
+     "first process image overlaps the last paragraph" bug on every project
+     without a mechanism (NEB, NAF, AMSALP). No box, no negative margins,
+     no overlap. The `has-mech` class is what the crop margins key off now,
+     so the crop can never apply to a box that has nothing to crop. */
+  var graphicInner = mechEl + (real(p.hiwVideo) ? videoFig(p.hiwVideo,"16/9") : '');
+  var mechHalf = (graphicInner || real(p.howItWorks)) ?
     '<div class="cad-hiw-mech">' +
       (real(p.howItWorks)?'<div class="hiw-text"><p class="desc">'+withInfo(esc(p.howItWorks), p.howItWorksMore)+'</p></div>':'') +
-      '<div class="hiw-graphic">'+mechEl+(real(p.hiwVideo)?videoFig(p.hiwVideo,"16/9"):'')+'</div>' +
+      (graphicInner ? '<div class="hiw-graphic'+(mechEl?' has-mech':'')+'">'+graphicInner+'</div>' : '') +
     '</div>' : '';
 
   var cadHiwMode = (modelHalf && mechHalf) ? '' : (modelHalf ? ' solo-model' : (mechHalf ? ' solo-mech' : ''));
@@ -776,10 +916,40 @@
     // handing scrolling back. A small hint shows until it's engaged.
     (function(){
       var box = mv.parentElement;   // .cad-stage (the compact slot)
+      var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+
       var hint = document.createElement("div");
       hint.className = "mv-hint";
-      hint.textContent = "CLICK TO INTERACT";
+      hint.textContent = coarse ? "TOUCH TO INTERACT" : "CLICK TO INTERACT";
       box.appendChild(hint);
+
+      /* ---------- WHY TOUCH IS HANDLED SEPARATELY ----------
+         The gate below works by flipping pointer-events from none to auto on
+         the first pointerdown. With a mouse that is fine: the click engages,
+         and the drag that follows is a separate stream of events which the
+         model then receives.
+
+         On a touchscreen it was broken. A drag is ONE continuous pointer
+         sequence, and by the time the capture-phase listener flips
+         pointer-events the browser has already hit-tested that pointerdown
+         against an inert element - so the model never saw the gesture that
+         engaged it, and the whole drag was swallowed. That is why the model
+         only responded after a second touch, or after a two-finger gesture
+         started a fresh sequence.
+
+         On coarse pointers the gate is therefore skipped entirely: the model
+         is live from the start. It can afford to be, because touch-action
+         "pan-y" already lets a vertical swipe scroll the page straight
+         through it, and the mobile CSS keeps the element close to its slot so
+         it is not sitting invisibly on top of neighbouring sections. */
+      if(coarse){
+        mv.style.pointerEvents = "auto";
+        var fade = function(){ box.classList.add("mv-live"); };
+        mv.addEventListener("pointerdown", fade, { once:true });
+        box.addEventListener("touchstart", fade, { once:true, passive:true });
+        return;
+      }
+
       var live = false;
       function inBox(e){
         var r = box.getBoundingClientRect();
@@ -821,6 +991,38 @@
     }
 
     mv.addEventListener("load", function(){
+      /* ---- ZOOM RANGE: you can zoom IN, but not OUT past the default -------
+         The default view is deliberately the widest the model ever gets. From
+         there the wheel only brings you closer, so the model can never be
+         shrunk into a speck in the corner of a very large element, and there is
+         no "where did it go" state to recover from. Zooming in is left wide
+         open (the element is enormous, see .cad-stage model-viewer in
+         css/style.css, which is what gives it room to grow without clipping).
+
+         Both limits are set HERE, in METRES, rather than as attributes:
+         model-viewer does NOT clamp radius PERCENTAGES in min/max-camera-orbit
+         reliably - "105%" still let the camera through to about 60%, measured.
+         Metres clamp exactly.
+
+         framing = current radius / whatever percentage the camera-orbit
+         attribute asked for. Parsed rather than hard-coded so changing that
+         attribute cannot silently break this. */
+      (function setZoomRange(){
+        try{
+          var pct = 2.28;
+          var m = String(defaultOrbit || "").match(/([\d.]+)%\s*$/);
+          if(m && parseFloat(m[1]) > 0) pct = parseFloat(m[1]) / 100;
+          var radius  = mv.getCameraOrbit().radius;      // the default distance
+          var framing = radius / pct;                    // 100% = fits element
+          if(isFinite(radius) && radius > 0){
+            // furthest out = exactly where it starts
+            mv.maxCameraOrbit = "auto auto " + radius.toFixed(4) + "m";
+            // closest in: well inside the element, so it fills the screen
+            mv.minCameraOrbit = "auto auto " + (framing * 0.30).toFixed(4) + "m";
+          }
+        } catch(e){ /* leave the attribute values in place */ }
+      })();
+
       // ---- lamp on / off / dim ----
       // The render's LED material is emissive; scaling its emissiveFactor dims
       // the glow through the frosted-glass shade. If the emissive material can't
@@ -928,16 +1130,21 @@
     });
   }
 
+  // assigned by the lightbox block below, called by the gallery when it
+  // re-deals its columns and the thumb elements are replaced.
+  var bindLightbox = function(){};
+
   // ---------- LIGHTBOX: click the hero image or any gallery thumb to open a
   // near-fullscreen viewer. data-lb="N" on each <img> indexes into `gal`
   // (gal[0] is the hero, gal[1..] are the thumbs, same order they're built in
   // above), so the viewer always cycles the FULL project gallery regardless
   // of which image was clicked first. ----------
   (function(){
-    var items = gal.map(function(s){ return img(s); });
+    var items = LB;                       // images AND videos, one shared set
     if(!items.length) return;
     var lb = document.getElementById("lightbox");
     var lbImg = document.getElementById("lbImg");
+    var lbVid = document.getElementById("lbVid");
     var lbCount = document.getElementById("lbCount");
     var lbPrev = document.getElementById("lbPrev");
     var lbNext = document.getElementById("lbNext");
@@ -945,8 +1152,22 @@
     var cur = 0, lastFocus = null;
 
     function render(){
-      lbImg.src = items[cur];
-      lbImg.alt = p.title + " - image " + (cur+1) + " of " + items.length;
+      var it = items[cur];
+      var isVid = it.type === "video";
+      // swap which element is live, and always stop the video when leaving it -
+      // otherwise its audio/decoding carries on behind a photo
+      lbVid.hidden = !isVid;
+      lbImg.hidden = isVid;
+      if(isVid){
+        lbImg.removeAttribute("src");
+        if(lbVid.getAttribute("src") !== it.src) lbVid.setAttribute("src", it.src);
+        lbVid.play().catch(function(){});
+      } else {
+        lbVid.pause();
+        lbVid.removeAttribute("src");
+        lbImg.src = it.src;
+        lbImg.alt = p.title + " - " + (cur+1) + " of " + items.length;
+      }
       lbCount.textContent = (cur+1<10?"0":"")+(cur+1) + " / " + (items.length<10?"0":"")+items.length;
       lbPrev.disabled = items.length < 2;
       lbNext.disabled = items.length < 2;
@@ -965,6 +1186,8 @@
       lb.classList.remove("show"); lb.classList.remove("imgshow");
       lb.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
+      // never leave a video playing behind a closed overlay
+      lbVid.pause(); lbVid.removeAttribute("src");
       setTimeout(function(){ lb.classList.remove("open"); }, 220);
       if(lastFocus && lastFocus.focus) lastFocus.focus();
     }
@@ -974,12 +1197,20 @@
       setTimeout(function(){ render(); lb.classList.add("imgshow"); }, 120);
     }
 
-    content.querySelectorAll("[data-lb]").forEach(function(el){
-      el.addEventListener("click", function(e){
-        e.preventDefault();
-        open(+el.getAttribute("data-lb"));
+    /* Exposed so the gallery can rewire itself: when the column count changes
+       at the 760px breakpoint the thumbs are rebuilt as brand new nodes, and
+       their click handlers go with the old ones. Re-binding is safe to call
+       repeatedly because it only ever runs over nodes inside the subtree it is
+       handed, and those nodes have just been created. */
+    bindLightbox = function(root){
+      (root || content).querySelectorAll("[data-lb]").forEach(function(el){
+        el.addEventListener("click", function(e){
+          e.preventDefault();
+          open(+el.getAttribute("data-lb"));
+        });
       });
-    });
+    };
+    bindLightbox(content);
     lbPrev.addEventListener("click", function(){ step(-1); });
     lbNext.addEventListener("click", function(){ step(1); });
     lbClose.addEventListener("click", close);
@@ -990,6 +1221,31 @@
       else if(e.key === "ArrowLeft") step(-1);
       else if(e.key === "ArrowRight") step(1);
     });
+  })();
+
+  /* ---------- gallery: re-deal the columns when the layout breakpoint
+     changes. Four columns on desktop, two on a phone (one if there is only a
+     single photo). The columns are real elements, so unlike the old CSS
+     multi-column this cannot re-flow itself and has to be rebuilt. Keyed off a
+     matchMedia change event rather than every resize tick, so dragging a
+     window edge does not rebuild the DOM continuously - it only fires when the
+     page actually crosses 760px. ---------- */
+  (function(){
+    var wrap = document.getElementById("heroGallery");
+    if(!wrap || !galFiles.length) return;
+    var cols = wrap.querySelector(".gcols");
+    // the markup was already built with galColCount(), so start in step with it
+    // and only touch the DOM when the breakpoint actually changes.
+    var current = galColCount();
+    function apply(){
+      var n = galColCount();
+      if(n === current) return;
+      current = n;
+      cols.innerHTML = galleryHTML(n);
+      bindLightbox(cols);          // the thumbs are new nodes, rewire them
+    }
+    if(galMQ.addEventListener) galMQ.addEventListener("change", apply);
+    else if(galMQ.addListener) galMQ.addListener(apply);   // older Safari
   })();
 
   // ---------- inline loop videos: only play while on screen. autoplay still
