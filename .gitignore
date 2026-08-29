@@ -38,3 +38,6 @@ _backup_originals/
 Thumbs.db
 desktop.ini
 $null
+
+# staged deletions - review then delete, or run cleanup.ps1
+_to_delete/

@@ -27,6 +27,15 @@ var renderer = null, view = null, tumble = null, core = null;
 var canvas = null, dpr = 1, cssSize = 0;
 var pageReady = false, released = false, stopped = false;
 var turnCount = 0, phase = "settle", phaseElapsed = 0, lastTs = null;
+/* The tumble does not start until the main thread says the handoff from the
+   flat SVG mark to this canvas has FINISHED fading. Before this existed the
+   worker began its clock the instant it rendered its first frame, so the mark
+   could already be turning while it was still cross-fading with the static
+   logo underneath - which is what read as the loader "bugging out". Holding
+   here keeps the settled pose on screen through the whole fade, so the static
+   mark and the model's first frame are the same picture, motionless, and the
+   motion only begins once there is a single clean image to move. */
+var begun = false;
 
 function fail(why){
   try { self.postMessage({ type: "failed", why: String(why || "") }); } catch(e){}
@@ -38,6 +47,8 @@ self.onmessage = function(ev){
   if(d.type === "init")      init(d);
   else if(d.type === "resize")    { dpr = d.dpr; cssSize = d.cssSize; applySize(); }
   else if(d.type === "pageReady") pageReady = true;
+  // sent once the flat mark has finished fading out on the main thread
+  else if(d.type === "begin")     { begun = true; lastTs = null; }
   else if(d.type === "stop")      { stopped = true; cleanup(); }
 };
 
@@ -90,7 +101,11 @@ function init(d){
 
       tumble.apply(view.group, 0, 0);          // start settled, front-on
       renderer.render(view.scene, view.camera); // paint frame one before revealing
-      self.postMessage({ type: "firstFrame" });
+      // main thread fades the canvas up over the flat mark, then replies
+      // with {type:"begin"} to release the animation. See `begun` above.
+      // overscan tells the main thread the true canvas/mark ratio for THIS
+      // geometry, so the 3D mark always lands exactly the size of the 2D one
+      self.postMessage({ type: "firstFrame", overscan: view.OVERSCAN });
 
       requestAnimationFrame(frame);
     })
@@ -102,6 +117,11 @@ function frame(ts){
   if(lastTs === null) lastTs = ts;
   var dt = Math.min(ts - lastTs, 100);   // clamped so a stall cannot jump the turn
   lastTs = ts;
+
+  // hold the settled first pose until the main thread has finished the fade.
+  // Still renders every frame, so the canvas is never blank - it just does not
+  // advance the animation clock yet.
+  if(!begun) dt = 0;
 
   if(!released){
     phaseElapsed += dt;

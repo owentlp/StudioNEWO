@@ -24,6 +24,14 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
+<!-- warm the loader's dependencies from the first byte of HTML: the 3D logo
+     tumble runs in a worker that needs three.js (CDN) and the STL. Cold, those
+     two downloads used to start only after loader3d.js booted the worker -
+     while the GLB / images hogged the connection - which is what pushed the
+     3D mark past its safety cap on fresh tabs. Preloading starts them
+     immediately; both land in the HTTP cache the worker then reads from. -->
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script">
+<link rel="preload" href="logo/3d-logo.stl" as="fetch" crossorigin>
 <!-- model-viewer powers the rendered 3D model + AR (iOS Quick Look / Android
      Scene Viewer). It is now injected from the page script ONLY when the
      current project actually has a GLB (see the cad block), so the four
@@ -41,7 +49,7 @@
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=8"></script>
+<script src="js/loader3d.js?v=12"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -69,11 +77,11 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=10"></script>
+<script src="js/projects-data.js?v=12"></script>
 <script src="js/materials-data.js?v=3"></script>
 <!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
      reserved before the files land (no reflow) and srcset can be emitted -->
-<script src="js/image-sizes.js?v=1"></script>
+<script src="js/image-sizes.js?v=2"></script>
 <!-- project pages hold the loader until their hero image, hero video and 3D
      model have loaded (see the readiness gate at the end of the page script);
      this flag tells main.js to hand reveal control to this page. -->
@@ -493,6 +501,21 @@
   var glbView = real(p.modelRender) ? p.modelRender : (real(p.model) ? p.model : "");
   // load the model-viewer library only when there is actually a model to show
   var MV_SRC = "https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js";
+  /* Cap the resolution model-viewer renders at, BEFORE its module loads.
+     The element is deliberately huge (130vw wide, 5 slots tall - that size is
+     the zoom budget), and model-viewer sizes its WebGL buffer to element x
+     devicePixelRatio with no cap of its own. At dpr 2 on a wide window that
+     is a ~25-megapixel framebuffer redrawn on every model frame - most of the
+     scroll-time GPU load on this page. Capping at 1.5 matches the loader and
+     the mechanism canvas (the site-wide rule) and is not visible on this
+     matte model at display size. Only JS reads of devicePixelRatio change:
+     srcset selection and media queries are browser-internal and untouched. */
+  if((window.devicePixelRatio || 1) > 1.5){
+    try {
+      Object.defineProperty(window, "devicePixelRatio",
+        { get: function(){ return 1.5; }, configurable: true });
+    } catch(e){}
+  }
   if(glbView && !document.querySelector('script[data-mv]')){
     var mvs = document.createElement("script");
     mvs.type = "module"; mvs.src = MV_SRC; mvs.setAttribute("data-mv","");
@@ -706,9 +729,20 @@
        competing with model-viewer's WebGL loop and whatever else is running.
        The parent can see it clearly, so it just tells them. */
     (function(){
-      function post(vis){
-        try { mechFrame.contentWindow.postMessage({ type:"mechVisible", visible:!!vis }, "*"); } catch(e){}
+      /* Two independent reasons to hold the loop: the graphic is scrolled off
+         screen, or the visitor is scrolling RIGHT NOW. It runs only when
+         neither applies, so the two are tracked separately and combined -
+         otherwise the scroll handler would restart a loop the observer had
+         just stopped, or vice versa. */
+      var onScreen = true, scrolling = false, sent = null;
+      function sync(){
+        var run = onScreen && !scrolling;
+        if(run === sent) return;          // don't spam the iframe every frame
+        sent = run;
+        try { mechFrame.contentWindow.postMessage({ type:"mechVisible", visible:run }, "*"); } catch(e){}
       }
+      function post(vis){ onScreen = !!vis; sync(); }
+
       if(window.IntersectionObserver){
         // generous margin so it is already running by the time it scrolls in
         new IntersectionObserver(function(entries){
@@ -717,6 +751,31 @@
       } else {
         post(true);   // no IO: leave it running, same as before
       }
+
+      /* PAUSE WHILE SCROLLING. The KART mechanism repaints a ~1.4 megapixel
+         canvas on every frame, and model-viewer runs its own WebGL loop for
+         the auto-rotate. Both were competing with the compositor for exactly
+         the frames the scroll needed, which is why this page felt choppier
+         than the others. Neither is worth watching mid-scroll, so both stop
+         while the page is moving and pick up again 240ms after it settles.
+         Nothing is torn down or reloaded - the mechanism keeps its state and
+         the model keeps its camera, they just stop drawing for a moment. */
+      var mvEl = document.getElementById("mv");
+      var wasRotating = mvEl ? mvEl.autoRotate : false;
+      var idle = null;
+      window.addEventListener("scroll", function(){
+        if(!scrolling){
+          scrolling = true;
+          sync();
+          if(mvEl && mvEl.autoRotate){ wasRotating = true; mvEl.autoRotate = false; }
+        }
+        clearTimeout(idle);
+        idle = setTimeout(function(){
+          scrolling = false;
+          sync();
+          if(mvEl && wasRotating) mvEl.autoRotate = true;
+        }, 240);
+      }, { passive: true });
       // a hidden tab should not be animating either
       document.addEventListener("visibilitychange", function(){
         if(document.hidden) post(false);
@@ -1301,7 +1360,41 @@
     var heroVid = content.querySelector(".hero-aside-btm video, .hero-vid video");
     if(heroVid) waits.push(settle(heroVid, "canplay", 8000));   // first frame ready, not full download
     if(mv) waits.push(settle(mv, "load", 11000));               // the 3D model (now eager-loaded)
-    Promise.all(waits).then(function(){ window.__revealPage(); });
+    // the mechanism iframe: its first paint is a big canvas render, and on
+    // KART it sits beside the model above the fold - it should never pop in
+    // (or first-paint-jank) after the loader clears
+    var mechF = document.getElementById("mechFrame");
+    // (guarded by position: a loading="lazy" iframe far below the fold never
+    // starts loading until scrolled near, so waiting on it would just burn
+    // the timeout. Near the fold - the KART/OMNI row - it loads immediately.)
+    if(mechF && mechF.getBoundingClientRect().top < window.innerHeight * 2){
+      waits.push(settle(mechF, "load", 8000));
+    }
+    Promise.all(waits).then(function(){
+      /* Owen's spec (2026-08-29): the loader lasts as long as it needs to for
+         the WHOLE page to be ready, so the revealed page is smooth from the
+         first scroll. So once the critical assets are in, force-fetch and
+         decode every image on the page (decode() triggers the request even on
+         loading="lazy" images) - scrolling then never hits a decode burst.
+         Each decode is raced against a timeout and errors are swallowed, and
+         main.js's global 12s hard cap still stands, so nothing can strand the
+         loader. The sm/md srcset system keeps the total small (~2 MB). */
+      var imgs = Array.prototype.slice.call(content.querySelectorAll("img"));
+      return Promise.all(imgs.map(function(im){
+        var t = new Promise(function(res){ setTimeout(res, 6000); });
+        var d;
+        try { d = im.decode ? im.decode() : Promise.resolve(); }
+        catch(e){ d = Promise.resolve(); }
+        return Promise.race([d.catch(function(){}), t]);
+      }));
+    }).then(function(){
+      // two frames of settle so the first full-page layout/paint (and the
+      // model's first composited frame) happen UNDER the loader, not during
+      // its fade
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ window.__revealPage(); });
+      });
+    });
   })();
 })();
 </script>

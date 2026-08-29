@@ -102,8 +102,16 @@
      pin MUST come off or the loader would sit there forever. Every failure
      path below calls unpin(), and PIN_CAP_MS is a backstop in case one is
      missed. */
-  var PIN_CAP_MS = 2600;
+  var PIN_CAP_MS = 4000;
   var pinned = false, started3d = false, pinCap = null;
+  /* If the cap fires, the 3D path is ABANDONED, not just unpinned. The old
+     code only unpinned, so on a cold cache (three.js + STL downloading inside
+     the worker while the KART GLB hogs the connection) the animation could
+     arrive AFTER the cap, start tumbling on an unpinned loader, and then
+     body.ready would fade the loader out mid-turn - the "glitches out on a
+     fresh tab" bug. Now a late 3D path is torn down and the loader simply
+     fades out showing the flat 2D mark, which is always clean. */
+  var capFired = false, abort3d = null;
 
   // where this script lives, so the worker can be pointed at its siblings
   // without hard-coding "/js/" (the pages sit at the site root today, but a
@@ -126,7 +134,12 @@
        guaranteed full rotation never got shown. Pinning both is what keeps the
        animation on screen until this file decides to release it. */
     loaderEl.style.visibility = "visible";
-    pinCap = setTimeout(function(){ if(!started3d) unpin(); }, PIN_CAP_MS);
+    pinCap = setTimeout(function(){
+      if(started3d) return;
+      capFired = true;
+      if(abort3d){ try { abort3d(); } catch(e){} abort3d = null; }
+      unpin();
+    }, PIN_CAP_MS);
   }
   function unpin(){
     if(!pinned) return;
@@ -134,6 +147,28 @@
     if(pinCap){ clearTimeout(pinCap); pinCap = null; }
     loaderEl.style.opacity = "";      // hand back to the body.ready CSS rule
     loaderEl.style.visibility = "";   // ...including the delayed visibility flip
+
+    /* Free the WebGL canvas once the loader has faded out.
+       It is hooked HERE rather than to any one success path because the loader
+       can be released several different ways (the worker finishing, the
+       main-thread fallback finishing, PIN_CAP_MS firing, a failure bailing
+       out) and every one of them ends up calling unpin(). Hanging it off a
+       single path meant the canvas survived whenever a different path won,
+       which is what was leaving a live WebGL context parked in a hidden loader
+       for the rest of the session - on a project page the browser then wants
+       another one for model-viewer, and contexts are a limited resource.
+       Checked on a short RETRY rather than a single timer: unpin() can fire
+       before the canvas has even been appended (the PIN_CAP backstop, or a
+       fast release), and a one-shot timeout in that case finds nothing and
+       gives up, leaving the canvas behind for good. A few cheap re-checks
+       cover every ordering, and the first one lands after the loader's own
+       650ms fade so nothing blanks early. */
+    var tries = 0;
+    var sweep = setInterval(function(){
+      var c = loaderEl.querySelector("canvas.ld-3d");
+      if(c){ try { c.remove(); } catch(e){} clearInterval(sweep); }
+      else if(++tries > 8) clearInterval(sweep);   // ~3.6s, then stop looking
+    }, 450);
   }
   pin();
 
@@ -225,17 +260,25 @@
     canvas.style.transform = "translate(-50%, -50%)";
 
     var w;
-    try { w = new Worker(BASE + "loader3d.worker.js?v=1"); }
+    try { w = new Worker(BASE + "loader3d.worker.js?v=3"); }
     catch(e){ canvas.remove(); return false; }
 
     var handedOff;
     try { handedOff = canvas.transferControlToOffscreen(); }
     catch(e){ w.terminate(); canvas.remove(); return false; }
 
-    var settled = false;
+    var settled = false, aborted = false;
+    abort3d = function(){
+      aborted = true;
+      try { w.terminate(); } catch(e){}
+      try { canvas.remove(); } catch(e){}
+      flatLogo.style.display = "";   // make sure the 2D mark is what fades out
+    };
     w.onmessage = function(ev){
       var d = ev.data || {};
+      if(aborted) return;
       if(d.type === "firstFrame"){
+        if(d.overscan) OVERSCAN_EL = d.overscan;
         started3d = true;
         if(pinCap){ clearTimeout(pinCap); pinCap = null; }
         // size the element now that we know the overscan is applied worker-side
@@ -244,15 +287,38 @@
         // only hide that once the fade is done - same handoff as the fallback
         void canvas.offsetWidth;
         canvas.style.opacity = "1";
-        setTimeout(function(){ flatLogo.style.display = "none"; }, 260);
+        setTimeout(function(){
+          flatLogo.style.display = "none";
+          // ONLY NOW may the tumble start. The worker holds its settled first
+          // pose until this arrives, so the mark never begins turning while it
+          // is still cross-fading with the static logo underneath it.
+          try { w.postMessage({ type: "begin" }); } catch(e){}
+        }, 260);
       } else if(d.type === "released"){
         settled = true;
-        unpin();
-        setTimeout(function(){ try { w.terminate(); } catch(e){} }, 900);
+        /* Hand BACK to the 2D mark before the loader fades. The settled pose
+           and the flat SVG are the same silhouette, so restoring the flat mark
+           under the canvas and fading the canvas out is invisible - and it
+           means the loader's own fade-out always shows the crisp 2D logo, with
+           no live WebGL involved. Owen's spec: 2D -> 3D turn(s) -> rest as the
+           2D logo -> fade out. */
+        flatLogo.style.display = "";
+        void canvas.offsetWidth;
+        canvas.style.opacity = "0";
+        setTimeout(function(){
+          unpin();
+          // The canvas is an OffscreenCanvas holding a live WebGL context, and
+          // browsers allow only a handful of those per page - on KART the page
+          // goes on to want one for model-viewer. Drop it as soon as the 2D
+          // mark is back.
+          try { w.terminate(); } catch(e){}
+          try { canvas.remove(); } catch(e){}
+        }, 240);
       } else if(d.type === "failed"){
         // worker could not do it: clean up and let the main-thread path try
         try { w.terminate(); } catch(e){}
         canvas.remove();
+        flatLogo.style.display = "";
         if(!started3d){ startMainThread(); }
         else { unpin(); }
       }
@@ -260,13 +326,17 @@
     w.onerror = function(){
       try { w.terminate(); } catch(e){}
       canvas.remove();
+      flatLogo.style.display = "";
       if(!started3d) startMainThread(); else unpin();
     };
 
+    // 1.836 is the value for the current logo; the worker reports the real
+    // one (computed from the geometry) with its first frame, so a re-exported
+    // STL can never leave the 3D mark a different size from the 2D one.
+    var OVERSCAN_EL = 1.836;
     function sizeCanvasEl(){
       var s = mark.clientWidth || 104;
-      // OVERSCAN is 1.836 for this logo - kept in step with loader3d-core
-      var px = Math.round(s * 1.836);
+      var px = Math.round(s * OVERSCAN_EL);
       canvas.style.width = px + "px";
       canvas.style.height = px + "px";
     }
@@ -307,10 +377,10 @@
   // only because the pin was set late; now that it is set up front, an
   // un-unpinned exit would freeze the loader on screen.
   loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js", function(){
-    if(!pageStillLoading()){ unpin(); return; }   // the page beat us to it, don't bother
+    if(!pageStillLoading() || capFired){ unpin(); return; }   // the page (or the cap) beat us to it
     fetch("logo/3d-logo.stl").then(function(r){ return r.arrayBuffer(); })
       .then(function(buf){
-        if(!pageStillLoading()){ unpin(); return; }
+        if(!pageStillLoading() || capFired){ unpin(); return; }
         var parsed = parseSTL(buf);
         if(!parsed){ unpin(); return; }           // malformed/ASCII STL
         init(parsed);
@@ -464,7 +534,13 @@
     // flush that gives opacity:0 a chance to exist before we set it to 1.
     void canvas.offsetWidth;
     canvas.style.opacity = "1";
-    setTimeout(function(){ flatLogo.style.display = "none"; }, 260);
+    // same handshake as the worker path: hold the settled pose until the flat
+    // mark has finished fading out, so motion never overlaps the cross-fade.
+    var begun = false;
+    setTimeout(function(){
+      flatLogo.style.display = "none";
+      begun = true; lastTs = null;
+    }, 260);
 
     var lastTs = null, rafId = null, stopped = false;
     function frame(ts){
@@ -472,6 +548,7 @@
       if(lastTs === null) lastTs = ts;
       var dt = Math.min(ts - lastTs, 50);   // ms, clamped so a stalled tab can't jump the animation
       lastTs = ts;
+      if(!begun) dt = 0;                    // rendering, but not yet animating
 
       if(!released){
         phaseElapsed += dt;
@@ -493,7 +570,13 @@
             var pageReady = document.body.classList.contains("ready");
             if(turnCount >= MIN_TURNS && (pageReady || turnCount >= MAX_TURNS)){
               released = true;
-              unpin();   // hand back to the body.ready CSS rule, which now fades it
+              // same hand-back as the worker path: restore the flat mark, fade
+              // the canvas out over it, THEN release the loader - so the fade
+              // always shows the 2D logo at rest, never live WebGL.
+              flatLogo.style.display = "";
+              void canvas.offsetWidth;
+              canvas.style.opacity = "0";
+              setTimeout(unpin, 240);
             } else {
               phase = "turn";
               phaseElapsed = 0;
@@ -518,6 +601,7 @@
           renderer.dispose();
           cube.geo.dispose(); cube.mat.dispose();
           sphere.geo.dispose(); sphere.mat.dispose();
+          try { canvas.remove(); } catch(e){}
         }, 700);
       } else {
         requestAnimationFrame(waitForReleased);
