@@ -544,6 +544,16 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   font-family:var(--body); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
   color:var(--ink-soft); pointer-events:none; opacity:.75; transition:opacity .3s ease; white-space:nowrap;}
 .cad-stage.mv-live .mv-hint{opacity:0;}
+/* OFF-SCREEN: stop the model costing the compositor anything while you are
+   reading somewhere else on the page. The element is 130vw x five --model-slot
+   rows - about 6.5 megapixels - and even with nothing being redrawn (auto-rotate
+   is gone, so the WebGL loop is idle) that is still a 6.5 MP TRANSPARENT layer
+   the compositor has to blend on every scroll frame. visibility:hidden takes the
+   layer out of paint entirely and costs nothing to undo: layout size is
+   unchanged, so model-viewer never re-frames, and the canvas keeps its rendered
+   contents, so coming back is instant with no redraw. Toggled from project.html
+   at 100% viewport margin, so it is always visible well before you reach it. */
+.cad-stage.mv-offscreen model-viewer{visibility:hidden;}
 /* the controls and the mechanism half stay ABOVE the flooding model */
 .mv-bar{position:relative; z-index:3;}
 .cad-hiw-mech{z-index:3;}

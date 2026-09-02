@@ -32,6 +32,10 @@
      immediately; both land in the HTTP cache the worker then reads from. -->
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script">
 <link rel="preload" href="logo/3d-logo.stl" as="fetch" crossorigin>
+<!-- model-viewer is fetched LATE now (on scroll-approach, see "DEFERRED MODEL
+     LOAD") so its DNS + TLS handshake would otherwise happen at the worst
+     possible moment. Warm the connection up front; it costs one socket. -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- model-viewer powers the rendered 3D model + AR (iOS Quick Look / Android
      Scene Viewer). It is now injected from the page script ONLY when the
      current project actually has a GLB (see the cad block), so the four
@@ -39,7 +43,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=40">
+<link rel="stylesheet" href="css/style.css?v=41">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -87,7 +91,7 @@
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
 <script src="js/main.js?v=3"></script>
-<script src="js/menu.js?v=4"></script>
+<script src="js/menu.js?v=6"></script>
 <script>
 (function(){
   var id = new URLSearchParams(location.search).get("p");
@@ -501,25 +505,54 @@
   var glbView = real(p.modelRender) ? p.modelRender : (real(p.model) ? p.model : "");
   // load the model-viewer library only when there is actually a model to show
   var MV_SRC = "https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js";
-  /* Cap the resolution model-viewer renders at, BEFORE its module loads.
-     The element is deliberately huge (130vw wide, 5 slots tall - that size is
-     the zoom budget), and model-viewer sizes its WebGL buffer to element x
-     devicePixelRatio with no cap of its own. At dpr 2 on a wide window that
-     is a ~25-megapixel framebuffer redrawn on every model frame - most of the
-     scroll-time GPU load on this page. Capping at 1.5 matches the loader and
-     the mechanism canvas (the site-wide rule) and is not visible on this
-     matte model at display size. Only JS reads of devicePixelRatio change:
-     srcset selection and media queries are browser-internal and untouched. */
-  if((window.devicePixelRatio || 1) > 1.5){
-    try {
-      Object.defineProperty(window, "devicePixelRatio",
-        { get: function(){ return 1.5; }, configurable: true });
-    } catch(e){}
-  }
-  if(glbView && !document.querySelector('script[data-mv]')){
-    var mvs = document.createElement("script");
-    mvs.type = "module"; mvs.src = MV_SRC; mvs.setAttribute("data-mv","");
-    document.head.appendChild(mvs);
+  /* ---------- DEFERRED MODEL LOAD ----------
+     This used to fire immediately: the module script went out with the page and
+     the element carried loading="eager", so ~700KB of library plus the GLB (its
+     draco decode, 22 texture uploads and the PMREM environment map) all landed
+     on the GPU during the loading screen - which is what made the logo tumble
+     stutter, and what made the loader sit there for so long, since it also
+     WAITED on the model before revealing.
+     Now nothing model-related starts until (1) the loading screen has released
+     and (2) the model's slot is within ~1.5 screens of the viewport. By the
+     time you have scrolled to it, it is there. Nothing pops in, and the tumble
+     gets the GPU to itself. */
+  var loadModel = null;
+  if(glbView){
+    loadModel = function(){
+      if(loadModel.done) return;
+      loadModel.done = true;
+      /* Cap the resolution model-viewer renders at, and do it BEFORE its
+         module loads - it reads devicePixelRatio once, on the way up.
+         Measured on the live page: the element resolves to about 3150 x 3260
+         CSS pixels (130vw by five --model-slot rows), so at dpr 2 that is a
+         ~41 megapixel framebuffer, redrawn in full on every model frame, and
+         doubled again by the frosted shade's transmission pass. Capping at 1.5
+         matches the loader and the mechanism canvas (the site-wide rule) and is
+         not visible on this matte model at display size.
+         This used to run at the top of the page, where it capped dpr for
+         EVERYTHING - including the loader's own canvas. It belongs here, with
+         the only thing that needs it. Only JS reads change; srcset selection
+         and media queries are browser-internal and untouched. */
+      if((window.devicePixelRatio || 1) > 1.5){
+        try {
+          Object.defineProperty(window, "devicePixelRatio",
+            { get: function(){ return 1.5; }, configurable: true });
+        } catch(e){}
+      }
+      if(!document.querySelector('script[data-mv]')){
+        var mvs = document.createElement("script");
+        mvs.type = "module"; mvs.src = MV_SRC; mvs.setAttribute("data-mv","");
+        document.head.appendChild(mvs);
+      }
+      var el = document.getElementById("mv");
+      /* setAttribute, NOT el.src. Until the module lands, <model-viewer> is an
+         unknown element with no src accessor, so `el.src = ...` just parks a
+         plain own property on it - which is then SHADOWING the real accessor
+         once the element upgrades, so the fetch never starts. Verified: the
+         GLB was never requested. The attribute is observed either way, so this
+         works whichever arrives first, the library or this line. */
+      if(el) el.setAttribute("src", el.getAttribute("data-src"));
+    };
   }
   var modelHalf = glbView ?
     '<div class="cad-hiw-model">' +
@@ -538,7 +571,14 @@
         '</div>' +
       '</div>' +
       '<div class="cad-stage">' +
-        '<model-viewer id="mv" src="'+img(glbView)+'" ' +
+        // NO src ATTRIBUTE. The GLB is attached by loadModel() below, on
+        // scroll-approach and never before the loading screen has cleared -
+        // see "DEFERRED MODEL LOAD". An empty model-viewer costs nothing: it
+        // renders transparent and never asks for a WebGL context.
+        // ?v=2 : the GLB was re-exported 2026-08-29 with 512px textures
+        // (1.5MB -> 772KB, ~122MB of GPU texture memory down to ~30MB) under
+        // the same filename. Keep in step with MODEL_V in index.html.
+        '<model-viewer id="mv" data-src="'+img(glbView)+'?v=2" ' +
           (real(p.modelUSDZ)?'ios-src="'+img(p.modelUSDZ)+'" ':'') +
           'alt="'+esc(p.title)+' 3D model" camera-controls touch-action="pan-y" ' +
           // camera radius is set as a % of the auto-framing distance so the
@@ -570,9 +610,24 @@
           // model render bigger than intended. The real limits are set in
           // metres once the model loads: see setZoomRange().
           'min-camera-orbit="auto auto 20%" max-camera-orbit="auto auto 600%" ' +
-          'auto-rotate auto-rotate-delay="1200" rotation-per-second="10deg" ' +
+          /* NO auto-rotate, deliberately (2026-08-29). model-viewer only
+             draws when the scene is DIRTY; auto-rotate marks it dirty on every
+             single frame, so the page carried a permanent WebGL loop for as
+             long as it was open. The element is 130vw x 5 slots - about 6.5
+             megapixels of CSS, ~14.5 MP at the 1.5 dpr cap - and the frosted
+             shade (KHR_materials_transmission) makes three.js render the whole
+             scene a SECOND time into a transmission target every frame. So the
+             turntable cost roughly 29 MP of fill per frame, forever, competing
+             with the compositor for exactly the frames scrolling needed. That
+             was the "KART feels slow" report.
+             Without it the model draws ONE frame, the loop stops, and the page
+             costs nothing until you click into the model - at which point
+             model-viewer wakes on its own and idles again when you let go.
+             If a turntable is ever wanted back, put it behind the click-to-
+             interact gate below (mv.autoRotate = true on engage, false on
+             disengage) so it can never run while someone is reading. */
           'shadow-intensity="0" exposure="1" environment-image="neutral" tone-mapping="neutral" ' +
-          'ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="eager" reveal="auto">' +
+          'ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="lazy" reveal="auto">' +
           // an EMPTY ar-button slot: model-viewer still needs the slot to exist
           // to consider AR wired up, but we drive it from our own button above
           // via activateAR() so the layout is ours to control.
@@ -753,28 +808,20 @@
       }
 
       /* PAUSE WHILE SCROLLING. The KART mechanism repaints a ~1.4 megapixel
-         canvas on every frame, and model-viewer runs its own WebGL loop for
-         the auto-rotate. Both were competing with the compositor for exactly
-         the frames the scroll needed, which is why this page felt choppier
-         than the others. Neither is worth watching mid-scroll, so both stop
-         while the page is moving and pick up again 240ms after it settles.
-         Nothing is torn down or reloaded - the mechanism keeps its state and
-         the model keeps its camera, they just stop drawing for a moment. */
-      var mvEl = document.getElementById("mv");
-      var wasRotating = mvEl ? mvEl.autoRotate : false;
+         canvas on every frame, which competed with the compositor for exactly
+         the frames the scroll needed. It is not worth watching mid-scroll, so
+         it stops while the page is moving and picks up again 240ms after it
+         settles. Nothing is torn down or reloaded - the mechanism keeps its
+         state, it just stops drawing for a moment.
+         model-viewer used to be paused here too (its auto-rotate was a
+         permanent render loop). auto-rotate is gone as of 2026-08-29, so the
+         model is already idle whenever nobody is dragging it and there is
+         nothing left to pause. */
       var idle = null;
       window.addEventListener("scroll", function(){
-        if(!scrolling){
-          scrolling = true;
-          sync();
-          if(mvEl && mvEl.autoRotate){ wasRotating = true; mvEl.autoRotate = false; }
-        }
+        if(!scrolling){ scrolling = true; sync(); }
         clearTimeout(idle);
-        idle = setTimeout(function(){
-          scrolling = false;
-          sync();
-          if(mvEl && wasRotating) mvEl.autoRotate = true;
-        }, 240);
+        idle = setTimeout(function(){ scrolling = false; sync(); }, 240);
       }, { passive: true });
       // a hidden tab should not be animating either
       document.addEventListener("visibilitychange", function(){
@@ -1359,7 +1406,11 @@
     }
     var heroVid = content.querySelector(".hero-aside-btm video, .hero-vid video");
     if(heroVid) waits.push(settle(heroVid, "canplay", 8000));   // first frame ready, not full download
-    if(mv) waits.push(settle(mv, "load", 11000));               // the 3D model (now eager-loaded)
+    /* The 3D MODEL IS NO LONGER WAITED ON (2026-08-29). It used to be the
+       longest pole here by far - ~700KB of library, a draco decode, 22 texture
+       uploads and a PMREM environment map - and all of it landed while the
+       logo was still tumbling. It now loads on scroll-approach instead; see
+       "DEFERRED MODEL LOAD" above. */
     // the mechanism iframe: its first paint is a big canvas render, and on
     // KART it sits beside the model above the fold - it should never pop in
     // (or first-paint-jank) after the loader clears
@@ -1371,22 +1422,39 @@
       waits.push(settle(mechF, "load", 8000));
     }
     Promise.all(waits).then(function(){
-      /* Owen's spec (2026-08-29): the loader lasts as long as it needs to for
-         the WHOLE page to be ready, so the revealed page is smooth from the
-         first scroll. So once the critical assets are in, force-fetch and
-         decode every image on the page (decode() triggers the request even on
-         loading="lazy" images) - scrolling then never hits a decode burst.
+      /* IMAGE DECODING, IN TWO PASSES (revised 2026-08-29).
+         The previous version force-decoded EVERY image on the page before
+         revealing - decode() triggers the request even on a loading="lazy"
+         image - so a project page could not appear until its entire image set
+         had downloaded AND decoded. That is what made the loading screen "take
+         its time", and the decode burst itself was landing on the same main
+         thread the logo tumble had to share.
+         Now only what is within ~2 screens is decoded up front, which is all
+         that can possibly be seen in the first second of scrolling. Everything
+         below that is decoded after the reveal, during idle time, so it is
+         still warm long before you reach it but it costs the loader nothing.
          Each decode is raced against a timeout and errors are swallowed, and
          main.js's global 12s hard cap still stands, so nothing can strand the
-         loader. The sm/md srcset system keeps the total small (~2 MB). */
+         loader. */
       var imgs = Array.prototype.slice.call(content.querySelectorAll("img"));
-      return Promise.all(imgs.map(function(im){
-        var t = new Promise(function(res){ setTimeout(res, 6000); });
-        var d;
-        try { d = im.decode ? im.decode() : Promise.resolve(); }
-        catch(e){ d = Promise.resolve(); }
-        return Promise.race([d.catch(function(){}), t]);
-      }));
+      var fold = window.innerHeight * 2;
+      var near = [], far = [];
+      imgs.forEach(function(im){
+        (im.getBoundingClientRect().top < fold ? near : far).push(im);
+      });
+      function warm(list, ms){
+        return Promise.all(list.map(function(im){
+          var t = new Promise(function(res){ setTimeout(res, ms); });
+          var d;
+          try { d = im.decode ? im.decode() : Promise.resolve(); }
+          catch(e){ d = Promise.resolve(); }
+          return Promise.race([d.catch(function(){}), t]);
+        }));
+      }
+      // the rest, once the page is up and the browser is otherwise idle
+      var later = window.requestIdleCallback || function(fn){ setTimeout(fn, 1200); };
+      later(function(){ warm(far, 20000); });
+      return warm(near, 6000);
     }).then(function(){
       // two frames of settle so the first full-page layout/paint (and the
       // model's first composited frame) happen UNDER the loader, not during
@@ -1395,6 +1463,52 @@
         requestAnimationFrame(function(){ window.__revealPage(); });
       });
     });
+  })();
+
+  /* ---------- ARM THE DEFERRED MODEL LOAD ----------
+     Two gates, both required:
+       1. body.ready - the loading screen has released. Polled rather than
+          hooked onto __revealPage, because the reveal can also come from
+          main.js's 12s hard cap, which bypasses the promise chain above.
+       2. the model's slot is within 1.5 screens. rootMargin is generous on
+          purpose: the library + GLB want a moment, and arriving at an empty
+          box would be worse than the old behaviour, not better.
+     The extra beat after ready keeps the GLB's parse and texture upload off
+     the same frames as the loader's own 650ms fade-out. */
+  /* ---------- STOP COMPOSITING THE MODEL WHEN IT IS OFF SCREEN ----------
+     Separate from the load gate below and it runs for the whole life of the
+     page, not once: the model can be scrolled away from as often as it is
+     scrolled to. See the .mv-offscreen note in css/style.css for why a static,
+     idle model still costs something.
+     50%, not 100%: a project page before "read more" is only about three
+     viewports tall, so a full-viewport margin on either side meant the model
+     counted as on-screen from everywhere and the class never engaged at all
+     (measured). Half a viewport still gives ~450px of scroll warning, and the
+     toggle is only a visibility flip - the canvas keeps its rendered contents,
+     so there is nothing to redraw and no chance of arriving at a blank box. */
+  (function hideOffscreenModel(){
+    if(!loadModel || !window.IntersectionObserver) return;
+    var box = document.querySelector(".cad-stage");
+    if(!box) return;
+    box.classList.add("mv-offscreen");
+    new IntersectionObserver(function(entries){
+      box.classList.toggle("mv-offscreen", !entries[0].isIntersecting);
+    }, { rootMargin: "50% 0px" }).observe(box);
+  })();
+
+  (function armModel(){
+    if(!loadModel) return;
+    var box = document.querySelector(".cad-stage");
+    function arm(){
+      if(!box || !window.IntersectionObserver){ loadModel(); return; }
+      new IntersectionObserver(function(entries, obs){
+        if(entries[0].isIntersecting){ obs.disconnect(); loadModel(); }
+      }, { rootMargin: "150% 0px" }).observe(box);
+    }
+    (function whenReady(){
+      if(document.body.classList.contains("ready")){ setTimeout(arm, 700); return; }
+      setTimeout(whenReady, 80);
+    })();
   })();
 })();
 </script>

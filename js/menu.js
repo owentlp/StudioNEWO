@@ -56,6 +56,102 @@
 
   function esc(s){ return (s == null ? "" : String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
+  /* ============================================================
+     WARMING THE NEXT PAGE  (window.NEWO_WARM)
+     ------------------------------------------------------------
+     Lives here because menu.js is the one script every page loads, so the
+     version numbers below exist in exactly one place. index.html's dock uses
+     it too - see warmProject() there.
+
+     TWO TIERS, AND THE ORDER IS THE POINT.
+
+     TIER 1, on contact: everything the next page's LOADING SCREEN needs before
+     it can show anything - the stylesheet, the shared scripts, the loader's own
+     three.js/STL chain, and then the document itself. In practice most of that
+     is already in cache (index and project.html run the same loading screen, so
+     whichever page you are on already fetched it) and a warmed URL that is
+     already cached costs nothing. It is listed anyway so the loader is always
+     first in the queue rather than last, including from the pages that do not
+     run one - about, contact, materials, 404.
+
+     TIER 2, only after the pointer has stayed put for DWELL_MS: the heavy
+     per-project payload, which on KART is a 772KB GLB plus the ~700KB
+     model-viewer library. Deliberately NOT started on contact. Sweeping across
+     the dock hits four cards in half a second and each one would otherwise
+     queue a megabyte; worse, a click at 100ms would leave that megabyte
+     downloading against the page it is trying to open, which is exactly the
+     stutter this is supposed to prevent. Dwelling is the real intent signal, so
+     tier 2 waits for it and is cancelled outright if the pointer leaves first.
+
+     rel=prefetch (never preload) throughout: it is the lowest priority the
+     browser has, so none of this can compete with what the current page is
+     still doing. Everything is deduped for the life of the page.
+
+     KEEP THESE ?v= NUMBERS IN STEP with the <script>/<link> tags in the HTML
+     pages. A stale one warms a URL the next page never asks for, which is
+     worse than not warming at all.
+     ============================================================ */
+  var NEWO_WARM = (function(){
+    var seen = {};
+    function link(href){
+      if(!href || seen[href]) return; seen[href] = 1;
+      var l = document.createElement("link");
+      l.rel = "prefetch"; l.href = href;
+      document.head.appendChild(l);
+    }
+    // ordered: stylesheet, shared scripts, then the loading animation's own
+    // chain. loader3d.worker.js and loader3d-core.js are fetched by the worker
+    // rather than by a script tag, but a prefetch lands in the same HTTP cache
+    // the worker reads from.
+    var SHELL = [
+      "css/style.css?v=41",
+      "js/main.js?v=3",
+      "js/materials-data.js?v=3",
+      "js/loader3d.js?v=12",
+      "js/loader3d-core.js?v=1",
+      "js/loader3d.worker.js?v=3",
+      "logo/3d-logo.stl"
+    ];
+    var MV_LIB  = "https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js";
+    var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
+    var MECH_V  = "?v=15";     // must match the mechanism iframe src in project.html
+    var DWELL_MS = 400;
+
+    function shell(){ SHELL.forEach(link); }
+
+    function heavy(key, p){
+      if(!p) return;
+      if(p.mechanism && /\.html?$/i.test(p.mechanism)) link("projects/"+key+"/"+p.mechanism+MECH_V);
+      var glb = p.modelRender || p.model;
+      if(glb){ link("projects/"+key+"/"+glb+MODEL_V); link(MV_LIB); }
+    }
+
+    /* el is the thing being hovered, so tier 2 can be called off the moment the
+       pointer leaves it. Safe to call repeatedly - link() dedupes and the
+       timer is per call, so a re-entered card just schedules another tier 2
+       that finds everything already warmed. */
+    function project(el, key){
+      shell();
+      link("project.html?p=" + encodeURIComponent(key));
+      var P = projects(), p = P[key];
+      if(!p || !el) return;
+      var t = setTimeout(function(){ heavy(key, p); }, DWELL_MS);
+      function cancel(){
+        clearTimeout(t);
+        el.removeEventListener("pointerleave", cancel);
+        el.removeEventListener("blur", cancel);
+      }
+      el.addEventListener("pointerleave", cancel);
+      el.addEventListener("blur", cancel);
+    }
+
+    // a plain page (materials / about / contact): shell, then the document
+    function page(href){ shell(); link(href); }
+
+    return { shell: shell, project: project, page: page };
+  })();
+  window.NEWO_WARM = NEWO_WARM;
+
   function projects(){ return (typeof PROJECTS !== "undefined") ? PROJECTS : {}; }
 
   /* Pull the category label off a project's code. Codes look like "L01.1" or
@@ -154,18 +250,20 @@
     if(!overlay) return;
     build(overlay);
 
-    // hover-to-prefetch: warm a project page's document + stylesheet the moment
-    // the pointer lands on its menu link, so the click feels instant. Deduped,
-    // and prefetch (not preload) so it never competes with the current page.
-    var pf = {};
-    function prefetch(href){
-      if(!href || pf[href]) return; pf[href] = 1;
-      var l = document.createElement("link"); l.rel = "prefetch"; l.href = href;
-      document.head.appendChild(l);
-    }
-    overlay.addEventListener("mouseover", function(e){
-      var a = e.target.closest && e.target.closest('a[href^="project.html"]');
-      if(a){ prefetch(a.getAttribute("href")); prefetch("css/style.css?v=40"); }
+    /* hover-to-warm on the menu's own links, through the shared NEWO_WARM
+       above: the loading screen's chain first, then the page, then (only if the
+       pointer settles) that project's model and mechanism. Materials / About /
+       Contact get the shell and their document; they have no loading screen and
+       no heavy assets, so there is no tier 2 for them.
+       Delegated on pointerover rather than bound per link because the panel is
+       rebuilt from data and the footer burger can open it on project pages. */
+    overlay.addEventListener("pointerover", function(e){
+      var a = e.target.closest && e.target.closest("a[href]");
+      if(!a) return;
+      var href = a.getAttribute("href") || "";
+      var m = href.match(/^project\.html\?p=([^&]+)/);
+      if(m){ NEWO_WARM.project(a, decodeURIComponent(m[1])); }
+      else if(/^(materials|about|contact)\.html/.test(href)){ NEWO_WARM.page(href); }
     });
 
     // category dropdowns. Handled here rather than with a checkbox/details

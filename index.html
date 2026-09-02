@@ -361,7 +361,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 
 <script src="js/projects-data.js?v=12"></script>
 <script src="js/image-sizes.js?v=2"></script>
-<script src="js/menu.js?v=4"></script>
+<script src="js/menu.js?v=6"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -418,17 +418,17 @@ const CLIP_PICK = (function(){
            ' width="'+w+'" height="'+h+'"';
   }
 
-  // hover-to-prefetch: the moment the pointer lands on a card, warm the project
-  // page's document + stylesheet (index uses inline CSS, so style.css isn't
-  // cached yet) so the click feels instant. The card image is already the hero
-  // image, so that's cached too. Deduped; prefetch (not preload) so it never
-  // fights the current page for bandwidth.
-  var _pf = {};
-  function prefetch(href){
-    if(!href || _pf[href]) return; _pf[href] = 1;
-    var l = document.createElement("link"); l.rel = "prefetch"; l.href = href;
-    document.head.appendChild(l);
-  }
+  /* ---- WARMING THE PROJECT PAGES ----------------------------------------
+     The mechanism lives in js/menu.js as window.NEWO_WARM (menu.js is the one
+     script every page loads, so the ?v= numbers exist in exactly one place).
+     Read the long note there for what the two tiers are and why the heavy
+     assets wait for a dwell rather than firing on contact.
+     Here: warm the shared shell once the home page has settled, so even a
+     straight click into the first card starts warm, and warm each project when
+     the pointer actually lands on its card. */
+  var WARM = window.NEWO_WARM || { shell:function(){}, project:function(){} };
+  var whenIdle = window.requestIdleCallback || function(fn){ return setTimeout(fn, 1500); };
+  whenIdle(function(){ WARM.shell(); });
 
   var dock = document.getElementById("dock");
   ORDER.forEach(function(key, i){
@@ -447,10 +447,12 @@ const CLIP_PICK = (function(){
       '<span class="dc-media">' +
         '<img src="projects/'+key+'/'+first+'"'+cardSrc(key, first)+' alt="'+esc(p.title)+'" decoding="async">' +
       '</span>';
-    a.addEventListener("mouseenter", function(){
-      prefetch("project.html?p=" + key);
-      prefetch("css/style.css?v=40");
-    }, { once:true });
+    /* pointerenter, not mouseenter: it also fires on a touch, which is the
+       only warning a phone ever gives before the tap lands. NOT {once:true} -
+       NEWO_WARM dedupes every URL itself, and re-entering a card has to be able
+       to re-arm the dwell timer for the heavy tier, which leaving cancelled. */
+    a.addEventListener("pointerenter", function(){ WARM.project(a, key); });
+    a.addEventListener("focus", function(){ WARM.project(a, key); });
     dock.appendChild(a);
   });
 
