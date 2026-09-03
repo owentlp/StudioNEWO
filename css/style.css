@@ -597,7 +597,28 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      If you change these numbers, change the camera-orbit percentage in
      project.html by the same factor or the model's default size will jump:
      apparent size is elementSize / cameraRadius. */
-  width:130vw; height:calc(var(--model-slot) * 5);
+  /* SIZED TO WHAT THE ZOOM RANGE ACTUALLY NEEDS, which is the single biggest
+     thing you can do for how smooth the model feels while it is being dragged.
+     This element is the model's clipping boundary, and model-viewer sizes its
+     WebGL buffer to element x dpr - so every pixel of it is fill cost on every
+     frame of an interaction, and the frosted shade's KHR_materials_transmission
+     makes three.js render the whole scene a SECOND time into a transmission
+     target, doubling it.
+     It used to be 130vw x 5 slots (about 3150 x 3260 CSS px, ~10 MP, ~21 MP of
+     fill per frame) because zoom-in went to 7-8x and the element's edge was the
+     only thing that ever cropped the model - its size WAS the zoom budget. Zoom
+     is now capped at +25% (ZOOM_IN in project.html), so the model can never be
+     larger than --model-fill * 1.25 slots, and all the rest of that element was
+     empty transparent space being rasterised every frame.
+     Square, and derived from the same two numbers, so it can never drift out of
+     step with them: the model is framed on its bounding sphere, so a square of
+     (fill * 1.25 + margin) slots contains it at any rotation and at full zoom.
+     NOTHING ABOUT THE COMPOSITION CHANGES - frameModel() solves the camera
+     distance FROM the element's height, so a smaller element simply gets a
+     closer camera and the model renders at exactly the same size on screen.
+     Verified: rendered height unchanged, no clipping at max zoom. */
+  width:calc(var(--model-slot) * (var(--model-fill) * 1.25 + 0.3));
+  height:calc(var(--model-slot) * (var(--model-fill) * 1.25 + 0.3));
   transform:translate(-50%,-50%) rotate(-5deg) scale(.94);
   /* Hidden until frameModel() has set the camera distance for this screen.
      model-viewer paints one auto-framed frame before our JS can size it, and at
@@ -904,9 +925,13 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      from this height, so the two can never drift apart again. Width stays at
      100% (not the desktop 130vw): the horizontal overhang is what swallows taps
      meant for the page, and on touch the model is live from the first tap. */
+  /* same derivation as desktop; see the note there. Width is capped at 100% of
+     the slot on touch: the horizontal overhang is what swallows taps meant for
+     the page, and the model is live from the first tap here. */
   .cad-stage model-viewer{
     transform:translate(-50%,-50%);
-    width:100%; height:calc(var(--model-slot) * 2.7);
+    width:100%;
+    height:calc(var(--model-slot) * (var(--model-fill) * 1.25 + 0.3));
   }
   .cad-stage model-viewer:hover{transform:translate(-50%,-50%);}
   /* row, not column: as text these could stack down the page and still read

@@ -104,7 +104,7 @@
     // rather than by a script tag, but a prefetch lands in the same HTTP cache
     // the worker reads from.
     var SHELL = [
-      "css/style.css?v=49",
+      "css/style.css?v=50",
       "js/main.js?v=3",
       "js/materials-data.js?v=3",
       "js/loader3d.js?v=12",
