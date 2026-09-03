@@ -52,6 +52,17 @@
   --hero-pad:clamp(8px,1.4vw,22px);  /* whitespace around the hero image */
   --gallery-gap:12px;/* vertical gap between gallery thumbs (smaller = denser) */
   --viewer-h:clamp(520px,74vh,1100px);
+  /* HOW BIG THE MODEL RENDERS, as a multiple of --model-slot. This is the one
+     number to change: 1 means the model exactly fills its slot, 2.4 means it
+     stands 2.4 slots tall and therefore overhangs the slot by 0.7 slots top and
+     bottom - which is what makes it flood up over the gallery above it and read
+     as part of the composition rather than a boxed-in viewer.
+     project.html computes the camera distance from this every time the model
+     loads or the window resizes, so it holds at EVERY width and on mobile (see
+     frameModel()). The control bar spaces itself off the same number, so
+     nothing has to be retuned by hand when this changes. The max-width:900px
+     block overrides it for phones. */
+  --model-fill:2.4;
   --model-slot:clamp(400px,27vw,680px);  /* the model's compact layout + interaction box; the model-viewer overflows it. Width-proportional (vw) like the hero image, so it holds a consistent size across zoom and just scales with screen width. *//* 2026-07-22, revised same day after live-checking in a real browser: first pass (90vh) made the stage a wide landscape box for what is a tall, narrow product (the lamp) - mismatched aspect ratio, causing lots of visible empty space either side of the model and likely contributing to the "cut off" report. Still notably bigger than the pre-2026-07-22 value (was clamp(420px,58vw,840px)) for the immersive full-bleed feel, just less extreme. */
   --txt-gap:14px;  /* standard gap between a figure/image and its text, used site-wide for consistency */
 }
@@ -271,18 +282,52 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .info-panel.open .info-panel-in{margin-top:var(--txt-gap);}
 
 /* ---------- COMPONENT SPREAD: a parts photo with positioned info labels ---------- */
-.comp-spread{position:relative; display:block; line-height:0;}
+/* container-type makes every size below relative to the SPREAD'S OWN WIDTH
+   (cqw) instead of the viewport. The labels used to be clamp(11px,1vw,13px):
+   a floor of 11px with white-space:nowrap, so "MICROCONTROLLER" stayed ~190px
+   wide while the gutter it sits in shrank with the column - 263px at a 1920
+   window, 161px at 1180, 111px at 820, 52px on a phone. From about 1200px down
+   it ran straight over the parts photo, which was the "tags overlap the
+   components" report. In cqw the spread is one composition that scales as a
+   unit at every width. */
+/* The container-type lives on this WRAPPER, not on .comp-spread itself: an
+   @container rule styles a container's DESCENDANTS and can never style the
+   container element, so with it on .comp-spread the width rules below silently
+   did nothing. Everything inside now sizes off the spread's own width in cqw
+   rather than the viewport. The labels used to be clamp(11px,1vw,13px) - an
+   11px floor with white-space:nowrap, so "MICROCONTROLLER" stayed ~190px wide
+   while the gutter holding it shrank with the column: 263px at a 1920 window,
+   161px at 1180, 111px at 820, 52px on a phone. From about 1400px down it ran
+   straight over the parts photo, which was the "tags overlap the components"
+   report. */
+.comp-spread-wrap{container-type:inline-size; display:block;}
+.comp-spread{position:relative; display:block; line-height:0; --spread-img:72%;}
 /* the photo is shifted right (72% wide, 28% left gap) so each part's label can
    sit to its LEFT in that gap, level with the part - like Owen's sketch. */
-.comp-spread > img{display:block; width:72%; height:auto; margin-left:28%;}
+.comp-spread > img{display:block; width:var(--spread-img); height:auto;
+  margin-left:calc(100% - var(--spread-img));}
+/* Narrower than this the label column cannot hold a word like MICROCONTROLLER
+   at a readable size, so the photo gives width back instead of the type
+   shrinking away. project.html rebuilds every label's position from
+   --spread-img, so the parts and their names move together and nothing has to
+   be re-authored per project. */
+@container (max-width:900px){ .comp-spread{--spread-img:56%;} }
+@container (max-width:480px){ .comp-spread{--spread-img:46%;} }
+/* left is rebuilt from the live photo width: a gutter label sits at its
+   fraction of the gutter, a label on the photo at its fraction of the photo.
+   --f comes from compSpread() in project.html; top stays a plain % because the
+   photo keeps its aspect ratio, so a given % of the spread's height is always
+   the same point on the part. */
+.comp-label.in-gut{left:calc((100% - var(--spread-img)) * var(--f));}
+.comp-label.on-img{left:calc((100% - var(--spread-img)) + var(--spread-img) * var(--f));}
 .comp-label{position:absolute; z-index:2; line-height:1;}
 /* an OPEN label (and its panel) rises above the other labels so the spec panel
    overlaps them instead of sliding underneath - each label is its own stacking
    context, so the panel's own z-index can't clear a sibling label on its own. */
 .comp-label.open{z-index:20;}
-.comp-info{display:inline-flex; align-items:center; gap:6px; padding:3px 0; background:none; border:0; cursor:pointer; font-family:var(--body); color:var(--ink);}
-.comp-name{font-size:clamp(11px,1vw,13px); letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; text-shadow:0 0 4px var(--paper),0 0 4px var(--paper),0 0 4px var(--paper);}
-.comp-info img{width:12px; height:12px; display:block; flex:0 0 auto;}
+.comp-info{display:inline-flex; align-items:center; gap:clamp(3px,.65cqw,6px); padding:3px 0; background:none; border:0; cursor:pointer; font-family:var(--body); color:var(--ink);}
+.comp-name{font-size:clamp(8px,2.1cqw,13px); letter-spacing:clamp(.05em,.9cqw,.14em); text-transform:uppercase; white-space:nowrap; text-shadow:0 0 4px var(--paper),0 0 4px var(--paper),0 0 4px var(--paper);}
+.comp-info img{width:clamp(8px,1.3cqw,12px); height:auto; display:block; flex:0 0 auto;}
 .comp-info:hover .comp-name,.comp-label.open .comp-name{color:var(--red);}
 .comp-panel{position:absolute; left:0; top:calc(100% + 6px); width:max-content; max-width:min(260px,60vw); background:var(--paper); border:1px solid rgba(20,20,20,.16); padding:11px 13px; display:none; z-index:5; box-shadow:0 8px 30px rgba(0,0,0,.12);}
 .comp-label.open .comp-panel{display:block;}
@@ -481,7 +526,17 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    is how .cad-stage/.hiw-graphic used to do it right before this rewrite).
    .solo-model/.solo-mech let either half take the full row alone if a
    future project only has one of the two (only KART currently has either). */
-.cad-hiw{width:100vw; margin-left:calc(50% - 50vw); margin-top:32px; display:grid; grid-template-columns:1fr 1fr; column-gap:var(--gut); align-items:stretch;}
+/* --hiw-pull is measured and set by project.html (alignHiw): a NEGATIVE margin
+   equal to the how-it-works paragraph's own height, which lands the bottom of
+   that paragraph exactly on the bottom of the gallery above it, and carries the
+   model and the mechanism up together by the same amount so the row stays in
+   step. It has to be measured rather than authored because the paragraph's
+   height depends on the project's copy and on how it wraps at this width.
+   Desktop only - the stacked mobile layout has the gallery full-width directly
+   above, so pulling up there would just run the two into each other. The 32px
+   fallback is the old value, used if the JS never runs or there is no
+   how-it-works text to align to. */
+.cad-hiw{width:100vw; margin-left:calc(50% - 50vw); margin-top:var(--hiw-pull, 32px); display:grid; grid-template-columns:1fr 1fr; column-gap:var(--gut); align-items:stretch;}
 .cad-hiw.solo-model .cad-hiw-model,.cad-hiw.solo-mech .cad-hiw-mech{grid-column:1 / -1;}
 /* a graphic-only project (no 3D model, e.g. OMNI) shows its mechanism centred
    at a contained width instead of full-bleed, so it reads at a similar scale
@@ -518,8 +573,18 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    at every window size and on mobile (margin is excluded from the click-to-
    interact box, so the interaction area is unchanged). Retune together: a bigger
    model (lower camera %) needs a bigger margin. */
+/* The model overhangs its slot by (--model-fill - 1) / 2 slots top and bottom,
+   so the control bar has to clear exactly that much plus a small gap. Deriving
+   it means changing --model-fill alone can never leave the bar overlapping the
+   model or stranded in a field of white space. */
+/* --model-fill-eff is written back by frameModel() and is the fill the model
+   actually got: it equals --model-fill unless the wish was taller than the
+   window, in which case the model is capped and this is the capped value.
+   Spacing keys off the achieved number so a capped model does not leave a
+   slot's worth of white space under it. Falls back to the wish if JS never
+   runs. */
 .cad-stage{position:relative; height:var(--model-slot); z-index:1;
-  margin-bottom:calc(var(--model-slot) * 0.72);}
+  margin-bottom:calc(var(--model-slot) * ((var(--model-fill-eff, var(--model-fill)) - 1) / 2 + 0.16));}
 .cad-stage model-viewer{
   position:absolute; left:50%; top:50%; z-index:1;
   /* The element is MUCH bigger than its slot on purpose: it runs the full width
@@ -534,7 +599,13 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      apparent size is elementSize / cameraRadius. */
   width:130vw; height:calc(var(--model-slot) * 5);
   transform:translate(-50%,-50%) rotate(-5deg) scale(.94);
-  transition:transform .5s ease; background:transparent; --poster-color:transparent;
+  /* Hidden until frameModel() has set the camera distance for this screen.
+     model-viewer paints one auto-framed frame before our JS can size it, and at
+     these element proportions that frame is the wrong size - it read as the
+     model popping in and then jumping. Two frames later it is framed and this
+     fades it up. */
+  opacity:0;
+  transition:transform .5s ease, opacity .35s ease; background:transparent; --poster-color:transparent;
   pointer-events:none;   /* enabled only over the slot box, in project.html */
 }
 .cad-stage model-viewer:hover{transform:translate(-50%,-50%) rotate(-2deg) scale(.97);}
@@ -543,6 +614,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .mv-hint{position:absolute; left:50%; bottom:8px; transform:translateX(-50%); z-index:4;
   font-family:var(--body); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
   color:var(--ink-soft); pointer-events:none; opacity:.75; transition:opacity .3s ease; white-space:nowrap;}
+.cad-stage.mv-framed model-viewer{opacity:1;}
 .cad-stage.mv-live .mv-hint{opacity:0;}
 /* OFF-SCREEN: stop the model costing the compositor anything while you are
    reading somewhere else on the page. The element is 130vw x five --model-slot
@@ -558,12 +630,22 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .mv-bar{position:relative; z-index:3;}
 .cad-hiw-mech{z-index:3;}
 /* two rows: DRAWING VIEW + RESET on top, LIGHT ON + dimmer stacked under them */
-.mv-bar{display:flex; flex-direction:column; align-items:flex-start; gap:clamp(9px,1.2vw,16px); padding:0 var(--mar);}
-.mv-bar .mv-left,.mv-bar .mv-mid{display:flex; gap:clamp(14px,2vw,28px); flex-wrap:wrap; align-items:center;}
-.mv-btn,.mv-sel{font-family:var(--body); font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); background:none; border:0; padding:4px 0; cursor:pointer; border-radius:0; transition:color .15s;}
-.mv-btn:hover,.mv-sel:hover{color:var(--red);}
-.mv-btn.active{color:var(--red);}
-.mv-sel{padding-right:14px; -webkit-appearance:none; appearance:none; border-bottom:1px solid var(--ink);}
+.mv-bar{display:flex; flex-direction:column; align-items:flex-start; gap:clamp(8px,1vw,12px); padding:0 var(--mar);}
+/* tighter than the old text buttons needed: these are blocks now, so the gap
+   between them reads as a gap rather than as word spacing. */
+.mv-bar .mv-left,.mv-bar .mv-mid{display:flex; gap:clamp(8px,1vw,12px); flex-wrap:wrap; align-items:center;}
+/* Same block as .inq (INQUIRE) and .mv-ar (VIEW IN YOUR SPACE): white on red,
+   12px, .16em tracking, 8px/14px padding. These used to be quiet ink text that
+   turned red when active; as red blocks the ACTIVE state needs somewhere else
+   to go, so it inverts to ink. Red = available, ink = currently on. */
+.mv-btn,.mv-sel{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; border-radius:0; transition:opacity .15s ease, background-color .15s ease;}
+.mv-btn:hover,.mv-sel:hover{color:#fff; opacity:.82;}
+.mv-btn.active{background:var(--ink); color:#fff;}
+.mv-sel{padding-right:30px; -webkit-appearance:none; appearance:none; border-bottom:0;
+  background-image:linear-gradient(45deg,transparent 50%,#fff 50%),linear-gradient(135deg,#fff 50%,transparent 50%);
+  background-position:calc(100% - 17px) calc(50% + 1px),calc(100% - 12px) calc(50% + 1px);
+  background-size:5px 5px,5px 5px; background-repeat:no-repeat;}
+.mv-sel option{color:var(--ink); background:var(--paper);}
 /* lamp brightness slider */
 .mv-dim{-webkit-appearance:none; appearance:none; width:96px; height:1px; background:var(--ink); cursor:pointer; align-self:center;}
 .mv-dim::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:11px; height:11px; background:var(--red); border:0; border-radius:50%; cursor:pointer;}
@@ -576,7 +658,21 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    here means it can only ever sit above the model, whatever the model does.
    The button is hidden until project.html decides what it does: launch AR on a
    phone, or open the QR panel on a desktop. */
-.mv-ar-row{position:relative; z-index:6; display:flex; flex-direction:column; align-items:flex-start; padding:0 var(--mar); margin-bottom:clamp(10px,1.4vw,18px);}
+/* PINNED OVER THE MODEL, and taking no space in the flow.
+   Owen wants VIEW IN YOUR SPACE reading as a label printed on the render, not
+   as another control in the bar. In normal flow it did that, but it also
+   occupied ~50px above .cad-stage, and every pixel it took pushed the stage
+   down and came straight off the model's overlap with the gallery above, one
+   for one - measured, that overlap fell from 238 to 172px at 1920 and from 62
+   to 7px on a phone, which is most of the effect Owen asked for in the first
+   place. A fixed negative margin cannot compensate, because the row collapses
+   to zero height while the button is still hidden (the script decides at click
+   time whether it launches AR or opens the QR panel).
+   Absolute against .cad-hiw-model instead: the stage keeps the top of the
+   column, the button floats over the model's upper half, and the z-index keeps
+   it printed on top rather than behind. The QR panel still hangs off this row,
+   so nothing about that changes. */
+.mv-ar-row{position:absolute; top:0; left:0; z-index:6; display:flex; flex-direction:column; align-items:flex-start; padding:0 var(--mar);}
 .mv-ar{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; transition:opacity .15s ease;}
 .mv-ar:hover{opacity:.82;}
 .mv-ar[hidden]{display:none;}
@@ -603,6 +699,10 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    right. The one short line of copy (if any) sits above the graphic as a
    small caption-weight block. */
 .hiw-text{padding:0 var(--mar); max-width:var(--w-desc);}
+/* set by alignHiw() in project.html when the gallery column above forces the
+   paragraph narrower than the site's normal measure - justification at ~20ch
+   is all rivers. */
+.hiw-text.hiw-narrow .desc{text-align:left; text-align-last:left;}
 .hiw-graphic{overflow:visible;}
 .hiw-graphic .fig.vid{margin-top:24px;}
 /* KART (model + mechanism paired): make the mechanism a little bigger by
@@ -613,12 +713,33 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    pair is how much bigger it gets. */
 .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-text{position:relative; z-index:2;}
 .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech{position:relative; z-index:1;
-  width:100%; margin-left:0;
-  /* underlap as a % of width (not fixed px) so the transparent top buffer tucks
-     under the text by the same proportion at any mechanism size - and no cap, so
-     the graphic scales with its column like the images (was capped at 720px,
-     which made it small at 100% zoom). It now stays balanced with the model. */
-  margin-top:-25%;}
+  /* THE DRAWN ROOM FILLS THE COLUMN EXACTLY, edge to edge.
+     The canvas carries a transparent buffer around the artwork so the lamp's
+     glow can fade out instead of being hard-clipped: BUF_X=90 of a W=940
+     logical canvas, i.e. **9.574% of the element is empty space before the room
+     starts**, and the same again on the right. So the element has to be
+     100 / (100 - 2*9.574) = 1.237x the column for the ROOM to be exactly one
+     column wide, and pulled left by 9.574% x 1.237 = 11.84% for the room's LEFT
+     edge to land exactly on the column's left edge - which is also the left edge
+     of the how-it-works paragraph above it. The room's right edge then lands on
+     the page's right margin.
+     This is Owen's 2026-09-03 note: the graphic reads bigger than a plain
+     width:100% (where the room filled only four fifths of an already half-width
+     column) but is now cleanly separated from the model instead of bleeding
+     left across it - the room never enters the model's column at any width.
+     If BUF_X or ROOM_W change in mechanism.html, recompute both numbers from
+     BUF_X / (ROOM_W + 2*BUF_X).
+     The column runs to the viewport edge, but the gallery above stops at the
+     page margin, so the room is sized against (column - --mar): its right edge
+     then lands on the SAME margin as the photos and as the right-justified
+     controls inside it, instead of 10px past it. */
+  width:calc((100% - var(--mar)) * 1.2368);
+  margin-left:calc((100% - var(--mar)) * -0.1184);
+  /* underlap as a % of WIDTH (not fixed px) so the transparent top buffer tucks
+     under the text by the same proportion at any mechanism size. Raised with
+     the element: a wider element is a taller canvas, so the same -25% left a
+     bigger gap under the paragraph than before. */
+  margin-top:-28%;}
 /* OMNI (mechanism with no model beside it, so .solo-mech, full page width).
    Its mechanism.html now carries a big transparent buffer around the art so the
    sound waves are not clipped at the frame edge - see the long note in that
@@ -727,6 +848,18 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    RESPONSIVE
    ============================================================ */
 @media (max-width:900px){
+  /* --model-slot is clamp(400px,27vw,680px): below ~1480px the 27vw term is
+     under the 400px floor, so every narrow screen got the SAME 400px slot -
+     on a 390px phone that is a 400px box plus its margin for a model that was
+     rendering ~270px tall. Width-relative on small screens instead, so the slot
+     and everything spaced off it shrink with the phone. */
+  :root{
+    --model-slot:clamp(290px,74vw,520px);
+    /* a little less overhang than desktop: there is no gallery beside it to
+       flood into on a stacked layout, and a 2.4 fill on a phone puts the lamp
+       through the text above and below it. */
+    --model-fill:1.7;
+  }
   .hero{min-height:auto; row-gap:18px;}
   .hero-main{grid-column:1 / 13; grid-row:auto; width:100%; margin-left:0;}
   .hero-specs{grid-column:1 / 13; grid-row:auto;}
@@ -741,7 +874,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   /* model + mechanism stack back to one column on small screens - side by
      side doesn't work once each half is narrower than the model/graphic
      needs to read clearly. */
-  .cad-hiw{display:block; margin-top:80px;}
+  .cad-hiw{display:block; margin-top:40px;}
   .cad-hiw-model{margin-bottom:60px;}
   /* stacked: drop the desktop sideways bleed. The mechanism canvas carries a
      big transparent top/bottom buffer (for the glow/beam); on desktop it hides
@@ -762,13 +895,26 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      model is live from the first tap (see the note in project.html), so an
      element that big would be sitting invisibly on top of whatever is next to
      it and swallowing touches meant for the page. Contained here instead. */
+  /* The element is the model's ROOM, not its size: the model is clipped by the
+     element's edge, so it has to stay comfortably taller than
+     --model-fill slots or a zoomed-in model gets cut off. 1.55 was below the
+     old 2.28 camera default, which is what made the model render tiny here -
+     apparent size is elementHeight / cameraRadius, so a shorter element with
+     the same radius is a smaller model. frameModel() now derives the radius
+     from this height, so the two can never drift apart again. Width stays at
+     100% (not the desktop 130vw): the horizontal overhang is what swallows taps
+     meant for the page, and on touch the model is live from the first tap. */
   .cad-stage model-viewer{
     transform:translate(-50%,-50%);
-    width:100%; height:calc(var(--model-slot) * 1.55);
+    width:100%; height:calc(var(--model-slot) * 2.7);
   }
   .cad-stage model-viewer:hover{transform:translate(-50%,-50%);}
-  .mv-bar{gap:14px 24px; margin-top:14px;}
+  /* row, not column: as text these could stack down the page and still read
+     as a list, but as solid blocks a vertical stack is a wall of red. display:
+     contents flattens the two groups so every control wraps in one flow. */
+  .mv-bar{flex-direction:row; flex-wrap:wrap; align-items:center; gap:10px; margin-top:14px;}
   .mv-bar .mv-left,.mv-bar .mv-mid{display:contents;}
+  .mv-dim{width:min(140px,40vw);}
   /* AR row is in normal flow now, so nothing to reposition - just let the QR
      panel (desktop-only anyway) wrap rather than squeeze on a narrow window. */
   .mv-qr{flex-wrap:wrap;}
@@ -792,6 +938,11 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      the 760px breakpoint), not here - the columns are real elements now, so
      CSS cannot re-deal them. This only tightens the gutter between them. */
   .hero-gallery .gcols{gap:var(--gallery-gap);}
+  /* the scatter drops to 2 columns here, which leaves a labelled component
+     spread about 180px wide - far too narrow for a parts photo with a column
+     of names beside it. Any cell carrying a spread takes the full width
+     instead. project.html tags the cell, so this covers every project. */
+  .scatter .cell.has-spread{grid-column:1 / -1 !important;}
 }
 
 @media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto;} .page{transition:none;} }

@@ -41,3 +41,6 @@ $null
 
 # staged deletions - review then delete, or run cleanup.ps1
 _to_delete/
+
+# the Cowork desktop app saves files it delivers into here; never deploy them
+Claude outputs/

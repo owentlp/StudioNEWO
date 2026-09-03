@@ -35,29 +35,65 @@
      grew the block upward, which shoved the buttons up when Shadow wrapped to a
      third line). cursor:none so the custom canvas cursor stays hidden-arrow over
      the controls too. */
-  .ui{position:absolute;left:6%;top:67%;z-index:2;pointer-events:none;cursor:none;
-    display:flex;flex-direction:column;align-items:flex-start;max-width:56%;}
+  /* The mode buttons are fixed-width blocks now, so the old max-width on .ui
+     (which capped the WHOLE control stack) wrapped "Dim Away" onto a second row
+     as soon as the graphic was narrower than about 560px of button. The cap
+     belongs on the paragraph, not on the button row - .meta keeps its own
+     46ch - so .ui is uncapped and the buttons stay in one line wherever there
+     is room for them. */
+  /* top:80%, was 67%. Everything the radar draws is clipped to the room
+     (ctx.rect(ROOM...) + clip), and the room's bottom edge sits at
+     BUF_TOP + ROOM_H = 750 of the 960-unit canvas, i.e. 78.1%. At 67% the
+     buttons sat INSIDE the room, so the cone's boundary line ran straight
+     through them - Owen: "that thin line jutting into the buttons looks bad".
+     80% puts the row just clear of the room's bottom edge, in the transparent
+     bottom buffer that was dead space anyway. If BUF_TOP, BUF_BOT or ROOM_H
+     change, recompute: (BUF_TOP + ROOM_H) / (ROOM_H + BUF_TOP + BUF_BOT). */
+  /* RIGHT-JUSTIFIED to the room's right edge (Owen, 2026-09-03), which
+     css/style.css now lines up with the page's right margin - so the controls
+     hang off the same edge as everything else on that side of the page.
+     right:9.574% is BUF_X / W, the transparent margin between the element's
+     edge and the drawn room, so this tracks the artwork rather than the canvas.
+     top:80%, was 67%. Everything the radar draws is clipped to the room
+     (ctx.rect(ROOM...) + clip), and the room's bottom edge sits at
+     BUF_TOP + ROOM_H = 750 of the 960-unit canvas, i.e. 78.1%. At 67% the
+     buttons sat INSIDE the room, so the cone's boundary line ran straight
+     through them - Owen: "that thin line jutting into the buttons looks bad".
+     80% puts the row just clear of it, in transparent bottom buffer that was
+     dead space anyway. If BUF_TOP, BUF_BOT or ROOM_H change, recompute:
+     (BUF_TOP + ROOM_H) / (ROOM_H + BUF_TOP + BUF_BOT). */
+  .ui{position:absolute;left:auto;right:9.574%;top:80%;z-index:2;pointer-events:none;cursor:none;
+    display:flex;flex-direction:column;align-items:flex-end;max-width:none;}
   .ui .modes button{pointer-events:auto;cursor:none;}
-  .modes{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:clamp(15px,1.5vw,22px);margin:0 0 10px;}
+  .modes{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:0 0 12px;}
   /* held near 10px to sit in step with the site's body copy (.desc is 10px),
      with a mild vw term so it still tracks the graphic a little across sizes. */
-  .modes button{font-family:var(--mono);font-size:clamp(12px,1.1vw,14px);letter-spacing:.16em;text-transform:uppercase;
-    color:var(--ink);background:none;border:0;padding:4px 0;cursor:pointer;border-radius:0;
-    text-shadow:0 0 5px var(--paper),0 0 5px var(--paper);
-    transition:color .12s ease;}
-  .modes button:hover{color:var(--red);}
-  .modes button[aria-pressed="true"]{color:var(--red);}
-  .modes button:focus-visible{outline:2px solid var(--red);outline-offset:3px;}
-  .meta{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin:0;max-width:46ch;
-    font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-align:left;
+  /* Same block as INQUIRE, VIEW IN YOUR SPACE and the model's own controls
+     (.inq / .mv-ar / .mv-btn in css/style.css): white on red, 12px, .16em
+     tracking, 8px/14px padding. They used to be quiet ink text that turned red
+     when active; as red blocks the ACTIVE state needs somewhere else to go, so
+     it inverts to ink. Red = available, ink = currently on. No text-shadow
+     halo any more - a solid block does not need one to sit on the canvas. */
+  .modes button{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:#fff;background:var(--red);border:0;padding:8px 14px;cursor:pointer;border-radius:0;
+    transition:opacity .15s ease,background-color .15s ease;}
+  .modes button:hover{color:#fff;opacity:.82;}
+  .modes button[aria-pressed="true"]{background:var(--ink);color:#fff;opacity:1;}
+  .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
+  .meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin:0;max-width:46ch;
+    font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-align:right;
     text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);}
   /* small windows: the canvas is too small to carry an overlay, so the
      controls drop into normal flow BELOW the graphic instead of stacking on
      top of it, with a fixed readable size. The height message includes them. */
   @media (max-width:640px){
-    .ui{position:static;padding:10px 0 0;max-width:none;}
-    .modes{gap:16px;margin:0 0 10px;}
-    .modes button{font-size:13px;padding:4px 0;cursor:pointer;}
+    /* stacked under the graphic in one narrow column, where the rest of the
+       page is left-aligned - the right-justification above belongs to the
+       two-column desktop composition, not to this. */
+    .ui{position:static;padding:10px 0 0;max-width:none;align-items:flex-start;}
+    .modes{gap:10px;margin:0 0 12px;justify-content:flex-start;}
+    .meta{align-items:flex-start;text-align:left;}
+    .modes button{font-size:12px;padding:8px 14px;cursor:pointer;}
     .meta{font-size:13px;}
     .ui{cursor:auto;}
     canvas{cursor:default;}

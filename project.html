@@ -43,7 +43,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=41">
+<link rel="stylesheet" href="css/style.css?v=49">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -91,7 +91,7 @@
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
 <script src="js/main.js?v=3"></script>
-<script src="js/menu.js?v=6"></script>
+<script src="js/menu.js?v=14"></script>
 <script>
 (function(){
   var id = new URLSearchParams(location.search).get("p");
@@ -254,9 +254,22 @@
   // a component-spread image with positioned labels. Each label sits at an
   // x/y percent of the image (tune in projects-data.js) and carries an info
   // icon that opens a small panel with the part's real name + simple specs.
+  /* The x/y in projects-data.js are percentages of the WHOLE SPREAD, authored
+     against the desktop layout where the photo is 72% wide in a 28% gutter
+     (--spread-img in css/style.css). On a narrow column that photo has to give
+     width back to the labels or "MICROCONTROLLER" cannot be set at a readable
+     size - but moving the photo edge would slide every part out from under its
+     label. So x is converted here into a FRACTION of whichever band it falls
+     in, gutter or photo, and CSS rebuilds the position from the live
+     --spread-img. The authored numbers never change and the labels stay locked
+     to their parts at any width. IMG_BASE must match the --spread-img default. */
+  var IMG_BASE = 72;
   function compSpread(src, labels){
     var tags = labels.map(function(L){
-      return '<div class="comp-label" style="left:'+L.x+'%;top:'+L.y+'%;">' +
+      var x = +L.x || 0, inGut = x < (100 - IMG_BASE);
+      var f = inGut ? (x / (100 - IMG_BASE)) : ((x - (100 - IMG_BASE)) / IMG_BASE);
+      return '<div class="comp-label '+(inGut?'in-gut':'on-img')+'" style="--f:'+
+             (Math.round(f*10000)/10000)+';top:'+L.y+'%;">' +
         '<button type="button" class="comp-info" aria-expanded="false">' +
           '<span class="comp-name">'+esc((L.t||"").toUpperCase())+'</span>'+INFO_ICON +
         '</button>' +
@@ -266,10 +279,10 @@
         '</div>' +
       '</div>';
     }).join('');
-    return '<div class="comp-spread">' +
+    return '<div class="comp-spread-wrap"><div class="comp-spread">' +
       '<img src="'+img(src)+'" alt="'+esc(p.title)+' internal components" loading="lazy" decoding="async">' +
       tags +
-    '</div>';
+    '</div></div>';
   }
 
   // SCATTER: string = auto-placed (random, stable); object = pinned anchor.
@@ -321,10 +334,13 @@
       // captions are no longer shown under process images (removed by request).
       // An image with a `labels` array becomes a component spread instead: the
       // image with positioned, info-icon labels overlaid on it.
-      var inner = (o && o.labels && o.labels.length) ? compSpread(src, o.labels) : figure(src, ar, cut, idxNum);
+      var isSpread = !!(o && o.labels && o.labels.length);
+      var inner = isSpread ? compSpread(src, o.labels) : figure(src, ar, cut, idxNum);
       // horizontal placement (grid-column) + aspect ratio only; vertical
       // position is handled by the grid's dense auto-flow.
-      return '<div class="cell cap-'+capSide+'" style="'+colStyle+'">' + inner + '</div>';
+      // has-spread lets the mobile rules give a labelled parts photo the full
+      // width; in a 2-column mobile scatter it would otherwise be ~180px wide.
+      return '<div class="cell cap-'+capSide+(isSpread?' has-spread':'')+'" style="'+colStyle+'">' + inner + '</div>';
     }).filter(Boolean);
   }
   // same idea as an image cell, but for the materials note (design-tags row + one lifecycle
@@ -556,13 +572,16 @@
   }
   var modelHalf = glbView ?
     '<div class="cad-hiw-model">' +
-      // AR row, in NORMAL FLOW above the stage. It used to be slotted inside
-      // <model-viewer> with position:absolute;right:0 - but that element is
-      // deliberately ~1500px wide and overflows its slot, so "right:0" put the
-      // button off the right of the window and widened the page on Safari.
-      // Out here it can only ever sit above the model. The button is hidden
-      // until the script below decides what it should do (launch AR, or show
-      // the QR panel for a desktop visitor).
+      // AR row, in NORMAL FLOW above the stage, and DELIBERATELY overlapping
+      // the model: the model overhangs its slot upward by
+      // (--model-fill - 1) / 2 slots, so it floods up through this band, and
+      // .mv-ar-row's z-index keeps the button printed on top of it. Owen wants
+      // it read as a label pinned over the render, not as another control in
+      // the bar - it was moved down to the bar on 2026-09-03 and moved straight
+      // back on his say-so. It used to be slotted INSIDE <model-viewer> with
+      // position:absolute;right:0, which put it off the right of the window and
+      // widened the page on Safari, because that element is ~1500px wide; out
+      // here it can only ever sit above the model.
       '<div class="mv-ar-row">' +
         '<button class="mv-ar" type="button" hidden>VIEW IN YOUR SPACE &rarr;</button>' +
         '<div class="mv-qr" hidden>' +
@@ -655,7 +674,7 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=15" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=19" title="mechanism" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
@@ -842,6 +861,99 @@
     var dim   = stage.querySelector('.mv-dim');
     var sel   = stage.querySelector('.mv-sel');
     var defaultOrbit = mv.getAttribute("camera-orbit");
+
+    /* ================= SIZING THE MODEL =================================
+       The camera-orbit attribute carried a hard-coded 228%, hand-tuned once
+       against the desktop element (130vw x five --model-slot rows). Apparent
+       size is elementHeight / cameraRadius, so the moment any rule changed the
+       element - and the max-width:900px rule made it a third as tall - that
+       same 228% rendered the model at a third of its desktop size, marooned in
+       a box of white space. That was the "tiny on mobile" report.
+
+       So the radius is no longer authored. It is solved for, from the geometry,
+       every time the model loads and every time the window changes shape:
+
+         on-screen px = elementHeight * modelHeight / (2 * radius * tan(fov/2))
+
+       set that equal to --model-fill x --model-slot and solve for radius. The
+       model then lands at exactly the intended size on any screen, in any
+       window, at any zoom, with no per-breakpoint tuning - change --model-fill
+       in css/style.css and everything follows, including the control bar's
+       clearance, which is derived from the same number.
+
+       ZOOM RANGE (Owen, 2026-09-02): you cannot zoom OUT at all - the default
+       IS the widest view, so there is no "where did it go" state to recover
+       from - and you can zoom IN by 25%, no further. Both limits are set in
+       METRES, never percentages: model-viewer does not clamp radius
+       PERCENTAGES reliably ("105%" still let the camera through to about 60%,
+       measured). Metres clamp exactly. */
+    var ZOOM_IN = 1.25;          // 25% bigger than default, the whole range
+    var framedOrbit = null;      // what RESET goes back to, once we know it
+    var homeTheta = null, homePhi = null;
+
+    function frameModel(){
+      var stage = mv.parentElement;                       // .cad-stage
+      try{
+        if(!stage) return;
+        var slotPx = stage.getBoundingClientRect().height;
+        var elH    = mv.getBoundingClientRect().height;
+        if(!slotPx || !elH) return;
+        var fill = parseFloat(getComputedStyle(document.documentElement)
+                     .getPropertyValue("--model-fill")) || 2;
+        /* CAP AT THE WINDOW. --model-fill is a multiple of --model-slot, and
+           --model-slot is width-driven (27vw), so on a wide-but-short window
+           the wish can be taller than the screen - you could never see the
+           whole lamp and the hint under it at the same time. Never taller than
+           the viewport, and write the achieved fill back so the CSS spacing
+           below the model follows the real size instead of the wish. */
+        var targetPx = slotPx * fill;
+        /* 1.2, not 1.0: at --model-fill 2.4 the model is deliberately taller
+           than a 1080px window, which is what lets it reach up past the SHORT
+           gallery columns on the left and overlap them - the tall column on the
+           right is the only thing that reaches down to meet it otherwise. This
+           is still a safety net, just a looser one: on a genuinely short window
+           the model shrinks rather than becoming unviewable. */
+        var cap = (window.innerHeight || 900) * 1.2;
+        if(targetPx > cap) targetPx = cap;
+        document.documentElement.style.setProperty("--model-fill-eff",
+          String(Math.round((targetPx / slotPx) * 1000) / 1000));
+        var dims   = mv.getDimensions();                  // metres
+        var modelH = dims && dims.y ? dims.y : 0;
+        var t      = Math.tan((mv.getFieldOfView() || 45) * Math.PI / 360);
+        if(!modelH || !targetPx || !isFinite(t) || t <= 0) return;
+        var r = (elH * modelH) / (2 * targetPx * t);
+        if(!isFinite(r) || r <= 0) return;
+
+        var o = mv.getCameraOrbit();
+        // the authored angles, captured once - a re-frame after a resize keeps
+        // whatever the visitor has rotated to, but RESET still goes home
+        if(homeTheta === null){ homeTheta = o.theta; homePhi = o.phi; }
+        framedOrbit = homeTheta.toFixed(5)+"rad "+homePhi.toFixed(5)+"rad "+r.toFixed(5)+"m";
+
+        // limits BEFORE the orbit: whatever is in force clamps what we set next
+        mv.minCameraOrbit = "auto auto " + (r / ZOOM_IN).toFixed(5) + "m";
+        mv.maxCameraOrbit = "auto auto " + r.toFixed(5) + "m";
+        mv.cameraOrbit = o.theta.toFixed(5)+"rad "+o.phi.toFixed(5)+"rad "+r.toFixed(5)+"m";
+      } catch(e){ /* leave model-viewer's own framing in place */ }
+      finally { if(stage) stage.classList.add("mv-framed"); }
+    }
+
+    /* Re-frame on resize, but never while someone is using the model: a
+       re-frame resets the distance, and having your zoom yanked out from under
+       you mid-drag is worse than a slightly-off size until you let go. Rotating
+       the phone or dragging a desktop window across a breakpoint both land
+       here. */
+    (function watchResize(){
+      var t = null;
+      window.addEventListener("resize", function(){
+        clearTimeout(t);
+        t = setTimeout(function(){
+          var stage = mv.parentElement;
+          if(stage && stage.classList.contains("mv-live")) return;
+          if(mv.loaded) frameModel();
+        }, 220);
+      }, { passive:true });
+    })();
 
     /* ---------- AR, on phones AND on desktop ----------
        Phone -> launches AR (iOS Quick Look / Android Scene Viewer).
@@ -1072,7 +1184,10 @@
     })();
 
     rsBtn.addEventListener("click", function(){
-      mv.cameraOrbit = defaultOrbit;
+      // framedOrbit is the computed home for THIS screen; defaultOrbit is only
+      // the attribute's placeholder, and would put the model back at the wrong
+      // size on anything but the window it was hand-tuned for.
+      mv.cameraOrbit = framedOrbit || defaultOrbit;
       // also recentre. Panning is disabled now, but anyone who shifted the
       // model before this change still has that offset stored in cameraTarget,
       // and resetting the orbit alone would leave it stuck off-centre.
@@ -1097,37 +1212,14 @@
     }
 
     mv.addEventListener("load", function(){
-      /* ---- ZOOM RANGE: you can zoom IN, but not OUT past the default -------
-         The default view is deliberately the widest the model ever gets. From
-         there the wheel only brings you closer, so the model can never be
-         shrunk into a speck in the corner of a very large element, and there is
-         no "where did it go" state to recover from. Zooming in is left wide
-         open (the element is enormous, see .cad-stage model-viewer in
-         css/style.css, which is what gives it room to grow without clipping).
-
-         Both limits are set HERE, in METRES, rather than as attributes:
-         model-viewer does NOT clamp radius PERCENTAGES in min/max-camera-orbit
-         reliably - "105%" still let the camera through to about 60%, measured.
-         Metres clamp exactly.
-
-         framing = current radius / whatever percentage the camera-orbit
-         attribute asked for. Parsed rather than hard-coded so changing that
-         attribute cannot silently break this. */
-      (function setZoomRange(){
-        try{
-          var pct = 2.28;
-          var m = String(defaultOrbit || "").match(/([\d.]+)%\s*$/);
-          if(m && parseFloat(m[1]) > 0) pct = parseFloat(m[1]) / 100;
-          var radius  = mv.getCameraOrbit().radius;      // the default distance
-          var framing = radius / pct;                    // 100% = fits element
-          if(isFinite(radius) && radius > 0){
-            // furthest out = exactly where it starts
-            mv.maxCameraOrbit = "auto auto " + radius.toFixed(4) + "m";
-            // closest in: well inside the element, so it fills the screen
-            mv.minCameraOrbit = "auto auto " + (framing * 0.30).toFixed(4) + "m";
-          }
-        } catch(e){ /* leave the attribute values in place */ }
-      })();
+      frameModel();
+      // two frames of settle, then reveal: the first frame model-viewer paints
+      // is its own auto-framing, which at these element proportions is the
+      // wrong size. See the opacity note on .cad-stage model-viewer.
+      requestAnimationFrame(function(){
+        frameModel();
+        var st = mv.parentElement; if(st) st.classList.add("mv-framed");
+      });
 
       // ---- lamp on / off / dim ----
       // The render's LED material is emissive; scaling its emissiveFactor dims
@@ -1463,6 +1555,97 @@
         requestAnimationFrame(function(){ window.__revealPage(); });
       });
     });
+  })();
+
+  /* ---------- ALIGN THE HOW-IT-WORKS ROW WITH THE GALLERY ABOVE ----------
+     Owen's composition rule (2026-09-03): the bottom of the how-it-works
+     paragraph sits on the bottom of the gallery above it, and the model and
+     the mechanism move up TOGETHER by the same amount so the row stays in
+     step. Pulling the row up is also what finally gets the model overlapping
+     the photos: the gallery's short columns are on the left, directly above the
+     model, and the tall one is on the right, so the section's own bottom edge
+     is no guide to what the model actually reaches.
+
+     Measured, not authored: the paragraph's height depends on the project's
+     copy and on how it wraps at this width, so the pull is its own height,
+     read at runtime and written to --hiw-pull for the CSS to apply as a
+     negative margin. Desktop only - the stacked mobile layout puts the
+     full-width gallery directly above and pulling up there would run the two
+     into each other. Re-measured on resize because a rewrap changes the
+     height. */
+  (function alignHiw(){
+    var cad = content.querySelector(".cad-hiw");
+    var txt = cad && cad.querySelector(".hiw-text");
+    if(!cad || !txt) return;
+    var wide = window.matchMedia("(min-width:901px)");
+    var GAP = 14;          // breathing room between a photo and the text under it
+
+    function apply(){
+      // clear both first, so every measurement below is of the NATURAL layout
+      // and not of one a previous pass already produced
+      cad.style.removeProperty("--hiw-pull");
+      txt.style.removeProperty("max-width");
+      if(!wide.matches) return;
+
+      var gal  = content.querySelector(".hero-gallery");
+      var cols = gal ? Array.prototype.slice.call(gal.querySelectorAll(".gcol")) : [];
+      var imgs = gal ? Array.prototype.slice.call(gal.querySelectorAll("img, video")) : [];
+      if(!cols.length || !imgs.length) return;
+
+      /* 1. KEEP THE PARAGRAPH INSIDE ITS OWN GALLERY COLUMN.
+         --w-desc is a fixed 32ch (~448px) but the gallery columns narrow with
+         the window - 459px at 1920, 340 at 1440, 279 at 1180 - so from about
+         1500px down the paragraph hung past its own column and into the next
+         one. That next column is the TALL one, the only column that reaches
+         down to where the paragraph now sits, so the text landed on a photo.
+         Measured overlap before this: 48px at 1600, 88 at 1440, 153 at 1180.
+         Capping to the column it starts under fixes it at every width and
+         needs nothing authored per project. */
+      var tl = txt.getBoundingClientRect().left, own = null;
+      cols.forEach(function(c){
+        var r = c.getBoundingClientRect();
+        if(tl >= r.left - 2 && tl < r.right) own = r;
+      });
+      if(own){
+        var cap = Math.max(200, Math.round(own.right - tl));
+        txt.style.maxWidth = cap + "px";
+        /* Justified text needs a measure to justify against. This paragraph is
+           set justified like every other .desc on the site, which reads well at
+           the full 32ch but opens ugly rivers of white space once the column
+           caps it to ~20ch. Flag it so the CSS can fall back to plain left
+           alignment when it has been squeezed. */
+        txt.classList.toggle("hiw-narrow", cap < 380);
+      }
+
+      /* 2. Pull up by the paragraph's own height so its bottom lands on the
+         gallery's bottom - but NEVER far enough to put its top over a photo
+         that is genuinely above it. Owen's rule: no body text over any image,
+         ever; only labels that belong to an image may sit on one. With the cap
+         above this clamp should not bite, and it is here so that a longer
+         how-it-works paragraph on some future project cannot reintroduce the
+         bug. */
+      var t = txt.getBoundingClientRect();
+      var deepest = 0;
+      imgs.forEach(function(im){
+        var r = im.getBoundingClientRect();
+        // only photos that actually sit in this paragraph's horizontal band
+        if(r.right > t.left + 2 && r.left < t.right - 2) deepest = Math.max(deepest, r.bottom);
+      });
+      var pull = t.height;
+      if(deepest){
+        var headroom = t.top - (deepest + GAP);
+        if(headroom < pull) pull = Math.max(0, headroom);
+      }
+      if(pull > 0) cad.style.setProperty("--hiw-pull", (-Math.round(pull)) + "px");
+    }
+    apply();
+    // fonts land after first layout and change the wrap; re-measure once they do
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(apply).catch(function(){});
+    var t = null;
+    window.addEventListener("resize", function(){
+      clearTimeout(t); t = setTimeout(apply, 180);
+    }, { passive:true });
+    if(wide.addEventListener) wide.addEventListener("change", apply);
   })();
 
   /* ---------- ARM THE DEFERRED MODEL LOAD ----------

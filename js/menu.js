@@ -104,7 +104,7 @@
     // rather than by a script tag, but a prefetch lands in the same HTTP cache
     // the worker reads from.
     var SHELL = [
-      "css/style.css?v=41",
+      "css/style.css?v=49",
       "js/main.js?v=3",
       "js/materials-data.js?v=3",
       "js/loader3d.js?v=12",
@@ -114,7 +114,7 @@
     ];
     var MV_LIB  = "https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js";
     var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
-    var MECH_V  = "?v=15";     // must match the mechanism iframe src in project.html
+    var MECH_V  = "?v=19";     // must match the mechanism iframe src in project.html
     var DWELL_MS = 400;
 
     function shell(){ SHELL.forEach(link); }

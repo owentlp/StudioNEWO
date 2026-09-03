@@ -62,13 +62,27 @@
      with the leftmost figure and survive the crop with room to spare.
      max-width is measured from there, so it drops to keep the right edge in
      the same place it was before. */
-  .ui{position:absolute;left:22%;bottom:8%;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;max-width:58%;gap:12px;}
+  /* The mode buttons are fixed-width blocks now, so the old max-width on .ui
+     (which capped the WHOLE control stack) wrapped "Dim Away" onto a second row
+     as soon as the graphic was narrower than about 560px of button. The cap
+     belongs on the paragraph, not on the button row - .meta keeps its own
+     46ch - so .ui is uncapped and the buttons stay in one line wherever there
+     is room for them. */
+  .ui{position:absolute;left:22%;bottom:8%;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;max-width:none;gap:12px;}
   .ui > *{pointer-events:auto;}
-  .modes{display:flex;flex-wrap:wrap;gap:20px;margin:0;}
-  .modes button{font-family:var(--mono);font-size:clamp(12px,1.1vw,14px);letter-spacing:.16em;text-transform:uppercase;color:var(--ink);background:none;border:0;padding:4px 0;cursor:pointer;text-shadow:0 0 5px var(--paper),0 0 5px var(--paper);transition:color .12s ease;}
-  .modes button:hover{color:var(--red);}
-  .modes button[aria-pressed="true"]{color:var(--red);}
-  .modes button:focus-visible{outline:2px solid var(--red);outline-offset:3px;}
+  .modes{display:flex;flex-wrap:wrap;gap:8px;margin:0;}
+  /* Same block as INQUIRE, VIEW IN YOUR SPACE and the model's own controls
+     (.inq / .mv-ar / .mv-btn in css/style.css): white on red, 12px, .16em
+     tracking, 8px/14px padding. They used to be quiet ink text that turned red
+     when active; as red blocks the ACTIVE state needs somewhere else to go, so
+     it inverts to ink. Red = available, ink = currently on. No text-shadow
+     halo any more - a solid block does not need one to sit on the canvas. */
+  .modes button{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:#fff;background:var(--red);border:0;padding:8px 14px;cursor:pointer;border-radius:0;
+    transition:opacity .15s ease,background-color .15s ease;}
+  .modes button:hover{color:#fff;opacity:.82;}
+  .modes button[aria-pressed="true"]{background:var(--ink);color:#fff;opacity:1;}
+  .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
   .meta{margin:0;max-width:46ch;font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);line-height:1.5;text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);}
   .vol{display:flex;align-items:center;gap:12px;}
   .vol-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);text-shadow:0 0 5px var(--paper),0 0 5px var(--paper);}
