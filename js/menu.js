@@ -154,6 +154,12 @@
 
   function projects(){ return (typeof PROJECTS !== "undefined") ? PROJECTS : {}; }
 
+  /* Same reason as the guard at the top of project.html: a bare P[key] test
+     also matches inherited Object.prototype keys, so ?p=__proto__ would pick a
+     category off Object.prototype. Harmless here, but keep the two consistent
+     so neither drifts back to the unsafe form. */
+  function known(P, key){ return !!key && Object.prototype.hasOwnProperty.call(P, key); }
+
   /* Pull the category label off a project's code. Codes look like "L01.1" or
      "AU01.1", so the prefix is the leading run of letters. Two-letter prefixes
      (AU) must be tested before one-letter ones (A) or "AU01.1" would match
@@ -202,7 +208,7 @@
     var P = projects();
     var here = currentKey();
     var openLabel = "";
-    if(here && P[here]) openLabel = categoryOf(P[here]);
+    if(known(P, here)) openLabel = categoryOf(P[here]);
     if(!openLabel && g.labels.length === 1) openLabel = g.labels[0];
 
     var html = '<nav class="menu-nav">';

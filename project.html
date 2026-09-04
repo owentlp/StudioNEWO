@@ -91,11 +91,19 @@
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
 <script src="js/main.js?v=3"></script>
-<script src="js/menu.js?v=15"></script>
+<script src="js/menu.js?v=16"></script>
 <script>
 (function(){
   var id = new URLSearchParams(location.search).get("p");
-  if(!id || !PROJECTS[id]) id = Object.keys(PROJECTS)[0];
+  /* hasOwnProperty, NOT a plain truthiness test. `!PROJECTS[id]` looks like a
+     whitelist but every object inherits keys from Object.prototype, so
+     ?p=__proto__ , ?p=constructor and ?p=toString all sailed through it. The
+     page then ran with p = Object.prototype (every field undefined), threw
+     part-way through the build, and the loading screen sat there forever -
+     verified live on 2026-09-03. Not a security hole (nothing unescaped
+     reaches the DOM; esc() covers every interpolation) but a crafted or
+     mistyped URL should fall back to a real project, not brick the page. */
+  if(!id || !Object.prototype.hasOwnProperty.call(PROJECTS, id)) id = Object.keys(PROJECTS)[0];
   var p = PROJECTS[id];
   var base = "projects/" + id + "/";
   document.title = p.title + " · STUDIO NEWO";
