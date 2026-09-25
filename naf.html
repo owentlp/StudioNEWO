@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<!--
+  GENERATED FILE - do not hand-edit. Rebuild with:
+
+      python make-project-pages.py
+
+  This is project.html with one project's real title, description, canonical
+  URL and social-preview tags baked into the <head>, and that project's id on
+  <body data-project>. Everything below the </head> is identical to the
+  template. See make-project-pages.py for why this is a file on disk rather
+  than something the script works out at runtime.
+-->
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NAF · STUDIO NEWO</title>
+<meta name="description" content="The desk fan has seen little fundamental change in years, often resulting in noisy, low-quality plastic disks. Taking formal cues from 1970s Braun design and industrial HVAC systems, NAF utilizes tangential crossflow technology. It pulls air in along its full length and pushes it out as one steady, quiet curtain, while looking like an object you'd want on your desk.">
+<meta name="theme-color" content="#e9e7e2">
+<link rel="canonical" href="https://studionewo.com/naf.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://studionewo.com/naf.html">
+<meta property="og:site_name" content="Studio NEWO">
+<meta property="og:title" content="NAF · Studio NEWO">
+<meta property="og:description" content="The desk fan has seen little fundamental change in years, often resulting in noisy, low-quality plastic disks. Taking formal cues from 1970s Braun design and industrial HVAC systems, NAF utilizes tangential crossflow technology. It pulls air in along its full length and pushes it out as one steady, quiet curtain, while looking like an object you'd want on your desk.">
+<meta property="og:image" content="https://studionewo.com/projects/naf/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NAF · Studio NEWO">
+<meta name="twitter:description" content="The desk fan has seen little fundamental change in years, often resulting in noisy, low-quality plastic disks. Taking formal cues from 1970s Braun design and industrial HVAC systems, NAF utilizes tangential crossflow technology. It pulls air in along its full length and pushes it out as one steady, quiet curtain, while looking like an object you'd want on your desk.">
+<meta name="twitter:image" content="https://studionewo.com/projects/naf/hero.jpg">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon-48.png" sizes="48x48" type="image/png">
+<!-- Google crops search-result favicons into a circle and prefers a source
+     that is a multiple of 48px. icon-192 draws the mark small enough that the
+     whole square survives that crop, so the result circle is not blank. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
+<!-- warm the loader's dependencies from the first byte of HTML: the 3D logo
+     tumble runs in a worker that needs three.js (CDN) and the STL. Cold, those
+     two downloads used to start only after loader3d.js booted the worker -
+     while the GLB / images hogged the connection - which is what pushed the
+     3D mark past its safety cap on fresh tabs. Preloading starts them
+     immediately; both land in the HTTP cache the worker then reads from. -->
+<link rel="preload" href="js/vendor/three.min.js?v=1" as="script">
+<link rel="preload" href="logo/3d-logo.stl" as="fetch" crossorigin>
+<!-- model-viewer is fetched LATE now (on scroll-approach, see "DEFERRED MODEL
+     LOAD") so its DNS + TLS handshake would otherwise happen at the worst
+     possible moment. Warm the connection up front; it costs one socket. -->
+<!-- the preconnect to cdn.jsdelivr.net was removed 2026-09-16: model-viewer
+     and the QR library are served from js/vendor/ now, same origin. -->
+<!-- model-viewer powers the rendered 3D model + AR (iOS Quick Look / Android
+     Scene Viewer). It is now injected from the page script ONLY when the
+     current project actually has a GLB (see the cad block), so the four
+     model-less projects skip the ~700KB library entirely. Version pinned to
+     the v4 line so an upstream major release can't silently break the page.
+     To go fully offline, download model-viewer.min.js into js/vendor/ and
+     point MV_SRC in the script below at it. -->
+<link rel="stylesheet" href="css/style.css?v=51">
+</head>
+<body class="proj-body" data-project="naf">
+<a class="skip-link" href="#content">Skip to content</a>
+
+<div id="loader" aria-hidden="true">
+  <div class="ld-mark">
+    <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+  </div>
+</div>
+<script src="js/loader3d.js?v=14"></script>
+
+<a class="site-home" href="index.html" aria-label="Studio NEWO home">
+  <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+</a>
+<div class="run-head" id="runHead" aria-hidden="true"></div>
+<div class="site-wordmark" role="img" aria-label="NEWO">
+  <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
+</div>
+<button id="burger" aria-label="Open menu">
+  <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
+</button>
+<div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+
+<main class="page proj" id="content" tabindex="-1"><!-- filled from data --></main>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lb-close" id="lbClose" aria-label="Close">CLOSE &times;</button>
+  <button class="lb-prev" id="lbPrev" aria-label="Previous item">&larr;</button>
+  <!-- no src="" here: an empty src makes the browser request the PAGE's own URL
+       as an image. Both src and alt are set by render() when the lightbox
+       opens, and cleared again when it closes. -->
+  <img id="lbImg" alt="">
+  <!-- videos share the lightbox with the photos; whichever matches the current
+       item is shown and the other is hidden. Controls on, because at full
+       screen you want scrubbing, unlike the muted inline loops. -->
+  <video id="lbVid" playsinline controls loop hidden></video>
+  <button class="lb-next" id="lbNext" aria-label="Next item">&rarr;</button>
+  <span class="lb-count" id="lbCount"></span>
+</div>
+
+<script src="js/projects-data.js?v=14"></script>
+<script src="js/materials-data.js?v=3"></script>
+<!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
+     reserved before the files land (no reflow) and srcset can be emitted -->
+<script src="js/image-sizes.js?v=3"></script>
+<!-- project pages hold the loader until their hero image, hero video and 3D
+     model have loaded (see the readiness gate at the end of the page script);
+     this flag tells main.js to hand reveal control to this page. -->
+<script>window.__DEFER_REVEAL = true;</script>
+<script src="js/main.js?v=4"></script>
+<script src="js/menu.js?v=17"></script>
+<script>
+(function(){
+  /* ---- LEGACY URL REDIRECT ----
+     project.html?p=kart was the only address a project had until 2026-09-16.
+     Anything already shared, bookmarked or indexed still uses it, so it is
+     forwarded to the clean path rather than left to rot. replace(), not
+     assign(), so the old URL does not sit in the back button. Only from
+     project.html itself - the generated wrappers carry data-project and must
+     never redirect, or kart.html would bounce to kart.html forever. */
+  if(!document.body.getAttribute("data-project")){
+    var legacy = null;
+    try { legacy = new URLSearchParams(location.search).get("p"); } catch(e){}
+    if(legacy && Object.prototype.hasOwnProperty.call(PROJECTS, legacy)){
+      var keep = location.search.replace(/[?&]p=[^&]*/, "").replace(/^&/, "?");
+      location.replace(legacy + ".html" + (keep && keep !== "?" ? keep : "") + location.hash);
+      return;
+    }
+  }
+
+  /* WHICH PROJECT THIS PAGE IS.
+     The generated per-project wrappers (kart.html, neb.html, ...) carry it on
+     <body data-project="...">, so the page knows before a query string is
+     involved and the URL can stay clean. project.html?p=<id> still works and
+     is what the legacy redirect below leans on. */
+  var id = document.body.getAttribute("data-project") ||
+           new URLSearchParams(location.search).get("p");
+  /* hasOwnProperty, NOT a plain truthiness test. `!PROJECTS[id]` looks like a
+     whitelist but every object inherits keys from Object.prototype, so
+     ?p=__proto__ , ?p=constructor and ?p=toString all sailed through it. The
+     page then ran with p = Object.prototype (every field undefined), threw
+     part-way through the build, and the loading screen sat there forever -
+     verified live on 2026-09-03. Not a security hole (nothing unescaped
+     reaches the DOM; esc() covers every interpolation) but a crafted or
+     mistyped URL should fall back to a real project, not brick the page. */
+  if(!id || !Object.prototype.hasOwnProperty.call(PROJECTS, id)) id = Object.keys(PROJECTS)[0];
+  var p = PROJECTS[id];
+  var base = "projects/" + id + "/";
+  document.title = p.title + " · STUDIO NEWO";
+
+  // WIREFRAME MODE: add &wire to the URL (project.html?p=kart&wire) to see the
+  // page as a layout skeleton - photos/video/model become labelled placeholder
+  // boxes, text keeps its real copy but every block is outlined, and the whole
+  // page (including the process section) is shown. Purely a planning view;
+  // non-destructive, styled entirely by the body.wire class (see css/style.css).
+  if(/[?&]wire\b/.test(location.search)) document.body.classList.add("wire");
+
+  function real(v){ return typeof v === "string" && v.trim() && !/^\s*\[/.test(v.trim()); }
+
+  // ---- per-project metadata. The static tags in <head> are sensible
+  // defaults (most link-preview scrapers do not run JS, so they fall back to
+  // those); this updates the tab title, canonical URL, social preview, and
+  // structured data for browsers and JS-aware crawlers on the actual project. ----
+  (function setMeta(){
+    var ORIGIN = "https://studionewo.com";
+    var pageUrl = ORIGIN + "/" + id + ".html";
+    var heroImg = ORIGIN + "/" + base + ((p.gallery && p.gallery[0]) ? p.gallery[0] : "hero.jpg");
+    var summary = real(p.summary) ? p.summary : (real(p.teaser) ? p.teaser : ("Studio NEWO project: " + p.title + "."));
+    function setMetaTag(sel, attr, val){
+      var el = document.head.querySelector(sel);
+      if(el){ el.setAttribute(attr, val); }
+    }
+    setMetaTag('link[rel="canonical"]', 'href', pageUrl);
+    setMetaTag('meta[property="og:url"]', 'content', pageUrl);
+    setMetaTag('meta[property="og:title"]', 'content', p.title + " · Studio NEWO");
+    setMetaTag('meta[property="og:description"]', 'content', summary);
+    setMetaTag('meta[property="og:image"]', 'content', heroImg);
+    setMetaTag('meta[name="twitter:title"]', 'content', p.title + " · Studio NEWO");
+    setMetaTag('meta[name="twitter:description"]', 'content', summary);
+    setMetaTag('meta[name="twitter:image"]', 'content', heroImg);
+    var descEl = document.head.querySelector('meta[name="description"]');
+    if(descEl){ descEl.setAttribute('content', summary); }
+    // CreativeWork structured data, for search engines
+    var ld = {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "name": p.title,
+      "url": pageUrl,
+      "image": heroImg,
+      "creator": { "@type": "Person", "name": "Owen Palmer" },
+      "publisher": { "@type": "Organization", "name": "Studio NEWO", "url": ORIGIN + "/" }
+    };
+    if(real(p.date)) ld.dateCreated = p.date;
+    if(real(p.summary)) ld.description = p.summary;
+    var s = document.createElement("script");
+    s.type = "application/ld+json";
+    s.textContent = JSON.stringify(ld);
+    document.head.appendChild(s);
+  })();
+  function keep(it){ return (it && typeof it === "object") ? real(it.src) : real(it); }
+  function img(src){ return base + src; }
+
+  /* ---- RESPONSIVE IMAGES ------------------------------------------------
+     Every hero + gallery photo has two pre-generated downscaled copies beside
+     it, in projects/<id>/sm/ (600px wide) and projects/<id>/md/ (1200px wide).
+     The ORIGINAL file is never touched and is always the last, largest srcset
+     candidate, so nothing here can cost image quality: the browser simply
+     picks the smallest copy whose pixel width still covers the box at this
+     screen size and pixel density, exactly as it would have used the original
+     otherwise. The lightbox deliberately bypasses this and loads the original.
+
+     `sizes` tells the browser how wide the image will actually be BEFORE it
+     has the CSS, which is what makes the choice correct rather than a guess.
+     Keep these in step with the matching CSS if the layout changes:
+       gallery  = a 4-column masonry across the full window (2 columns <=760px)
+       hero     = columns 1-7 of the 12-column hero grid, roughly 58vw
+     Dimensions come from js/image-sizes.js; if an image has no entry there
+     (a new file added before the script was re-run) this quietly emits a plain
+     src with no srcset, so the page still works, just without the saving. */
+  var GAL_SIZES  = "(max-width:760px) 50vw, 25vw";
+  var HERO_SIZES = "(max-width:760px) 100vw, 58vw";
+  /* Scatter cells span between 2 and 12 of the 12 columns, and the span is
+     known at build time, so each figure can declare its own real width instead
+     of sharing one pessimistic guess. Below 600px the scatter collapses to two
+     equal columns (see css/style.css), hence the fixed 50vw first term. */
+  function scatterSizes(spanCols){
+    var pct = Math.max(10, Math.min(100, Math.round((spanCols / 12) * 100)));
+    return "(max-width:600px) 50vw, " + pct + "vw";
+  }
+  function srcAttrs(file, sizes){
+    var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][file] : null;
+    if(!dims) return "";
+    var w = dims[0], h = dims[1], set = [];
+    if(w > 600)  set.push(base + "sm/" + file + " 600w");
+    if(w > 1200) set.push(base + "md/" + file + " 1200w");
+    set.push(base + file + " " + w + "w");
+    return (set.length > 1 ? ' srcset="' + set.join(", ") + '" sizes="' + sizes + '"' : '') +
+           ' width="' + w + '" height="' + h + '"';
+  }
+  function pad(n){ return n < 10 ? "0"+n : ""+n; }
+  // real HTML escaping (this used to be a passthrough): copy is all first-party
+  // so it's not a security issue, but a stray & or < in a caption would have
+  // silently broken the markup around it.
+  function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function isCut(src){ return /\.png$/i.test(src||""); }
+
+  /* ALT TEXT, by filename, from the `alt` map in js/projects-data.js.
+     Every gallery and process image used to be emitted with alt="", which tells
+     a screen reader and an image crawler that the photo is decoration. On a
+     portfolio the photographs ARE the content, so they say what they show.
+     A file with no entry falls back to the project title rather than to an
+     empty string, so a newly added photo is never silently unlabelled. */
+  function altFor(src){
+    var map = (p && p.alt) || {};
+    var txt = map[src];
+    return esc(real(txt) ? txt : p.title);
+  }
+
+  // material name -> slug, built from js/materials-data.js, so a chip under
+  // the hero can link straight to its entry on the Material Guide
+  // (materials.html#<slug>) without Owen having to hand-maintain slugs here.
+  // materials-data.js is nested (category -> groups -> items); walk both the
+  // legacy flat `items` and the current `groups[].items`, and index each
+  // material's name AND any aliases, so a hero material chip can deep-link to
+  // the right entry even when the chip word differs from the material's name.
+  var MAT_SLUGS = {};
+  (typeof MATERIAL_CATEGORIES !== "undefined" ? MATERIAL_CATEGORIES : []).forEach(function(cat){
+    function idx(it){
+      MAT_SLUGS[String(it.name).toLowerCase()] = it.slug;
+      (it.aliases||[]).forEach(function(a){ MAT_SLUGS[String(a).toLowerCase()] = it.slug; });
+    }
+    (cat.items||[]).forEach(idx);
+    (cat.groups||[]).forEach(function(g){ (g.items||[]).forEach(idx); });
+  });
+
+  // ---- INFO ICON: a small button that reveals a longer description on
+  // click, so a long paragraph can be shown as a couple of sentences with
+  // the rest one tap away instead of cluttering the page, or so an unlabeled
+  // image can carry its full writeup without a caption sitting on the page
+  // at rest. Uses Owen's own icon (logo/info.svg).
+  var INFO_ICON = '<img src="logo/info.svg" alt="" aria-hidden="true">';
+  function withInfo(shortHtml, moreText){
+    if(!real(moreText)) return shortHtml;
+    return shortHtml +
+      '<span class="info-wrap">' +
+        '<button type="button" class="info-btn" aria-expanded="false" aria-label="More detail">'+INFO_ICON+'</button>' +
+        '<span class="info-panel"><span class="info-panel-in">'+esc(moreText)+'</span></span>' +
+      '</span>';
+  }
+
+  // deterministic per-project RNG so the auto scatter is random but stable
+  function seedFrom(s){ var h=2166136261; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+  function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function pick(rnd,arr){ return arr[Math.floor(rnd()*arr.length)]; }
+
+  var year = real(p.date) ? p.date : "";
+
+  // a looping inline video figure (a section's video slot)
+  /* Every video on the page is registered into the SAME lightbox set as the
+     gallery images (see LB below), so tapping one opens it full screen and the
+     arrows carry on through the rest of the project's media rather than
+     stopping at the photos. Gallery images take indices 0..n-1; each video
+     appends itself and stamps its own index onto the figure. */
+  function videoFig(src, ar){
+    var u = img(src), i = -1;
+    // reuse an existing slot if this clip is already in the set. That is how
+    // the hero video picks up the index reserved for it above (and it keeps a
+    // clip that appears in two places from being listed twice).
+    for(var k = 0; k < LB.length; k++){ if(LB[k].type === "video" && LB[k].src === u){ i = k; break; } }
+    if(i < 0) i = LB.push({ type:"video", src:u }) - 1;
+    return '<figure class="fig vid" style="aspect-ratio:'+(ar||"16/9")+'" data-lb="'+i+'">' +
+      '<video src="'+u+'" muted loop autoplay playsinline preload="metadata" ' +
+      'aria-label="'+esc(p.title)+' in use, silent looping clip"></video></figure>';
+  }
+
+  /* One figure. Cut-outs sit on the paper with no crop and no box.
+
+     Now carries srcset. make-image-variants.py generates sm/ and md/ copies for
+     scatter images as well as hero and gallery, so these no longer download a
+     2000-2400px original into a box a few hundred pixels wide. Lazy loading
+     already decided WHEN they arrive; this decides how big they are. srcAttrs()
+     returns "" for any file with no entry in js/image-sizes.js, so a photo
+     added before the script is re-run still works, just without the saving. */
+  function figure(src, ar, cut, idxNum, sizes){
+    var idx = (idxNum != null) ? '<span class="idx">'+pad(idxNum)+'</span>' : '';
+    var attrs = srcAttrs(src, sizes || scatterSizes(6));
+    var alt = altFor(src);
+    if(cut) return '<figure class="fig cut">'+idx+'<img src="'+img(src)+'"'+attrs+' alt="'+alt+'" loading="lazy" decoding="async"></figure>';
+    return '<figure class="fig" style="aspect-ratio:'+(ar||"4/3")+'">'+idx+'<img src="'+img(src)+'"'+attrs+' alt="'+alt+'" loading="lazy" decoding="async"></figure>';
+  }
+
+  // a component-spread image with positioned labels. Each label sits at an
+  // x/y percent of the image (tune in projects-data.js) and carries an info
+  // icon that opens a small panel with the part's real name + simple specs.
+  /* The x/y in projects-data.js are percentages of the WHOLE SPREAD, authored
+     against the desktop layout where the photo is 72% wide in a 28% gutter
+     (--spread-img in css/style.css). On a narrow column that photo has to give
+     width back to the labels or "MICROCONTROLLER" cannot be set at a readable
+     size - but moving the photo edge would slide every part out from under its
+     label. So x is converted here into a FRACTION of whichever band it falls
+     in, gutter or photo, and CSS rebuilds the position from the live
+     --spread-img. The authored numbers never change and the labels stay locked
+     to their parts at any width. IMG_BASE must match the --spread-img default. */
+  var IMG_BASE = 72;
+  function compSpread(src, labels){
+    var tags = labels.map(function(L){
+      var x = +L.x || 0, inGut = x < (100 - IMG_BASE);
+      var f = inGut ? (x / (100 - IMG_BASE)) : ((x - (100 - IMG_BASE)) / IMG_BASE);
+      return '<div class="comp-label '+(inGut?'in-gut':'on-img')+'" style="--f:'+
+             (Math.round(f*10000)/10000)+';top:'+L.y+'%;">' +
+        '<button type="button" class="comp-info" aria-expanded="false">' +
+          '<span class="comp-name">'+esc((L.t||"").toUpperCase())+'</span>'+INFO_ICON +
+        '</button>' +
+        '<div class="comp-panel">' +
+          (real(L.name)?'<span class="comp-panel-name">'+esc(L.name)+'</span>':'') +
+          (real(L.spec)?'<span class="comp-panel-spec">'+esc(L.spec)+'</span>':'') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="comp-spread-wrap"><div class="comp-spread">' +
+      '<img src="'+img(src)+'"'+srcAttrs(src, "(max-width:600px) 92vw, 46vw")+' alt="'+esc(p.title)+' internal components" loading="lazy" decoding="async">' +
+      tags +
+    '</div></div>';
+  }
+
+  // SCATTER: string = auto-placed (random, stable); object = pinned anchor.
+  // Captions hug the side of the cell nearest the page edge (or sit under it).
+  function scatter(items, rnd, opts){
+    opts = opts || {};
+    return items.map(function(it, i){
+      var o   = (it && typeof it === "object") ? it : null;
+      var src = o ? o.src : it;
+      if(!real(src)) return "";
+
+      var cut    = (o && o.cut != null) ? !!o.cut : isCut(src);
+      var idxNum = (o && o.idx != null) ? (o.idx ? i+1 : null) : (opts.index ? i+1 : null);
+      var noteCap= (opts.notes && real(opts.notes[i])) ? opts.notes[i] : "";
+      var capTxt = (o && real(o.cap)) ? o.cap : noteCap;
+      var capOn  = !!(o && o.capOn) && capTxt && !cut;   // caption sits ON the image
+
+      var ar = o && o.ar ? o.ar : null;
+      var mt = (o && o.mt != null) ? o.mt : null;
+      // shift: negative vw pushes the cell's left edge OFF the window (the
+      // Figma's LED-matrix photo starts 21% off-canvas); html overflow-x is
+      // hidden, so the overhang crops cleanly.
+      var shift = (o && o.shift != null) ? "margin-left:" + o.shift + "vw;" : "";
+      var colStyle, capSide = "left", startCol = null, spanCols = null;
+
+      if(o && (o.col || o.bleed)){                       // ---- pinned anchor ----
+        var span = o.span || 6;
+        if(o.bleed === "full")       { colStyle = "grid-column:1 / -1;"; capSide="left"; spanCols = 12; }
+        else if(o.bleed === "left")  { colStyle = "grid-column:1 / span "+span+";"; capSide="left"; spanCols = span; }
+        else if(o.bleed === "right") { colStyle = "grid-column:"+(13-span)+" / -1;"; capSide="right"; spanCols = span; }
+        else { colStyle = "grid-column:"+o.col+";"; var m=String(o.col).match(/(\d+)\s*\/\s*(\d+)/); if(m){ startCol=+m[1]; spanCols=(+m[2])-(+m[1]); capSide = startCol<=2 ? "left" : (startCol+spanCols>=11 ? "right":"left"); } }
+        if(mt == null) mt = 0;
+        if(!ar) ar = "3/2";
+      } else {                                            // ---- seeded auto-scatter ----
+        var poolsBig   = [[3,4,5,6],[4,4,5,5,6],[3,5,4,6,4]];
+        var poolsSmall = [[2,3,4,5],[3,3,4,4,5],[2,4,3,5,3]];
+        var spanPool = (opts.big ? poolsBig : poolsSmall)[(opts.variant||0) % 3];
+        var sp = pick(rnd, spanPool);
+        var maxStart = 13 - sp;
+        var start = 1 + Math.floor(rnd()*maxStart);
+        var e = rnd();
+        if(e < 0.24) start = 1; else if(e < 0.48) start = maxStart;
+        if(!ar) ar = pick(rnd, ["4/3","16/9","3/2","1/1","4/3","3/2","3/4","2/1"]);
+        if(mt == null) mt = Math.floor(rnd() * (opts.big ? 150 : 130));
+        if(!cut && rnd() < 0.10){ colStyle = "grid-column:1 / -1;"; ar = pick(rnd, ["2/1","16/9","3/2"]); capSide="left"; spanCols = 12; }
+        else { colStyle = "grid-column:"+start+" / span "+sp+";"; capSide = (start+sp>=11) ? "right" : "left"; spanCols = sp; }
+      }
+
+      // captions are no longer shown under process images (removed by request).
+      // An image with a `labels` array becomes a component spread instead: the
+      // image with positioned, info-icon labels overlaid on it.
+      var isSpread = !!(o && o.labels && o.labels.length);
+      /* how many of the 12 columns this cell ends up spanning, so the figure
+         can declare an accurate `sizes`. Set on every branch above; the
+         fallback of 6 is only reached if a future branch forgets to. */
+      var cellSpan = spanCols || 6;
+      var mBleed = /grid-column:\s*1 \/ -1/.test(colStyle||"") ? 12 : null;
+      if(mBleed) cellSpan = 12;
+      var inner = isSpread ? compSpread(src, o.labels)
+                           : figure(src, ar, cut, idxNum, scatterSizes(cellSpan));
+      // horizontal placement (grid-column) + aspect ratio only; vertical
+      // position is handled by the grid's dense auto-flow.
+      // has-spread lets the mobile rules give a labelled parts photo the full
+      // width; in a 2-column mobile scatter it would otherwise be ~180px wide.
+      return '<div class="cell cap-'+capSide+(isSpread?' has-spread':'')+'" style="'+colStyle+'">' + inner + '</div>';
+    }).filter(Boolean);
+  }
+  // same idea as an image cell, but for the materials note (design-tags row + one lifecycle
+  // sentence + a link to the Material Guide) that used to live in its own
+  // standalone MATERIALS section. It now rides inside the process scatter
+  // instead, same family of cell as the other process text.
+  function matlNoteCell(dTags, lifecycle, col, mt){
+    // text alignment follows whichever margin this cell is actually nearer:
+    // a cell starting at column 6+ sits on the right half of the page, so
+    // its last (ragged) line should align right instead of the site's left
+    // default, same rule the scatter() captions already use.
+    var m = String(col).match(/(\d+)\s*\/\s*(\d+)/);
+    var startCol = m ? +m[1] : 1;
+    var sideCls = startCol >= 6 ? " side-right" : "";
+    var tagsHtml = dTags.length ? '<div class="matl-tags">'+esc(dTags.map(function(t){ return t.toUpperCase(); }).join("   /   "))+'</div>' : '';
+    var lifeHtml = real(lifecycle) ? '<p class="desc'+sideCls+'">'+esc(lifecycle)+'</p>' : '';
+    if(!tagsHtml && !lifeHtml) return '';
+    return '<div class="cell proc-note matl-note" style="grid-column:'+col+';margin-top:'+mt+'px;">' +
+      tagsHtml + lifeHtml +
+      '<a class="matl-link" href="materials.html">MATERIAL GUIDE &rarr;</a>' +
+    '</div>';
+  }
+
+  var rnd = mulberry(seedFrom(id));
+
+  // give each project's body paragraphs a slightly different measure (29-36ch,
+  // stable per project via the same seed) so the page doesn't read as one
+  // rigid 32ch column repeated identically everywhere. Only the paragraph
+  // width varies, teaser/caption widths stay fixed so the hero still lines up.
+  document.getElementById("content").style.setProperty("--w-desc", (29 + (seedFrom(id+"-w") % 8)) + "ch");
+
+  // ---------- HERO (image bleeds left; text stuck to the right edge) ----------
+  var gal = (p.gallery||["hero.jpg"]).filter(real);
+
+  /* ---- The lightbox set: images and videos in ONE ordered list ----
+     Order is hero image, then the hero video, then the rest of the gallery,
+     then any other video on the page. The hero video's slot is RESERVED here
+     rather than being appended whenever videoFig() happens to emit it - the
+     hero markup is built after the thumbs, so left to itself the demo landed
+     last, behind eight photos, when it belongs beside the shot it demonstrates.
+
+     galOffset is where the gallery thumbs start, so their data-lb stamps stay
+     correct whether or not this project has a hero video. */
+  var LB = [{ type:"img", src: img(gal[0]) }];
+  if(real(p.heroVideo)) LB.push({ type:"video", src: img(p.heroVideo) });
+  var galOffset = LB.length;
+  gal.slice(1).forEach(function(s){ LB.push({ type:"img", src: img(s) }); });
+  var heroSrc = gal[0] || "hero.jpg";
+
+  // per-project rhythm seed, still used by the process / aesthetics scatter
+  var gVar = seedFrom(id) % 3;
+  // gallery (everything after the hero): randomly sized and scattered across
+  // the 12-col grid below the hero, on its own seeded RNG so it does not shift
+  // the process / aesthetics composition. Each thumb still swaps the hero.
+  // gallery = the support shots after the hero, shown as a compact masonry
+  // (CSS columns, see style.css). The masonry packs them top-down and keeps
+  // each image's native aspect ratio, so there's no per-thumb column/span/crop
+  // math - just emit the thumbs in order. Each still swaps the hero on click.
+  // Each thumb is emitted with a srcset (sm/ 600px, md/ 1200px, plus the
+  // full-resolution original) and its intrinsic width/height. The srcset lets
+  // the browser download the smallest copy that still covers the box it is
+  // actually painted into, which on a masonry of ~250-450px thumbs is a large
+  // saving with no visible difference; a high-DPR screen still pulls the
+  // bigger candidate, and the lightbox always opens the untouched original.
+  // width/height reserve the correct box before the file arrives, so the
+  // CSS-columns masonry lays out once instead of reflowing on every load.
+  /* ---- GALLERY COLUMNS -------------------------------------------------
+     This used to be a CSS multi-column (`columns:4`) masonry. Multi-column
+     BALANCES: it works out an even height and fills columns to it, so five
+     thumbs across four columns packed 2/2/1 and left the fourth column empty,
+     which is where NEB's and NAF's big dead strip on the right came from. It
+     also could not be reasoned about in advance, because the balance depends
+     on image heights that are not known until the files load.
+
+     So the columns are built explicitly instead. Each thumb goes into whichever
+     column is currently shortest, using its aspect ratio from js/image-sizes.js
+     as the height - that is known up front, so the packing is decided before a
+     single byte of image arrives and never reshuffles afterwards. The columns
+     are flex children with `flex:1`, so whatever the count, they always span
+     the full width edge to edge with no leftover margin.
+
+     Column count is capped at the number of thumbs, so three photos make three
+     full-width columns rather than three quarters of the page. */
+  function buildColumns(files, colCount){
+    var cols = [], heights = [];
+    for(var c = 0; c < colCount; c++){ cols.push([]); heights.push(0); }
+    files.forEach(function(entry){
+      var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][entry.file] : null;
+      // ratio = height per unit width. Unknown files get 1 (square-ish), which
+      // is a reasonable neutral guess and never breaks the layout.
+      var ratio = dims ? (dims[1] / dims[0]) : 1;
+      var shortest = 0;
+      for(var c = 1; c < colCount; c++){ if(heights[c] < heights[shortest]) shortest = c; }
+      cols[shortest].push(entry);
+      heights[shortest] += ratio;
+    });
+    return cols;
+  }
+  var galFiles = gal.slice(1).map(function(g, i){ return { file:g, lb:galOffset + i }; });
+  function galleryHTML(colCount){
+    return buildColumns(galFiles, colCount).map(function(col){
+      return '<div class="gcol">' + col.map(function(e){
+        return '<div class="gthumb">' +
+                 '<img src="'+img(e.file)+'"'+srcAttrs(e.file, GAL_SIZES)+
+                 ' alt="'+altFor(e.file)+'" loading="lazy" decoding="async" data-lb="'+e.lb+'"></div>';
+      }).join("") + '</div>';
+    }).join("");
+  }
+  // 4 columns on desktop, 2 on a phone, never more than there are photos (so
+  // three photos make three full-width columns, not three quarters of a page).
+  var galMQ = window.matchMedia("(max-width:760px)");
+  function galColCount(){ return Math.min(galMQ.matches ? 2 : 4, galFiles.length) || 1; }
+  var galleryBlock = (galFiles.length || real(p.galleryVideo)) ?
+    '<div class="hero-gallery" id="heroGallery">' +
+      '<div class="gcols">' + galleryHTML(galColCount()) + '</div>' +
+      (real(p.galleryVideo)?'<div class="gallery-vid">'+videoFig(p.galleryVideo,"16/9")+'</div>':'') +
+    '</div>' : '';
+
+  // material chips now sit directly under the hero image, single words, each
+  // linking to its own entry on the Material Guide when a matching material
+  // exists there (falls back to a plain link to the guide if not found, never
+  // a dead link).
+  var matlWords = real(p.materials) ? p.materials.split(",").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+  var heroMatl = matlWords.length ?
+    '<div class="hero-materials">' +
+      matlWords.map(function(w){
+        var slug = MAT_SLUGS[w.toLowerCase()];
+        return '<a href="materials.html'+(slug?'#'+slug:'')+'">'+esc(w.toUpperCase())+'</a>';
+      }).join('<span class="sep" aria-hidden="true">/</span>') +
+    '</div>' : '';
+
+  var hero =
+    '<section class="hero">' +
+      '<figure class="hero-main">' +
+        '<img src="'+img(heroSrc)+'"'+srcAttrs(heroSrc, HERO_SIZES)+' alt="'+altFor(heroSrc)+'" fetchpriority="high" decoding="async" data-lb="0">' +
+      '</figure>' +
+      // specs + INQUIRE share one row directly under the image, the red
+      // INQUIRE block sitting at the row's right end (Figma: specs at the
+      // hero's left edge, inquire at its right edge, same baseline).
+      '<div class="hero-specs">' +
+        (year?'<span class="sp">'+esc(year)+'</span>':'') +
+        (real(p.size)?'<span class="sp">'+esc(p.size)+'</span>':'') +
+        '<a class="inq" href="contact.html">INQUIRE &rarr;</a>' +
+      '</div>' +
+      heroMatl +
+      // The aside fills the height of the hero image (align-self:stretch) and
+      // splits top/bottom: title + tagline stacked at the TOP, against the
+      // image's top-right; the summary paragraph + the demo video pinned to the
+      // BOTTOM, level with the image's bottom edge (paragraph left, video out
+      // at the right page margin).
+      '<div class="hero-aside">' +
+        '<div class="hero-aside-top">' +
+          '<h1 class="hero-title">'+esc(p.title)+'</h1>' +
+          (real(p.teaser)?'<p class="hero-tagline">'+esc(p.teaser)+'</p>':'') +
+        '</div>' +
+        '<div class="hero-aside-btm">' +
+          (real(p.summary)?'<p class="desc">'+withInfo(esc(p.summary), p.summaryMore)+'</p>':'') +
+          (real(p.heroVideo)?'<div class="hero-vid">'+videoFig(p.heroVideo,"16/9")+'</div>':'') +
+        '</div>' +
+      '</div>' +
+    '</section>' +
+    galleryBlock;
+
+  // ---------- MODEL + MECHANISM, SIDE BY SIDE ----------
+  // 2026-07-22: combined from two stacked sections (model above, mechanism
+  // below - each faking a "connected" feel with a vertical overlap hack)
+  // into ONE row, model on the left / mechanism on the right, per Owen's
+  // explicit request. Falls back to a single full-width column if only one
+  // half has content (only KART currently has either - see solo-model/
+  // solo-mech classes below and the matching CSS).
+  // The model-viewer element is deliberately bigger than its layout slot
+  // (.cad-stage) so a zoomed model floods past it and underlaps the page.
+  // To keep that flood from stealing the cursor everywhere, pointer input is
+  // gated to the compact slot box by a script further down (search
+  // "interaction contained"): the model only takes wheel/drag while the
+  // cursor is over the box, and is pointer-events:none everywhere else so
+  // the page scrolls and its links stay clickable through the flooded model.
+  var glbView = real(p.modelRender) ? p.modelRender : (real(p.model) ? p.model : "");
+  // load the model-viewer library only when there is actually a model to show
+  var MV_SRC = "js/vendor/model-viewer.min.js?v=1";
+  /* ---------- DEFERRED MODEL LOAD ----------
+     This used to fire immediately: the module script went out with the page and
+     the element carried loading="eager", so ~700KB of library plus the GLB (its
+     draco decode, 22 texture uploads and the PMREM environment map) all landed
+     on the GPU during the loading screen - which is what made the logo tumble
+     stutter, and what made the loader sit there for so long, since it also
+     WAITED on the model before revealing.
+     Now nothing model-related starts until (1) the loading screen has released
+     and (2) the model's slot is within ~1.5 screens of the viewport. By the
+     time you have scrolled to it, it is there. Nothing pops in, and the tumble
+     gets the GPU to itself. */
+  var loadModel = null;
+  if(glbView){
+    loadModel = function(){
+      if(loadModel.done) return;
+      loadModel.done = true;
+      /* Cap the resolution model-viewer renders at, and do it BEFORE its
+         module loads - it reads devicePixelRatio once, on the way up.
+         Measured on the live page: the element resolves to about 3150 x 3260
+         CSS pixels (130vw by five --model-slot rows), so at dpr 2 that is a
+         ~41 megapixel framebuffer, redrawn in full on every model frame, and
+         doubled again by the frosted shade's transmission pass. Capping at 1.5
+         matches the loader and the mechanism canvas (the site-wide rule) and is
+         not visible on this matte model at display size.
+         This used to run at the top of the page, where it capped dpr for
+         EVERYTHING - including the loader's own canvas. It belongs here, with
+         the only thing that needs it. Only JS reads change; srcset selection
+         and media queries are browser-internal and untouched. */
+      if((window.devicePixelRatio || 1) > 1.5){
+        try {
+          Object.defineProperty(window, "devicePixelRatio",
+            { get: function(){ return 1.5; }, configurable: true });
+        } catch(e){}
+      }
+      if(!document.querySelector('script[data-mv]')){
+        var mvs = document.createElement("script");
+        mvs.type = "module"; mvs.src = MV_SRC; mvs.setAttribute("data-mv","");
+        document.head.appendChild(mvs);
+      }
+      var el = document.getElementById("mv");
+      /* setAttribute, NOT el.src. Until the module lands, <model-viewer> is an
+         unknown element with no src accessor, so `el.src = ...` just parks a
+         plain own property on it - which is then SHADOWING the real accessor
+         once the element upgrades, so the fetch never starts. Verified: the
+         GLB was never requested. The attribute is observed either way, so this
+         works whichever arrives first, the library or this line. */
+      if(el) el.setAttribute("src", el.getAttribute("data-src"));
+    };
+  }
+  var modelHalf = glbView ?
+    '<div class="cad-hiw-model">' +
+      // AR row, in NORMAL FLOW above the stage, and DELIBERATELY overlapping
+      // the model: the model overhangs its slot upward by
+      // (--model-fill - 1) / 2 slots, so it floods up through this band, and
+      // .mv-ar-row's z-index keeps the button printed on top of it. Owen wants
+      // it read as a label pinned over the render, not as another control in
+      // the bar - it was moved down to the bar on 2026-09-03 and moved straight
+      // back on his say-so. It used to be slotted INSIDE <model-viewer> with
+      // position:absolute;right:0, which put it off the right of the window and
+      // widened the page on Safari, because that element is ~1500px wide; out
+      // here it can only ever sit above the model.
+      '<div class="mv-ar-row">' +
+        '<button class="mv-ar" type="button" hidden>VIEW IN YOUR SPACE &rarr;</button>' +
+        '<div class="mv-qr" hidden>' +
+          '<div class="mv-qr-img"></div>' +
+          '<p class="mv-qr-note">Scan to open this page on your phone,<br>then tap View in your space.</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cad-stage">' +
+        // NO src ATTRIBUTE. The GLB is attached by loadModel() below, on
+        // scroll-approach and never before the loading screen has cleared -
+        // see "DEFERRED MODEL LOAD". An empty model-viewer costs nothing: it
+        // renders transparent and never asks for a WebGL context.
+        // ?v=2 : the GLB was re-exported 2026-08-29 with 512px textures
+        // (1.5MB -> 772KB, ~122MB of GPU texture memory down to ~30MB) under
+        // the same filename. Keep in step with MODEL_V in index.html.
+        '<model-viewer id="mv" data-src="'+img(glbView)+'?v=2" ' +
+          (real(p.modelUSDZ)?'ios-src="'+img(p.modelUSDZ)+'" ':'') +
+          'alt="'+esc(p.title)+' 3D model" camera-controls touch-action="pan-y" ' +
+          // camera radius is set as a % of the auto-framing distance so the
+          // DEFAULT model size is decoupled from the (deliberately huge) element:
+          // 230% starts it small + clears the control bar; min 45% lets a zoom-in
+          // grow it well past the element so it floods/underlaps the page.
+          // disable-pan: the model TURNS, it never slides around.
+          // model-viewer calls translating the model "pan" and rotating the
+          // camera around it "orbit". Panning was on by default (two-finger
+          // drag on touch, right-click drag on desktop), so on a phone the
+          // lamp kept getting shoved off-centre with no obvious way back -
+          // which is not a thing you want a product viewer to do. Orbit and
+          // zoom stay; only the translation is gone.
+          // 228%, not the old 130%: the viewer element is now ~1.72x taller.
+          // The framing distance (100%) is INDEPENDENT of element size - it
+          // only depends on the model and the field of view - so apparent size
+          // works out as elementHeight / radius. That means the radius has to
+          // grow by the FULL element-height factor to keep the model looking
+          // the same size at rest. Change the element size in css/style.css
+          // (.cad-stage model-viewer) and this has to move with it.
+          'disable-pan interaction-prompt="none" camera-orbit="-25deg 76deg 228%" ' +
+          // These attribute values are only a first frame's worth of defaults -
+          // the real limits are set in metres once the model loads, because
+          // model-viewer does not clamp radius percentages here reliably.
+          // See setZoomRange() further down.
+          // These are only placeholders for the first frame. They must be WIDER
+          // than the real range or they will clamp the default before the JS
+          // runs - a too-low max here quietly pulled the camera in and made the
+          // model render bigger than intended. The real limits are set in
+          // metres once the model loads: see setZoomRange().
+          'min-camera-orbit="auto auto 20%" max-camera-orbit="auto auto 600%" ' +
+          /* NO auto-rotate, deliberately (2026-08-29). model-viewer only
+             draws when the scene is DIRTY; auto-rotate marks it dirty on every
+             single frame, so the page carried a permanent WebGL loop for as
+             long as it was open. The element is 130vw x 5 slots - about 6.5
+             megapixels of CSS, ~14.5 MP at the 1.5 dpr cap - and the frosted
+             shade (KHR_materials_transmission) makes three.js render the whole
+             scene a SECOND time into a transmission target every frame. So the
+             turntable cost roughly 29 MP of fill per frame, forever, competing
+             with the compositor for exactly the frames scrolling needed. That
+             was the "KART feels slow" report.
+             Without it the model draws ONE frame, the loop stops, and the page
+             costs nothing until you click into the model - at which point
+             model-viewer wakes on its own and idles again when you let go.
+             If a turntable is ever wanted back, put it behind the click-to-
+             interact gate below (mv.autoRotate = true on engage, false on
+             disengage) so it can never run while someone is reading. */
+          'shadow-intensity="0" exposure="1" environment-image="neutral" tone-mapping="neutral" ' +
+          'ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="lazy" reveal="auto">' +
+          // an EMPTY ar-button slot: model-viewer still needs the slot to exist
+          // to consider AR wired up, but we drive it from our own button above
+          // via activateAR() so the layout is ours to control.
+          '<span slot="ar-button" hidden></span>' +
+        '</model-viewer>' +
+      '</div>' +
+      // controls sit OUTSIDE the tilted stage on their own row: exploded +
+      // wireframe as quiet text, the material picker (and the light
+      // control) beside them. No borders or chips; these should read as
+      // printed text until touched.
+      '<div class="mv-bar">' +
+        '<div class="mv-group mv-left">' +
+          '<button class="mv-btn" data-act="explode" hidden>EXPLODED VIEW</button>' +
+          '<button class="mv-btn" data-act="wireframe">DRAWING VIEW</button>' +
+          '<button class="mv-btn" data-act="reset">RESET</button>' +
+        '</div>' +
+        '<div class="mv-group mv-mid">' +
+          '<select class="mv-sel" aria-label="Material" hidden></select>' +
+          '<button class="mv-btn" data-act="power">LIGHT ON</button>' +
+          '<input class="mv-dim" type="range" min="0" max="100" value="80" aria-label="Lamp brightness">' +
+        '</div>' +
+      '</div>' +
+    '</div>' : '';
+
+  var mechFile = p.mechanism || "";
+  var mechEl = real(mechFile)
+    ? (/\.html?$/i.test(mechFile)
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=20" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
+    : '';
+  // p.mechNotes (a numbered list under the intro) isn't part of the Figma
+  // reference - HOW IT WORKS there is just the graphic, the mode buttons, and
+  // one line of intro text - so it's no longer rendered here. The data can
+  // stay in projects-data.js, it's simply unused now.
+  /* The .hiw-graphic box is emitted ONLY when there is something to put in it.
+     This matters more than it looks: css/style.css pulls .hiw-graphic upward
+     and downward with large negative margins, to crop the transparent buffer
+     that a mechanism file carries around its artwork. An EMPTY .hiw-graphic
+     still received those margins, which collapsed the section and dragged the
+     process grid up over the how-it-works text above it. That was the
+     "first process image overlaps the last paragraph" bug on every project
+     without a mechanism (NEB, NAF, AMSALP). No box, no negative margins,
+     no overlap. The `has-mech` class is what the crop margins key off now,
+     so the crop can never apply to a box that has nothing to crop. */
+  var graphicInner = mechEl + (real(p.hiwVideo) ? videoFig(p.hiwVideo,"16/9") : '');
+  var mechHalf = (graphicInner || real(p.howItWorks)) ?
+    '<div class="cad-hiw-mech">' +
+      (real(p.howItWorks)?'<div class="hiw-text"><p class="desc">'+withInfo(esc(p.howItWorks), p.howItWorksMore)+'</p></div>':'') +
+      (graphicInner ? '<div class="hiw-graphic'+(mechEl?' has-mech':'')+'">'+graphicInner+'</div>' : '') +
+    '</div>' : '';
+
+  var cadHiwMode = (modelHalf && mechHalf) ? '' : (modelHalf ? ' solo-model' : (mechHalf ? ' solo-mech' : ''));
+  // kept as `cad`/`hiw` (hiw always '') rather than renaming everywhere
+  // below, since `sections` further down just does
+  // [hero, cad, hiw, ...].filter(Boolean) - smaller diff, same result.
+  var cad = (modelHalf || mechHalf) ?
+    '<section class="cad-hiw'+cadHiwMode+'">' + modelHalf + mechHalf + '</section>' : '';
+  var hiw = '';
+
+  // ---------- PROCESS (dense scatter; the writing lives INSIDE it) ----------
+  var procImgs = (p.process||[]).filter(keep);
+  var procVidCell = real(p.processVideo) ? '<div class="cell" style="grid-column:2 / 8;margin-top:90px;">'+videoFig(p.processVideo,"16/9")+'</div>' : '';
+  var procImgCells = scatter(procImgs, rnd, {notes:p.processNotes, variant:gVar}); // array of cells
+  // processText: keep it to TWO short paragraphs (blank line splits them).
+  // The first sits at the very TOP of the scatter, right under the mechanism
+  // graphic; the second sits at the very BOTTOM, near whatever the last
+  // process photo is (Figma reference: one block near the CAD/mechanism
+  // area, one lower near the breadboard shot). Putting them first/last in
+  // the cell array (rather than side by side under the first image) is what
+  // actually lands them at the top/bottom of the scatter, since the grid
+  // flows in DOM order. No PROCESS label, no lede block. processMore
+  // (optional) hangs the fuller story behind the info icon on the first
+  // block; anything past two paragraphs in processText is unused, keep it
+  // to two.
+  // processText is the short top block; processMore is the fuller detail shown
+  // as its own block lower in the scatter. Both are archive-only content.
+  var procTextTop = real(p.processText) ?
+    '<div class="cell proc-note" style="grid-column:7 / 10;margin-top:0;">' +
+      '<p class="desc">'+esc(p.processText)+'</p></div>' : '';
+  var procTextBottom = real(p.processMore) ?
+    '<div class="cell proc-note" style="grid-column:3 / 6;">' +
+      '<p class="desc">'+esc(p.processMore)+'</p></div>' : '';
+  var procCells = (procTextTop ? [procTextTop] : []).concat(procImgCells).concat(procTextBottom ? [procTextBottom] : []);
+  // designTags: short, provable claims (Designed for disassembly, Repairable,
+  // Open source, etc), shown as small red tags, plus the one-line lifecycle/
+  // end-of-life note. This used to be its own standalone MATERIALS section;
+  // it now rides inside the process scatter as one more text cell (the
+  // per-material name chips moved up under the hero image instead, see
+  // heroMatl above). Only list designTags that are actually true for THIS
+  // project, this is a claim, not a mood board.
+  // designTags are no longer shown (not part of the current copy); only the
+  // one-line lifecycle note rides in the process scatter, archive pages only.
+  var matlCell = matlNoteCell([], p.lifecycle, (gVar % 2 === 0) ? "2 / 8" : "6 / 12", 0);
+  if(matlCell) procCells.push(matlCell);
+  if(procVidCell) procCells.push(procVidCell);
+  var process = (procImgCells.length || procVidCell || procTextTop || procTextBottom) ?
+    '<section class="proc">' +
+      '<div class="scatter">'+ procCells.join('') +'</div>' +
+    '</section>' : '';
+
+  // ---------- READ MORE: one page. The storefront content (hero + gallery +
+  // CAD/graphic) shows first; this button reveals the fuller process /
+  // portfolio section below it, on the same page. Hidden entirely if a
+  // project has no process content to reveal. ----------
+  var hasMore = !!process;
+  var readmore = hasMore ?
+    '<div class="readmore" id="readmoreWrap">' +
+      '<button type="button" class="read-more-link" id="readMoreBtn" aria-expanded="false" aria-controls="procReveal">Read more, process and detail</button>' +
+    '</div>' : '';
+  var processReveal = hasMore ? '<div class="proc-reveal" id="procReveal" hidden>' + process + '</div>' : '';
+
+  // ---------- assemble: hero, CAD/graphic, the read-more button, then the
+  // (revealed on click) process section. Material swatches, the component
+  // spread, and V2 are retired. ----------
+  var sections = [hero, cad, readmore, processReveal].filter(Boolean);
+  var content = document.getElementById("content");
+  content.innerHTML = sections.join('');
+
+  // footer mirrors the header: logo bottom-left, wordmark centre, hamburger right
+  var foot = document.createElement("footer");
+  foot.className = "site-foot";
+  foot.innerHTML =
+    '<a class="foot-home" href="index.html" aria-label="Studio NEWO home"></a>' +
+    '<div class="foot-wordmark" aria-label="NEWO"></div>' +
+    '<button class="foot-burger" aria-label="Open menu"></button>';
+  var hSvg = document.querySelector(".site-home svg");
+  var wSvg = document.querySelector(".site-wordmark svg");
+  var bSvg = document.querySelector("#burger svg");
+  if(hSvg) foot.querySelector(".foot-home").appendChild(hSvg.cloneNode(true));
+  if(wSvg) foot.querySelector(".foot-wordmark").appendChild(wSvg.cloneNode(true));
+  if(bSvg) foot.querySelector(".foot-burger").appendChild(bSvg.cloneNode(true));
+  content.appendChild(foot);
+  // the footer burger opens the same top-right dropdown as the header burger;
+  // js/menu.js wires both via a delegated listener, nothing to bind here.
+
+  // the full-width mechanism reports its own height from inside the iframe
+  var mechFrame = document.getElementById("mechFrame");
+  if(mechFrame){
+    window.addEventListener("message", function(ev){
+      if(ev.source !== mechFrame.contentWindow) return;   // only trust our own iframe
+      var d = ev.data;
+      if(d && d.type === "mechHeight" && typeof d.height === "number"){
+        mechFrame.style.height = Math.ceil(d.height) + "px";
+        mechFrame.style.minHeight = "0";
+      }
+    });
+
+    /* ---------- tell the mechanism when it is actually on screen ----------
+       The mechanisms run requestAnimationFrame loops that repaint a large
+       canvas (KART) or a field of SVG wavefronts (OMNI) every frame. Inside an
+       iframe they have no reliable way to know they have been scrolled past -
+       browsers throttle offscreen iframes inconsistently - so they were still
+       painting while you were reading something else further down the page,
+       competing with model-viewer's WebGL loop and whatever else is running.
+       The parent can see it clearly, so it just tells them. */
+    (function(){
+      /* Two independent reasons to hold the loop: the graphic is scrolled off
+         screen, or the visitor is scrolling RIGHT NOW. It runs only when
+         neither applies, so the two are tracked separately and combined -
+         otherwise the scroll handler would restart a loop the observer had
+         just stopped, or vice versa. */
+      var onScreen = true, scrolling = false, sent = null;
+      function sync(){
+        var run = onScreen && !scrolling;
+        if(run === sent) return;          // don't spam the iframe every frame
+        sent = run;
+        try { mechFrame.contentWindow.postMessage({ type:"mechVisible", visible:run }, "*"); } catch(e){}
+      }
+      function post(vis){ onScreen = !!vis; sync(); }
+
+      if(window.IntersectionObserver){
+        // generous margin so it is already running by the time it scrolls in
+        new IntersectionObserver(function(entries){
+          post(entries[0].isIntersecting);
+        }, { rootMargin: "200px 0px" }).observe(mechFrame);
+      } else {
+        post(true);   // no IO: leave it running, same as before
+      }
+
+      /* PAUSE WHILE SCROLLING. The KART mechanism repaints a ~1.4 megapixel
+         canvas on every frame, which competed with the compositor for exactly
+         the frames the scroll needed. It is not worth watching mid-scroll, so
+         it stops while the page is moving and picks up again 240ms after it
+         settles. Nothing is torn down or reloaded - the mechanism keeps its
+         state, it just stops drawing for a moment.
+         model-viewer used to be paused here too (its auto-rotate was a
+         permanent render loop). auto-rotate is gone as of 2026-08-29, so the
+         model is already idle whenever nobody is dragging it and there is
+         nothing left to pause. */
+      var idle = null;
+      window.addEventListener("scroll", function(){
+        if(!scrolling){ scrolling = true; sync(); }
+        clearTimeout(idle);
+        idle = setTimeout(function(){ scrolling = false; sync(); }, 240);
+      }, { passive: true });
+      // a hidden tab should not be animating either
+      document.addEventListener("visibilitychange", function(){
+        if(document.hidden) post(false);
+      });
+      mechFrame.addEventListener("load", function(){ post(true); });
+    })();
+  }
+
+  // ---------- model-viewer: variants + reset + explode (baked animation) ----------
+  var mv = document.getElementById("mv");
+  if(mv){
+    var stage = mv.closest(".cad-hiw-model");
+    var exBtn = stage.querySelector('[data-act="explode"]');
+    var rsBtn = stage.querySelector('[data-act="reset"]');
+    var pwrBtn= stage.querySelector('[data-act="power"]');
+    var wfBtn = stage.querySelector('[data-act="wireframe"]');
+    var dim   = stage.querySelector('.mv-dim');
+    var sel   = stage.querySelector('.mv-sel');
+    var defaultOrbit = mv.getAttribute("camera-orbit");
+
+    /* ================= SIZING THE MODEL =================================
+       The camera-orbit attribute carried a hard-coded 228%, hand-tuned once
+       against the desktop element (130vw x five --model-slot rows). Apparent
+       size is elementHeight / cameraRadius, so the moment any rule changed the
+       element - and the max-width:900px rule made it a third as tall - that
+       same 228% rendered the model at a third of its desktop size, marooned in
+       a box of white space. That was the "tiny on mobile" report.
+
+       So the radius is no longer authored. It is solved for, from the geometry,
+       every time the model loads and every time the window changes shape:
+
+         on-screen px = elementHeight * modelHeight / (2 * radius * tan(fov/2))
+
+       set that equal to --model-fill x --model-slot and solve for radius. The
+       model then lands at exactly the intended size on any screen, in any
+       window, at any zoom, with no per-breakpoint tuning - change --model-fill
+       in css/style.css and everything follows, including the control bar's
+       clearance, which is derived from the same number.
+
+       ZOOM RANGE (Owen, 2026-09-02): you cannot zoom OUT at all - the default
+       IS the widest view, so there is no "where did it go" state to recover
+       from - and you can zoom IN by 25%, no further. Both limits are set in
+       METRES, never percentages: model-viewer does not clamp radius
+       PERCENTAGES reliably ("105%" still let the camera through to about 60%,
+       measured). Metres clamp exactly. */
+    var ZOOM_IN = 1.25;          // 25% bigger than default, the whole range
+    var framedOrbit = null;      // what RESET goes back to, once we know it
+    var homeTheta = null, homePhi = null;
+
+    function frameModel(){
+      var stage = mv.parentElement;                       // .cad-stage
+      try{
+        if(!stage) return;
+        var slotPx = stage.getBoundingClientRect().height;
+        var elH    = mv.getBoundingClientRect().height;
+        if(!slotPx || !elH) return;
+        var fill = parseFloat(getComputedStyle(document.documentElement)
+                     .getPropertyValue("--model-fill")) || 2;
+        /* CAP AT THE WINDOW. --model-fill is a multiple of --model-slot, and
+           --model-slot is width-driven (27vw), so on a wide-but-short window
+           the wish can be taller than the screen - you could never see the
+           whole lamp and the hint under it at the same time. Never taller than
+           the viewport, and write the achieved fill back so the CSS spacing
+           below the model follows the real size instead of the wish. */
+        var targetPx = slotPx * fill;
+        /* 1.2, not 1.0: at --model-fill 2.4 the model is deliberately taller
+           than a 1080px window, which is what lets it reach up past the SHORT
+           gallery columns on the left and overlap them - the tall column on the
+           right is the only thing that reaches down to meet it otherwise. This
+           is still a safety net, just a looser one: on a genuinely short window
+           the model shrinks rather than becoming unviewable. */
+        var cap = (window.innerHeight || 900) * 1.2;
+        if(targetPx > cap) targetPx = cap;
+        document.documentElement.style.setProperty("--model-fill-eff",
+          String(Math.round((targetPx / slotPx) * 1000) / 1000));
+        var dims   = mv.getDimensions();                  // metres
+        var modelH = dims && dims.y ? dims.y : 0;
+        var t      = Math.tan((mv.getFieldOfView() || 45) * Math.PI / 360);
+        if(!modelH || !targetPx || !isFinite(t) || t <= 0) return;
+        var r = (elH * modelH) / (2 * targetPx * t);
+        if(!isFinite(r) || r <= 0) return;
+
+        var o = mv.getCameraOrbit();
+        // the authored angles, captured once - a re-frame after a resize keeps
+        // whatever the visitor has rotated to, but RESET still goes home
+        if(homeTheta === null){ homeTheta = o.theta; homePhi = o.phi; }
+        framedOrbit = homeTheta.toFixed(5)+"rad "+homePhi.toFixed(5)+"rad "+r.toFixed(5)+"m";
+
+        // limits BEFORE the orbit: whatever is in force clamps what we set next
+        mv.minCameraOrbit = "auto auto " + (r / ZOOM_IN).toFixed(5) + "m";
+        mv.maxCameraOrbit = "auto auto " + r.toFixed(5) + "m";
+        mv.cameraOrbit = o.theta.toFixed(5)+"rad "+o.phi.toFixed(5)+"rad "+r.toFixed(5)+"m";
+      } catch(e){ /* leave model-viewer's own framing in place */ }
+      finally { if(stage) stage.classList.add("mv-framed"); }
+    }
+
+    /* Re-frame on resize, but never while someone is using the model: a
+       re-frame resets the distance, and having your zoom yanked out from under
+       you mid-drag is worse than a slightly-off size until you let go. Rotating
+       the phone or dragging a desktop window across a breakpoint both land
+       here. */
+    (function watchResize(){
+      var t = null;
+      window.addEventListener("resize", function(){
+        clearTimeout(t);
+        t = setTimeout(function(){
+          var stage = mv.parentElement;
+          if(stage && stage.classList.contains("mv-live")) return;
+          if(mv.loaded) frameModel();
+        }, 220);
+      }, { passive:true });
+    })();
+
+    /* ---------- AR, on phones AND on desktop ----------
+       Phone -> launches AR (iOS Quick Look / Android Scene Viewer).
+       Desktop -> there is no AR to launch, so the button opens a QR code of
+       THIS page instead; scan it and the phone lands here with a button that
+       does the real thing.
+
+       TWO THINGS THIS GETS RIGHT THAT THE FIRST VERSION DID NOT:
+
+       1) The decision is made AT CLICK TIME, not once at load. Before, it read
+          mv.canActivateAR during a load/ar-status handler and permanently wired
+          one behaviour or the other. model-viewer had not finished working out
+          AR support at that moment on iOS, so canActivateAR was still false and
+          iPhones got permanently wired to the QR panel - which is exactly the
+          "Safari shows the QR instead of opening the viewer" bug.
+
+       2) It does not trust canActivateAR alone. iOS Quick Look is driven by a
+          plain <a rel="ar"> anchor, so if model-viewer has not (or will not)
+          claim AR support, we can still open Quick Look ourselves. The anchor
+          MUST contain an <img> child - that is Apple's requirement, not ours,
+          and Quick Look silently does nothing without it. */
+    (function(){
+      var arBtn = stage.querySelector('.mv-ar');
+      var qrBox = stage.querySelector('.mv-qr');
+      if(!arBtn || !qrBox) return;
+      var qrImg = qrBox.querySelector('.mv-qr-img');
+      var qrDrawn = false, qrOpen = false;
+
+      /* Does this browser advertise Apple's <a rel="ar"> hand-off? True in iOS
+         Safari. NOT true in Chrome or Firefox on iOS, even though those are
+         WebKit underneath and the device can absolutely do Quick Look - which
+         is exactly why Chrome on the iPhone was being handed the desktop QR
+         panel. So the device itself is detected separately below. */
+      var supportsQuickLook = (function(){
+        var a = document.createElement("a");
+        return !!(a.relList && a.relList.supports && a.relList.supports("ar"));
+      })();
+      // iPadOS 13+ reports itself as "MacIntel", hence the touch-point check
+      var isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent || "") ||
+                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      var isAndroid = /android/i.test(navigator.userAgent || "");
+      var iosSrc = mv.getAttribute("ios-src") || "";
+
+      function canDoAR(){
+        if(mv.canActivateAR) return true;         // model-viewer says yes
+        if(isIOS && iosSrc) return true;          // ANY iOS browser, not just Safari
+        if(isAndroid) return true;                // Android: Scene Viewer intent
+        return false;
+      }
+
+      /* Open iOS Quick Look directly, bypassing model-viewer.
+         Built to mirror model-viewer's own implementation exactly: create the
+         anchor, give it an empty <img> child (Apple requires one - Quick Look
+         silently ignores an anchor without it), and click it WITHOUT adding it
+         to the document. The previous version appended it to <body> with
+         display:none first, which is a plausible reason Safari ignored it -
+         a hidden element is a poor thing to hang a navigation off. */
+      function openQuickLook(){
+        // #allowsContentScaling=0 pins the model to real-world size, matching
+        // ar-scale="fixed" on the viewer.
+        var href = iosSrc + "#allowsContentScaling=0";
+        if(supportsQuickLook){
+          var a = document.createElement("a");
+          a.setAttribute("rel", "ar");
+          a.setAttribute("href", href);
+          a.appendChild(document.createElement("img"));
+          a.click();
+          return;
+        }
+        // iOS browser that doesn't advertise rel="ar" (Chrome, Firefox):
+        // navigating straight at the .usdz hands it to Quick Look anyway,
+        // because the OS owns that file type regardless of which browser asked.
+        window.location.href = href;
+      }
+
+      // lazy: the QR library is only fetched if someone actually asks for the
+      // code, so phones (which go straight to AR) never pay for it.
+      var QR_SRC = "js/vendor/qrcode.js?v=1";
+      function drawQR(){
+        if(qrDrawn) return; qrDrawn = true;
+        function make(){
+          try{
+            var q = qrcode(0, "M");
+            q.addData(location.href);
+            q.make();
+            qrImg.innerHTML = q.createImgTag(5, 0);
+          } catch(e){
+            // no QR? fall back to the plain URL, still readable by eye
+            qrImg.innerHTML = '<code class="mv-qr-url">' + esc(location.href) + '</code>';
+          }
+        }
+        if(window.qrcode){ make(); return; }
+        var s = document.createElement("script");
+        s.src = QR_SRC;
+        s.onload = make;
+        s.onerror = function(){ qrDrawn = false; qrImg.innerHTML = '<code class="mv-qr-url">' + esc(location.href) + '</code>'; };
+        document.head.appendChild(s);
+      }
+
+      function toggleQR(){
+        qrOpen = !qrOpen;
+        if(qrOpen) drawQR();
+        qrBox.hidden = !qrOpen;
+        arBtn.setAttribute("aria-expanded", qrOpen ? "true" : "false");
+        arBtn.classList.toggle("active", qrOpen);
+      }
+
+      arBtn.addEventListener("click", function(){
+        if(canDoAR()){
+          // prefer model-viewer (it handles Scene Viewer + WebXR properly);
+          // fall back to opening Quick Look ourselves on iOS.
+          if(mv.canActivateAR){
+            try { mv.activateAR(); return; } catch(e){}
+          }
+          if(isIOS && iosSrc){ openQuickLook(); return; }
+        }
+        toggleQR();
+      });
+
+      // The button itself is always shown once there is a model - on desktop it
+      // opens the QR, on a phone it opens AR. Nothing to wait for.
+      arBtn.hidden = false;
+      arBtn.setAttribute("aria-expanded", "false");
+
+      /* ---------- ?ardebug ----------
+         Add &ardebug to the URL to print what this device actually detected,
+         right on the page. There is no console on an iPhone, so when AR "does
+         nothing" there is otherwise no way to tell whether the code took the
+         model-viewer path, the Quick Look path, or decided it could not do AR
+         at all - which is the difference between a broken file and broken
+         wiring. Off unless asked for; costs nothing otherwise. */
+      if(/[?&]ardebug\b/.test(location.search)){
+        var dbg = document.createElement("pre");
+        dbg.className = "mv-ardebug";
+        function refresh(note){
+          dbg.textContent =
+            "ios-src        : " + (iosSrc || "(none)") + "\n" +
+            "canActivateAR  : " + mv.canActivateAR + "\n" +
+            "rel=ar support : " + supportsQuickLook + "\n" +
+            "isAndroid      : " + isAndroid + "\n" +
+            "canDoAR()      : " + canDoAR() + "\n" +
+            "UA             : " + navigator.userAgent + "\n" +
+            (note ? ("\nlast tap  -> " + note) : "");
+        }
+        refresh("");
+        arBtn.parentNode.appendChild(dbg);
+        mv.addEventListener("ar-status", function(e){
+          refresh("ar-status: " + (e.detail && e.detail.status));
+        });
+        arBtn.addEventListener("click", function(){
+          // runs after the main handler above, so it reports what that chose
+          refresh(mv.canActivateAR ? "used mv.activateAR()"
+                : (isIOS && iosSrc) ? (supportsQuickLook ? "used <a rel=ar> Quick Look" : "navigated to .usdz (iOS non-Safari)")
+                : "no AR -> showed QR");
+        });
+        // surface script errors too - otherwise they are invisible on a phone
+        window.addEventListener("error", function(ev){
+          dbg.textContent += "\nJS ERROR: " + ev.message;
+        });
+      }
+
+      // close the QR on Escape or on a click outside it
+      document.addEventListener("keydown", function(e){ if(e.key === "Escape" && qrOpen) toggleQR(); });
+      document.addEventListener("click", function(e){
+        if(!qrOpen) return;
+        if(e.target.closest(".mv-ar-row")) return;
+        toggleQR();
+      });
+    })();
+
+    // ---------- click to interact ----------
+    // The <model-viewer> element is larger than its slot so a zoomed model can
+    // flood past it and underlap the page. By default the model is INERT
+    // (pointer-events:none): the page scrolls and its links stay clickable
+    // straight through it, so hovering the model never hijacks the scroll. A
+    // click inside the compact .cad-stage box "engages" it (pointer-events:auto)
+    // so you can rotate + wheel-zoom; a click anywhere outside disengages it,
+    // handing scrolling back. A small hint shows until it's engaged.
+    (function(){
+      var box = mv.parentElement;   // .cad-stage (the compact slot)
+      var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+
+      var hint = document.createElement("div");
+      hint.className = "mv-hint";
+      hint.textContent = coarse ? "TOUCH TO INTERACT" : "CLICK TO INTERACT";
+      box.appendChild(hint);
+
+      /* ---------- WHY TOUCH IS HANDLED SEPARATELY ----------
+         The gate below works by flipping pointer-events from none to auto on
+         the first pointerdown. With a mouse that is fine: the click engages,
+         and the drag that follows is a separate stream of events which the
+         model then receives.
+
+         On a touchscreen it was broken. A drag is ONE continuous pointer
+         sequence, and by the time the capture-phase listener flips
+         pointer-events the browser has already hit-tested that pointerdown
+         against an inert element - so the model never saw the gesture that
+         engaged it, and the whole drag was swallowed. That is why the model
+         only responded after a second touch, or after a two-finger gesture
+         started a fresh sequence.
+
+         On coarse pointers the gate is therefore skipped entirely: the model
+         is live from the start. It can afford to be, because touch-action
+         "pan-y" already lets a vertical swipe scroll the page straight
+         through it, and the mobile CSS keeps the element close to its slot so
+         it is not sitting invisibly on top of neighbouring sections. */
+      if(coarse){
+        mv.style.pointerEvents = "auto";
+        var fade = function(){ box.classList.add("mv-live"); };
+        mv.addEventListener("pointerdown", fade, { once:true });
+        box.addEventListener("touchstart", fade, { once:true, passive:true });
+        return;
+      }
+
+      var live = false;
+      function inBox(e){
+        var r = box.getBoundingClientRect();
+        return e.clientX >= r.left && e.clientX <= r.right &&
+               e.clientY >= r.top  && e.clientY <= r.bottom;
+      }
+      function setLive(on){
+        if(live === on) return;
+        live = on;
+        mv.style.pointerEvents = on ? "auto" : "none";
+        box.classList.toggle("mv-live", on);
+      }
+      window.addEventListener("pointerdown", function(e){ setLive(inBox(e)); }, true);
+    })();
+
+    rsBtn.addEventListener("click", function(){
+      // framedOrbit is the computed home for THIS screen; defaultOrbit is only
+      // the attribute's placeholder, and would put the model back at the wrong
+      // size on anything but the window it was hand-tuned for.
+      mv.cameraOrbit = framedOrbit || defaultOrbit;
+      // also recentre. Panning is disabled now, but anyone who shifted the
+      // model before this change still has that offset stored in cameraTarget,
+      // and resetting the orbit alone would leave it stuck off-centre.
+      mv.cameraTarget = "auto auto auto";
+      mv.resetTurntableRotation && mv.resetTurntableRotation();
+    });
+
+    // WIREFRAME / render toggle: model-viewer has no real wireframe shader
+    // mode, so until there's an actual wireframe-textured export (or a second
+    // GLB) to switch to, this flips a desaturated, high-contrast look that
+    // reads as "technical drawing" next to the textured render, same idea as
+    // the reference's wireframe/render button. Swap this for a real asset
+    // swap whenever one exists, this is a stand-in, not the final behaviour.
+    if(wfBtn){
+      var wireOn = false;
+      wfBtn.addEventListener("click", function(){
+        wireOn = !wireOn;
+        wfBtn.classList.toggle("active", wireOn);
+        mv.style.filter = wireOn ? "grayscale(1) contrast(1.35) brightness(1.08)" : "";
+        mv.exposure = wireOn ? 1.6 : 1;
+      });
+    }
+
+    mv.addEventListener("load", function(){
+      frameModel();
+      // two frames of settle, then reveal: the first frame model-viewer paints
+      // is its own auto-framing, which at these element proportions is the
+      // wrong size. See the opacity note on .cad-stage model-viewer.
+      requestAnimationFrame(function(){
+        frameModel();
+        var st = mv.parentElement; if(st) st.classList.add("mv-framed");
+      });
+
+      // ---- lamp on / off / dim ----
+      // The render's LED material is emissive; scaling its emissiveFactor dims
+      // the glow through the frosted-glass shade. If the emissive material can't
+      // be read for some reason, fall back to dimming the whole scene exposure.
+      var emis = [], base = [];
+      try {
+        (mv.model && mv.model.materials || []).forEach(function(m){
+          var ef = null; try { ef = m.emissiveFactor; } catch(e){}
+          var lit = ef && (ef[0]>0 || ef[1]>0 || ef[2]>0);
+          if(!lit && /255_0_0|emis|led|glow/i.test(m.name||"")) { lit = true; ef = [1,1,1]; }
+          if(lit){ emis.push(m); base.push([ef[0],ef[1],ef[2]]); }
+        });
+      } catch(e){}
+      var lampOn = true, level = (dim ? (+dim.value)/100 : 0.8);
+      function applyLamp(){
+        var v = lampOn ? level : 0;
+        if(emis.length){ emis.forEach(function(m,i){ var b=base[i]; try{ m.setEmissiveFactor([b[0]*v,b[1]*v,b[2]*v]); }catch(e){} }); }
+        else { mv.exposure = 0.3 + 1.1*v; }   // fallback: dim the whole scene
+      }
+      function setPwr(on){ lampOn=on; pwrBtn.classList.toggle("active",on); pwrBtn.textContent = on?"LIGHT ON":"LIGHT OFF"; applyLamp(); }
+      if(pwrBtn) pwrBtn.addEventListener("click", function(){ setPwr(!lampOn); });
+      if(dim) dim.addEventListener("input", function(){ level=(+dim.value)/100; if(!lampOn) lampOn=true; setPwr(true); });
+      setPwr(true);
+
+      // material variants (KHR_materials_variants): show a picker if the GLB
+      // carries them. Author them in Blender / gltf-transform; nothing to wire
+      // here beyond this once the file has them.
+      var vs = mv.availableVariants || [];
+      if(vs.length > 1){
+        sel.hidden = false;
+        sel.innerHTML = vs.map(function(v){ return '<option value="'+v+'">'+String(v).toUpperCase()+'</option>'; }).join("");
+        sel.value = mv.variantName || vs[0];
+        sel.addEventListener("change", function(){ mv.variantName = sel.value; });
+      }
+
+      // explode: plays a baked glTF animation whose name contains "explode".
+      // model-viewer has no built-in explode, so the clean path is to keyframe
+      // the parts apart in Blender and export the animation; this scrubs it.
+      var anims = mv.availableAnimations || [];
+      var exName = anims.filter(function(a){ return /explode/i.test(a); })[0];
+      if(exName){
+        exBtn.hidden = false;
+        mv.animationName = exName;
+        mv.pause();
+        try { mv.currentTime = 0; } catch(e){}
+        var open = false, raf = null;
+        exBtn.addEventListener("click", function(){
+          open = !open;
+          exBtn.classList.toggle("active", open);
+          var dur = mv.duration || 1, from = mv.currentTime || 0, to = open ? dur : 0;
+          var t0 = performance.now(), D = 620;
+          cancelAnimationFrame(raf);
+          (function step(now){
+            var k = Math.min(1, (now - t0) / D);
+            var e = k < .5 ? 2*k*k : -1 + (4 - 2*k)*k;
+            try { mv.currentTime = from + (to - from) * e; } catch(err){}
+            if(k < 1) raf = requestAnimationFrame(step);
+          })(performance.now());
+        });
+      }
+    });
+  }
+
+  // project title: now a real on-page h1 at the top of the hero's text
+  // column (Figma: title box at 570,155). The docked-beside-the-logo running
+  // title is therefore OFF to avoid saying the name twice; delete the next
+  // line's comment markers to bring it back.
+  var runHead = document.getElementById("runHead");
+  // if(runHead){ runHead.innerHTML = '<span class="rh-in">'+esc(p.title)+'</span>'; runHead.classList.add("on"); }
+
+  // info icon: click reveals the fuller "more" text sitting beside whatever
+  // short line it's attached to (mechanism copy, a component note, etc).
+  // One delegated listener covers every instance built into the page.
+  content.addEventListener("click", function(e){
+    var btn = e.target.closest(".info-btn");
+    if(!btn) return;
+    var panel = btn.parentElement.querySelector(".info-panel");
+    var open = !btn.classList.contains("open");
+    btn.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if(panel) panel.classList.toggle("open", open);
+  });
+
+  // component-spread labels: click a label's info icon to open its spec panel;
+  // opening one closes any other that's open so panels don't stack.
+  content.addEventListener("click", function(e){
+    var ci = e.target.closest(".comp-info");
+    if(!ci) return;
+    var label = ci.closest(".comp-label");
+    var open = !label.classList.contains("open");
+    content.querySelectorAll(".comp-label.open").forEach(function(l){ if(l !== label) l.classList.remove("open"); });
+    label.classList.toggle("open", open);
+    ci.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  // read more: reveal the process / portfolio section, then retire the button
+  var readMoreBtn = document.getElementById("readMoreBtn");
+  if(readMoreBtn){
+    readMoreBtn.addEventListener("click", function(){
+      var wrap = document.getElementById("procReveal");
+      if(wrap){ wrap.hidden = false; requestAnimationFrame(function(){ wrap.classList.add("open"); }); }
+      readMoreBtn.setAttribute("aria-expanded", "true");
+      var rm = document.getElementById("readmoreWrap");
+      if(rm) rm.style.display = "none";
+    });
+  }
+
+  // assigned by the lightbox block below, called by the gallery when it
+  // re-deals its columns and the thumb elements are replaced.
+  var bindLightbox = function(){};
+
+  // ---------- LIGHTBOX: click the hero image or any gallery thumb to open a
+  // near-fullscreen viewer. data-lb="N" on each <img> indexes into `gal`
+  // (gal[0] is the hero, gal[1..] are the thumbs, same order they're built in
+  // above), so the viewer always cycles the FULL project gallery regardless
+  // of which image was clicked first. ----------
+  (function(){
+    var items = LB;                       // images AND videos, one shared set
+    if(!items.length) return;
+    var lb = document.getElementById("lightbox");
+    var lbImg = document.getElementById("lbImg");
+    var lbVid = document.getElementById("lbVid");
+    var lbCount = document.getElementById("lbCount");
+    var lbPrev = document.getElementById("lbPrev");
+    var lbNext = document.getElementById("lbNext");
+    var lbClose = document.getElementById("lbClose");
+    var cur = 0, lastFocus = null;
+
+    function render(){
+      var it = items[cur];
+      var isVid = it.type === "video";
+      // swap which element is live, and always stop the video when leaving it -
+      // otherwise its audio/decoding carries on behind a photo
+      lbVid.hidden = !isVid;
+      lbImg.hidden = isVid;
+      if(isVid){
+        lbImg.removeAttribute("src");
+        if(lbVid.getAttribute("src") !== it.src) lbVid.setAttribute("src", it.src);
+        lbVid.play().catch(function(){});
+      } else {
+        lbVid.pause();
+        lbVid.removeAttribute("src");
+        lbImg.src = it.src;
+        /* the photo's own description, not just its position in the set */
+        var file = String(it.src).split("/").pop();
+        var d = (p.alt || {})[file];
+        lbImg.alt = (d ? d : p.title) + " (" + (cur+1) + " of " + items.length + ")";
+      }
+      lbCount.textContent = (cur+1<10?"0":"")+(cur+1) + " / " + (items.length<10?"0":"")+items.length;
+      lbPrev.disabled = items.length < 2;
+      lbNext.disabled = items.length < 2;
+    }
+    /* SCROLL LOCK. `document.body.style.overflow = "hidden"` did nothing here:
+       the scrolling element on this page is <html>, not <body>, so the page
+       carried on scrolling behind the open lightbox (measured: one wheel
+       gesture moved it 900px) and closing it dropped you somewhere else
+       entirely. overflow:hidden on documentElement is all it takes: it stops
+       the scroll without moving anything, so the position is still exactly
+       where it was when the overlay closes. */
+    function lockScroll(){ document.documentElement.style.overflow = "hidden"; }
+    function unlockScroll(){ document.documentElement.style.overflow = ""; }
+
+    /* FOCUS TRAP. The lightbox covers the whole window, but Tab used to walk
+       straight out of it into the page behind (verified: three presses put
+       focus on the skip link). Keep the ring inside the three controls while
+       it is open; focus returns to whatever opened it on close. */
+    function trapKeys(e){
+      if(e.key !== "Tab") return;
+      var f = [lbClose, lbPrev, lbNext].filter(function(el){ return el && !el.disabled; });
+      if(!f.length) return;
+      var i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      var n = e.shiftKey ? (i <= 0 ? f.length - 1 : i - 1)
+                         : (i < 0 || i === f.length - 1 ? 0 : i + 1);
+      f[n].focus();
+    }
+
+    function open(i){
+      cur = ((i % items.length) + items.length) % items.length;
+      lastFocus = document.activeElement;
+      render();
+      lb.classList.add("open");
+      lb.setAttribute("aria-hidden", "false");
+      lockScroll();
+      document.addEventListener("keydown", trapKeys, true);
+      requestAnimationFrame(function(){ lb.classList.add("show"); lb.classList.add("imgshow"); });
+      lbClose.focus();
+    }
+    function close(){
+      lb.classList.remove("show"); lb.classList.remove("imgshow");
+      lb.setAttribute("aria-hidden", "true");
+      document.removeEventListener("keydown", trapKeys, true);
+      unlockScroll();
+      // never leave a video playing behind a closed overlay
+      lbVid.pause(); lbVid.removeAttribute("src");
+      setTimeout(function(){ lb.classList.remove("open"); }, 220);
+      if(lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    function step(d){
+      lb.classList.remove("imgshow");
+      cur = ((cur + d) % items.length + items.length) % items.length;
+      setTimeout(function(){ render(); lb.classList.add("imgshow"); }, 120);
+    }
+
+    /* Exposed so the gallery can rewire itself: when the column count changes
+       at the 760px breakpoint the thumbs are rebuilt as brand new nodes, and
+       their click handlers go with the old ones. Re-binding is safe to call
+       repeatedly because it only ever runs over nodes inside the subtree it is
+       handed, and those nodes have just been created. */
+    bindLightbox = function(root){
+      (root || content).querySelectorAll("[data-lb]").forEach(function(el){
+        el.addEventListener("click", function(e){
+          e.preventDefault();
+          open(+el.getAttribute("data-lb"));
+        });
+      });
+    };
+    bindLightbox(content);
+    lbPrev.addEventListener("click", function(){ step(-1); });
+    lbNext.addEventListener("click", function(){ step(1); });
+    lbClose.addEventListener("click", close);
+    lb.addEventListener("click", function(e){ if(e.target === lb) close(); });
+    document.addEventListener("keydown", function(e){
+      if(!lb.classList.contains("open")) return;
+      if(e.key === "Escape") close();
+      else if(e.key === "ArrowLeft") step(-1);
+      else if(e.key === "ArrowRight") step(1);
+    });
+  })();
+
+  /* ---------- gallery: re-deal the columns when the layout breakpoint
+     changes. Four columns on desktop, two on a phone (one if there is only a
+     single photo). The columns are real elements, so unlike the old CSS
+     multi-column this cannot re-flow itself and has to be rebuilt. Keyed off a
+     matchMedia change event rather than every resize tick, so dragging a
+     window edge does not rebuild the DOM continuously - it only fires when the
+     page actually crosses 760px. ---------- */
+  (function(){
+    var wrap = document.getElementById("heroGallery");
+    if(!wrap || !galFiles.length) return;
+    var cols = wrap.querySelector(".gcols");
+    // the markup was already built with galColCount(), so start in step with it
+    // and only touch the DOM when the breakpoint actually changes.
+    var current = galColCount();
+    function apply(){
+      var n = galColCount();
+      if(n === current) return;
+      current = n;
+      cols.innerHTML = galleryHTML(n);
+      bindLightbox(cols);          // the thumbs are new nodes, rewire them
+    }
+    if(galMQ.addEventListener) galMQ.addEventListener("change", apply);
+    else if(galMQ.addListener) galMQ.addListener(apply);   // older Safari
+  })();
+
+  // ---------- inline loop videos: only play while on screen. autoplay still
+  // starts them the normal way; this pauses any that scroll out of view and
+  // resumes them as they come back, so a page with several loops never has
+  // them all decoding at once. ----------
+  if("IntersectionObserver" in window){
+    var vio = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        var v = en.target;
+        if(en.isIntersecting){ v.play && v.play().catch(function(){}); }
+        else { v.pause && v.pause(); }
+      });
+    }, {rootMargin:"120px 0px"});
+    content.querySelectorAll(".fig.vid video").forEach(function(v){ vio.observe(v); });
+  }
+
+  // ---------- LAYOUT SANDBOX (opt-in via ?sandbox in the URL) ----------
+  // Lets Owen drag/resize the process scatter + V2 media directly on the
+  // real page, then export a description of the new layout to send back.
+  // See js/sandbox.js. Absent entirely unless the URL asks for it.
+  if(/[?&]sandbox\b/.test(location.search)){
+    var sbx = document.createElement("script");
+    sbx.src = "js/sandbox.js";
+    sbx.onload = function(){ if(window.NEWO_SANDBOX) window.NEWO_SANDBOX.init({ id:id, title:p.title }); };
+    document.body.appendChild(sbx);
+  }
+
+  // ---------- HOLD THE LOADER until the above-the-fold assets are actually
+  // loaded, so the page never reveals with the hero image, hero video or 3D
+  // model still popping in. Each wait has its own timeout and main.js keeps a
+  // global 12s hard cap, so one stalled asset can never strand the loader.
+  // (main.js hands us reveal control because window.__DEFER_REVEAL is set in
+  // the head; if for any reason it isn't, this simply does nothing and the
+  // page reveals on the normal timing.) ----------
+  (function holdLoader(){
+    if(typeof window.__revealPage !== "function") return;
+    function settle(el, ev, ms){
+      return new Promise(function(res){
+        if(!el) return res();
+        var t = setTimeout(res, ms);
+        function ok(){ clearTimeout(t); res(); }
+        el.addEventListener(ev, ok, {once:true});
+        el.addEventListener("error", ok, {once:true});
+      });
+    }
+    var waits = [];
+    var heroImg = content.querySelector(".hero-main img");
+    if(heroImg){
+      if(heroImg.complete && heroImg.naturalWidth) waits.push(Promise.resolve());
+      else waits.push(settle(heroImg, "load", 8000));
+    }
+    var heroVid = content.querySelector(".hero-aside-btm video, .hero-vid video");
+    if(heroVid) waits.push(settle(heroVid, "canplay", 8000));   // first frame ready, not full download
+    /* The 3D MODEL IS NO LONGER WAITED ON (2026-08-29). It used to be the
+       longest pole here by far - ~700KB of library, a draco decode, 22 texture
+       uploads and a PMREM environment map - and all of it landed while the
+       logo was still tumbling. It now loads on scroll-approach instead; see
+       "DEFERRED MODEL LOAD" above. */
+    // the mechanism iframe: its first paint is a big canvas render, and on
+    // KART it sits beside the model above the fold - it should never pop in
+    // (or first-paint-jank) after the loader clears
+    var mechF = document.getElementById("mechFrame");
+    // (guarded by position: a loading="lazy" iframe far below the fold never
+    // starts loading until scrolled near, so waiting on it would just burn
+    // the timeout. Near the fold - the KART/OMNI row - it loads immediately.)
+    if(mechF && mechF.getBoundingClientRect().top < window.innerHeight * 2){
+      waits.push(settle(mechF, "load", 8000));
+    }
+    Promise.all(waits).then(function(){
+      /* IMAGE DECODING, IN TWO PASSES (revised 2026-08-29).
+         The previous version force-decoded EVERY image on the page before
+         revealing - decode() triggers the request even on a loading="lazy"
+         image - so a project page could not appear until its entire image set
+         had downloaded AND decoded. That is what made the loading screen "take
+         its time", and the decode burst itself was landing on the same main
+         thread the logo tumble had to share.
+         Now only what is within ~2 screens is decoded up front, which is all
+         that can possibly be seen in the first second of scrolling. Everything
+         below that is decoded after the reveal, during idle time, so it is
+         still warm long before you reach it but it costs the loader nothing.
+         Each decode is raced against a timeout and errors are swallowed, and
+         main.js's global 12s hard cap still stands, so nothing can strand the
+         loader. */
+      var imgs = Array.prototype.slice.call(content.querySelectorAll("img"));
+      var fold = window.innerHeight * 2;
+      var near = [], far = [];
+      imgs.forEach(function(im){
+        (im.getBoundingClientRect().top < fold ? near : far).push(im);
+      });
+      function warm(list, ms){
+        return Promise.all(list.map(function(im){
+          var t = new Promise(function(res){ setTimeout(res, ms); });
+          var d;
+          try { d = im.decode ? im.decode() : Promise.resolve(); }
+          catch(e){ d = Promise.resolve(); }
+          return Promise.race([d.catch(function(){}), t]);
+        }));
+      }
+      // the rest, once the page is up and the browser is otherwise idle
+      var later = window.requestIdleCallback || function(fn){ setTimeout(fn, 1200); };
+      later(function(){ warm(far, 20000); });
+      return warm(near, 6000);
+    }).then(function(){
+      // two frames of settle so the first full-page layout/paint (and the
+      // model's first composited frame) happen UNDER the loader, not during
+      // its fade
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ window.__revealPage(); });
+      });
+    });
+  })();
+
+  /* ---------- ALIGN THE HOW-IT-WORKS ROW WITH THE GALLERY ABOVE ----------
+     Owen's composition rule (2026-09-03): the bottom of the how-it-works
+     paragraph sits on the bottom of the gallery above it, and the model and
+     the mechanism move up TOGETHER by the same amount so the row stays in
+     step. Pulling the row up is also what finally gets the model overlapping
+     the photos: the gallery's short columns are on the left, directly above the
+     model, and the tall one is on the right, so the section's own bottom edge
+     is no guide to what the model actually reaches.
+
+     Measured, not authored: the paragraph's height depends on the project's
+     copy and on how it wraps at this width, so the pull is its own height,
+     read at runtime and written to --hiw-pull for the CSS to apply as a
+     negative margin. Desktop only - the stacked mobile layout puts the
+     full-width gallery directly above and pulling up there would run the two
+     into each other. Re-measured on resize because a rewrap changes the
+     height. */
+  (function alignHiw(){
+    var cad = content.querySelector(".cad-hiw");
+    var txt = cad && cad.querySelector(".hiw-text");
+    if(!cad || !txt) return;
+    var wide = window.matchMedia("(min-width:901px)");
+    var GAP = 14;          // breathing room between a photo and the text under it
+
+    function apply(){
+      /* MEASURE FROM AN EXPLICIT ZERO, never by REMOVING the property.
+         The CSS is `margin-top: var(--hiw-pull, 32px)`, so removing the custom
+         property does not return the row to its origin - it falls back to the
+         32px default. Every measurement below was therefore taken with the row
+         sitting 32px lower than the point the pull is actually applied from,
+         which made `headroom` 32px too generous and overshot the pull by
+         exactly that much. On AMSALP and NEB (how-it-works copy with the
+         gallery directly above it and no model beside it) the overshoot landed
+         the paragraph's first line 18px INSIDE the photo above it, at every
+         width from 901px up - the one thing this function exists to prevent.
+         Setting 0px explicitly makes the measurement and the value written
+         back share an origin. */
+      cad.style.setProperty("--hiw-pull", "0px");
+      txt.style.removeProperty("max-width");
+      if(!wide.matches){ cad.style.removeProperty("--hiw-pull"); return; }
+
+      var gal  = content.querySelector(".hero-gallery");
+      var cols = gal ? Array.prototype.slice.call(gal.querySelectorAll(".gcol")) : [];
+      var imgs = gal ? Array.prototype.slice.call(gal.querySelectorAll("img, video")) : [];
+      if(!cols.length || !imgs.length) return;
+
+      /* 1. KEEP THE PARAGRAPH INSIDE ITS OWN GALLERY COLUMN.
+         --w-desc is a fixed 32ch (~448px) but the gallery columns narrow with
+         the window - 459px at 1920, 340 at 1440, 279 at 1180 - so from about
+         1500px down the paragraph hung past its own column and into the next
+         one. That next column is the TALL one, the only column that reaches
+         down to where the paragraph now sits, so the text landed on a photo.
+         Measured overlap before this: 48px at 1600, 88 at 1440, 153 at 1180.
+         Capping to the column it starts under fixes it at every width and
+         needs nothing authored per project. */
+      var tl = txt.getBoundingClientRect().left, own = null;
+      cols.forEach(function(c){
+        var r = c.getBoundingClientRect();
+        if(tl >= r.left - 2 && tl < r.right) own = r;
+      });
+      if(own){
+        var cap = Math.max(200, Math.round(own.right - tl));
+        txt.style.maxWidth = cap + "px";
+        /* Justified text needs a measure to justify against. This paragraph is
+           set justified like every other .desc on the site, which reads well at
+           the full 32ch but opens ugly rivers of white space once the column
+           caps it to ~20ch. Flag it so the CSS can fall back to plain left
+           alignment when it has been squeezed. */
+        txt.classList.toggle("hiw-narrow", cap < 380);
+      }
+
+      /* 2. Pull up by the paragraph's own height so its bottom lands on the
+         gallery's bottom - but NEVER far enough to put its top over a photo
+         that is genuinely above it. Owen's rule: no body text over any image,
+         ever; only labels that belong to an image may sit on one. With the cap
+         above this clamp should not bite, and it is here so that a longer
+         how-it-works paragraph on some future project cannot reintroduce the
+         bug. */
+      var t = txt.getBoundingClientRect();
+      var deepest = 0;
+      imgs.forEach(function(im){
+        var r = im.getBoundingClientRect();
+        // only photos that actually sit in this paragraph's horizontal band
+        if(r.right > t.left + 2 && r.left < t.right - 2) deepest = Math.max(deepest, r.bottom);
+      });
+      var pull = t.height;
+      if(deepest){
+        /* No Math.max(0, ...) here. Clamping at zero meant that when the
+           paragraph already sat too close to the photo above it, the best this
+           could do was pull nothing - it could not push the row back DOWN to
+           restore the gap. A negative pull is a positive margin, which is
+           exactly the right answer in that case. */
+        var headroom = t.top - (deepest + GAP);
+        if(headroom < pull) pull = headroom;
+      }
+      cad.style.setProperty("--hiw-pull", (-Math.round(pull)) + "px");
+    }
+    apply();
+    // fonts land after first layout and change the wrap; re-measure once they do
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(apply).catch(function(){});
+    var t = null;
+    window.addEventListener("resize", function(){
+      clearTimeout(t); t = setTimeout(apply, 180);
+    }, { passive:true });
+    if(wide.addEventListener) wide.addEventListener("change", apply);
+  })();
+
+  /* ---------- ARM THE DEFERRED MODEL LOAD ----------
+     Two gates, both required:
+       1. body.ready - the loading screen has released. Polled rather than
+          hooked onto __revealPage, because the reveal can also come from
+          main.js's 12s hard cap, which bypasses the promise chain above.
+       2. the model's slot is within 1.5 screens. rootMargin is generous on
+          purpose: the library + GLB want a moment, and arriving at an empty
+          box would be worse than the old behaviour, not better.
+     The extra beat after ready keeps the GLB's parse and texture upload off
+     the same frames as the loader's own 650ms fade-out. */
+  /* ---------- STOP COMPOSITING THE MODEL WHEN IT IS OFF SCREEN ----------
+     Separate from the load gate below and it runs for the whole life of the
+     page, not once: the model can be scrolled away from as often as it is
+     scrolled to. See the .mv-offscreen note in css/style.css for why a static,
+     idle model still costs something.
+     50%, not 100%: a project page before "read more" is only about three
+     viewports tall, so a full-viewport margin on either side meant the model
+     counted as on-screen from everywhere and the class never engaged at all
+     (measured). Half a viewport still gives ~450px of scroll warning, and the
+     toggle is only a visibility flip - the canvas keeps its rendered contents,
+     so there is nothing to redraw and no chance of arriving at a blank box. */
+  /* ---------- PAUSE THE INLINE VIDEOS WHEN THEY ARE NOT ON SCREEN ----------
+     The mechanism iframe and the 3D model are both already gated on visibility
+     (see the mechVisible messages above and .mv-offscreen below) - the <video>
+     elements were the one thing on the page still working while nobody was
+     looking at it. A project page can carry four of them (hero demo, gallery
+     clip, how-it-works clip, process clip), all autoplay+loop, and a browser
+     will happily keep decoding every one of them while you read something two
+     screens further down. That is a real cost on a phone.
+     Same pattern as the other two: pause on the way out, play on the way back
+     in. Nothing is torn down and no bytes are re-fetched, so resuming is
+     instant. A video the visitor has paused themselves is left alone. */
+  (function pauseOffscreenVideos(){
+    var vids = Array.prototype.slice.call(content.querySelectorAll(".fig.vid video, .hero-vid video"));
+    if(!vids.length) return;
+
+    if(!window.IntersectionObserver) return;   // leave them running, as before
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if(e.isIntersecting){
+          if(v.dataset.autopaused === "1"){ v.dataset.autopaused = ""; v.play().catch(function(){}); }
+        } else if(!v.paused){
+          v.dataset.autopaused = "1"; v.pause();
+        }
+      });
+    }, { rootMargin: "100px 0px" });
+    vids.forEach(function(v){ io.observe(v); });
+
+    // a hidden tab should not be decoding video either
+    document.addEventListener("visibilitychange", function(){
+      if(document.hidden){
+        vids.forEach(function(v){ if(!v.paused){ v.dataset.autopaused = "1"; v.pause(); } });
+      } else {
+        vids.forEach(function(v){
+          if(v.dataset.autopaused === "1"){ v.dataset.autopaused = ""; v.play().catch(function(){}); }
+        });
+      }
+    });
+  })();
+
+  (function hideOffscreenModel(){
+    if(!loadModel || !window.IntersectionObserver) return;
+    var box = document.querySelector(".cad-stage");
+    if(!box) return;
+    box.classList.add("mv-offscreen");
+    new IntersectionObserver(function(entries){
+      box.classList.toggle("mv-offscreen", !entries[0].isIntersecting);
+    }, { rootMargin: "50% 0px" }).observe(box);
+  })();
+
+  (function armModel(){
+    if(!loadModel) return;
+    var box = document.querySelector(".cad-stage");
+    function arm(){
+      if(!box || !window.IntersectionObserver){ loadModel(); return; }
+      new IntersectionObserver(function(entries, obs){
+        if(entries[0].isIntersecting){ obs.disconnect(); loadModel(); }
+      }, { rootMargin: "150% 0px" }).observe(box);
+    }
+    (function whenReady(){
+      if(document.body.classList.contains("ready")){ setTimeout(arm, 700); return; }
+      setTimeout(whenReady, 80);
+    })();
+  })();
+})();
+</script>
+</body>
+</html>

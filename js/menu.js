@@ -103,24 +103,35 @@
     // chain. loader3d.worker.js and loader3d-core.js are fetched by the worker
     // rather than by a script tag, but a prefetch lands in the same HTTP cache
     // the worker reads from.
+    /* Every script the NEXT page needs before it can render, in the order it
+       wants them. menu.js, projects-data.js and image-sizes.js were missing
+       from this list while materials-data.js - which only two pages load - was
+       on it, so the three files every page actually needs were the ones not
+       being warmed. */
     var SHELL = [
-      "css/style.css?v=50",
-      "js/main.js?v=3",
-      "js/materials-data.js?v=3",
-      "js/loader3d.js?v=12",
+      "css/style.css?v=51",
+      "js/projects-data.js?v=14",
+      "js/image-sizes.js?v=3",
+      "js/main.js?v=4",
+      "js/menu.js?v=17",
+      "js/loader3d.js?v=14",
       "js/loader3d-core.js?v=1",
-      "js/loader3d.worker.js?v=3",
+      "js/loader3d.worker.js?v=4",
       "logo/3d-logo.stl"
     ];
-    var MV_LIB  = "https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js";
+    /* only materials.html and project.html load this one, so it is warmed with
+       the page that needs it rather than on every hover anywhere. */
+    var MATERIALS_DATA = "js/materials-data.js?v=3";
+    var MV_LIB  = "js/vendor/model-viewer.min.js?v=1";
     var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
-    var MECH_V  = "?v=19";     // must match the mechanism iframe src in project.html
+    var MECH_V  = "?v=20";     // must match the mechanism iframe src in project.html
     var DWELL_MS = 400;
 
     function shell(){ SHELL.forEach(link); }
 
     function heavy(key, p){
       if(!p) return;
+      link(MATERIALS_DATA);        // project pages resolve their material chips from it
       if(p.mechanism && /\.html?$/i.test(p.mechanism)) link("projects/"+key+"/"+p.mechanism+MECH_V);
       var glb = p.modelRender || p.model;
       if(glb){ link("projects/"+key+"/"+glb+MODEL_V); link(MV_LIB); }
@@ -132,7 +143,7 @@
        that finds everything already warmed. */
     function project(el, key){
       shell();
-      link("project.html?p=" + encodeURIComponent(key));
+      link(encodeURIComponent(key) + ".html");
       var P = projects(), p = P[key];
       if(!p || !el) return;
       var t = setTimeout(function(){ heavy(key, p); }, DWELL_MS);
@@ -146,7 +157,11 @@
     }
 
     // a plain page (materials / about / contact): shell, then the document
-    function page(href){ shell(); link(href); }
+    function page(href){
+      shell();
+      if(/^materials\.html/.test(href)) link(MATERIALS_DATA);
+      link(href);
+    }
 
     return { shell: shell, project: project, page: page };
   })();
@@ -198,7 +213,12 @@
     return { labels: labels, buckets: buckets };
   }
 
+  /* Each project has its own page now (kart.html, neb.html, ...), so the key
+     comes off <body data-project>. The ?p= form is still read for
+     project.html itself, which forwards to the clean URL. */
   function currentKey(){
+    var d = document.body && document.body.getAttribute("data-project");
+    if(d) return d;
     try { return new URLSearchParams(location.search).get("p") || ""; }
     catch(e){ return ""; }
   }
@@ -209,18 +229,26 @@
     var here = currentKey();
     var openLabel = "";
     if(known(P, here)) openLabel = categoryOf(P[here]);
-    if(!openLabel && g.labels.length === 1) openLabel = g.labels[0];
+    /* OFF a project page there is no "current" category, and every one of them
+       used to start collapsed - so opening the menu on the home page showed
+       four category words and three links, and you had to expand something
+       before a single piece of work was visible. The menu's job on a portfolio
+       is to show the work, and with five projects across four categories the
+       panel is short enough to open them all. On a PROJECT page the behaviour
+       is unchanged: its own category opens and the others stay folded, so the
+       panel stays focused on where you are. */
+    var openAll = !openLabel;
 
     var html = '<nav class="menu-nav">';
 
     g.labels.forEach(function(label, i){
       var keys = g.buckets[label];
       var id = "menu-cat-" + i;
-      var isOpen = (label === openLabel);
+      var isOpen = openAll || (label === openLabel);
       var items = keys.map(function(key){
         var p = P[key];
         var isHere = (key === here);
-        return '<a href="project.html?p=' + encodeURIComponent(key) + '"' +
+        return '<a href="' + encodeURIComponent(key) + '.html"' +
                (isHere ? ' class="is-here" aria-current="page"' : '') + '>' +
                esc(p.title || key.toUpperCase()) + '</a>';
       }).join("");
@@ -267,9 +295,12 @@
       var a = e.target.closest && e.target.closest("a[href]");
       if(!a) return;
       var href = a.getAttribute("href") || "";
-      var m = href.match(/^project\.html\?p=([^&]+)/);
-      if(m){ NEWO_WARM.project(a, decodeURIComponent(m[1])); }
-      else if(/^(materials|about|contact)\.html/.test(href)){ NEWO_WARM.page(href); }
+      var m = href.match(/^([a-z0-9_-]+)\.html$/i);
+      if(m && Object.prototype.hasOwnProperty.call(projects(), m[1])){
+        NEWO_WARM.project(a, m[1]);
+      } else if(/^(materials|about|contact)\.html/.test(href)){
+        NEWO_WARM.page(href);
+      }
     });
 
     // category dropdowns. Handled here rather than with a checkbox/details

@@ -104,7 +104,16 @@
      scrolled straight past. A quiet mark, in the same voice as the mode
      buttons, that disappears the first time anyone actually touches it and
      never comes back. Wording follows the input device. */
-  .hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:3;
+  /* IN FLOW, as the last item of .ui - not absolutely positioned.
+     Pinned to the stage (bottom-centre, and later bottom-left) it shared a band
+     with the controls, and the moment the mode buttons wrapped or the mode
+     description ran to two lines the two printed on top of each other. Measured
+     before this: every window from 901-1080px, and every phone width. As a flex
+     child of the same column the controls live in, it simply stacks under them
+     and cannot collide with anything - and it inherits .ui's alignment, so it
+     right-aligns with the caption on desktop and left-aligns on a phone, for
+     free. */
+  .hint{margin-top:10px;z-index:3;
     pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;
     text-transform:uppercase;color:var(--ink);opacity:.62;white-space:nowrap;
     text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);
@@ -456,7 +465,10 @@
     h.className = 'hint';
     h.textContent = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
       ? 'TOUCH TO INTERACT' : 'DRAG TO INTERACT';
-    stageEl.appendChild(h);
+    /* into .ui, the controls' own column, NOT onto the stage - see the .hint
+       rule above for why. The pointer listeners below stay on the stage, since
+       that is the thing you actually drag. */
+    (document.querySelector('.ui') || stageEl).appendChild(h);
     function gone(){ h.classList.add('gone'); }
     stageEl.addEventListener('pointerdown', gone, { once:true });
     stageEl.addEventListener('touchstart',  gone, { once:true, passive:true });

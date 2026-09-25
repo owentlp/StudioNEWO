@@ -26,7 +26,11 @@
 
 :root{
   --ink:#141414;
-  --ink-soft:#141414;            /* labels are now full ink: hierarchy comes from size, not colour */
+  /* deliberately the SAME value as --ink: hierarchy on this site comes from
+     size and spacing, not from greying text down. Kept as its own token so
+     the places that mean "secondary" still say so, and so one edit here can
+     bring a softer tone back if it is ever wanted. */
+  --ink-soft:var(--ink);
   --paper:#e9e7e2;
   --red:#e2191b;
   --disp:"GOST B",Georgia,serif;
@@ -39,7 +43,6 @@
 
   --hdr:45px;                     /* logo / wordmark / hamburger height (bumped ~50%) */
   --hdr-top:24px;                 /* shared top so all three line up */
-  --stick:84px;                   /* legacy: text blocks no longer stick, kept for reference */
 
   /* consistent text-block widths (paragraphs match each other, captions match each other) */
   --w-desc:32ch;                  /* every description paragraph */
@@ -48,7 +51,6 @@
   /* ---- HERO / GALLERY / VIEWER KNOBS (safe to tweak the numbers) ----
      These are the main "dials" for the project-page composition. Change the
      number, reload. Nothing else needs editing. */
-  --hero-max:none;                   /* legacy: the hero is width-driven now (cols 1-6 at its own aspect, like the Figma); kept only so old notes referencing it don't dangle */
   --hero-pad:clamp(8px,1.4vw,22px);  /* whitespace around the hero image */
   --gallery-gap:12px;/* vertical gap between gallery thumbs (smaller = denser) */
   --viewer-h:clamp(520px,74vh,1100px);
@@ -268,7 +270,12 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* plain `inline`, not inline-block: the collapsed panel must not be able to
    inflate this wrapper's shrink-to-fit width before it's ever opened. */
 .info-wrap{position:relative; display:inline;}
-.info-btn{display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; margin-left:6px; padding:0; background:none; border:0; color:var(--ink-soft); cursor:pointer; vertical-align:-3px; transition:opacity .15s ease;}
+/* The MARK stays 15px - that is the size it is meant to read at, printed in
+   the run of text. The BUTTON is 26px with the difference as padding, so the
+   tap target clears the 24px minimum on a phone without the icon growing or
+   the line it sits on getting taller (the negative margins cancel the extra
+   box back out of the inline flow). */
+.info-btn{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; padding:5.5px; margin-left:1px; margin-top:-5.5px; margin-bottom:-5.5px; background:none; border:0; color:var(--ink-soft); cursor:pointer; vertical-align:-8px; transition:opacity .15s ease;}
 /* Owen's info.svg is a solid black icon, not a tintable outline, so hover/
    open feedback is opacity rather than the red-on-hover other buttons use. */
 .info-btn img{width:100%; height:100%; display:block; object-fit:contain;}
@@ -377,9 +384,20 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .foot-wordmark{position:absolute; left:50%; transform:translateX(-50%); height:var(--hdr); color:var(--ink); pointer-events:none;}
 .foot-wordmark svg{height:100%; width:auto; display:block; fill:currentColor;}
 .foot-burger{width:var(--hdr); height:var(--hdr); background:none; border:0; padding:0; cursor:pointer; color:var(--ink);}
+
+/* The same footer on the .wrap pages (about / contact / materials / 404), where
+   it is a body-level sibling of <main> rather than living inside .proj. Two
+   differences follow from that:
+   1. .proj is already padded by --mar, so .site-foot adds the missing --mar to
+      reach --mar-edge and line its marks up with the fixed header marks. Here
+      there is no outer padding at all, so the full --mar-edge goes on directly.
+   2. .wrap already ends in 120px of bottom padding, so the 110px top margin
+      that suits a project page would leave a 230px hole. */
+.site-foot[data-autofoot]{margin-top:0; padding:0 var(--mar-edge) 48px;}
+/* index.html deliberately has no footer: it does not scroll, and the card dock
+   is already pinned along the bottom edge. */
 .foot-burger svg{width:100%; height:100%; display:block; fill:currentColor;}
 
-.folio{display:none;}
 
 /* frameless figures + aspect ratios */
 .fig{position:relative; overflow:hidden; background:#00000008;}
@@ -667,8 +685,14 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   background-position:calc(100% - 17px) calc(50% + 1px),calc(100% - 12px) calc(50% + 1px);
   background-size:5px 5px,5px 5px; background-repeat:no-repeat;}
 .mv-sel option{color:var(--ink); background:var(--paper);}
-/* lamp brightness slider */
-.mv-dim{-webkit-appearance:none; appearance:none; width:96px; height:1px; background:var(--ink); cursor:pointer; align-self:center;}
+/* lamp brightness slider. The RULE stays 1px - it is meant to read as a drawn
+   line, not a UI widget - but the element is 26px tall with the line painted
+   as a centred background, so there is something to actually grab. At height:1px
+   the hit area was one pixel tall, which is unusable on a touchscreen and
+   fiddly with a mouse. */
+.mv-dim{-webkit-appearance:none; appearance:none; width:96px; height:26px; background:linear-gradient(var(--ink),var(--ink)) center/100% 1px no-repeat; cursor:pointer; align-self:center;}
+.mv-dim::-webkit-slider-runnable-track{height:26px; background:transparent;}
+.mv-dim::-moz-range-track{height:26px; background:transparent;}
 .mv-dim::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:11px; height:11px; background:var(--red); border:0; border-radius:50%; cursor:pointer;}
 .mv-dim::-moz-range-thumb{width:11px; height:11px; background:var(--red); border:0; border-radius:50%; cursor:pointer;}
 /* ---- AR row -------------------------------------------------------------
@@ -817,7 +841,6 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    hand-set margin-top offsets or negative shifts that can collide. */
 .proc{margin-top:40px; width:100vw; margin-left:calc(50% - 50vw);}
 .aesth{margin-top:var(--sec); width:100vw; margin-left:calc(50% - 50vw);}
-.proc .folio,.aesth .folio{right:var(--mar);}
 .aesth>.lbl{padding:0 var(--mar); margin-bottom:clamp(40px,7vh,90px);}
 .scatter{display:grid; grid-template-columns:repeat(12,1fr); grid-auto-flow:row dense; column-gap:var(--gut); row-gap:64px; align-items:start; padding:0 var(--mar);}
 .scatter.big{row-gap:84px;}
@@ -840,30 +863,10 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .cell.cap-over figcaption.cap-right{right:8px; margin-left:0; padding-right:7px;}
 
 
-/* ============================================================
-   3D VIEWER  (frameless, lives inside .cad-stage)
-   ============================================================ */
-.viewer{position:relative; width:100%; height:clamp(440px,76vh,860px); background:transparent; overflow:hidden; touch-action:none;}
-.viewer canvas{display:block; width:100%; height:100%;}
-.viewer:not(.is-live){display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; background:repeating-linear-gradient(45deg,#e9e7e2,#e9e7e2 12px,#e4e2dc 12px,#e4e2dc 24px);}
-.viewer .vlabel{font-family:var(--disp); font-style:italic; font-size:24px;}
-.viewer .vnote{font-size:10px; letter-spacing:.16em; color:var(--ink-soft); max-width:44ch; text-transform:uppercase;}
-.viewer .v-controls{position:absolute; left:0; bottom:0; z-index:3; display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
-.viewer .v-controls button{font-family:var(--body); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); background:rgba(233,231,226,.62); border:0; padding:6px 11px; cursor:pointer; transition:.18s; -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);}
-.viewer .v-controls button:hover{color:var(--ink);}
-.viewer .v-controls button.active{color:#fff; background:var(--red);}
-.viewer .v-sep{width:8px;}
-.viewer .v-hint{position:absolute; right:0; top:0; z-index:3; pointer-events:none; font-size:10px; letter-spacing:.16em; color:var(--ink-soft); text-transform:uppercase;}
-.viewer .v-labels{position:absolute; inset:0; z-index:2; pointer-events:none; overflow:hidden;}
-.viewer .v-label{position:absolute; top:0; left:0; will-change:transform; white-space:nowrap; font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink); background:rgba(233,231,226,.92); padding:3px 7px; opacity:0; transition:opacity .25s;}
-.viewer .v-label.on{opacity:1;}
-.viewer .v-loading{position:absolute; left:0; top:0; z-index:3; font-size:10px; letter-spacing:.18em; color:var(--ink-soft); text-transform:uppercase;}
-.viewer .v-msg{position:absolute; inset:0; z-index:4; display:none; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:30px; background:repeating-linear-gradient(45deg,#e9e7e2,#e9e7e2 12px,#e4e2dc 12px,#e4e2dc 24px);}
-.viewer.show-msg .v-msg{display:flex;}
-.viewer .v-msg .t{font-family:var(--disp); font-style:italic; font-size:22px;}
-.viewer .v-msg .s{font-size:10px; letter-spacing:.13em; color:var(--ink-soft); max-width:48ch; text-transform:uppercase; line-height:1.7;}
-.viewer .v-retry{margin-top:6px; font-family:var(--body); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 16px; cursor:pointer;}
-.viewer .v-retry:hover{opacity:.85;}
+/* The .viewer block that used to sit here (a frameless three.js viewer with its
+   own control bar, labels, loading and error states) was removed 2026-09-16:
+   nothing in any page or script carries those classes any more. The model is a
+   <model-viewer> inside .cad-stage - see "RENDERED MODEL" above. */
 
 /* ============================================================
    RESPONSIVE
@@ -947,7 +950,6 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   .proc{margin-top:70px;}      /* no collage overlap on small screens */
   .site-foot{margin-top:72px;}
   .scatter{row-gap:52px;}
-  .folio{font-size:28px;}
 }
 @media (max-width:600px){
   /* the fixed marks read fine at 45px on desktop but dominate a 375px phone;
@@ -968,6 +970,21 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      of names beside it. Any cell carrying a spread takes the full width
      instead. project.html tags the cell, so this covers every project. */
   .scatter .cell.has-spread{grid-column:1 / -1 !important;}
+}
+
+/* ---- JUSTIFICATION STOPS AT PHONE WIDTHS ----
+   Every body block on the site is justified with a ragged last line, which is
+   right at the 29-36ch desktop measure. On a phone the same blocks run at
+   roughly 24-28ch, and justifying that opens rivers of white space right
+   through the paragraph - worst on the contact lead, the 404 message and the
+   material guide entries. The page already does exactly this for one block
+   (.hiw-text.hiw-narrow, capped by the column above it); this is the same
+   judgement applied everywhere the measure gets that short. */
+@media (max-width:600px){
+  .desc, .teaser, .lead, .info-panel-in,
+  .matg-intro, .matcat-intro-text, .matitem-text, .matgroup-intro{
+    text-align:left; text-align-last:left;
+  }
 }
 
 @media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto;} .page{transition:none;} }

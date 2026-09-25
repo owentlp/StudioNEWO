@@ -54,3 +54,32 @@
   });
   if(on) document.addEventListener("DOMContentLoaded", apply);
 })();
+
+/* ---- SHARED FOOTER ---------------------------------------------------------
+   about / contact / materials / 404 carry an empty <footer class="site-foot"
+   data-autofoot> and this fills its three marks by cloning the page's own
+   header SVGs, so the logo, wordmark and burger paths exist once per page
+   rather than a second time in the footer markup. project.html builds its
+   footer the same way inside its own script, because there the whole page is
+   rendered from data and the footer has to be appended after that.
+   The footer burger opens the same panel as the header one - js/menu.js
+   listens for "#burger, .foot-burger" through a delegated handler, so there is
+   nothing to wire up here. */
+(function(){
+  function fill(){
+    var foot = document.querySelector("footer.site-foot[data-autofoot]");
+    if(!foot) return;
+    var pairs = [
+      [".foot-home",     ".site-home svg"],
+      [".foot-wordmark", ".site-wordmark svg"],
+      [".foot-burger",   "#burger svg"]
+    ];
+    pairs.forEach(function(pair){
+      var slot = foot.querySelector(pair[0]);
+      var src  = document.querySelector(pair[1]);
+      if(slot && src && !slot.firstElementChild) slot.appendChild(src.cloneNode(true));
+    });
+  }
+  if(document.readyState !== "loading") fill();
+  else document.addEventListener("DOMContentLoaded", fill);
+})();

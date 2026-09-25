@@ -45,7 +45,7 @@
    mark (with the page's normal, un-delayed reveal timing) is all
    anyone sees.
 
-   Bring your own THREE: loads three.js r128 from cdnjs, plus a small
+   Bring your own THREE: loads three.js r128 from js/vendor/, plus a small
    hand-rolled binary STL parser below (instead of pulling in the separate
    STLLoader addon file, one less thing that can 404).
 
@@ -170,7 +170,56 @@
       else if(++tries > 8) clearInterval(sweep);   // ~3.6s, then stop looking
     }, 450);
   }
-  pin();
+  /* ================= WHEN THE ANIMATION IS ALLOWED TO PLAY =================
+     Owen's rule, 2026-09-16: the tumble is a LOADING animation, so it should
+     only ever be the thing you watch while you are actually waiting.
+
+       first time this page is opened  ->  play it, as before
+       a page you have already opened  ->  play it ONLY if, two seconds in,
+                                           the page still is not ready
+
+     Before this, every page played the full ~2.5s sequence every time, so
+     clicking through three projects cost about eight seconds at the logo even
+     though everything after the first page was served from cache.
+
+     "This page" is the path plus the ?p= project, so KART and NEB count
+     separately. It is kept in sessionStorage, not localStorage: coming back
+     tomorrow is a fresh visit and gets the animation again, and a stale flag
+     can never permanently suppress it. Every access is wrapped - storage
+     throws in a private window and can be disabled outright - and if it is
+     unavailable we simply treat the page as new, which is the old behaviour. */
+  var REVISIT_HOLD_MS = 2000;
+
+  function pageKey(){
+    var p = "";
+    try { p = new URLSearchParams(location.search).get("p") || ""; } catch(e){}
+    return "newo:seen:" + location.pathname + (p ? "?p=" + p : "");
+  }
+  function seenBefore(){
+    try { return sessionStorage.getItem(pageKey()) === "1"; } catch(e){ return false; }
+  }
+  function markSeen(){
+    try { sessionStorage.setItem(pageKey(), "1"); } catch(e){}
+  }
+
+  /* Set at the kickoff site further down: on a revisit the 3D path is not
+     started at all until the hold below decides the page is genuinely slow. */
+  var deferredKickoff = null;
+
+  if(!seenBefore()){
+    markSeen();
+    pin();                       // first view of this page: unchanged
+  } else {
+    /* A revisit. Do NOT pin - if the page is ready quickly the loader should
+       just fade on its own with the flat mark showing, and nothing 3D should
+       ever be fetched or drawn. Only if we are still waiting at the hold does
+       this become a loading screen worth animating. */
+    setTimeout(function(){
+      if(!pageStillLoading()) return;      // fast enough, no animation at all
+      pin();
+      if(deferredKickoff){ var k = deferredKickoff; deferredKickoff = null; k(); }
+    }, REVISIT_HOLD_MS);
+  }
 
   /* ---- binary STL -> two vertex lists, split by face normal ----
      A face whose normal is dominated by one axis (|n| > 0.99 on x, y or z) is
@@ -260,7 +309,7 @@
     canvas.style.transform = "translate(-50%, -50%)";
 
     var w;
-    try { w = new Worker(BASE + "loader3d.worker.js?v=3"); }
+    try { w = new Worker(BASE + "loader3d.worker.js?v=4"); }
     catch(e){ canvas.remove(); return false; }
 
     var handedOff;
@@ -365,18 +414,31 @@
     return true;
   }
 
-  if(tryWorker()){
-    mark.classList.add("has3d");
-  } else {
-    startMainThread();
+  function kickoff(){
+    if(tryWorker()){
+      mark.classList.add("has3d");
+    } else {
+      startMainThread();
+    }
   }
+  /* pinned is true only on a first view. On a revisit the kickoff is parked
+     here and the hold above runs it if - and only if - the page is still
+     loading two seconds in, so a cached page never pays for three.js, the STL,
+     a worker or a WebGL context at all. */
+  if(pinned) kickoff();
+  else deferredKickoff = kickoff;
 
   // ================= MAIN-THREAD FALLBACK =================
   function startMainThread(){
   // NOTE: every exit below unpins. The old code just returned, which was safe
   // only because the pin was set late; now that it is set up front, an
   // un-unpinned exit would freeze the loader on screen.
-  loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js", function(){
+  /* BASE + ..., not a bare relative path. loadScript() appends a <script src>,
+     and that resolves against the DOCUMENT, not against this file - so
+     "vendor/three.min.js" would ask for /vendor/three.min.js from the site
+     root, which does not exist. BASE is this script's own directory (/js/),
+     the same value the worker is pointed at. */
+  loadScript(BASE + "vendor/three.min.js?v=1", function(){
     if(!pageStillLoading() || capFired){ unpin(); return; }   // the page (or the cap) beat us to it
     fetch("logo/3d-logo.stl").then(function(r){ return r.arrayBuffer(); })
       .then(function(buf){

@@ -21,7 +21,7 @@
    ============================================================ */
 "use strict";
 
-var THREE_SRC = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+var THREE_SRC = "vendor/three.min.js?v=1";
 
 var renderer = null, view = null, tumble = null, core = null;
 var canvas = null, dpr = 1, cssSize = 0;

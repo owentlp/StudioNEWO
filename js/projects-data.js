@@ -153,6 +153,25 @@ const PROJECTS = {
     size:      "4 in dia x 8 in tall",
     price:     "",
     parts:     ["Cherry base", "Frosted glass shade", "LED matrix", "Aluminum knob"],
+    /* ALT TEXT. What each photo actually shows, for screen readers and for
+       image search - these photographs are the portfolio, and an empty alt
+       tells both of them the image is decorative. Keyed by filename so the
+       gallery and process arrays stay as they are. A file with no entry
+       here falls back to the project title. */
+    alt: {
+      "gallery-01.jpg": "The KART smart lamp unlit on a wooden cabinet beside a window, showing the frosted glass shade and turned cherry cap",
+      "gallery-02.jpg": "KART lit deep blue and seen from above, the turned cherry cap and the LED matrix's graded light across the frosted shade",
+      "gallery-03.jpg": "KART lit warm orange against a dark wall, the addressable LED matrix visible as a pixel grid through the frosted glass",
+      "gallery-04.jpg": "KART lit red beside a white brick wall, the LED matrix pixels legible through the glass diffuser",
+      "gallery-05.jpg": "Close detail of KART's frosted glass shade lit red, showing the LED matrix pixels and the seam at the aluminium base",
+      "hero.jpg": "KART presence-sensing LED table lamp lit warm amber in a dark room, its frosted glass cylinder glowing above a cherry and aluminium base",
+      "scatter-01.jpg": "Close view of the addressable RGB LED matrix panel used in KART, individual LED packages on a flexible circuit board",
+      "scatter-02.webp": "KART's breadboard prototype: microcontroller, millimetre-wave radar presence sensor and jumper wires on the workbench",
+      "scatter-03.jpg": "Cherry hardwood grain, the material used for KART's turned cap and base",
+      "scatter-04.webp": "KART's electronics laid out flat: the addressable LED matrix panel with its microcontroller, radar sensor module and power supply",
+      "scatter-05.webp": "KART separated into its three main parts: the frosted glass shade, the turned cherry cap, and the LED cylinder on its aluminium base",
+      "scatter-06.jpg": "KART lit low in a dark room, the lamp's ambient glow reflected across the floor"
+    },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg", "gallery-05.jpg"],
     heroVideo: "demo.mp4",
     galleryVideo: "",
@@ -215,6 +234,23 @@ const PROJECTS = {
     size:      "7 x 7 x 9 in",
     price:     "",
     parts:     ["Purpleheart enclosure", "Aluminum diffuser", "Aluminum standoffs", "Coaxial driver"],
+    /* ALT TEXT. What each photo actually shows, for screen readers and for
+       image search - these photographs are the portfolio, and an empty alt
+       tells both of them the image is decorative. Keyed by filename so the
+       gallery and process arrays stay as they are. A file with no entry
+       here falls back to the project title. */
+    alt: {
+      "gallery-01.jpg": "Detail of OMNI's upward-firing driver and the sand-cast aluminium diffuser cone suspended beneath the purpleheart top plate",
+      "gallery-02.jpg": "OMNI from a low angle, the gap between cabinet and top plate revealing the driver firing up into the diffuser cone",
+      "gallery-03.jpg": "The OMNI speaker on a wooden cabinet beside a window, showing its proportions in a room",
+      "gallery-04.jpg": "OMNI photographed square on, the purpleheart grain running across the solid hardwood speaker cabinet",
+      "hero.jpg": "The OMNI omnidirectional speaker: a solid purpleheart cabinet with a floating top plate on steel posts",
+      "scatter-01.jpg": "Purpleheart cabinet blanks for OMNI on the workbench beside a mallet and hand tools",
+      "scatter-02.jpg": "The sand-casting mould opened to reveal OMNI's cast aluminium diffuser cone still sitting in the sand",
+      "scatter-03.jpg": "Two raw sand-cast aluminium diffuser cones straight out of the mould, before machining",
+      "scatter-04.jpg": "A machined aluminium diffuser cone beside a raw sand casting on the metal shop bench",
+      "scatter-05.jpg": "An assembled OMNI prototype, purpleheart cabinet and top plate mounted on their steel standoffs"
+    },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],
     heroVideo: "",
     galleryVideo: "",
@@ -258,6 +294,27 @@ const PROJECTS = {
     size:      "24 x 24 x 24 in (assembled)",
     price:     "",
     parts:     ["Side panel", "Seat", "Back"],
+    /* ALT TEXT. What each photo actually shows, for screen readers and for
+       image search - these photographs are the portfolio, and an empty alt
+       tells both of them the image is decorative. Keyed by filename so the
+       gallery and process arrays stay as they are. A file with no entry
+       here falls back to the project title. */
+    alt: {
+      "gallery-01.jpg": "NEB from the side, showing the birch plywood panel pinned onto the tapered hardwood dowel frame",
+      "gallery-02.jpg": "NEB's bare frame: tapered hardwood dowels running between two plywood side panels, held by tension with no glue or brackets",
+      "gallery-03.jpg": "A disassembled NEB leaning against a wall outdoors, one plywood panel and the bundle of hardwood dowels ready to flat-pack",
+      "gallery-04.jpg": "Detail of NEB's red seat cushion meeting the birch plywood side panel and its row of dowel ends",
+      "gallery-05.jpg": "NEB's dowel frame part-built, seven tapered hardwood dowels standing in the Baltic birch plywood base",
+      "hero.jpg": "The NEB flat-pack lounge chair assembled, red upholstery between two Baltic birch plywood side panels",
+      "scatter-01.jpg": "NEB's cut parts laid out on the floor: the row of tapered dowels above the Baltic birch plywood panels",
+      "scatter-02.jpg": "NEB's dowel frame part-built, seven tapered hardwood dowels standing in the Baltic birch plywood base",
+      "scatter-03.webp": "The finished NEB lounge chair outdoors, low sun throwing the dowel shadows across the ground",
+      "scatter-04.jpg": "A NEB birch plywood side panel lit from the side, its drilled dowel holes catching the light",
+      "scatter-05.jpg": "Technical drawings for NEB: exploded assembly, elevations and tapered dowel dimensions",
+      "scatter-06.png": "CAD render of the finished NEB flat-pack lounge chair with red cushions and a hardwood frame",
+      "scatter-07.png": "CAD elevations of NEB in front, side and exploded views",
+      "scatter-08.jpg": "Close detail of Baltic birch plywood, showing the face grain and the sanded edge"
+    },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg", "gallery-05.jpg"],
     heroVideo: "",
     galleryVideo: "",
@@ -272,7 +329,10 @@ const PROJECTS = {
     mechNotes: [],
     process:   [
       { src:"scatter-01.jpg", col:"1 / 6",                     mt:0,   cap:"Dowel framework" },
-      { src:"scatter-02.jpg", bleed:"right", span:6, ar:"3/2", mt:70,  cap:"Cut members" },
+      /* scatter-02.jpg removed 2026-09-16: it was byte-identical to gallery-05.jpg
+         (and to the unreferenced gallery-06.jpg), so the same shot of the dowel
+         frame appeared twice on one page. It stays in the gallery, where it
+         reads as a build shot, and is out of the process scatter. */
       { src:"scatter-03.webp", cut:true, col:"2 / 8",           mt:100, cap:"Drawings" },
       { src:"scatter-04.jpg", bleed:"left",  span:5, ar:"1/1", mt:50,  cap:"Floor texture" },
       { src:"scatter-05.jpg", bleed:"right", span:7, ar:"3/2", mt:60,   cap:"Plywood grain" },
@@ -305,6 +365,30 @@ const PROJECTS = {
     size:      "4 in dia x 8 in tall (approx.)",
     price:     "",
     parts:     ["Housing", "Turbine", "Motor"],
+    /* ALT TEXT. What each photo actually shows, for screen readers and for
+       image search - these photographs are the portfolio, and an empty alt
+       tells both of them the image is decorative. Keyed by filename so the
+       gallery and process arrays stay as they are. A file with no entry
+       here falls back to the project title. */
+    alt: {
+      "gallery-01.jpg": "NAF bladeless desk fan prototypes on a white plinth beside their spec card at a design show",
+      "gallery-02.jpg": "A single red NAF bladeless desk fan photographed against a plain background",
+      "gallery-03.jpg": "Three NAF bladeless fans in a row, two in brushed aluminium and one in red",
+      "gallery-04.jpg": "Four NAF bladeless fan bodies grouped together in brushed aluminium and red, seen from above",
+      "hero.jpg": "The NAF bladeless desk fan in red, a perforated aluminium cylinder with a folded side vane",
+      "scatter-01.jpg": "Aluminium offcuts and formed sheet on the workbench after rolling NAF's fan bodies",
+      "scatter-02.jpg": "Flat aluminium blanks with a steel rule and layout tools, marked out before rolling",
+      "scatter-03.jpg": "An early 3D-printed NAF prototype in yellow and clear plastic, showing the internal impeller",
+      "scatter-04.jpg": "NAF's impeller printing on the bed of a 3D printer",
+      "scatter-05.jpg": "Cut aluminium discs and sheet stock for NAF laid out on the bench, including a perforated end cap",
+      "scatter-06.jpg": "NAF's motor and wiring assembled inside a rolled aluminium fan body",
+      "scatter-07.jpg": "Two aluminium sheets marked out with NAF's perforation drilling pattern",
+      "scatter-08.jpg": "Rolled aluminium cylinders and end caps for NAF grouped on the bench mid-assembly",
+      "scatter-09.jpg": "Three perforated aluminium NAF fan bodies standing together on the workbench",
+      "scatter-10.jpg": "NAF assembly in progress: fan bodies, a motor and hand tools beside a laptop showing the CAD model",
+      "scatter-11.jpg": "Sheets of dark rubber gasket material on a cutting mat during NAF's build",
+      "scatter-12.jpg": "The finished NAF bladeless desk fans lined up, alternating brushed aluminium and red"
+    },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg"],
     heroVideo: "",
     galleryVideo: "",
@@ -355,6 +439,20 @@ const PROJECTS = {
     size:      "8 x 4 x 4 in",
     price:     "",
     parts:     ["Glass envelope", "Aluminum base", "Driver"],
+    /* ALT TEXT. What each photo actually shows, for screen readers and for
+       image search - these photographs are the portfolio, and an empty alt
+       tells both of them the image is decorative. Keyed by filename so the
+       gallery and process arrays stay as they are. A file with no entry
+       here falls back to the project title. */
+    alt: {
+      "gallery-01.jpg": "The AMSALP plasma lamp glowing orange, ionised noble gas filling the glass sphere and washing the hardwood base in red light",
+      "gallery-02.jpg": "AMSALP lit bright white-orange beside the perforated aluminium housing that holds its resonant inverter",
+      "gallery-03.jpg": "AMSALP running cooler, a ring of white plasma suspended inside the clear borosilicate orb with no electrode touching it",
+      "gallery-04.jpg": "AMSALP lit warm white in daylight, showing the hardwood base and the perforated aluminium electronics housing",
+      "hero.jpg": "AMSALP wireless plasma lamp lit red-orange in darkness, a borosilicate glass orb of plasma resting in its hardwood cradle",
+      "scatter-01.jpg": "A hand-wound copper resonator coil held beside AMSALP's high-frequency driver electronics on the workbench",
+      "scatter-03.jpg": "AMSALP's resonator coil energised on the bench, a ring of blue-white plasma forming above the windings"
+    },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],
     heroVideo: "demo.mp4",
     galleryVideo: "",

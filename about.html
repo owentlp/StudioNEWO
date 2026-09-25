@@ -18,13 +18,18 @@
 <meta name="twitter:description" content="Studio NEWO. Owen Palmer, industrial designer in Toronto. How the practice works.">
 <meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon-48.png" sizes="48x48" type="image/png">
+<!-- Google crops search-result favicons into a circle and prefers a source
+     that is a multiple of 48px. icon-192 draws the mark small enough that the
+     whole square survives that crop, so the result circle is not blank. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=50">
+<link rel="stylesheet" href="css/style.css?v=51">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -81,7 +86,7 @@
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
-<div class="site-wordmark" aria-label="NEWO">
+<div class="site-wordmark" role="img" aria-label="NEWO">
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
 <button id="burger" aria-label="Open menu">
@@ -89,7 +94,7 @@
 </button>
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<main class="page wrap" id="content">
+<main class="page wrap" id="content" tabindex="-1">
   <!-- The visible "INFO" eyebrow and the big "Studio NEWO" headline were
        removed by request: the wordmark is already fixed at the top of every
        page, so both were saying the name a second and third time. The <h1> is
@@ -127,9 +132,21 @@
     </div>
   </div>
 </main>
+<!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
+     right. Project pages have carried one for a while; these pages just
+     stopped at the end of their content, which on a wide screen left the
+     reader in a field of paper with no way onward except the burger they had
+     to remember was up there. Same markup, same marks, built from the page's
+     own header SVGs by js/main.js so there is one copy of each path. -->
+<footer class="site-foot" data-autofoot>
+  <a class="foot-home" href="index.html" aria-label="Studio NEWO home"></a>
+  <div class="foot-wordmark" role="img" aria-label="NEWO"></div>
+  <button class="foot-burger" type="button" aria-label="Open menu"></button>
+</footer>
 
-<script src="js/projects-data.js?v=12"></script>
-<script src="js/main.js?v=3"></script>
-<script src="js/menu.js?v=16"></script>
+
+<script src="js/projects-data.js?v=14"></script>
+<script src="js/main.js?v=4"></script>
+<script src="js/menu.js?v=17"></script>
 </body>
 </html>

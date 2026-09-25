@@ -14,11 +14,15 @@ docs/
 # local build/maintenance scripts, not part of the site.
 # NOTE: make-image-variants.py only WRITES files that do ship (the sm/ and md/
 # copies and js/image-sizes.js); the script itself never needs to be served.
-cleanup.ps1
-optimize-images.py
-make-image-variants.py
 push-to-repo.ps1
 PUSH.bat
+
+# 2026-09-25: the build scripts moved out of the root into tools/ (and the two
+# finished ones into tools/retired/). They only ever WRITE files that ship -
+# the sm/ and md/ image copies, js/image-sizes.js, the five project pages,
+# favicon.ico and logo/*.png - so the scripts themselves never need serving.
+# Ignoring the folder covers any new one without another edit here.
+tools/
 
 # intermediate written by an earlier run of the variant script; the real
 # output is js/image-sizes.js. cleanup.ps1 deletes this.

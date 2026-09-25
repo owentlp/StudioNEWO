@@ -18,10 +18,15 @@
 <meta name="twitter:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
 <meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon-48.png" sizes="48x48" type="image/png">
+<!-- Google crops search-result favicons into a circle and prefers a source
+     that is a multiple of 48px. icon-192 draws the mark small enough that the
+     whole square survives that crop, so the result circle is not blank. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
 <!-- warm the loader's dependencies from the first byte of HTML: the 3D logo
@@ -30,12 +35,13 @@
      while the GLB / images hogged the connection - which is what pushed the
      3D mark past its safety cap on fresh tabs. Preloading starts them
      immediately; both land in the HTTP cache the worker then reads from. -->
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script">
+<link rel="preload" href="js/vendor/three.min.js?v=1" as="script">
 <link rel="preload" href="logo/3d-logo.stl" as="fetch" crossorigin>
 <!-- model-viewer is fetched LATE now (on scroll-approach, see "DEFERRED MODEL
      LOAD") so its DNS + TLS handshake would otherwise happen at the worst
      possible moment. Warm the connection up front; it costs one socket. -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- the preconnect to cdn.jsdelivr.net was removed 2026-09-16: model-viewer
+     and the QR library are served from js/vendor/ now, same origin. -->
 <!-- model-viewer powers the rendered 3D model + AR (iOS Quick Look / Android
      Scene Viewer). It is now injected from the page script ONLY when the
      current project actually has a GLB (see the cad block), so the four
@@ -43,7 +49,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=50">
+<link rel="stylesheet" href="css/style.css?v=51">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -53,13 +59,13 @@
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=12"></script>
+<script src="js/loader3d.js?v=14"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
 <div class="run-head" id="runHead" aria-hidden="true"></div>
-<div class="site-wordmark" aria-label="NEWO">
+<div class="site-wordmark" role="img" aria-label="NEWO">
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
 <button id="burger" aria-label="Open menu">
@@ -67,12 +73,15 @@
 </button>
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<main class="page proj" id="content"><!-- filled from data --></main>
+<main class="page proj" id="content" tabindex="-1"><!-- filled from data --></main>
 
 <div class="lightbox" id="lightbox" aria-hidden="true">
   <button class="lb-close" id="lbClose" aria-label="Close">CLOSE &times;</button>
   <button class="lb-prev" id="lbPrev" aria-label="Previous item">&larr;</button>
-  <img id="lbImg" src="" alt="">
+  <!-- no src="" here: an empty src makes the browser request the PAGE's own URL
+       as an image. Both src and alt are set by render() when the lightbox
+       opens, and cleared again when it closes. -->
+  <img id="lbImg" alt="">
   <!-- videos share the lightbox with the photos; whichever matches the current
        item is shown and the other is hidden. Controls on, because at full
        screen you want scrubbing, unlike the muted inline loops. -->
@@ -81,20 +90,43 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=12"></script>
+<script src="js/projects-data.js?v=14"></script>
 <script src="js/materials-data.js?v=3"></script>
 <!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
      reserved before the files land (no reflow) and srcset can be emitted -->
-<script src="js/image-sizes.js?v=2"></script>
+<script src="js/image-sizes.js?v=3"></script>
 <!-- project pages hold the loader until their hero image, hero video and 3D
      model have loaded (see the readiness gate at the end of the page script);
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
-<script src="js/main.js?v=3"></script>
-<script src="js/menu.js?v=16"></script>
+<script src="js/main.js?v=4"></script>
+<script src="js/menu.js?v=17"></script>
 <script>
 (function(){
-  var id = new URLSearchParams(location.search).get("p");
+  /* ---- LEGACY URL REDIRECT ----
+     project.html?p=kart was the only address a project had until 2026-09-16.
+     Anything already shared, bookmarked or indexed still uses it, so it is
+     forwarded to the clean path rather than left to rot. replace(), not
+     assign(), so the old URL does not sit in the back button. Only from
+     project.html itself - the generated wrappers carry data-project and must
+     never redirect, or kart.html would bounce to kart.html forever. */
+  if(!document.body.getAttribute("data-project")){
+    var legacy = null;
+    try { legacy = new URLSearchParams(location.search).get("p"); } catch(e){}
+    if(legacy && Object.prototype.hasOwnProperty.call(PROJECTS, legacy)){
+      var keep = location.search.replace(/[?&]p=[^&]*/, "").replace(/^&/, "?");
+      location.replace(legacy + ".html" + (keep && keep !== "?" ? keep : "") + location.hash);
+      return;
+    }
+  }
+
+  /* WHICH PROJECT THIS PAGE IS.
+     The generated per-project wrappers (kart.html, neb.html, ...) carry it on
+     <body data-project="...">, so the page knows before a query string is
+     involved and the URL can stay clean. project.html?p=<id> still works and
+     is what the legacy redirect below leans on. */
+  var id = document.body.getAttribute("data-project") ||
+           new URLSearchParams(location.search).get("p");
   /* hasOwnProperty, NOT a plain truthiness test. `!PROJECTS[id]` looks like a
      whitelist but every object inherits keys from Object.prototype, so
      ?p=__proto__ , ?p=constructor and ?p=toString all sailed through it. The
@@ -123,7 +155,7 @@
   // structured data for browsers and JS-aware crawlers on the actual project. ----
   (function setMeta(){
     var ORIGIN = "https://studionewo.com";
-    var pageUrl = ORIGIN + "/project.html?p=" + id;
+    var pageUrl = ORIGIN + "/" + id + ".html";
     var heroImg = ORIGIN + "/" + base + ((p.gallery && p.gallery[0]) ? p.gallery[0] : "hero.jpg");
     var summary = real(p.summary) ? p.summary : (real(p.teaser) ? p.teaser : ("Studio NEWO project: " + p.title + "."));
     function setMetaTag(sel, attr, val){
@@ -179,6 +211,14 @@
      src with no srcset, so the page still works, just without the saving. */
   var GAL_SIZES  = "(max-width:760px) 50vw, 25vw";
   var HERO_SIZES = "(max-width:760px) 100vw, 58vw";
+  /* Scatter cells span between 2 and 12 of the 12 columns, and the span is
+     known at build time, so each figure can declare its own real width instead
+     of sharing one pessimistic guess. Below 600px the scatter collapses to two
+     equal columns (see css/style.css), hence the fixed 50vw first term. */
+  function scatterSizes(spanCols){
+    var pct = Math.max(10, Math.min(100, Math.round((spanCols / 12) * 100)));
+    return "(max-width:600px) 50vw, " + pct + "vw";
+  }
   function srcAttrs(file, sizes){
     var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][file] : null;
     if(!dims) return "";
@@ -195,6 +235,18 @@
   // silently broken the markup around it.
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
   function isCut(src){ return /\.png$/i.test(src||""); }
+
+  /* ALT TEXT, by filename, from the `alt` map in js/projects-data.js.
+     Every gallery and process image used to be emitted with alt="", which tells
+     a screen reader and an image crawler that the photo is decoration. On a
+     portfolio the photographs ARE the content, so they say what they show.
+     A file with no entry falls back to the project title rather than to an
+     empty string, so a newly added photo is never silently unlabelled. */
+  function altFor(src){
+    var map = (p && p.alt) || {};
+    var txt = map[src];
+    return esc(real(txt) ? txt : p.title);
+  }
 
   // material name -> slug, built from js/materials-data.js, so a chip under
   // the hero can link straight to its entry on the Material Guide
@@ -249,14 +301,24 @@
     for(var k = 0; k < LB.length; k++){ if(LB[k].type === "video" && LB[k].src === u){ i = k; break; } }
     if(i < 0) i = LB.push({ type:"video", src:u }) - 1;
     return '<figure class="fig vid" style="aspect-ratio:'+(ar||"16/9")+'" data-lb="'+i+'">' +
-      '<video src="'+u+'" muted loop autoplay playsinline preload="metadata"></video></figure>';
+      '<video src="'+u+'" muted loop autoplay playsinline preload="metadata" ' +
+      'aria-label="'+esc(p.title)+' in use, silent looping clip"></video></figure>';
   }
 
-  // one figure. cut-outs sit on the paper with no crop and no box.
-  function figure(src, ar, cut, idxNum){
+  /* One figure. Cut-outs sit on the paper with no crop and no box.
+
+     Now carries srcset. make-image-variants.py generates sm/ and md/ copies for
+     scatter images as well as hero and gallery, so these no longer download a
+     2000-2400px original into a box a few hundred pixels wide. Lazy loading
+     already decided WHEN they arrive; this decides how big they are. srcAttrs()
+     returns "" for any file with no entry in js/image-sizes.js, so a photo
+     added before the script is re-run still works, just without the saving. */
+  function figure(src, ar, cut, idxNum, sizes){
     var idx = (idxNum != null) ? '<span class="idx">'+pad(idxNum)+'</span>' : '';
-    if(cut) return '<figure class="fig cut">'+idx+'<img src="'+img(src)+'" alt="" loading="lazy" decoding="async"></figure>';
-    return '<figure class="fig" style="aspect-ratio:'+(ar||"4/3")+'">'+idx+'<img src="'+img(src)+'" alt="" loading="lazy" decoding="async"></figure>';
+    var attrs = srcAttrs(src, sizes || scatterSizes(6));
+    var alt = altFor(src);
+    if(cut) return '<figure class="fig cut">'+idx+'<img src="'+img(src)+'"'+attrs+' alt="'+alt+'" loading="lazy" decoding="async"></figure>';
+    return '<figure class="fig" style="aspect-ratio:'+(ar||"4/3")+'">'+idx+'<img src="'+img(src)+'"'+attrs+' alt="'+alt+'" loading="lazy" decoding="async"></figure>';
   }
 
   // a component-spread image with positioned labels. Each label sits at an
@@ -288,7 +350,7 @@
       '</div>';
     }).join('');
     return '<div class="comp-spread-wrap"><div class="comp-spread">' +
-      '<img src="'+img(src)+'" alt="'+esc(p.title)+' internal components" loading="lazy" decoding="async">' +
+      '<img src="'+img(src)+'"'+srcAttrs(src, "(max-width:600px) 92vw, 46vw")+' alt="'+esc(p.title)+' internal components" loading="lazy" decoding="async">' +
       tags +
     '</div></div>';
   }
@@ -318,9 +380,9 @@
 
       if(o && (o.col || o.bleed)){                       // ---- pinned anchor ----
         var span = o.span || 6;
-        if(o.bleed === "full")       { colStyle = "grid-column:1 / -1;"; capSide="left"; }
-        else if(o.bleed === "left")  { colStyle = "grid-column:1 / span "+span+";"; capSide="left"; }
-        else if(o.bleed === "right") { colStyle = "grid-column:"+(13-span)+" / -1;"; capSide="right"; }
+        if(o.bleed === "full")       { colStyle = "grid-column:1 / -1;"; capSide="left"; spanCols = 12; }
+        else if(o.bleed === "left")  { colStyle = "grid-column:1 / span "+span+";"; capSide="left"; spanCols = span; }
+        else if(o.bleed === "right") { colStyle = "grid-column:"+(13-span)+" / -1;"; capSide="right"; spanCols = span; }
         else { colStyle = "grid-column:"+o.col+";"; var m=String(o.col).match(/(\d+)\s*\/\s*(\d+)/); if(m){ startCol=+m[1]; spanCols=(+m[2])-(+m[1]); capSide = startCol<=2 ? "left" : (startCol+spanCols>=11 ? "right":"left"); } }
         if(mt == null) mt = 0;
         if(!ar) ar = "3/2";
@@ -335,15 +397,22 @@
         if(e < 0.24) start = 1; else if(e < 0.48) start = maxStart;
         if(!ar) ar = pick(rnd, ["4/3","16/9","3/2","1/1","4/3","3/2","3/4","2/1"]);
         if(mt == null) mt = Math.floor(rnd() * (opts.big ? 150 : 130));
-        if(!cut && rnd() < 0.10){ colStyle = "grid-column:1 / -1;"; ar = pick(rnd, ["2/1","16/9","3/2"]); capSide="left"; }
-        else { colStyle = "grid-column:"+start+" / span "+sp+";"; capSide = (start+sp>=11) ? "right" : "left"; }
+        if(!cut && rnd() < 0.10){ colStyle = "grid-column:1 / -1;"; ar = pick(rnd, ["2/1","16/9","3/2"]); capSide="left"; spanCols = 12; }
+        else { colStyle = "grid-column:"+start+" / span "+sp+";"; capSide = (start+sp>=11) ? "right" : "left"; spanCols = sp; }
       }
 
       // captions are no longer shown under process images (removed by request).
       // An image with a `labels` array becomes a component spread instead: the
       // image with positioned, info-icon labels overlaid on it.
       var isSpread = !!(o && o.labels && o.labels.length);
-      var inner = isSpread ? compSpread(src, o.labels) : figure(src, ar, cut, idxNum);
+      /* how many of the 12 columns this cell ends up spanning, so the figure
+         can declare an accurate `sizes`. Set on every branch above; the
+         fallback of 6 is only reached if a future branch forgets to. */
+      var cellSpan = spanCols || 6;
+      var mBleed = /grid-column:\s*1 \/ -1/.test(colStyle||"") ? 12 : null;
+      if(mBleed) cellSpan = 12;
+      var inner = isSpread ? compSpread(src, o.labels)
+                           : figure(src, ar, cut, idxNum, scatterSizes(cellSpan));
       // horizontal placement (grid-column) + aspect ratio only; vertical
       // position is handled by the grid's dense auto-flow.
       // has-spread lets the mobile rules give a labelled parts photo the full
@@ -453,7 +522,7 @@
       return '<div class="gcol">' + col.map(function(e){
         return '<div class="gthumb">' +
                  '<img src="'+img(e.file)+'"'+srcAttrs(e.file, GAL_SIZES)+
-                 ' alt="" loading="lazy" decoding="async" data-lb="'+e.lb+'"></div>';
+                 ' alt="'+altFor(e.file)+'" loading="lazy" decoding="async" data-lb="'+e.lb+'"></div>';
       }).join("") + '</div>';
     }).join("");
   }
@@ -483,7 +552,7 @@
   var hero =
     '<section class="hero">' +
       '<figure class="hero-main">' +
-        '<img src="'+img(heroSrc)+'"'+srcAttrs(heroSrc, HERO_SIZES)+' alt="'+esc(p.title)+'" fetchpriority="high" decoding="async" data-lb="0">' +
+        '<img src="'+img(heroSrc)+'"'+srcAttrs(heroSrc, HERO_SIZES)+' alt="'+altFor(heroSrc)+'" fetchpriority="high" decoding="async" data-lb="0">' +
       '</figure>' +
       // specs + INQUIRE share one row directly under the image, the red
       // INQUIRE block sitting at the row's right end (Figma: specs at the
@@ -528,7 +597,7 @@
   // the page scrolls and its links stay clickable through the flooded model.
   var glbView = real(p.modelRender) ? p.modelRender : (real(p.model) ? p.model : "");
   // load the model-viewer library only when there is actually a model to show
-  var MV_SRC = "https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js";
+  var MV_SRC = "js/vendor/model-viewer.min.js?v=1";
   /* ---------- DEFERRED MODEL LOAD ----------
      This used to fire immediately: the module script went out with the page and
      the element carried loading="eager", so ~700KB of library plus the GLB (its
@@ -682,7 +751,7 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=19" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=20" title="mechanism" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
@@ -1039,7 +1108,7 @@
 
       // lazy: the QR library is only fetched if someone actually asks for the
       // code, so phones (which go straight to AR) never pay for it.
-      var QR_SRC = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
+      var QR_SRC = "js/vendor/qrcode.js?v=1";
       function drawQR(){
         if(qrDrawn) return; qrDrawn = true;
         function make(){
@@ -1372,26 +1441,56 @@
         lbVid.pause();
         lbVid.removeAttribute("src");
         lbImg.src = it.src;
-        lbImg.alt = p.title + " - " + (cur+1) + " of " + items.length;
+        /* the photo's own description, not just its position in the set */
+        var file = String(it.src).split("/").pop();
+        var d = (p.alt || {})[file];
+        lbImg.alt = (d ? d : p.title) + " (" + (cur+1) + " of " + items.length + ")";
       }
       lbCount.textContent = (cur+1<10?"0":"")+(cur+1) + " / " + (items.length<10?"0":"")+items.length;
       lbPrev.disabled = items.length < 2;
       lbNext.disabled = items.length < 2;
     }
+    /* SCROLL LOCK. `document.body.style.overflow = "hidden"` did nothing here:
+       the scrolling element on this page is <html>, not <body>, so the page
+       carried on scrolling behind the open lightbox (measured: one wheel
+       gesture moved it 900px) and closing it dropped you somewhere else
+       entirely. overflow:hidden on documentElement is all it takes: it stops
+       the scroll without moving anything, so the position is still exactly
+       where it was when the overlay closes. */
+    function lockScroll(){ document.documentElement.style.overflow = "hidden"; }
+    function unlockScroll(){ document.documentElement.style.overflow = ""; }
+
+    /* FOCUS TRAP. The lightbox covers the whole window, but Tab used to walk
+       straight out of it into the page behind (verified: three presses put
+       focus on the skip link). Keep the ring inside the three controls while
+       it is open; focus returns to whatever opened it on close. */
+    function trapKeys(e){
+      if(e.key !== "Tab") return;
+      var f = [lbClose, lbPrev, lbNext].filter(function(el){ return el && !el.disabled; });
+      if(!f.length) return;
+      var i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      var n = e.shiftKey ? (i <= 0 ? f.length - 1 : i - 1)
+                         : (i < 0 || i === f.length - 1 ? 0 : i + 1);
+      f[n].focus();
+    }
+
     function open(i){
       cur = ((i % items.length) + items.length) % items.length;
       lastFocus = document.activeElement;
       render();
       lb.classList.add("open");
       lb.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
+      lockScroll();
+      document.addEventListener("keydown", trapKeys, true);
       requestAnimationFrame(function(){ lb.classList.add("show"); lb.classList.add("imgshow"); });
       lbClose.focus();
     }
     function close(){
       lb.classList.remove("show"); lb.classList.remove("imgshow");
       lb.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
+      document.removeEventListener("keydown", trapKeys, true);
+      unlockScroll();
       // never leave a video playing behind a closed overlay
       lbVid.pause(); lbVid.removeAttribute("src");
       setTimeout(function(){ lb.classList.remove("open"); }, 220);
@@ -1589,11 +1688,21 @@
     var GAP = 14;          // breathing room between a photo and the text under it
 
     function apply(){
-      // clear both first, so every measurement below is of the NATURAL layout
-      // and not of one a previous pass already produced
-      cad.style.removeProperty("--hiw-pull");
+      /* MEASURE FROM AN EXPLICIT ZERO, never by REMOVING the property.
+         The CSS is `margin-top: var(--hiw-pull, 32px)`, so removing the custom
+         property does not return the row to its origin - it falls back to the
+         32px default. Every measurement below was therefore taken with the row
+         sitting 32px lower than the point the pull is actually applied from,
+         which made `headroom` 32px too generous and overshot the pull by
+         exactly that much. On AMSALP and NEB (how-it-works copy with the
+         gallery directly above it and no model beside it) the overshoot landed
+         the paragraph's first line 18px INSIDE the photo above it, at every
+         width from 901px up - the one thing this function exists to prevent.
+         Setting 0px explicitly makes the measurement and the value written
+         back share an origin. */
+      cad.style.setProperty("--hiw-pull", "0px");
       txt.style.removeProperty("max-width");
-      if(!wide.matches) return;
+      if(!wide.matches){ cad.style.removeProperty("--hiw-pull"); return; }
 
       var gal  = content.querySelector(".hero-gallery");
       var cols = gal ? Array.prototype.slice.call(gal.querySelectorAll(".gcol")) : [];
@@ -1641,10 +1750,15 @@
       });
       var pull = t.height;
       if(deepest){
+        /* No Math.max(0, ...) here. Clamping at zero meant that when the
+           paragraph already sat too close to the photo above it, the best this
+           could do was pull nothing - it could not push the row back DOWN to
+           restore the gap. A negative pull is a positive margin, which is
+           exactly the right answer in that case. */
         var headroom = t.top - (deepest + GAP);
-        if(headroom < pull) pull = Math.max(0, headroom);
+        if(headroom < pull) pull = headroom;
       }
-      if(pull > 0) cad.style.setProperty("--hiw-pull", (-Math.round(pull)) + "px");
+      cad.style.setProperty("--hiw-pull", (-Math.round(pull)) + "px");
     }
     apply();
     // fonts land after first layout and change the wrap; re-measure once they do
@@ -1677,6 +1791,46 @@
      (measured). Half a viewport still gives ~450px of scroll warning, and the
      toggle is only a visibility flip - the canvas keeps its rendered contents,
      so there is nothing to redraw and no chance of arriving at a blank box. */
+  /* ---------- PAUSE THE INLINE VIDEOS WHEN THEY ARE NOT ON SCREEN ----------
+     The mechanism iframe and the 3D model are both already gated on visibility
+     (see the mechVisible messages above and .mv-offscreen below) - the <video>
+     elements were the one thing on the page still working while nobody was
+     looking at it. A project page can carry four of them (hero demo, gallery
+     clip, how-it-works clip, process clip), all autoplay+loop, and a browser
+     will happily keep decoding every one of them while you read something two
+     screens further down. That is a real cost on a phone.
+     Same pattern as the other two: pause on the way out, play on the way back
+     in. Nothing is torn down and no bytes are re-fetched, so resuming is
+     instant. A video the visitor has paused themselves is left alone. */
+  (function pauseOffscreenVideos(){
+    var vids = Array.prototype.slice.call(content.querySelectorAll(".fig.vid video, .hero-vid video"));
+    if(!vids.length) return;
+
+    if(!window.IntersectionObserver) return;   // leave them running, as before
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if(e.isIntersecting){
+          if(v.dataset.autopaused === "1"){ v.dataset.autopaused = ""; v.play().catch(function(){}); }
+        } else if(!v.paused){
+          v.dataset.autopaused = "1"; v.pause();
+        }
+      });
+    }, { rootMargin: "100px 0px" });
+    vids.forEach(function(v){ io.observe(v); });
+
+    // a hidden tab should not be decoding video either
+    document.addEventListener("visibilitychange", function(){
+      if(document.hidden){
+        vids.forEach(function(v){ if(!v.paused){ v.dataset.autopaused = "1"; v.pause(); } });
+      } else {
+        vids.forEach(function(v){
+          if(v.dataset.autopaused === "1"){ v.dataset.autopaused = ""; v.play().catch(function(){}); }
+        });
+      }
+    });
+  })();
+
   (function hideOffscreenModel(){
     if(!loadModel || !window.IntersectionObserver) return;
     var box = document.querySelector(".cad-stage");

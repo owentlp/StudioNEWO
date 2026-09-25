@@ -18,10 +18,15 @@
 <meta name="twitter:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
 <meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon-48.png" sizes="48x48" type="image/png">
+<!-- Google crops search-result favicons into a circle and prefers a source
+     that is a multiple of 48px. icon-192 draws the mark small enough that the
+     whole square survives that crop, so the result circle is not blank. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
 <!-- warm the loader's dependencies from the first byte of HTML: the 3D logo
@@ -30,7 +35,7 @@
      while the GLB / images hogged the connection - which is what pushed the
      3D mark past its safety cap on fresh tabs. Preloading starts them
      immediately; both land in the HTTP cache the worker then reads from. -->
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script">
+<link rel="preload" href="js/vendor/three.min.js?v=1" as="script">
 <link rel="preload" href="logo/3d-logo.stl" as="fetch" crossorigin>
 
 <!--
@@ -45,14 +50,27 @@
   needed. Copy -> js/projects-data.js.
 -->
 
-<style>
-@font-face{font-family:"GOST B";src:url("fonts/gost-typeb-italic.woff2") format("woff2"),url("fonts/gost-typeb-italic.ttf") format("truetype");font-style:italic;font-display:swap;}
-@font-face{font-family:"OCR B";src:url("fonts/ocr-b.woff2") format("woff2"),url("fonts/ocr-b.otf") format("opentype");font-display:swap;}
+<!-- THE SHARED STYLESHEET, same as every other page.
+     This page used to be entirely self-contained: about 250 lines of inline CSS
+     that re-declared the fonts, the tokens, the loader, the menu panel, the
+     skip link and .vh. A comment further down said the two copies "must be kept
+     in step when either changes". They were not, and the drift was shipping
+     real bugs - the loader sat at z-index 9 here against 60 in the stylesheet,
+     so the burger painted over the loading screen on every visit; the phone
+     header marks were 20px here against 30px everywhere else; the menu type was
+     9px/30px against 8px/clamp(20,2vw,27).
+     It is linked FIRST and the inline block still follows, so everything this
+     page genuinely needs to do differently - the fixed non-scrolling body, the
+     background video, the card dock - still wins on source order. What is gone
+     from below is only the duplicated half. -->
+<link rel="stylesheet" href="css/style.css?v=51">
 
-:root{ --ink:#141414; --red:#e2191b; --disp:"GOST B",Georgia,serif; --body:"OCR B","Courier New",monospace; }
-*{box-sizing:border-box; margin:0; padding:0;}
+<style>
+/* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
+   skip link, .vh) now comes from css/style.css above and must NOT be
+   re-declared here - that duplication is exactly what drifted. ---- */
 html,body{height:100%;}
-body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hidden; letter-spacing:.02em; -webkit-font-smoothing:antialiased;}
+body{font-family:var(--body); color:var(--ink); background:var(--paper); overflow:hidden; letter-spacing:.02em; -webkit-font-smoothing:antialiased;}
 
 /* full-page background video: two layers of the SAME clip, self-crossfaded
    so it loops with no seam (see the script). Paper shows until the first
@@ -72,7 +90,15 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
 #home svg{width:100%; height:100%; display:block; fill:currentColor;}
 #wordmark{position:fixed; z-index:5; top:24px; left:50%; transform:translateX(-50%); height:45px; color:var(--ink); pointer-events:none;}
 #wordmark svg{height:100%; width:auto; display:block; fill:currentColor;}
-#burger{position:fixed; z-index:50; top:24px; right:34px; width:45px; height:45px; background:none; border:0; padding:0; cursor:pointer; color:var(--ink);}
+/* #burger is the only selector this page shares with css/style.css, and the
+   shared rule sets mix-blend-mode:difference so the mark stays legible over a
+   dark photo on the project pages. This page draws it in solid ink instead, so
+   the blend mode is switched off explicitly - otherwise linking the stylesheet
+   would have quietly changed how the home page looks.
+   (Worth revisiting: over dark footage the solid ink mark is hard to see, and
+   difference blending is what #soundToggle below already uses. That is a design
+   decision, not a refactor, so it is left alone here.) */
+#burger{position:fixed; z-index:50; top:24px; right:34px; width:45px; height:45px; background:none; border:0; padding:0; cursor:pointer; color:var(--ink); mix-blend-mode:normal;}
 #burger svg{width:100%; height:100%; display:block; fill:currentColor;}
 
 /* sound toggle: a small, deliberately quiet easter egg in the corner, not a
@@ -81,7 +107,10 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
    as a mark rather than a button, brightens on hover/when on so it's still
    findable. mix-blend-difference like the other fixed marks so it stays
    visible over any part of the background video. */
-#soundToggle{position:fixed; z-index:6; bottom:26px; right:34px; width:20px; height:20px; background:none; border:0; padding:0; cursor:pointer; color:var(--ink); mix-blend-mode:difference; opacity:.32; transition:opacity .25s ease;}
+/* 30px box with the mark drawn at 20px inside it (padding): the visual weight
+   of the easter egg is unchanged, but the tap target clears the 24px minimum
+   instead of being a 20px square on a phone. */
+#soundToggle{position:fixed; z-index:6; bottom:26px; right:34px; width:30px; height:30px; padding:5px; background:none; border:0; cursor:pointer; color:var(--ink); mix-blend-mode:difference; opacity:.32; transition:opacity .25s ease;}
 #soundToggle:hover, #soundToggle.on{opacity:.9;}
 #soundToggle svg{width:100%; height:100%; display:block;}
 #soundToggle .wave{opacity:0; transition:opacity .2s ease;}
@@ -171,7 +200,7 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
    teaser line on the home page (that lives on each project page). */
 .dc-body{
   position:relative; z-index:1; flex:0 0 auto;
-  background:#e9e7e2;   /* opaque paper (index.html has no --paper var) */
+  background:var(--paper);   /* from css/style.css, linked at the top */
   padding:10px 10px 12px;
 }
 .dc-title{display:block; font-family:var(--disp); font-style:italic; font-size:20px; line-height:1.1;}
@@ -192,80 +221,33 @@ body{font-family:var(--body); color:var(--ink); background:#e9e7e2; overflow:hid
 @media (min-width:761px){ .dc:first-child .dc-body{padding-left:38px;} }
 .dc:focus-visible{outline:1px solid var(--red); outline-offset:-2px;}
 
-/* top-right dropdown menu (shared markup, built by js/menu.js) */
-#menu-overlay{display:none;}
-#menu-overlay.menu-panel{
-  display:block; position:fixed; top:0; right:0; z-index:40;
-  width:min(300px,82vw); max-height:100vh; overflow-y:auto;
-  background:#e9e7e2; color:var(--ink);
-  padding:89px 26px 28px;
-  box-shadow:-2px 3px 22px rgba(0,0,0,.16);
-  opacity:0; transform:translateY(-10px); pointer-events:none;
-  transition:opacity .18s ease, transform .2s ease;
-}
-#menu-overlay.menu-panel.open{opacity:1; transform:none; pointer-events:auto;}
-.menu-nav{display:flex; flex-direction:column; gap:12px;}
-/* category dropdowns - see the matching, commented block in css/style.css.
-   This page carries its own copy because index.html is fully inline (no
-   stylesheet link), so the two must be kept in step when either changes. */
-.menu-cat{display:flex; flex-direction:column;}
-.menu-head{display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; background:none; border:0; padding:6px 0; margin:0; font-family:inherit; font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink); opacity:.48; cursor:pointer; text-align:left; transition:opacity .15s ease, color .15s ease;}
-.menu-head:hover, .menu-head:focus-visible{opacity:1; color:var(--red);}
-.menu-cat.open > .menu-head{opacity:.85;}
-.menu-head-mark{position:relative; flex:0 0 auto; width:9px; height:9px;}
-.menu-head-mark::before, .menu-head-mark::after{content:""; position:absolute; left:0; top:4px; width:9px; height:1px; background:currentColor; transition:transform .25s cubic-bezier(.2,.8,.2,1);}
-.menu-head-mark::after{transform:rotate(90deg);}
-.menu-cat.open .menu-head-mark::after{transform:rotate(0deg);}
-.menu-cat-wrap{display:grid; grid-template-rows:0fr; visibility:hidden; transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s linear .28s;}
-.menu-cat.open > .menu-cat-wrap{grid-template-rows:1fr; visibility:visible; transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s;}
-.menu-cat-list{min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; padding-bottom:6px;}
-.menu-cat-list a{font-family:var(--disp); font-style:italic; font-size:30px; line-height:1.12; color:var(--ink); text-decoration:none;}
-.menu-cat-list a:hover, .menu-cat-list a:focus-visible{color:var(--red);}
-.menu-cat-list a.is-here{opacity:.55;}
-.menu-cat-list a.is-here::before{content:""; display:inline-block; width:14px; height:1px; background:var(--red); vertical-align:middle; margin-right:7px;}
-.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px; margin-top:9px;}
-.menu-links a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-decoration:none;}
-.menu-links a:hover{color:var(--red);}
-
-#loader{position:fixed; inset:0; z-index:9; display:grid; place-items:center; background:#e9e7e2; transition:opacity 650ms ease;}
-/* ONE size for both the flat mark and the 3D canvas - the flat SVG is the
-   same silhouette as the model seen front-on, which is the pose the animation
-   starts in, so the static mark IS the first frame and the handoff is a
-   dissolve in place. Keep in step with css/style.css. */
-#loader{--ld-size:clamp(104px,15vmin,168px);}
-.ld-mark{position:relative; width:var(--ld-size); height:var(--ld-size);}
-.ld-mark svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
-.ld-logo path{fill:#141414;}
-/* visibility flips only AFTER the 650ms fade finishes (the 0s transition with
-   a 650ms delay sequences that without JS). Without it the loader stays a
-   full-viewport composited layer on top of the page forever at opacity 0,
-   which the compositor keeps paying for on every frame of the background
-   video. Appearance is unchanged, it is already invisible by then. */
-body.ready #loader{opacity:0; pointer-events:none; visibility:hidden; transition:opacity 650ms ease, visibility 0s linear 650ms;}
-/* 3D logo (js/loader3d.js): swaps the static mark above for a real 3D
-   render of the logo, front-on at first, then spinning - see that file's
-   header comment. Absent entirely unless/until it loads. */
-/* size/position set by js/loader3d.js - the canvas is ~1.84x the mark so the
-   front-on face lands at exactly --ld-size, and overflows it during the tumble. */
-.ld-3d{display:block; opacity:0; transition:opacity .22s ease; pointer-events:none;}
-
-/* skip link: hidden until keyboard-focused, then drops in top-left */
-.skip-link{position:absolute; left:8px; top:-60px; z-index:20; background:var(--ink); color:#e9e7e2; font-size:10px; letter-spacing:.16em; text-transform:uppercase; text-decoration:none; padding:8px 12px; transition:top .15s ease;}
-.skip-link:focus{top:8px; outline:2px solid var(--red); outline-offset:2px;}
-
 .fade-in{opacity:0; transform:translateY(6px); transition:opacity 700ms ease, transform 700ms ease;}
 body.ready .fade-in{opacity:1; transform:none;}
 body.ready .fade-in.d1{transition-delay:.05s;}
 body.ready .fade-in.d2{transition-delay:.2s;}
 
-@media (max-width:760px){
+/* THE TEST IS HOVER, NOT WIDTH.
+   The fan dock works by hovering a card to raise it. This block used to fire at
+   max-width:760px alone - but an iPad in portrait is 768px and a phone in
+   landscape is 844px, so both sailed past it and got the hover layout on a
+   device with no hover. Measured: at 768x1024 a card is 451px tall with 184px
+   visible; at 844x390 it is 320px tall with 140px visible - and because the
+   desktop dock is fixed with the body set to overflow:hidden, there is no way
+   to scroll to the rest of it either. You saw the titles and a strip of photo,
+   and that was the whole home page.
+   `(hover: none)` catches every touch device whatever its size, and the width
+   term stays for a narrow window on a desktop, where the fan has no room. */
+@media (max-width:760px), (hover: none){
   /* scroll vertically only - never sideways. See the matching note in
      css/style.css: iOS needs the axis pinned explicitly or a stray wide child
      gives you a dead margin you can drag the page into. */
   body{overflow-x:hidden; overflow-y:auto; max-width:100%;}
-  #home{top:24px; left:22px; width:20px; height:20px;}
-  #burger{top:24px; right:22px; width:20px; height:20px;}
-  #wordmark{top:24px; height:20px;}
+  /* 30px, matching --hdr in css/style.css at its own phone breakpoint, so the
+     logo / wordmark / burger do not change size between the home page and
+     every other page. 20px was also under the 24px minimum touch target. */
+  #home{top:24px; left:22px; width:30px; height:30px;}
+  #burger{top:24px; right:22px; width:30px; height:30px;}
+  #wordmark{top:24px; height:30px;}
   /* the background video plays on mobile now, so the sound toggle has
      something to control again. It sits above the scrolling dock. */
   #soundToggle{position:fixed; z-index:6; bottom:22px; right:22px;}
@@ -279,7 +261,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
      opaque behind them - but backing only the text made it read as a stray bar
      floating above the photo. Backing the card instead makes each project a
      paper card sitting on the footage, which is a deliberate-looking object. */
-  .dc{position:static; display:block; width:100% !important; height:auto !important; margin-left:0 !important; transform:none !important; pointer-events:auto; background:#e9e7e2;}
+  .dc{position:static; display:block; width:100% !important; height:auto !important; margin-left:0 !important; transform:none !important; pointer-events:auto; background:var(--paper);}
   /* THE display:block IS NOT OPTIONAL.
      .dc-body and .dc-media are <span> elements. On desktop .dc is a flex
      container, so the browser blockifies them automatically and everything
@@ -306,7 +288,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   "name": "Studio NEWO",
   "alternateName": "NEWO",
   "url": "https://studionewo.com/",
-  "logo": "https://studionewo.com/logo/apple-touch-icon.png",
+  "logo": "https://studionewo.com/logo/icon-512.png",
   "image": "https://studionewo.com/projects/kart/hero.jpg",
   "description": "Industrial design practice in Toronto. Products built for repair, disassembly, and long life.",
   "founder": { "@type": "Person", "name": "Owen Palmer" },
@@ -319,6 +301,14 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <body>
 <a class="skip-link" href="#dock">Skip to content</a>
 
+<!-- The home page carried no <h1> at all, which is the one heading search
+     engines and screen readers look for first. The page is deliberately
+     wordless (the wordmark is the only title on screen), so the heading is
+     visually hidden with the same .vh technique about.html and contact.html
+     already use - never display:none, which would hide it from assistive
+     tech too. -->
+<h1 class="vh">Studio NEWO, industrial design practice in Toronto</h1>
+
 <video class="bgvid" id="vidA" muted playsinline preload="auto"></video>
 <video class="bgvid" id="vidB" muted playsinline preload="metadata"></video>
 
@@ -327,13 +317,13 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=12"></script>
+<script src="js/loader3d.js?v=14"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
 
-<div id="wordmark" class="fade-in d1" aria-label="NEWO">
+<div id="wordmark" class="fade-in d1" role="img" aria-label="NEWO">
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
 
@@ -355,13 +345,19 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <!-- BOTTOM DOCK. Cards are built in the script below, straight off PROJECTS
      in ORDER - add a project's key to ORDER to add its card, nothing else
      to place by hand. -->
-<main id="dock" class="fade-in d2"></main>
+<main id="dock" class="fade-in d2" tabindex="-1"></main>
 
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<script src="js/projects-data.js?v=12"></script>
-<script src="js/image-sizes.js?v=2"></script>
-<script src="js/menu.js?v=16"></script>
+<script src="js/projects-data.js?v=14"></script>
+<!-- main.js: the ?guides / "g" layout overlay, which every page but this
+     one already had. Its page-reveal half is skipped here - this page
+     runs its own reveal at the bottom of the file and never sets
+     __DEFER_REVEAL, so main.js simply adds body.ready a beat earlier and
+     the local copy is idempotent. -->
+<script src="js/main.js?v=4"></script>
+<script src="js/image-sizes.js?v=3"></script>
+<script src="js/menu.js?v=17"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -438,14 +434,14 @@ const CLIP_PICK = (function(){
 
     var a = document.createElement("a");
     a.className = "dc";
-    a.href = "project.html?p=" + key;
+    a.href = key + ".html";   // each project has its own page now
     a.innerHTML =
       '<span class="dc-body">' +
         '<span class="dc-title">'+esc(p.title)+'</span>' +
         (date ? '<span class="dc-date">'+esc(date)+'</span>' : '') +
       '</span>' +
       '<span class="dc-media">' +
-        '<img src="projects/'+key+'/'+first+'"'+cardSrc(key, first)+' alt="'+esc(p.title)+'" decoding="async">' +
+        '<img src="projects/'+key+'/'+first+'"'+cardSrc(key, first)+' alt="'+esc((p.alt && p.alt[first]) || p.title)+'" decoding="async">' +
       '</span>';
     /* pointerenter, not mouseenter: it also fires on a touch, which is the
        only warning a phone ever gives before the tap lands. NOT {once:true} -
@@ -461,16 +457,23 @@ const CLIP_PICK = (function(){
   // margin-left rule), so N cards occupy width * (1 + (N-1)*0.65). Solve that
   // for the viewport width and set --dock-w. Recompute on resize. On mobile
   // the dock is a plain stacked column (CSS), so leave it to the stylesheet.
+  var STACKED = window.matchMedia("(max-width:760px), (hover: none)");
   function sizeDock(){
     var n = dock.children.length;
     if(!n) return;
-    if(window.innerWidth <= 760){ dock.style.removeProperty("--dock-w"); return; }
+    /* Must match the CSS media query above exactly, or the script sets a fan
+       width for a layout that is actually a stacked column (and the first
+       card's --dock-w would fight the `width:100% !important` there). */
+    if(STACKED.matches){ dock.style.removeProperty("--dock-w"); return; }
     // +48px so the fan runs a touch past both window edges (no side gap)
     var w = (window.innerWidth + 48) / (1 + (n - 1) * 0.65);
     dock.style.setProperty("--dock-w", Math.ceil(w) + "px");
   }
   sizeDock();
   window.addEventListener("resize", sizeDock);
+  // a phone rotating, or a 2-in-1 folding into tablet mode, changes the answer
+  // without necessarily firing a resize the script would otherwise act on
+  if(STACKED.addEventListener) STACKED.addEventListener("change", sizeDock);
 })();
 </script>
 
@@ -553,7 +556,16 @@ const CLIP_PICK = (function(){
     });
   }
 
-  function prep(v){ v.src = clip; v.loop = false; v.playbackRate = RATE; v.load(); }
+  /* defaultPlaybackRate, NOT just playbackRate. The media load algorithm resets
+     playbackRate to defaultPlaybackRate, so setting the rate and then calling
+     load() threw it away and every clip played at 1.0 - verified live. Setting
+     the default first means load() restores 0.6 instead of overwriting it. */
+  function prep(v){
+    v.src = clip; v.loop = false;
+    v.defaultPlaybackRate = RATE; v.playbackRate = RATE;
+    v.load();
+    v.playbackRate = RATE;
+  }
 
   function arm(v){
     // hand off to the other layer: both videos sit at the SAME z-index, so

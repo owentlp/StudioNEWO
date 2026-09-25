@@ -18,13 +18,18 @@
 <meta name="twitter:description" content="Contact Studio NEWO for project inquiries, collaborations, or consulting work.">
 <meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="logo/favicon-16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon-48.png" sizes="48x48" type="image/png">
+<!-- Google crops search-result favicons into a circle and prefers a source
+     that is a multiple of 48px. icon-192 draws the mark small enough that the
+     whole square survives that crop, so the result circle is not blank. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=50">
+<link rel="stylesheet" href="css/style.css?v=51">
 <style>
   /* contact form: same editorial grammar as the rest of the site, no boxes,
      thin underline fields, tiny OCR-B labels, one red action. */
@@ -48,6 +53,16 @@
   .cform button:disabled{opacity:.5; cursor:default;}
   .cform-status{font-size:10px; letter-spacing:.06em; line-height:1.5; min-height:1.2em; color:var(--ink);}
   .cform-status.err{color:var(--red);}
+  /* the mailto fallback panel (hidden until a handoff has been attempted) */
+  .cf-fallback{margin-top:26px; border-left:2px solid var(--red); padding:2px 0 2px 16px; max-width:56ch;}
+  .cf-fb-lead{font-size:13px; letter-spacing:.06em; margin:0 0 10px;}
+  .cf-fb-lead a{color:var(--ink); border-bottom:1px solid var(--red); text-decoration:none; padding-bottom:1px;}
+  .cf-fb-text{font-family:var(--body); font-size:12px; line-height:1.6; white-space:pre-wrap;
+    word-break:break-word; margin:0 0 12px; color:var(--ink-soft); max-height:210px; overflow:auto;}
+  .cf-fb-copy{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; transition:opacity .15s ease;}
+  .cf-fb-copy:hover{opacity:.82;}
+
   .contact-alt{margin-top:clamp(34px,6vh,60px); font-size:10px; letter-spacing:.1em; text-transform:uppercase; line-height:2;}
   .contact-alt a{color:var(--ink); text-decoration:none; border-bottom:1px solid var(--red); padding-bottom:1px;}
   .contact-alt .sep{opacity:.4; margin:0 10px;}
@@ -58,7 +73,7 @@
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
-<div class="site-wordmark" aria-label="NEWO">
+<div class="site-wordmark" role="img" aria-label="NEWO">
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
 <button id="burger" aria-label="Open menu">
@@ -66,7 +81,7 @@
 </button>
 <div id="menu-overlay"><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<main class="page wrap" id="content">
+<main class="page wrap" id="content" tabindex="-1">
   <!-- Header removed by request, same as the info page: the menu already says
        CONTACT and the lead line below says what the page is for. The <h1> is
        kept but visually hidden - the page still needs one heading for search
@@ -97,16 +112,36 @@
     <p class="cform-status" id="cf-status" role="status" aria-live="polite"></p>
   </form>
 
+  <!-- Only ever shown after a mailto: handoff, which the browser gives no way
+       of confirming. See showMailFallback() at the bottom of this file. -->
+  <div class="cf-fallback" id="cf-fallback" hidden>
+    <p class="cf-fb-lead">Send it to <a href="mailto:owen@studionewo.com">owen@studionewo.com</a></p>
+    <pre class="cf-fb-text"></pre>
+    <button type="button" class="cf-fb-copy">Copy message</button>
+  </div>
+
   <p class="contact-alt">
     <a href="mailto:owen@studionewo.com">owen@studionewo.com</a>
     <span class="sep">/</span>
     <a href="https://www.instagram.com/studio.newo" target="_blank" rel="noopener">Instagram</a>
   </p>
 </main>
+<!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
+     right. Project pages have carried one for a while; these pages just
+     stopped at the end of their content, which on a wide screen left the
+     reader in a field of paper with no way onward except the burger they had
+     to remember was up there. Same markup, same marks, built from the page's
+     own header SVGs by js/main.js so there is one copy of each path. -->
+<footer class="site-foot" data-autofoot>
+  <a class="foot-home" href="index.html" aria-label="Studio NEWO home"></a>
+  <div class="foot-wordmark" role="img" aria-label="NEWO"></div>
+  <button class="foot-burger" type="button" aria-label="Open menu"></button>
+</footer>
 
-<script src="js/projects-data.js?v=12"></script>
-<script src="js/main.js?v=3"></script>
-<script src="js/menu.js?v=16"></script>
+
+<script src="js/projects-data.js?v=14"></script>
+<script src="js/main.js?v=4"></script>
+<script src="js/menu.js?v=17"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening
@@ -115,7 +150,13 @@
    paste its endpoint (looks like https://formspree.io/f/abcdwxyz) as
    FORMSPREE_ENDPOINT. Nothing else to change. */
 (function(){
-  var FORMSPREE_ENDPOINT = "";               // <-- paste your Formspree endpoint here
+  /* The live Formspree endpoint, set 2026-09-25. Submissions land in the
+     inbox configured on that form at formspree.io.
+     If this is ever blanked out the form does NOT silently break: it falls
+     back to a prefilled mail draft and also prints the message on screen with
+     the address and a copy button, so an enquiry still gets through on a
+     device where mailto: does nothing. See showMailFallback() below. */
+  var FORMSPREE_ENDPOINT = "https://formspree.io/f/xnpnbokn";
   var MAILTO = "owen@studionewo.com";
 
   var form = document.getElementById("contactForm");
@@ -128,6 +169,40 @@
     statusEl.classList.toggle("err", !!isErr);
   }
 
+  /* Shown after a mailto: handoff, because there is no way to know whether it
+     did anything. Gives the visitor the address, the message they just typed,
+     and one button that puts the whole thing on the clipboard. */
+  function showMailFallback(name, email, message){
+    var box = document.getElementById("cf-fallback");
+    if(!box) return;
+    var text = "To: " + MAILTO + "\n" +
+               "Subject: Studio NEWO inquiry from " + name + "\n\n" +
+               message + "\n\n" + name + "\n" + email;
+    box.hidden = false;
+    var pre = box.querySelector(".cf-fb-text");
+    if(pre) pre.textContent = text;
+    var copy = box.querySelector(".cf-fb-copy");
+    if(copy && !copy.dataset.wired){
+      copy.dataset.wired = "1";
+      copy.addEventListener("click", function(){
+        var done = function(){ copy.textContent = "Copied"; setTimeout(function(){ copy.textContent = "Copy message"; }, 2200); };
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(text).then(done, function(){});
+        } else {
+          try {
+            var ta = document.createElement("textarea");
+            ta.value = text; ta.setAttribute("readonly","");
+            ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select();
+            document.execCommand("copy"); ta.remove(); done();
+          } catch(e){}
+        }
+      });
+    }
+    setStatus("If your mail app did not open, use the address below.", true);
+    box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
   form.addEventListener("submit", function(e){
     e.preventDefault();
     if(form.querySelector('[name="_gotcha"]').value) return;   // bot caught
@@ -137,12 +212,24 @@
     if(!name || !email || !message){ setStatus("Please fill in every field.", true); return; }
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setStatus("That email address looks off.", true); return; }
 
-    // No hosted endpoint configured: fall back to a prefilled mail draft.
+    /* ---- NO HOSTED ENDPOINT: THE FALLBACK MUST NEVER FAIL SILENTLY ----
+       This used to set window.location to a mailto: and say "Opening your mail
+       app..." and that was the end of it. On a phone, or on any machine with no
+       mail client registered, absolutely nothing happens: no app opens, no
+       error, and the visitor is left looking at a message saying it worked.
+       Every enquiry from one of those visitors was lost without either side
+       knowing.
+       Now the draft is still attempted, but the message stays on screen with
+       the address spelled out and the text ready to copy, so the visitor always
+       has a way through even when the handoff does nothing. Nothing here
+       depends on being able to detect whether the mail app actually opened -
+       the browser does not tell you, which is the whole problem. */
     if(!FORMSPREE_ENDPOINT){
       var subject = encodeURIComponent("Studio NEWO inquiry from " + name);
       var body = encodeURIComponent(message + "\n\n" + name + "\n" + email);
-      window.location.href = "mailto:" + MAILTO + "?subject=" + subject + "&body=" + body;
-      setStatus("Opening your mail app...");
+      try { window.location.href = "mailto:" + MAILTO + "?subject=" + subject + "&body=" + body; }
+      catch(err){}
+      showMailFallback(name, email, message);
       return;
     }
 
