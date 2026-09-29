@@ -33,22 +33,49 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="/logo/favicon-48.png" sizes="48x48" type="image/png">
-<!-- Google crops search-result favicons into a circle and prefers a source
-     that is a multiple of 48px. icon-192 draws the mark small enough that the
-     whole square survives that crop, so the result circle is not blank. -->
+<!-- Google crops search-result favicons into a circle, and prefers a source
+     that is a multiple of 48px. The mark is a square with an inscribed circle
+     knocked out, so all its ink sits in the corners - exactly what a circular
+     crop removes. icon-192 draws the mark at 66% so the whole square survives
+     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
+     SQUARE and a margin there reads as a white border.
+     favicon-48.png is deliberately NOT declared here even though the file
+     exists for the manifest: at 48 it would qualify as Google's preferred size
+     and it must not be able to win over the circle-safe one. -->
 <link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<!-- warm the loader's dependencies from the first byte of HTML: the 3D logo
-     tumble runs in a worker that needs three.js (CDN) and the STL. Cold, those
-     two downloads used to start only after loader3d.js booted the worker -
-     while the GLB / images hogged the connection - which is what pushed the
-     3D mark past its safety cap on fresh tabs. Preloading starts them
-     immediately; both land in the HTTP cache the worker then reads from. -->
-<link rel="preload" href="js/vendor/three.min.js?v=1" as="script">
-<link rel="preload" href="logo/3d-logo.stl" as="fetch" crossorigin>
+<!-- warm the loader's dependencies from the first byte of HTML, but ONLY on a
+     page this session has not shown the tumble on yet. The 3D logo tumble runs
+     in a worker that needs three.js and the STL, and preloading them from the
+     head is what keeps the animation from stuttering on a fresh tab.
+     These used to be two plain <link rel="preload"> tags, which fire before any
+     script runs - so 589KB of three.js and a 177KB STL were fetched on every
+     page view, including the revisits where loader3d.js deliberately never
+     starts the 3D path at all (see deferredKickoff / REVISIT_HOLD_MS there).
+     Chrome flagged it: "preloaded using link preload but not used within a few
+     seconds from the window's load event".
+     The key below MUST match pageKey() in js/loader3d.js. If the page turns out
+     to be slow on a revisit, loader3d.js loads three.js itself exactly as
+     before - the preload was only ever a warm-up, never the loading path. -->
+<script>
+(function(){
+  try{
+    var p = new URLSearchParams(location.search).get("p") || "";
+    var k = "newo:seen:" + location.pathname + (p ? "?p=" + p : "");
+    if(sessionStorage.getItem(k) === "1") return;   // tumble is skipped here
+  }catch(e){}                                       // no storage: warm it, as before
+  function pre(href, as, cors){
+    var l = document.createElement("link");
+    l.rel = "preload"; l.href = href; l.as = as;
+    if(cors) l.crossOrigin = "";
+    document.head.appendChild(l);
+  }
+  pre("js/vendor/three.min.js?v=1", "script");
+  pre("logo/3d-logo.stl", "fetch", true);
+})();
+</script>
 <!-- model-viewer is fetched LATE now (on scroll-approach, see "DEFERRED MODEL
      LOAD") so its DNS + TLS handshake would otherwise happen at the worst
      possible moment. Warm the connection up front; it costs one socket. -->
@@ -649,6 +676,31 @@
         mvs.type = "module"; mvs.src = MV_SRC; mvs.setAttribute("data-mv","");
         document.head.appendChild(mvs);
       }
+      /* ---------- SELF-HOSTED DRACO DECODER ----------------------------------
+         The GLBs are Draco-compressed (KHR_draco_mesh_compression is in their
+         extensionsRequired), so model-viewer cannot show them at all until it
+         has a decoder. Out of the box it fetches one from
+         www.gstatic.com/draco/versioned/decoders/1.5.6/ - two requests,
+         ~250KB, to a third-party host, on the critical path of the only piece
+         of the page that is not already local. Measured on kart.html: the
+         wrapper and the .wasm cost a round trip each before the model can even
+         begin to decode, and the WebAssembly compile that follows is the
+         single longest main-thread block on the page. Nothing else on this site
+         touches a third-party server; this was the last one.
+         The same decoder now ships in js/vendor/draco/, so it comes off the
+         same connection as everything else, is cached under our own cache
+         headers, and cannot break because Google moved a URL.
+         Set on the class, not the element - it is a static property - and
+         guarded by whenDefined so it lands before the first decode either way.
+         The trailing slash matters: model-viewer concatenates the filenames. */
+      if(window.customElements && customElements.whenDefined){
+        customElements.whenDefined("model-viewer").then(function(){
+          try {
+            var C = customElements.get("model-viewer");
+            if(C) C.dracoDecoderLocation = new URL("js/vendor/draco/", document.baseURI).href;
+          } catch(e){}
+        });
+      }
       var el = document.getElementById("mv");
       /* setAttribute, NOT el.src. Until the module lands, <model-viewer> is an
          unknown element with no src accessor, so `el.src = ...` just parks a
@@ -707,7 +759,17 @@
           // grow by the FULL element-height factor to keep the model looking
           // the same size at rest. Change the element size in css/style.css
           // (.cad-stage model-viewer) and this has to move with it.
-          'disable-pan interaction-prompt="none" camera-orbit="-25deg 76deg 228%" ' +
+          /* loading="eager": model-viewer has an IntersectionObserver of its
+             own, and on the default loading="auto" it refuses to build a
+             scene until the element is near the viewport - $updateSource
+             logs "BAILING OUT EARLY" and returns. That made the idle
+             preload in armModel() impossible: the src was set, nothing
+             happened, and 60s later the model was still unloaded, so every
+             bit of its ~2s of compile cost landed on the scroll after all.
+             eager does NOT mean "load on page load" here - the src is not
+             attached until loadModel() runs, so this only removes
+             model-viewer's veto and leaves the timing to us. */
+          'disable-pan loading="eager" interaction-prompt="none" camera-orbit="-25deg 76deg 228%" ' +
           // These attribute values are only a first frame's worth of defaults -
           // the real limits are set in metres once the model loads, because
           // model-viewer does not clamp radius percentages here reliably.
@@ -1843,27 +1905,90 @@
     });
   })();
 
+  /* The offscreen gate and the idle preload below both want to own
+     .mv-offscreen, and they want opposite things. visibility:hidden takes the
+     element out of paint, and model-viewer will not build a scene it cannot
+     paint - so with the gate on, the preload would fetch the GLB and then sit
+     there, `loaded` never flipping, and the whole cost would land on the
+     scroll anyway. (That is exactly what happened the first time this was
+     tried: the model still had not loaded 60s after ready.)
+     So the gate is written once, here, and asked rather than set: onScreen is
+     the observer's answer, holds is the preload saying "not yet". */
+  var modelGate = null;
   (function hideOffscreenModel(){
     if(!loadModel || !window.IntersectionObserver) return;
     var box = document.querySelector(".cad-stage");
     if(!box) return;
-    box.classList.add("mv-offscreen");
+    var onScreen = false, holds = 0;
+    function apply(){ box.classList.toggle("mv-offscreen", !onScreen && holds === 0); }
+    apply();
     new IntersectionObserver(function(entries){
-      box.classList.toggle("mv-offscreen", !entries[0].isIntersecting);
+      onScreen = entries[0].isIntersecting; apply();
     }, { rootMargin: "50% 0px" }).observe(box);
+    modelGate = { hold: function(){ holds++; apply(); },
+                  release: function(){ holds = Math.max(0, holds - 1); apply(); } };
   })();
 
+  /* ---------- WHEN THE MODEL IS ALLOWED TO LOAD ---------------------------
+     This used to wait for an IntersectionObserver at 150% viewport margin, so
+     the model started loading as soon as the visitor scrolled a little way
+     down. That put the whole cost of starting it - and it is a lot of cost -
+     directly underneath the scroll it was triggered by, which is the worst
+     possible moment for it. Measured on kart.html at 1920x1080, from the
+     instant loadModel() ran:
+
+       ~1000ms   parsing and compiling model-viewer.min.js (1.1MB of module,
+                 injected lazily by loadModel, so none of it had been touched
+                 before this point)
+       ~150ms    decoding the Draco mesh
+       ~800ms    32 getProgramParameter stalls - the GPU driver linking the
+                 PBR shader programs, doubled by the frosted shade's
+                 KHR_materials_transmission, which needs its own variants
+
+     Roughly two seconds of main-thread block, arriving in two lumps, on a
+     container CPU - call it a few hundred milliseconds on a real desktop. Any
+     of it landing mid-scroll reads as the page seizing up, and that is what
+     the "jittery and laggy on desktop" report was. kart.html is the only page
+     with a model AND a mechanism, which is why it was the only page reported.
+
+     None of that work gets cheaper, so it moves instead: it now runs on the
+     first idle callback after the page is ready, while the visitor is still
+     looking at the hero and the page is not moving. By the time they scroll
+     down to the model it is already built. The observer is kept only as a
+     guarantee for the case where idle never comes (a busy tab, or a browser
+     without requestIdleCallback that also beat the timeout) - whichever fires
+     first wins, and `fired` makes sure it happens exactly once. */
   (function armModel(){
     if(!loadModel) return;
-    var box = document.querySelector(".cad-stage");
+    var box = document.querySelector(".cad-stage"), fired = false;
+    function go(){
+      if(fired) return; fired = true;
+      /* let it paint for as long as it takes to build, then hand the element
+         back to the observer. It is transparent and 1700px down the page, so
+         nothing is visible either way - this is only about model-viewer being
+         willing to do the work. */
+      var mvEl = document.getElementById("mv"), released = false;
+      function release(){ if(released || !modelGate) return; released = true; modelGate.release(); }
+      if(modelGate) modelGate.hold();
+      if(mvEl){
+        mvEl.addEventListener("load", release, { once: true });
+        mvEl.addEventListener("error", release, { once: true });
+      }
+      setTimeout(release, 20000);   // never leave the hold stuck on
+      loadModel();
+    }
     function arm(){
-      if(!box || !window.IntersectionObserver){ loadModel(); return; }
-      new IntersectionObserver(function(entries, obs){
-        if(entries[0].isIntersecting){ obs.disconnect(); loadModel(); }
-      }, { rootMargin: "150% 0px" }).observe(box);
+      if(window.requestIdleCallback) requestIdleCallback(go, { timeout: 2500 });
+      else setTimeout(go, 1200);
+      /* backstop: if they get there before idle does, load it now */
+      if(box && window.IntersectionObserver){
+        new IntersectionObserver(function(entries, obs){
+          if(entries[0].isIntersecting){ obs.disconnect(); go(); }
+        }, { rootMargin: "150% 0px" }).observe(box);
+      } else if(!box){ go(); }
     }
     (function whenReady(){
-      if(document.body.classList.contains("ready")){ setTimeout(arm, 700); return; }
+      if(document.body.classList.contains("ready")){ setTimeout(arm, 400); return; }
       setTimeout(whenReady, 80);
     })();
   })();

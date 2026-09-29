@@ -21,10 +21,15 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/logo/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="icon" href="/logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="/logo/favicon-48.png" sizes="48x48" type="image/png">
-<!-- Google crops search-result favicons into a circle and prefers a source
-     that is a multiple of 48px. icon-192 draws the mark small enough that the
-     whole square survives that crop, so the result circle is not blank. -->
+<!-- Google crops search-result favicons into a circle, and prefers a source
+     that is a multiple of 48px. The mark is a square with an inscribed circle
+     knocked out, so all its ink sits in the corners - exactly what a circular
+     crop removes. icon-192 draws the mark at 66% so the whole square survives
+     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
+     SQUARE and a margin there reads as a white border.
+     favicon-48.png is deliberately NOT declared here even though the file
+     exists for the manifest: at 48 it would qualify as Google's preferred size
+     and it must not be able to win over the circle-safe one. -->
 <link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
@@ -275,7 +280,7 @@
     });
   }
 
-  var html = MATERIAL_CATEGORIES.map(function(cat){
+  var html = MATERIAL_CATEGORIES.map(function(cat, catIndex){
     var total = cat.groups.reduce(function(a,g){ return a + g.items.length; }, 0);
     var groupNames = cat.groups.map(function(g){ return g.label; }).join("  /  ");
 
@@ -287,12 +292,29 @@
       real(cat.intro.properties) ? '<p class="desc"><span class="mi-k">Properties</span>'+esc(cat.intro.properties)+'</p>' : '',
       real(cat.intro.lifecycle)  ? '<p class="desc"><span class="mi-k">Lifecycle</span>'+esc(cat.intro.lifecycle)+'</p>' : ''
     ].join("");
-    // The hero image loads EAGERLY and is never deferred: it is visible at rest
-    // now (as the collapsed slice), so data-src/loadImgs would leave a blank
-    // box on arrival. Material thumbnails inside the groups still defer.
+    /* The hero image is visible at rest (as the collapsed slice), so it is
+       never deferred with data-src/loadImgs - that would leave a blank box on
+       arrival. Material thumbnails inside the groups still defer.
+
+       It IS served responsively now. The originals are 1200x1200 squares of
+       177-630KB, and this box is 4:3 with object-fit:cover, so the browser was
+       downloading a quarter of every one of them only to crop it away. The
+       widths it actually renders at are 832px on a 2560 screen, 460px on a
+       1440 laptop and 340px on a phone, so materials/md (1000x750) covers
+       every case including 2x on a laptop, and materials/sm (600x450) covers
+       phones. Run tools/make-material-variants.py after changing any of them.
+
+       Only the first category is eager. All six used to be, which meant 2.7MB
+       of category photos on arrival for five boxes you have not scrolled to
+       yet. */
     var intro = '<div class="matcat-intro">' +
       '<figure class="matcat-hero '+esc(cat.swatch)+'">' +
-        (cat.image ? '<img src="materials/'+esc(cat.image)+'" alt="'+esc(cat.label)+'" loading="eager" decoding="async" onerror="this.remove()">' : '') +
+        (cat.image ? '<img src="materials/md/'+esc(cat.image)+'"' +
+          ' srcset="materials/sm/'+esc(cat.image)+' 600w, materials/md/'+esc(cat.image)+' 1000w"' +
+          ' sizes="(max-width:700px) 92vw, (max-width:900px) 46vw, 32vw"' +
+          ' width="1000" height="750"' +
+          ' alt="'+esc(cat.label)+'" loading="'+(catIndex === 0 ? 'eager' : 'lazy')+'"' +
+          ' decoding="async" onerror="this.remove()">' : '') +
       '</figure>' +
       '<div class="matcat-intro-text">'+introText+'</div></div>';
 
