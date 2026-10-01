@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SOLUTIONS · STUDIO NEWO</title>
+<meta name="description" content="Proposals, research and prototypes by Studio NEWO: a non-fare revenue proposal for the TTC, a multi-sensory music remote for people living with dementia, and a collapsible lumber stool.">
+<meta name="theme-color" content="#e9e7e2">
+<link rel="canonical" href="https://studionewo.com/solutions.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://studionewo.com/solutions.html">
+<meta property="og:site_name" content="Studio NEWO">
+<meta property="og:title" content="Solutions · Studio NEWO">
+<meta property="og:description" content="Proposals, research and prototypes by Studio NEWO: a non-fare revenue proposal for the TTC, a multi-sensory music remote for people living with dementia, and a collapsible lumber stool.">
+<meta property="og:image" content="https://studionewo.com/solutions/vacancy-to-value.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Solutions · Studio NEWO">
+<meta name="twitter:description" content="Proposals, research and prototypes by Studio NEWO: a non-fare revenue proposal for the TTC, a multi-sensory music remote for people living with dementia, and a collapsible lumber stool.">
+<meta name="twitter:image" content="https://studionewo.com/solutions/vacancy-to-value.jpg">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
+<link rel="icon" href="/logo/favicon-16.png?v=2" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=2" sizes="32x32" type="image/png">
+<!-- Google crops search-result favicons into a circle, and prefers a source
+     that is a multiple of 48px. The mark is a square with an inscribed circle
+     knocked out, so all its ink sits in the corners - exactly what a circular
+     crop removes. icon-192 draws the mark at 66% so the whole square survives
+     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
+     SQUARE and a margin there reads as a white border.
+     favicon-48.png is deliberately NOT declared here even though the file
+     exists for the manifest: at 48 it would qualify as Google's preferred size
+     and it must not be able to win over the circle-safe one. -->
+<link rel="icon" href="/logo/icon-192.png?v=2" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png?v=2">
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=52">
+<style>
+  /* SOLUTIONS: one table, a row per solution. Closed rows read as an index
+     (number, name, type, year, links); opening a row shows the cover image,
+     the abstract and the buttons. Rendered from js/solutions-data.js. */
+  .sol{max-width:1400px;}
+  .sol-intro{max-width:46ch; margin-bottom:clamp(36px,7vh,80px);}
+  .sol-head, .sol-sum{display:grid; grid-template-columns:3.2em minmax(0,5fr) minmax(0,2fr) 4.5em minmax(0,2.4fr) 1.4em; column-gap:var(--gut); align-items:baseline;}
+  .sol-head{padding:0 0 10px; border-bottom:1px solid rgba(20,20,20,.16);}
+  .sol-head span{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
+  .sol-row{border-bottom:1px solid rgba(20,20,20,.16);}
+  .sol-sum{width:100%; padding:18px 0 16px; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer;}
+  .sol-idx{font-size:12px; letter-spacing:.12em;}
+  .sol-name{font-family:var(--disp); font-style:italic; font-size:clamp(20px,2.3vw,30px); line-height:1.05; display:block;}
+  .sol-what{display:block; margin-top:6px; font-size:12px; letter-spacing:.06em; line-height:1.35;}
+  .sol-type, .sol-year{font-size:12px; letter-spacing:.14em; text-transform:uppercase;}
+  .sol-links{display:flex; gap:8px; flex-wrap:wrap;}
+  .sol-btn{display:inline-block; font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:7px 12px; text-decoration:none; cursor:pointer; transition:opacity .15s ease;}
+  .sol-btn:hover{opacity:.82;}
+  .sol-mark{justify-self:end; width:12px; height:12px; position:relative;}
+  .sol-mark::before, .sol-mark::after{content:""; position:absolute; left:0; top:5px; width:12px; height:1.5px; background:var(--ink); transition:transform .25s ease;}
+  .sol-mark::after{transform:rotate(90deg);}
+  .sol-row.open .sol-mark::after{transform:rotate(0deg);}
+  .sol-sum:hover .sol-name{color:var(--red);}
+  .sol-body{display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s ease;}
+  .sol-row.open .sol-body{grid-template-rows:1fr;}
+  .sol-body > div{overflow:hidden;}
+  .sol-in{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); padding:6px 0 40px;}
+  .sol-fig{grid-column:2 / 8; margin:0;}
+  /* multiply so a photo shot on white sits on the paper like print */
+  .sol-fig img{display:block; width:auto; max-width:100%; max-height:72vh; height:auto; mix-blend-mode:multiply;}
+  .sol-txt{grid-column:9 / 13;}
+  .sol-txt .desc{max-width:none; text-align:left;}
+  .sol-intro{text-align:left;}
+  .sol-txt .cap{display:block; margin-top:14px;}
+  .sol-txt .sol-links{margin-top:18px;}
+  .sol-video{position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:#141311; padding:clamp(24px,6vw,80px);}
+  .sol-video.open{display:flex;}
+  .sol-video .frame{width:min(100%, calc((100vh - 120px) * 16 / 9)); aspect-ratio:16/9;}
+  .sol-video iframe{width:100%; height:100%; border:0; display:block;}
+  @media (max-width:860px){
+    .sol-head{display:none;}
+    .sol-sum{grid-template-columns:2.4em minmax(0,1fr) 1.4em; row-gap:8px;}
+    .sol-type{grid-column:2; grid-row:2;}
+    .sol-year{display:none;}
+    .sol-sum .sol-links{grid-column:2; grid-row:3;}
+    .sol-mark{grid-column:3; grid-row:1;}
+    .sol-fig, .sol-txt{grid-column:1 / -1;}
+    .sol-txt{margin-top:18px;}
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<a class="site-home" href="index.html" aria-label="Studio NEWO home">
+  <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+</a>
+<div class="site-wordmark" role="img" aria-label="NEWO">
+  <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
+</div>
+<button id="burger" aria-label="Open menu">
+  <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
+</button>
+<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+
+<main class="page wrap sol" id="content" tabindex="-1">
+  <h1 class="vh">Solutions</h1>
+  <p class="desc sol-intro">Proposals, research and prototypes for problems bigger than a single product. Each one opens to a summary, with the full document as a PDF.</p>
+  <div class="sol-head" aria-hidden="true"><span></span><span>Solution</span><span>Type</span><span>Year</span><span>Files</span><span></span></div>
+  <div class="sol-list" id="sol-list"></div>
+  <noscript><p class="desc">This list needs JavaScript. The documents are in the solutions folder: vacancy-to-value.pdf, sonic-touch.pdf, loots.pdf.</p></noscript>
+</main>
+<div class="sol-video" id="sol-video" role="dialog" aria-modal="true" aria-label="Video">
+  <button class="lb-close" type="button">Close</button>
+  <div class="frame"></div>
+</div>
+<!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
+     right. Project pages have carried one for a while; these pages just
+     stopped at the end of their content, which on a wide screen left the
+     reader in a field of paper with no way onward except the burger they had
+     to remember was up there. Same markup, same marks, built from the page's
+     own header SVGs by js/main.js so there is one copy of each path. -->
+<footer class="site-foot" data-autofoot>
+  <a class="foot-home" href="index.html" aria-label="Studio NEWO home"></a>
+  <div class="foot-wordmark" role="img" aria-label="NEWO"></div>
+  <button class="foot-burger" type="button" aria-label="Open menu"></button>
+</footer>
+
+
+
+<script src="js/solutions-data.js?v=2"></script>
+<script src="js/projects-data.js?v=18"></script>
+<script src="js/main.js?v=4"></script>
+<script src="js/menu.js?v=18"></script>
+<script>
+(function(){
+  var list = document.getElementById("sol-list");
+  if(!list || typeof SOLUTIONS === "undefined") return;
+  function esc(s){ return (s == null ? "" : String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function links(s){
+    var h = "";
+    if(s.pdf) h += '<a class="sol-btn" href="solutions/' + esc(s.pdf) + '" target="_blank" rel="noopener">PDF' + (s.pdfMB ? ' ' + esc(s.pdfMB) + 'MB' : '') + '</a>';
+    if(s.video) h += '<button type="button" class="sol-btn" data-video="' + esc(s.video) + '">Video</button>';
+    return '<span class="sol-links">' + h + '</span>';
+  }
+  list.innerHTML = SOLUTIONS.map(function(s, i){
+    var n = ("0" + (i + 1)).slice(-2), bid = "sol-b-" + s.id;
+    return '<div class="sol-row" id="' + esc(s.id) + '">' +
+      '<div class="sol-sum" role="button" tabindex="0" aria-expanded="false" aria-controls="' + bid + '">' +
+        '<span class="sol-idx">[' + n + ']</span>' +
+        '<span><span class="sol-name">' + esc(s.title) + '</span><span class="sol-what">' + esc(s.what) + '</span></span>' +
+        '<span class="sol-type">' + esc(s.type) + '</span>' +
+        '<span class="sol-year">' + esc(s.year) + '</span>' +
+        links(s) +
+        '<span class="sol-mark" aria-hidden="true"></span>' +
+      '</div>' +
+      '<div class="sol-body" id="' + bid + '"><div><div class="sol-in">' +
+        (s.image ? '<figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/' + esc(s.image) + '" srcset="solutions/sm/' + esc(s.image) + ' 640w, solutions/' + esc(s.image) + ' 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="' + esc(s.alt) + '"></figure>' : '') +
+        '<div class="sol-txt"><p class="desc">' + esc(s.abstract || s.summary) + '</p>' +
+        (s.credits ? '<span class="cap">' + esc(s.credits) + '</span>' : '') +
+        links(s) + '</div>' +
+      '</div></div></div>' +
+    '</div>';
+  }).join("");
+
+  function toggle(row, open){
+    if(open == null) open = !row.classList.contains("open");
+    row.classList.toggle("open", open);
+    row.querySelector(".sol-sum").setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  list.addEventListener("click", function(e){
+    if(e.target.closest("a, [data-video]")) return;      // buttons do their own thing
+    var sum = e.target.closest(".sol-sum");
+    if(sum) toggle(sum.parentNode);
+  });
+  list.addEventListener("keydown", function(e){
+    var sum = e.target.closest && e.target.closest(".sol-sum");
+    if(sum && e.target === sum && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); toggle(sum.parentNode); }
+  });
+
+  /* video: youtube-nocookie, built only when asked for, so the page loads no
+     YouTube code and sets no cookies until someone presses VIDEO */
+  var box = document.getElementById("sol-video"), frame = box.querySelector(".frame"), last = null;
+  function openVideo(id, from){
+    last = from;
+    frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0&modestbranding=1" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    box.classList.add("open");
+    document.documentElement.style.overflow = "hidden";
+    box.querySelector(".lb-close").focus();
+  }
+  function closeVideo(){
+    if(!box.classList.contains("open")) return;
+    box.classList.remove("open"); frame.innerHTML = "";
+    document.documentElement.style.overflow = "";
+    if(last) last.focus();
+  }
+  document.addEventListener("click", function(e){
+    var v = e.target.closest("[data-video]");
+    if(v){ e.preventDefault(); openVideo(v.getAttribute("data-video"), v); return; }
+    if(box.classList.contains("open") && (e.target === box || e.target.closest(".lb-close"))) closeVideo();
+  });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeVideo(); });
+
+  // solutions.html#loots opens that row
+  var h = decodeURIComponent(location.hash.slice(1));
+  var row = h && document.getElementById(h);
+  if(row && row.classList.contains("sol-row")){ toggle(row, true); setTimeout(function(){ row.scrollIntoView({block:"start"}); }, 600); }
+})();
+</script>
+</body>
+</html>

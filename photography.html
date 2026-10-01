@@ -2,11 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>404 · STUDIO NEWO</title>
-<meta name="description" content="That page does not exist.">
-<meta name="theme-color" content="#e9e7e2">
 <meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PHOTOGRAPHY · STUDIO NEWO</title>
+<meta name="description" content="35mm film photography by Owen Palmer, Toronto.">
+<meta name="theme-color" content="#e9e7e2">
+<link rel="canonical" href="https://studionewo.com/photography.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://studionewo.com/photography.html">
+<meta property="og:site_name" content="Studio NEWO">
+<meta property="og:title" content="Photography · Studio NEWO">
+<meta property="og:description" content="35mm film photography by Owen Palmer, Toronto.">
+<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Photography · Studio NEWO">
+<meta name="twitter:description" content="35mm film photography by Owen Palmer, Toronto.">
+<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="/logo/favicon-16.png?v=2" sizes="16x16" type="image/png">
 <link rel="icon" href="/logo/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -21,28 +33,27 @@
      and it must not be able to win over the circle-safe one. -->
 <link rel="icon" href="/logo/icon-192.png?v=2" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png?v=2">
-<link rel="preload" href="/fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<!-- Every path here is ROOT-RELATIVE (leading /). GitHub Pages serves this same
-     file for a miss at ANY depth - /projects/kart/nope.usdz as readily as /nope -
-     so relative paths would resolve against the wrong folder and the page would
-     arrive unstyled with a broken logo. That is exactly what the old standalone
-     version did from anywhere but the site root. -->
-<link rel="stylesheet" href="/css/style.css?v=52">
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=52">
 <style>
-  .fourofour{min-height:64vh; display:flex; flex-direction:column; justify-content:center;}
-  .fourofour .code{font-family:var(--disp); font-style:italic; font-weight:400;
-    font-size:clamp(96px,20vw,240px); line-height:.9; color:var(--red); margin:0;}
-  .fourofour .backlinks{margin-top:clamp(26px,5vh,46px); display:flex; flex-wrap:wrap; gap:10px 26px;}
-  .fourofour .backlinks a{font-size:11px; letter-spacing:.16em; text-transform:uppercase;
-    color:var(--ink); text-decoration:none; border-bottom:1px solid var(--red); padding-bottom:3px; transition:color .15s ease;}
-  .fourofour .backlinks a:hover{color:var(--red);}
-  .fourofour .path{margin-top:24px; font-size:10px; letter-spacing:.1em; color:var(--ink-soft); word-break:break-all;}
+  .gp-wrap{max-width:1400px;}
+  .gp-group + .gp-group{margin-top:clamp(70px,12vh,140px);}
+  .gp-title{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(22px,2.6vw,32px); line-height:1.05; margin-bottom:10px;}
+  .gp-gnote{margin-bottom:28px;}
+  .gp-cols{display:flex; gap:var(--gut); align-items:flex-start;}
+  .gp-col{flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:clamp(22px,3vw,40px);}
+  .gp-fig{margin:0;}
+  .gp-open{display:block; width:100%; padding:0; border:0; background:none; cursor:zoom-in;}
+  .gp-open img{display:block; width:100%; height:auto;}
+  .gp-fig figcaption{margin-top:var(--txt-gap); display:flex; flex-direction:column; gap:3px;}
+  .gp-cap{font-size:12px; letter-spacing:.14em; text-transform:uppercase;}
+  .gp-meta, .gp-note{font-size:12px; letter-spacing:.04em;}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#content">Skip to content</a>
-<a class="site-home" href="/" aria-label="Studio NEWO home">
+<a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
 <div class="site-wordmark" role="img" aria-label="NEWO">
@@ -51,24 +62,11 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
-<div id="menu-overlay"><a href="/solutions.html">SOLUTIONS</a><a href="/about.html">INFO</a><a href="/materials.html">MATERIALS</a><a href="/contact.html">CONTACT</a></div>
+<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<main class="page wrap fourofour" id="content" tabindex="-1">
-  <span class="eyebrow">Error</span>
-  <!-- the big 404 is the page's heading, so it is an <h1> rather than a <p>.
-       .code already sets every type property it needs, and h1/h2/h3 in
-       css/style.css only add the display face this rule overrides anyway. -->
-  <h1 class="code">404</h1>
-  <hr>
-  <p class="lead">This page does not exist. It may have been renamed, or the link that brought you here may be out of date.</p>
-  <div class="backlinks">
-    <a href="/">Index</a>
-    <a href="/solutions.html">Solutions</a>
-     <a href="/about.html">Info</a>
-    <a href="/materials.html">Materials</a>
-    <a href="/contact.html">Contact</a>
-  </div>
-  <p class="path" id="badpath"></p>
+<main class="page wrap gp-wrap" id="content" tabindex="-1">
+  <h1 class="vh">Photography</h1>
+  <div id="gp" data-mode="photo"></div>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -77,24 +75,17 @@
      to remember was up there. Same markup, same marks, built from the page's
      own header SVGs by js/main.js so there is one copy of each path. -->
 <footer class="site-foot" data-autofoot>
-  <a class="foot-home" href="/index.html" aria-label="Studio NEWO home"></a>
+  <a class="foot-home" href="index.html" aria-label="Studio NEWO home"></a>
   <div class="foot-wordmark" role="img" aria-label="NEWO"></div>
   <button class="foot-burger" type="button" aria-label="Open menu"></button>
 </footer>
 
 
-<script src="/js/projects-data.js?v=18"></script>
-<script src="/js/main.js?v=4"></script>
-<script src="/js/menu.js?v=18"></script>
-<script>
-/* Echo back the path that missed - handy when a 404 comes from a typo or a
-   stale link, since you can see at a glance what was actually requested.
-   Written with textContent, never innerHTML, so a crafted URL cannot inject
-   markup into the page. */
-(function(){
-  var el = document.getElementById("badpath");
-  if(el) el.textContent = "Requested: " + location.pathname;
-})();
-</script>
+
+<script src="js/photos-data.js?v=1"></script>
+<script src="js/projects-data.js?v=18"></script>
+<script src="js/main.js?v=4"></script>
+<script src="js/menu.js?v=18"></script>
+<script src="js/gallery-page.js?v=1"></script>
 </body>
 </html>

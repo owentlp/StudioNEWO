@@ -42,6 +42,10 @@
         idx   : true                        (show the [NN] index number)
 
    TEXT FIELDS
+        kind     what the product IS, in plain words ("flat-pack lounge chair").
+                    Goes into the page title and search/share previews:
+                    "NEB, flat-pack lounge chair · STUDIO NEWO". Re-run
+                    tools/make-project-pages.py after changing it.
         teaser   the short italic line on the hero (the "catchy sentence").
                     This only lives on the project page now, the home page
                     dock shows title/date only, no catch phrase, so don't
@@ -142,10 +146,11 @@ const PROJECTS = {
   "kart": {
     objects:   true,
     title:     "KART",
+    kind:      "presence-sensing table lamp",
     code:      "L01.1",
     date:      "2026",
     teaser:    "A light that responds to your presence.",
-    summary:   "The light switch has barely changed since 1891. KART updates this interaction by replacing the switch with spatial awareness. The lamp tracks movement within a room, scaling its intensity as you approach, dimming as you walk away, and turning off entirely when you leave the room.",
+    summary:   "The light switch has barely changed in over a century. KART updates this interaction by replacing the switch with spatial awareness. The lamp tracks movement within a room, scaling its intensity as you approach, dimming as you walk away, and turning off entirely when you leave the room.",
     summaryMore:"",
     materials: "Cherry, frosted glass, aluminum, electronics",
     lifecycle: "The base, shade, and chassis pull apart entirely. Components can be repaired, upgraded, or cleanly recycled.",
@@ -163,13 +168,13 @@ const PROJECTS = {
       "gallery-02.jpg": "KART lit deep blue and seen from above, the turned cherry cap and the LED matrix's graded light across the frosted shade",
       "gallery-03.jpg": "KART lit warm orange against a dark wall, the addressable LED matrix visible as a pixel grid through the frosted glass",
       "gallery-04.jpg": "KART lit red beside a white brick wall, the LED matrix pixels legible through the glass diffuser",
-      "gallery-05.jpg": "Close detail of KART's frosted glass shade lit red, showing the LED matrix pixels and the seam at the aluminium base",
-      "hero.jpg": "KART presence-sensing LED table lamp lit warm amber in a dark room, its frosted glass cylinder glowing above a cherry and aluminium base",
+      "gallery-05.jpg": "Close detail of KART's frosted glass shade lit red, showing the LED matrix pixels and the seam at the aluminum base",
+      "hero.jpg": "KART presence-sensing LED table lamp lit warm amber in a dark room, its frosted glass cylinder glowing above a cherry and aluminum base",
       "scatter-01.jpg": "Close view of the addressable RGB LED matrix panel used in KART, individual LED packages on a flexible circuit board",
       "scatter-02.webp": "KART's breadboard prototype: microcontroller, millimetre-wave radar presence sensor and jumper wires on the workbench",
       "scatter-03.jpg": "Cherry hardwood grain, the material used for KART's turned cap and base",
       "scatter-04.webp": "KART's electronics laid out flat: the addressable LED matrix panel with its microcontroller, radar sensor module and power supply",
-      "scatter-05.webp": "KART separated into its three main parts: the frosted glass shade, the turned cherry cap, and the LED cylinder on its aluminium base",
+      "scatter-05.webp": "KART separated into its three main parts: the frosted glass shade, the turned cherry cap, and the LED cylinder on its aluminum base",
       "scatter-06.jpg": "KART lit low in a dark room, the lamp's ambient glow reflected across the floor"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg", "gallery-05.jpg"],
@@ -182,7 +187,7 @@ const PROJECTS = {
     mechanism: "mechanism.html",
     hiwVideo:  "",
     howItWorks:"A hidden radar module tracks presence and proximity, translating your physical location into dynamic lighting on an LED matrix.",
-    howItWorksMore:"Many modern conveniences require pulling out a phone. KART deliberately avoids this. A single push-button dial allows for quick access to dimming and power, while also managing mode customization. Set it once, and let the lamp react to you. (A mobile interface is in development for those who prefer it, but the primary experience will always remain tactile).",
+    howItWorksMore:"Many modern conveniences require pulling out a phone. KART deliberately avoids this. A single push-button dial allows for quick access to dimming and power, while also managing mode customization. Set it once, and let the lamp react to you. (A mobile interface is in development for those who prefer it, but the primary experience will always remain tactile.)",
     components: [],
     mechNotes: [
       "Follow. A column of light tracks your position, brightening as you get closer.",
@@ -211,7 +216,7 @@ const PROJECTS = {
     ],
     processNotes:[],
     processText:"The objective was to leverage modern sensor technology to fundamentally improve how we interact with light, moving beyond the standard binary switch without relying on complex smart-home ecosystems.",
-    processMore:"The design hinges on the RD-03D millimetre-wave radar. It can track up to three presences simultaneously through non-conductive materials, allowing the sensor to be completely hidden. The hardest compromise was balancing the internal electronics with the exterior aesthetics. In my design process form follows function, so the electronic chassis was built first. The final proportions were entirely dictated by the dimensions of the frosted glass shade available to me during prototyping.",
+    processMore:"The design hinges on the RD-03D millimetre-wave radar. It can track up to three presences simultaneously through non-conductive materials, allowing the sensor to be completely hidden. The hardest compromise was balancing the internal electronics with the exterior aesthetics. In my design process, form follows function, so the electronic chassis was built first. The final proportions were entirely dictated by the dimensions of the frosted glass shade available to me during prototyping.",
     processBottomMore:"",
     processVideo: "",
     v2:        "The focus for V2 is to create a core which holds all necessary electronics. The core can then be dropped into different chassis.",
@@ -223,6 +228,7 @@ const PROJECTS = {
   "omni": {
     objects:   true,
     title:     "OMNI",
+    kind:      "omnidirectional loudspeakers",
     code:      "AU01.1",
     date:      "2025",
     teaser:    "A continuous acoustic field.",
@@ -240,15 +246,15 @@ const PROJECTS = {
        gallery and process arrays stay as they are. A file with no entry
        here falls back to the project title. */
     alt: {
-      "gallery-01.jpg": "Detail of OMNI's upward-firing driver and the sand-cast aluminium diffuser cone suspended beneath the purpleheart top plate",
+      "gallery-01.jpg": "Detail of OMNI's upward-firing driver and the sand-cast aluminum diffuser cone suspended beneath the purpleheart top plate",
       "gallery-02.jpg": "OMNI from a low angle, the gap between cabinet and top plate revealing the driver firing up into the diffuser cone",
       "gallery-03.jpg": "The OMNI speaker on a wooden cabinet beside a window, showing its proportions in a room",
       "gallery-04.jpg": "OMNI photographed square on, the purpleheart grain running across the solid hardwood speaker cabinet",
       "hero.jpg": "The OMNI omnidirectional speaker: a solid purpleheart cabinet with a floating top plate on steel posts",
       "scatter-01.jpg": "Purpleheart cabinet blanks for OMNI on the workbench beside a mallet and hand tools",
-      "scatter-02.jpg": "The sand-casting mould opened to reveal OMNI's cast aluminium diffuser cone still sitting in the sand",
-      "scatter-03.jpg": "Two raw sand-cast aluminium diffuser cones straight out of the mould, before machining",
-      "scatter-04.jpg": "A machined aluminium diffuser cone beside a raw sand casting on the metal shop bench",
+      "scatter-02.jpg": "The sand-casting mould opened to reveal OMNI's cast aluminum diffuser cone still sitting in the sand",
+      "scatter-03.jpg": "Two raw sand-cast aluminum diffuser cones straight out of the mould, before machining",
+      "scatter-04.jpg": "A machined aluminum diffuser cone beside a raw sand casting on the metal shop bench",
       "scatter-05.jpg": "An assembled OMNI prototype, purpleheart cabinet and top plate mounted on their steel standoffs"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],
@@ -271,7 +277,7 @@ const PROJECTS = {
       { src:"scatter-05.jpg", col:"1 / 7",            mt:80, cap:"Enclosure, mitered" }
     ],
     processNotes:[],
-    processText:"The project was initiated after evaluating a high-end omnidirectional speaker, the Beolab 5. The goal was to engineer a similar acoustic geometry using premium, raw materials but delivering it at a fraction of the cost through highly efficient fabrication.",
+    processText:"The project was initiated after evaluating a high-end omnidirectional speaker, the BeoLab 5. The goal was to engineer a similar acoustic geometry using premium, raw materials but delivering it at a fraction of the cost through highly efficient fabrication.",
     processMore:"Aesthetically, there were no compromises. The constraints of the materials, the casting process, and the intended acoustic outcome entirely dictated the form. Purpleheart and solid aluminum were chosen for their sonic and structural properties. By utilizing a coaxial driver and calculating the exact dispersion angle for the aluminum cast, the speaker successfully collapses the traditional stereo image into an immersive, room-filling experience.",
     processVideo: "",
     v2:        "The current pair runs on inexpensive coaxial drivers and their stock crossover, chosen to prove the enclosure and diffuser before investing further. Next is higher-quality drivers matched to the diffuser's dispersion pattern, the part of the signal chain most likely limiting the sound right now.",
@@ -283,10 +289,11 @@ const PROJECTS = {
   "neb": {
     objects:   true,
     title:     "NEB",
+    kind:      "flat-pack lounge chair",
     code:      "S01.1",
     date:      "2024",
     teaser:    "A study in tension and flat-pack mechanics.",
-    summary:   "Flat-pack furniture usually implies cheap materials and a temporary lifespan. NEB intentionally pushes against that idea. It is a lounge chair that ships flat and assembles in minutes, relying entirely on tension mechanics and heavy-duty, solid materials to create a rock-solid frame meant to last.",
+    summary:   "Flat-pack furniture usually implies cheap materials and a temporary lifespan. NEB intentionally pushes against that idea. It is a lounge chair that ships flat and assembles in minutes, relying entirely on tension mechanics and heavy-duty materials to create a rock-solid frame meant to last.",
     summaryMore:"",
     materials: "Birch plywood, hardwood dowels, foam, canvas",
     lifecycle: "",
@@ -324,7 +331,7 @@ const PROJECTS = {
     mechanism: "",
     hiwVideo:  "",
     howItWorks:"Two Baltic birch plywood side panels lock onto seven tapered hardwood dowels. Hex screws clamp the assembly under high tension, eliminating the need for glue or hidden brackets.",
-    howItWorksMore:"Designed as a low-back lounge chair, NEB is proportioned to be incredibly versatile, fitting seamlessly into a living room, patio, or office. By utilizing simple flat planes and cylindrical dowels, the architecture of the chair allows it to be manufactured across various material grades. This delivers an easily customizable, mid-to-high-end furniture experience with an incredible value proposition.",
+    howItWorksMore:"Designed as a low-back lounge chair, NEB is proportioned to be incredibly versatile, fitting seamlessly into a living room, patio, or office. By utilizing simple flat planes and cylindrical dowels, the architecture of the chair allows it to be manufactured across various material grades. This delivers an easily customizable, mid-to-high-end furniture experience with a strong value proposition.",
     components: [],
     mechNotes: [],
     process:   [
@@ -354,6 +361,7 @@ const PROJECTS = {
   "naf": {
     objects:   false,
     title:     "NAF",
+    kind:      "crossflow desk fan",
     code:      "H01.1",
     date:      "2025",
     teaser:    "Clean, quiet airflow in a continuous curtain.",
@@ -371,23 +379,23 @@ const PROJECTS = {
        gallery and process arrays stay as they are. A file with no entry
        here falls back to the project title. */
     alt: {
-      "gallery-01.jpg": "NAF bladeless desk fan prototypes on a white plinth beside their spec card at a design show",
-      "gallery-02.jpg": "A single red NAF bladeless desk fan photographed against a plain background",
-      "gallery-03.jpg": "Three NAF bladeless fans in a row, two in brushed aluminium and one in red",
-      "gallery-04.jpg": "Four NAF bladeless fan bodies grouped together in brushed aluminium and red, seen from above",
-      "hero.jpg": "The NAF bladeless desk fan in red, a perforated aluminium cylinder with a folded side vane",
-      "scatter-01.jpg": "Aluminium offcuts and formed sheet on the workbench after rolling NAF's fan bodies",
-      "scatter-02.jpg": "Flat aluminium blanks with a steel rule and layout tools, marked out before rolling",
+      "gallery-01.jpg": "NAF crossflow desk fan prototypes on a white plinth beside their spec card at a design show",
+      "gallery-02.jpg": "A single red NAF crossflow desk fan photographed against a plain background",
+      "gallery-03.jpg": "Three NAF crossflow fans in a row, two in brushed steel and one painted red",
+      "gallery-04.jpg": "Four NAF fan bodies grouped together in brushed steel and painted red, seen from above",
+      "hero.jpg": "The NAF crossflow desk fan in red, a perforated steel cylinder with a folded side vane",
+      "scatter-01.jpg": "Steel offcuts and formed sheet on the workbench after rolling NAF's fan bodies",
+      "scatter-02.jpg": "Flat steel blanks with a rule and layout tools, marked out before rolling",
       "scatter-03.jpg": "An early 3D-printed NAF prototype in yellow and clear plastic, showing the internal impeller",
       "scatter-04.jpg": "NAF's impeller printing on the bed of a 3D printer",
-      "scatter-05.jpg": "Cut aluminium discs and sheet stock for NAF laid out on the bench, including a perforated end cap",
-      "scatter-06.jpg": "NAF's motor and wiring assembled inside a rolled aluminium fan body",
-      "scatter-07.jpg": "Two aluminium sheets marked out with NAF's perforation drilling pattern",
-      "scatter-08.jpg": "Rolled aluminium cylinders and end caps for NAF grouped on the bench mid-assembly",
-      "scatter-09.jpg": "Three perforated aluminium NAF fan bodies standing together on the workbench",
+      "scatter-05.jpg": "Cut steel discs and sheet stock for NAF laid out on the bench, including a perforated end cap",
+      "scatter-06.jpg": "NAF's motor and wiring assembled inside a rolled steel fan body",
+      "scatter-07.jpg": "Two steel sheets marked out with NAF's perforation drilling pattern",
+      "scatter-08.jpg": "Rolled steel cylinders and end caps for NAF grouped on the bench mid-assembly",
+      "scatter-09.jpg": "Three perforated steel NAF fan bodies standing together on the workbench",
       "scatter-10.jpg": "NAF assembly in progress: fan bodies, a motor and hand tools beside a laptop showing the CAD model",
       "scatter-11.jpg": "Sheets of dark rubber gasket material on a cutting mat during NAF's build",
-      "scatter-12.jpg": "The finished NAF bladeless desk fans lined up, alternating brushed aluminium and red"
+      "scatter-12.jpg": "The finished NAF crossflow desk fans lined up, alternating brushed steel and painted red"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg"],
     heroVideo: "",
@@ -416,7 +424,7 @@ const PROJECTS = {
       { src:"scatter-12.jpg", bleed:"full", ar:"2/1", mt:90, cap:"Five colorways" }
     ],
     processNotes:[],
-    processText:"NAF was developed as an academic project under a strict material brief: source three reused or found materials within a 3km radius of home. A reclaimed horizontal motor and off-cut sheet steel dictated the structural parameters.",
+    processText:"NAF was developed under a strict material brief: source three reused or found materials within a 3 km radius of home. A reclaimed horizontal motor and off-cut sheet steel dictated the structural parameters.",
     processMore:"The core design constraint was the horizontal crossflow turbine. Unlike an axial fan that requires a large circular housing, the crossflow layout allowed the fan to take the shape of a tall, minimal cylinder. The steel housing was manually cut, punched, formed, and TIG welded. Countless variations of the turbine blade were modeled and 3D printed to solve balancing issues, eventually moving to a single-piece, support-free print to achieve the precision needed for smooth performance.",
     processVideo: "",
     v2:        "V2 moves to a purpose-built motor and turbine assembly. Once that core is solid, it becomes a shared platform, the same mechanism dropping into different housings without a redesign each time.",
@@ -428,17 +436,18 @@ const PROJECTS = {
   "amsalp": {
     objects:   true,
     title:     "AMSALP",
+    kind:      "plasma lamp",
     code:      "L02.1",
     date:      "2026",
     teaser:    "Noble gas, wirelessly ionized into light.",
     summary:   "AMSALP explores gas discharge physics for residential lighting. By driving a high-frequency electromagnetic field into a sealed glass orb, noble gas is ionized into a glowing plasma. It feels like no other lamp and gives off a magical, wireless light from a seemingly empty globe.",
     summaryMore:"",
-    materials: "Borosilicate glass, aluminum, hardwood, plasma circuit",
+    materials: "Borosilicate glass, hardwood, plasma circuit",
     lifecycle: "",
     designTags:[],
     size:      "8 x 4 x 4 in",
     price:     "",
-    parts:     ["Glass envelope", "Aluminum base", "Driver"],
+    parts:     ["Glass envelope", "Hardwood base", "Driver"],
     /* ALT TEXT. What each photo actually shows, for screen readers and for
        image search - these photographs are the portfolio, and an empty alt
        tells both of them the image is decorative. Keyed by filename so the
@@ -446,9 +455,9 @@ const PROJECTS = {
        here falls back to the project title. */
     alt: {
       "gallery-01.jpg": "The AMSALP plasma lamp glowing orange, ionised noble gas filling the glass sphere and washing the hardwood base in red light",
-      "gallery-02.jpg": "AMSALP lit bright white-orange beside the perforated aluminium housing that holds its resonant inverter",
+      "gallery-02.jpg": "AMSALP glowing orange-white on its cantilevered wooden shelf, beside the perforated wooden base that houses and ventilates its resonant inverter",
       "gallery-03.jpg": "AMSALP running cooler, a ring of white plasma suspended inside the clear borosilicate orb with no electrode touching it",
-      "gallery-04.jpg": "AMSALP lit warm white in daylight, showing the hardwood base and the perforated aluminium electronics housing",
+      "gallery-04.jpg": "AMSALP lit in daylight: the glass orb on a cantilevered wooden shelf projecting from the ventilated hardwood base",
       "hero.jpg": "AMSALP wireless plasma lamp lit red-orange in darkness, a borosilicate glass orb of plasma resting in its hardwood cradle",
       "scatter-01.jpg": "A hand-wound copper resonator coil held beside AMSALP's high-frequency driver electronics on the workbench",
       "scatter-03.jpg": "AMSALP's resonator coil energised on the bench, a ring of blue-white plasma forming above the windings"

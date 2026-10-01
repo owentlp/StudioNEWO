@@ -748,6 +748,10 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    paragraph narrower than the site's normal measure - justification at ~20ch
    is all rivers. */
 .hiw-text.hiw-narrow .desc{text-align:left; text-align-last:left;}
+/* 2026-10-01: left-aligned at EVERY width, not only under the 380px cap.
+   Justified OCR-B at ~440px still opened rivers ("presence    and    proximity")
+   because a monospace face cannot spread space inside words. */
+.hiw-text .desc{text-align:left; text-align-last:left;}
 .hiw-graphic{overflow:visible;}
 .hiw-graphic .fig.vid{margin-top:24px;}
 /* KART (model + mechanism paired): make the mechanism a little bigger by

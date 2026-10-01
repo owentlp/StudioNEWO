@@ -18,12 +18,12 @@
        group heading; leave "" to skip.
 
      MATERIAL  { name, slug, used, image, usedIn[], aliases[], copy }
-       used    true if it is currently in a Studio NEWO product (an "In use"
-               mark shows). Mirrors the asterisks in the copy.
+       used    IGNORED since 2026-10-01: materials.html works out which
+               materials are in use from the project chips in
+               js/projects-data.js. Safe to leave as is.
        image   small thumbnail in materials/<file>; colour swatch fallback
                if absent, same as the category image.
-       usedIn  [{id,title}] links back to the project(s) using it (only the
-               in-use materials have these).
+       usedIn  IGNORED since 2026-10-01, derived the same way as `used`.
        aliases optional extra names a project's material chip might use, so
                the chip on a project page can still deep-link here even when
                the chip word differs from `name`.
@@ -68,7 +68,7 @@ const MATERIAL_CATEGORIES = [
       },
       {
         label: "Composites",
-        properties: "Engineered wood fiber and adhesives. Isotropic dimensional stability (resists warping).",
+        properties: "Engineered wood fiber and adhesives. More dimensionally stable than solid wood (resists warping).",
         bestUses:   "",
         lifecycle:  "Adhesives prevent clean composting. Destined for landfill. Used strictly when solid wood fails engineering constraints.",
         items: [
@@ -95,9 +95,9 @@ const MATERIAL_CATEGORIES = [
         bestUses:   "",
         lifecycle:  "",
         items: [
-          { name:"Cast aluminum (A356)", slug:"cast-aluminum", used:true, image:"aluminum-cast.jpg", usedIn:[{id:"omni",title:"OMNI"}], aliases:["cast aluminum","aluminum"],
+          { name:"Cast aluminum (A356)", slug:"cast-aluminum", used:true, image:"aluminum-cast.jpg", usedIn:[{id:"omni",title:"OMNI"}], aliases:["cast aluminum"],
             copy:"Granular finish. High thermal conductivity. Ideal for acoustic diffusion or heat sinking." },
-          { name:"Machined aluminum (6061/7075)", slug:"machined-aluminum", used:false, image:"aluminum-machined.jpg", usedIn:[], aliases:["machined aluminum"],
+          { name:"Machined aluminum (6061/7075)", slug:"machined-aluminum", used:false, image:"aluminum-machined.jpg", usedIn:[], aliases:["machined aluminum","aluminum"],
             copy:"High precision tolerances. Used for structural standoffs and rigid chassis." }
         ]
       },
@@ -131,7 +131,7 @@ const MATERIAL_CATEGORIES = [
         lifecycle:  "",
         items: [
           { name:"Vegetable-tanned leather", slug:"vegetable-tanned-leather", used:false, image:"leather-veg.jpg", usedIn:[], aliases:[],
-            copy:"Tanned using natural organic tannins. 100% biodegradable." },
+            copy:"Tanned using natural organic tannins. Biodegradable." },
         ]
       }
     ]

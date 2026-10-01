@@ -54,6 +54,18 @@
   // every project, most recent first. This sets the order WITHIN each category.
   var PROJECT_ORDER = ["kart", "amsalp", "omni", "naf", "neb"];
 
+  /* Top-level pages under the projects, in menu order. on:false keeps a page
+     out of the menu while it has no content yet (the page itself still exists
+     at its URL). Jewelry and Photography switch on when their data lands. */
+  var EXTRA_PAGES = [
+    { href:"solutions.html",   label:"Solutions",   on:true  },
+    { href:"jewelry.html",     label:"Jewelry",     on:false },
+    { href:"photography.html", label:"Photography", on:false },
+    { href:"materials.html",   label:"Materials",   on:true  },
+    { href:"about.html",       label:"About",       on:true  },
+    { href:"contact.html",     label:"Contact",     on:true  }
+  ];
+
   function esc(s){ return (s == null ? "" : String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
   /* ============================================================
@@ -109,11 +121,11 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=51",
-      "js/projects-data.js?v=14",
+      "css/style.css?v=52",
+      "js/projects-data.js?v=18",
       "js/image-sizes.js?v=3",
       "js/main.js?v=4",
-      "js/menu.js?v=17",
+      "js/menu.js?v=18",
       "js/loader3d.js?v=14",
       "js/loader3d-core.js?v=1",
       "js/loader3d.worker.js?v=4",
@@ -121,7 +133,7 @@
     ];
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
-    var MATERIALS_DATA = "js/materials-data.js?v=3";
+    var MATERIALS_DATA = "js/materials-data.js?v=5";
     var MV_LIB  = "js/vendor/model-viewer.min.js?v=1";
     var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
     var MECH_V  = "?v=20";     // must match the mechanism iframe src in project.html
@@ -267,9 +279,10 @@
 
     html +=
         '<div class="menu-links">' +
-          '<a href="materials.html">Materials</a>' +
-          '<a href="about.html">About</a>' +
-          '<a href="contact.html">Contact</a>' +
+          EXTRA_PAGES.filter(function(x){ return x.on; }).map(function(x){
+            var here = location.pathname.replace(/^.*\//, "") === x.href;
+            return '<a href="' + x.href + '"' + (here ? ' class="is-here" aria-current="page"' : '') + '>' + esc(x.label) + '</a>';
+          }).join("") +
         '</div>' +
       '</nav>';
 
@@ -298,7 +311,7 @@
       var m = href.match(/^([a-z0-9_-]+)\.html$/i);
       if(m && Object.prototype.hasOwnProperty.call(projects(), m[1])){
         NEWO_WARM.project(a, m[1]);
-      } else if(/^(materials|about|contact)\.html/.test(href)){
+      } else if(/^(materials|about|contact|solutions|jewelry|photography)\.html/.test(href)){
         NEWO_WARM.page(href);
       }
     });
