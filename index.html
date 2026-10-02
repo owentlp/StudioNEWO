@@ -3,35 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>STUDIO NEWO</title>
+<title>STUDIO NEWO · Industrial design studio, Toronto</title>
 <meta name="description" content="Studio NEWO. Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/">
 <meta property="og:site_name" content="Studio NEWO">
-<meta property="og:title" content="Studio NEWO">
+<meta property="og:title" content="Studio NEWO · Industrial design studio, Toronto">
 <meta property="og:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
-<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Studio NEWO">
+<meta name="twitter:title" content="Studio NEWO · Industrial design studio, Toronto">
 <meta name="twitter:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
-<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" href="/logo/favicon-16.png?v=2" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=2" sizes="32x32" type="image/png">
-<!-- Google crops search-result favicons into a circle, and prefers a source
-     that is a multiple of 48px. The mark is a square with an inscribed circle
-     knocked out, so all its ink sits in the corners - exactly what a circular
-     crop removes. icon-192 draws the mark at 66% so the whole square survives
-     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
-     SQUARE and a margin there reads as a white border.
-     favicon-48.png is deliberately NOT declared here even though the file
-     exists for the manifest: at 48 it would qualify as Google's preferred size
-     and it must not be able to win over the circle-safe one. -->
-<link rel="icon" href="/logo/icon-192.png?v=2" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png?v=2">
+<!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
+     one Google uses, and Google wants a size that is a multiple of 48 and a URL
+     that does not change. It carries the whole mark at 66% so Google's circular
+     crop cannot cut the corners off. The .ico / 16 / 32 are the browser-tab
+     icons: the same mark drawn full bleed, with frames for 125% and 150%
+     display scaling. Regenerate all of them with tools/make-icons.py. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
 <!-- warm the loader's dependencies from the first byte of HTML, but ONLY on a
@@ -90,7 +87,7 @@
      page genuinely needs to do differently - the fixed non-scrolling body, the
      background video, the card dock - still wins on source order. What is gone
      from below is only the duplicated half. -->
-<link rel="stylesheet" href="css/style.css?v=52">
+<link rel="stylesheet" href="css/style.css?v=53">
 
 <style>
 /* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
@@ -135,6 +132,23 @@ body{font-family:var(--body); color:var(--ink); background:var(--paper); overflo
 #home, #wordmark, #burger{transition:color .8s ease;}
 body[data-sky="dark"] #home, body[data-sky="dark"] #wordmark, body[data-sky="dark"] #burger{color:var(--paper);}
 body.bg-sky #soundToggle{display:none;}
+/* LOADING SCREEN = THE SKY (2026-10-02). The loader used to be a paper sheet
+   that faded to reveal the sky, which at night was a white flash into a dark
+   page. It is transparent here, so the logo turns over the live sky from the
+   first frame; everything else on the page is still hidden by .fade-in until
+   body.ready. On a dark sky the ink mark is inverted to paper. js/sky.js is
+   loaded BEFORE the loader markup so the sky and data-sky exist by then. */
+#loader{background:transparent;}
+body[data-sky="dark"] #loader .ld-mark{filter:invert(1);}
+/* one line saying what the studio is - the only words on the page */
+#home-line{position:absolute; z-index:4; top:86px; left:50%; transform:translateX(-50%); width:max-content; max-width:calc(100vw - 48px); text-align:center;
+  font-size:12px; letter-spacing:.16em; line-height:1.5; text-transform:uppercase; color:var(--ink); transition:color .8s ease, opacity 700ms ease;}
+#home-line a{color:inherit; text-decoration:none; border-bottom:1px solid currentColor; padding-bottom:1px;}
+#home-line a:hover{color:var(--red); border-color:var(--red);}
+body[data-sky="dark"] #home-line{color:var(--paper);}
+#home-line.fade-in{transform:translateX(-50%);}
+@media (max-width:760px), (hover: none){ #home-line{top:66px; font-size:10.5px; letter-spacing:.12em; max-width:calc(100vw - 44px);} }
+@media (max-width:600px){ #home-line .hl-long{display:none;} }
 
 /* ---- header: real logo (left) · wordmark (centre) · hamburger (right); all the SAME height ---- */
 #home{position:fixed; z-index:5; top:24px; left:34px; display:block; width:45px; height:45px; color:var(--ink); cursor:pointer;}
@@ -209,7 +223,7 @@ body.bg-sky #soundToggle{display:none;}
    whichever card is already in front of it, rather than snapping above
    everything. Reads as the card rising up from its place in the stack
    instead of popping to the front of it. */
-.dc:not(:first-child){ margin-left:calc(-1 * var(--dock-w) * .35); }
+.dc:not(:first-child){ margin-left:min(calc(-1 * var(--dock-w) * .35), calc((100vw - var(--dock-n, 4) * var(--dock-w)) / (var(--dock-n, 4) - 1))); }
 .dc:hover, .dc:focus-visible{ transform:translateY(calc(var(--dock-peek) - var(--dock-rise))); }
 /* the photo fills whatever height is left under the title band. The title
    band is a fixed-height sibling (title + date only, no animating text), so
@@ -352,7 +366,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   "alternateName": "NEWO",
   "url": "https://studionewo.com/",
   "logo": "https://studionewo.com/logo/icon-512.png",
-  "image": "https://studionewo.com/projects/kart/hero.jpg",
+  "image": "https://studionewo.com/logo/og-card.jpg",
   "description": "Industrial design practice in Toronto. Products built for repair, disassembly, and long life.",
   "founder": { "@type": "Person", "name": "Owen Palmer" },
   "address": { "@type": "PostalAddress", "addressLocality": "Toronto", "addressCountry": "CA" },
@@ -379,6 +393,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="sky-clouds" aria-hidden="true"></div>
 <div id="sky-precip" aria-hidden="true"></div>
 <div id="sky-grain" aria-hidden="true"></div>
+<script src="js/sky.js?v=2"></script>
 <video class="bgvid" id="vidA" muted playsinline preload="none"></video>
 <video class="bgvid" id="vidB" muted playsinline preload="none"></video>
 
@@ -396,6 +411,8 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="wordmark" class="fade-in d1" role="img" aria-label="NEWO">
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
+
+<p id="home-line" class="fade-in d2">Industrial design studio, Toronto. <span class="hl-long">Products built to be repaired. </span><a href="solutions.html">Consulting &rarr;</a></p>
 
 <button id="burger" class="fade-in d1" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
@@ -419,7 +436,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<script src="js/projects-data.js?v=18"></script>
+<script src="js/projects-data.js?v=20"></script>
 <!-- main.js: the ?guides / "g" layout overlay, which every page but this
      one already had. Its page-reveal half is skipped here - this page
      runs its own reveal at the bottom of the file and never sets
@@ -427,8 +444,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
      the local copy is idempotent. -->
 <script src="js/main.js?v=4"></script>
 <script src="js/image-sizes.js?v=3"></script>
-<script src="js/menu.js?v=18"></script>
-<script src="js/sky.js?v=1"></script>
+<script src="js/menu.js?v=20"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -458,10 +474,10 @@ const CLIP_PICK = (function(){
    by hand, every card is the same fixed size (see --dock-peek/--dock-rise
    in the CSS above). */
 (function(){
-  // storefront OBJECTS only, chronological most recent first: kart/amsalp
-  // 2026, omni 2025, neb 2024. NAF is archive-only (academic) so it is not
-  // shown on the home page; it lives only in the Archive menu.
-  var ORDER = ["kart","amsalp","omni","neb"];
+  // chronological, most recent first: kart/amsalp 2026, omni/naf 2025,
+  // neb 2024. NAF joined the home page on 2026-10-02 (Owen).
+  var ORDER = ["kart","amsalp","omni","naf","neb"];
+  document.documentElement.style.setProperty("--dock-n", ORDER.length);
   function real(s){ return s && String(s).charAt(0)!=="["; }
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 

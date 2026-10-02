@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>INFO · STUDIO NEWO</title>
+<title>INFO · Owen Palmer, industrial designer · STUDIO NEWO</title>
 <meta name="description" content="Studio NEWO. Owen Palmer, industrial designer in Toronto. How the practice works.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/about.html">
@@ -12,29 +12,26 @@
 <meta property="og:site_name" content="Studio NEWO">
 <meta property="og:title" content="Info · Studio NEWO">
 <meta property="og:description" content="Studio NEWO. Owen Palmer, industrial designer in Toronto. How the practice works.">
-<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Info · Studio NEWO">
 <meta name="twitter:description" content="Studio NEWO. Owen Palmer, industrial designer in Toronto. How the practice works.">
-<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" href="/logo/favicon-16.png?v=2" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=2" sizes="32x32" type="image/png">
-<!-- Google crops search-result favicons into a circle, and prefers a source
-     that is a multiple of 48px. The mark is a square with an inscribed circle
-     knocked out, so all its ink sits in the corners - exactly what a circular
-     crop removes. icon-192 draws the mark at 66% so the whole square survives
-     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
-     SQUARE and a margin there reads as a white border.
-     favicon-48.png is deliberately NOT declared here even though the file
-     exists for the manifest: at 48 it would qualify as Google's preferred size
-     and it must not be able to win over the circle-safe one. -->
-<link rel="icon" href="/logo/icon-192.png?v=2" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png?v=2">
+<!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
+     one Google uses, and Google wants a size that is a multiple of 48 and a URL
+     that does not change. It carries the whole mark at 66% so Google's circular
+     crop cannot cut the corners off. The .ico / 16 / 32 are the browser-tab
+     icons: the same mark drawn full bleed, with frames for 125% and 150%
+     display scaling. Regenerate all of them with tools/make-icons.py. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=52">
+<link rel="stylesheet" href="css/style.css?v=53">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -78,7 +75,18 @@
      the only red on the page and it went with them, so the titles take it on. */
   .principle h2{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(19px,2.4vw,27px); line-height:1.05; margin-bottom:10px; color:var(--red);}
 
+  .ab-photo{display:block; width:clamp(110px,11vw,150px); height:auto; margin-bottom:14px;}
+  .ab-facts{margin-top:clamp(56px,10vh,120px); display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:clamp(30px,5vh,46px); align-items:start;}
+  .ab-fact:nth-child(1){grid-column:1 / 5;}
+  .ab-fact:nth-child(2){grid-column:5 / 9;}
+  .ab-fact:nth-child(3){grid-column:9 / 13;}
+  .ab-fact ul{list-style:none; margin-top:10px;}
+  .ab-fact li{font-size:13px; line-height:1.45; letter-spacing:-.004em; padding:7px 0; border-top:1px solid rgba(20,20,20,.16);}
+  .ab-cta{margin-top:clamp(30px,5vh,46px); display:flex; flex-wrap:wrap; gap:8px;}
+  .ab-cta .inq{margin-top:0;}
+
   @media (max-width:860px){
+    .ab-fact:nth-child(1),.ab-fact:nth-child(2),.ab-fact:nth-child(3){grid-column:1 / -1;}
     .ab-statement, .ab-who{grid-column:1 / -1;}
     .principles{display:grid; grid-template-columns:1fr; row-gap:clamp(30px,5vh,46px);}
     .principle:nth-child(1),.principle:nth-child(2),
@@ -110,6 +118,7 @@
   <div class="ab-grid">
     <p class="desc ab-statement">Studio NEWO is an industrial design practice in Toronto, making furniture, lighting, and objects out of raw materials and current technology, built to be opened, repaired, and kept. Working is the minimum. How a product feels, looks, gets made, fixed, and eventually taken apart is the actual goal.</p>
     <div class="ab-who">
+      <img class="ab-photo" src="about/owen-palmer.jpg" width="712" height="848" alt="Owen Palmer, industrial designer and founder of Studio NEWO" decoding="async">
       <span class="cap">Owen Palmer, designer</span>
       <p class="desc">I came to industrial design from two years of mechanical engineering, and I still often think like an engineer: solving problems and rendering designs in my head before modeling them. I want to create products and develop solutions that bring the most value to as many people as possible.</p>
     </div>
@@ -136,6 +145,43 @@
       <p class="desc">Products are designed for their whole life, not just the sale. Fasteners, materials, and sub-assemblies are chosen so parts can be swapped out, repaired, or replaced, and to be more sustainable than the alternatives.</p>
     </div>
   </div>
+
+  <!-- FACTS (2026-10-02), from Owen's resume. Clients hire a person: this is
+       the short version of the CV, with the full one as a download. The PDF in
+       about/ has the phone number and personal email removed on purpose. -->
+  <div class="ab-facts">
+    <div class="ab-fact">
+      <span class="cap">Experience</span>
+      <ul>
+        <li>Founder and designer, Studio NEWO. Toronto, 2024 to present</li>
+        <li>Project assistant, Wood by Design. Custom furniture and cabinetry: assembly, finishing, installation, CAD for CNC. Peterborough, 2024 to 2026</li>
+        <li>Leak survey technician and GIS assistant, QSP Geographics. Ottawa, 2023</li>
+        <li>NAF shown at IDS Toronto, 2025</li>
+      </ul>
+    </div>
+    <div class="ab-fact">
+      <span class="cap">Education</span>
+      <ul>
+        <li>Industrial Design, OCAD University. Toronto, 2024 to 2027</li>
+        <li>Mechanical Engineering, University of Ottawa. 2021 to 2023. First place in the design-day competition two years running</li>
+      </ul>
+    </div>
+    <div class="ab-fact">
+      <span class="cap">Capabilities</span>
+      <ul>
+        <li>CAD: SolidWorks, Onshape</li>
+        <li>Fabrication: CNC, laser, 3D printing, welding, lathe, mill</li>
+        <li>Electronics and firmware: ESP32, C++ / Arduino</li>
+        <li>3D scanning and AR: photogrammetry, AR integration</li>
+        <li>Software and web: Photoshop, Illustrator, XD, SketchUp, HTML / CSS / JS, Three.js</li>
+        <li>Materials: wood, metal, plastic, foam, leather, vinyl</li>
+      </ul>
+    </div>
+  </div>
+  <p class="ab-cta">
+    <a class="inq" href="solutions.html">WORK WITH THE STUDIO &rarr;</a>
+    <a class="inq" href="about/Owen-Palmer-CV.pdf" target="_blank" rel="noopener">CV (PDF) &rarr;</a>
+  </p>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -150,8 +196,8 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=18"></script>
+<script src="js/projects-data.js?v=20"></script>
 <script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=18"></script>
+<script src="js/menu.js?v=20"></script>
 </body>
 </html>

@@ -121,11 +121,11 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=52",
-      "js/projects-data.js?v=18",
+      "css/style.css?v=53",
+      "js/projects-data.js?v=20",
       "js/image-sizes.js?v=3",
       "js/main.js?v=4",
-      "js/menu.js?v=18",
+      "js/menu.js?v=20",
       "js/loader3d.js?v=14",
       "js/loader3d-core.js?v=1",
       "js/loader3d.worker.js?v=4",
@@ -356,6 +356,54 @@
     var b = document.getElementById("burger");
     if(b) b.setAttribute("aria-expanded", "false");
   }
+
+  /* ---- FOOTER NOTE -----------------------------------------------------
+     One line under the footer marks on every page that has a footer: year,
+     email, Instagram, privacy. Added here because menu.js is the one script
+     every page loads; project pages build their footer late, so this runs at
+     DOMContentLoaded and again after load. */
+  function footNote(){
+    var feet = document.querySelectorAll(".site-foot");
+    for(var i = 0; i < feet.length; i++){
+      if(feet[i].querySelector(".foot-note")) continue;
+      var d = document.createElement("div");
+      d.className = "foot-note";
+      d.innerHTML = '&copy; ' + new Date().getFullYear() + ' Studio NEWO, Toronto' +
+        '<span class="sep">/</span><a href="mailto:owen@studionewo.com">owen@studionewo.com</a>' +
+        '<span class="sep">/</span><a href="https://www.instagram.com/studio.newo" target="_blank" rel="noopener">Instagram</a>' +
+        '<span class="sep">/</span><a href="contact.html#privacy">Privacy</a>';
+      feet[i].appendChild(d);
+    }
+  }
+  if(document.readyState !== "loading") footNote(); else document.addEventListener("DOMContentLoaded", footNote);
+  window.addEventListener("load", function(){ footNote(); setTimeout(footNote, 1500); });
+
+  /* ---- VISITOR COUNT (GoatCounter) -----------------------------------
+     Free, no cookies, no personal data: it records the page, the referrer and
+     the screen size, nothing else. OFF until a code is set:
+       1. sign up at goatcounter.com and pick a code, e.g. "studionewo"
+       2. put it between the quotes below and bump menu.js ?v= on every page
+     The numbers are then at https://<code>.goatcounter.com.
+     Sent as a plain image request (GoatCounter's documented pixel), so no
+     third-party script is loaded. Skipped for bots, previews, localhost and
+     for you when the address has ?nocount (it remembers that in this browser). */
+  var GOATCOUNTER = "studionewo";   // numbers: https://studionewo.goatcounter.com
+  (function(){
+    if(!GOATCOUNTER) return;
+    try {
+      if(/[?&]nocount\b/.test(location.search)) localStorage.setItem("newo-nocount", "1");
+      if(localStorage.getItem("newo-nocount")) return;
+    } catch(e){}
+    if(/^(localhost|127\.|\[::1\])/.test(location.hostname) || location.protocol === "file:") return;
+    if(navigator.webdriver || /bot|crawl|spider|headless|lighthouse/i.test(navigator.userAgent)) return;
+    if(document.visibilityState === "prerender") return;
+    var q = "p=" + encodeURIComponent(location.pathname) +
+            "&t=" + encodeURIComponent(document.title) +
+            "&r=" + encodeURIComponent(document.referrer) +
+            "&s=" + encodeURIComponent([screen.width, screen.height, window.devicePixelRatio || 1].join(",")) +
+            "&rnd=" + Math.random().toString(36).slice(2);
+    new Image().src = "https://" + GOATCOUNTER + ".goatcounter.com/count?" + q;
+  })();
 
   if(document.readyState !== "loading") init();
   else document.addEventListener("DOMContentLoaded", init);

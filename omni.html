@@ -16,34 +16,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>OMNI, omnidirectional loudspeakers · STUDIO NEWO</title>
-<meta name="description" content="Listening to music at home has become more transient. People no longer sit in a single, dedicated &quot;sweet spot&quot; facing two directional speakers. OMNI is a pair of omnidirectional loudspeakers designed to scatter sound outward in 360 degrees, creating a continuous acoustic field that fills the room evenly, no matter where you are sitting or walking.">
+<meta name="description" content="OMNI: omnidirectional loudspeakers by Studio NEWO, Toronto. A continuous acoustic field.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/omni.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://studionewo.com/omni.html">
 <meta property="og:site_name" content="Studio NEWO">
 <meta property="og:title" content="OMNI, omnidirectional loudspeakers · Studio NEWO">
-<meta property="og:description" content="Listening to music at home has become more transient. People no longer sit in a single, dedicated &quot;sweet spot&quot; facing two directional speakers. OMNI is a pair of omnidirectional loudspeakers designed to scatter sound outward in 360 degrees, creating a continuous acoustic field that fills the room evenly, no matter where you are sitting or walking.">
+<meta property="og:description" content="OMNI: omnidirectional loudspeakers by Studio NEWO, Toronto. A continuous acoustic field.">
 <meta property="og:image" content="https://studionewo.com/projects/omni/hero.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="OMNI, omnidirectional loudspeakers · Studio NEWO">
-<meta name="twitter:description" content="Listening to music at home has become more transient. People no longer sit in a single, dedicated &quot;sweet spot&quot; facing two directional speakers. OMNI is a pair of omnidirectional loudspeakers designed to scatter sound outward in 360 degrees, creating a continuous acoustic field that fills the room evenly, no matter where you are sitting or walking.">
+<meta name="twitter:description" content="OMNI: omnidirectional loudspeakers by Studio NEWO, Toronto. A continuous acoustic field.">
 <meta name="twitter:image" content="https://studionewo.com/projects/omni/hero.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" href="/logo/favicon-16.png?v=2" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=2" sizes="32x32" type="image/png">
-<!-- Google crops search-result favicons into a circle, and prefers a source
-     that is a multiple of 48px. The mark is a square with an inscribed circle
-     knocked out, so all its ink sits in the corners - exactly what a circular
-     crop removes. icon-192 draws the mark at 66% so the whole square survives
-     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
-     SQUARE and a margin there reads as a white border.
-     favicon-48.png is deliberately NOT declared here even though the file
-     exists for the manifest: at 48 it would qualify as Google's preferred size
-     and it must not be able to win over the circle-safe one. -->
-<link rel="icon" href="/logo/icon-192.png?v=2" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png?v=2">
+<!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
+     one Google uses, and Google wants a size that is a multiple of 48 and a URL
+     that does not change. It carries the whole mark at 66% so Google's circular
+     crop cannot cut the corners off. The .ico / 16 / 32 are the browser-tab
+     icons: the same mark drawn full bleed, with frames for 125% and 150%
+     display scaling. Regenerate all of them with tools/make-icons.py. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
 <!-- warm the loader's dependencies from the first byte of HTML, but ONLY on a
@@ -88,7 +85,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=52">
+<link rel="stylesheet" href="css/style.css?v=53">
 </head>
 <body class="proj-body" data-project="omni">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -129,7 +126,7 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=18"></script>
+<script src="js/projects-data.js?v=20"></script>
 <script src="js/materials-data.js?v=5"></script>
 <!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
      reserved before the files land (no reflow) and srcset can be emitted -->
@@ -139,7 +136,7 @@
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
 <script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=18"></script>
+<script src="js/menu.js?v=20"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----
@@ -210,7 +207,11 @@
     setMetaTag('meta[name="twitter:description"]', 'content', summary);
     setMetaTag('meta[name="twitter:image"]', 'content', heroImg);
     var descEl = document.head.querySelector('meta[name="description"]');
-    if(descEl){ descEl.setAttribute('content', summary); }
+    if(descEl){
+      // short on purpose, same formula as tools/make-project-pages.py
+      var shortDesc = p.kind ? (p.title + ": " + p.kind + " by Studio NEWO, Toronto." + (real(p.teaser) ? " " + p.teaser : "")) : summary;
+      descEl.setAttribute('content', shortDesc);
+    }
     // CreativeWork structured data, for search engines
     var ld = {
       "@context": "https://schema.org",
@@ -599,7 +600,8 @@
       '<div class="hero-specs">' +
         (year?'<span class="sp">'+esc(year)+'</span>':'') +
         (real(p.size)?'<span class="sp">'+esc(p.size)+'</span>':'') +
-        '<a class="inq" href="contact.html">INQUIRE &rarr;</a>' +
+        (real(p.status)?'<span class="sp st">'+esc(p.status)+'</span>':'') +
+        '<a class="inq" href="contact.html?about=' + encodeURIComponent(p.title) + '">INQUIRE &rarr;</a>' +
       '</div>' +
       heroMatl +
       // The aside fills the height of the hero image (align-self:stretch) and

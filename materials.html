@@ -12,29 +12,26 @@
 <meta property="og:site_name" content="Studio NEWO">
 <meta property="og:title" content="Materials · Studio NEWO">
 <meta property="og:description" content="The Studio NEWO material guide: the woods, metals, and other materials used across the studio products.">
-<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Materials · Studio NEWO">
 <meta name="twitter:description" content="The Studio NEWO material guide: the woods, metals, and other materials used across the studio products.">
-<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" href="/logo/favicon-16.png?v=2" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=2" sizes="32x32" type="image/png">
-<!-- Google crops search-result favicons into a circle, and prefers a source
-     that is a multiple of 48px. The mark is a square with an inscribed circle
-     knocked out, so all its ink sits in the corners - exactly what a circular
-     crop removes. icon-192 draws the mark at 66% so the whole square survives
-     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
-     SQUARE and a margin there reads as a white border.
-     favicon-48.png is deliberately NOT declared here even though the file
-     exists for the manifest: at 48 it would qualify as Google's preferred size
-     and it must not be able to win over the circle-safe one. -->
-<link rel="icon" href="/logo/icon-192.png?v=2" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png?v=2">
+<!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
+     one Google uses, and Google wants a size that is a multiple of 48 and a URL
+     that does not change. It carries the whole mark at 66% so Google's circular
+     crop cannot cut the corners off. The .ico / 16 / 32 are the browser-tab
+     icons: the same mark drawn full bleed, with frames for 125% and 150%
+     display scaling. Regenerate all of them with tools/make-icons.py. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=52">
+<link rel="stylesheet" href="css/style.css?v=53">
 <style>
   /* page-specific layout only: the shared editorial grammar (12-col grid,
      .cap/.desc type, .fig frames) lives in css/style.css and is reused as-is
@@ -239,7 +236,7 @@
     <p class="desc">The materials in the studio's current products. Chosen for how each one ages, wears, and comes apart, not for how it looks new.</p>
   </div>
   <div id="matg-cats"></div>
-  <p class="matg-more"><a class="inq" href="materials-library.html">Full material library</a></p>
+  <p class="matg-more"><a class="inq" href="materials-library.html">FULL MATERIAL LIBRARY &rarr;</a></p>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -255,9 +252,9 @@
 
 
 <script src="js/materials-data.js?v=5"></script>
-<script src="js/projects-data.js?v=18"></script>
+<script src="js/projects-data.js?v=20"></script>
 <script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=18"></script>
+<script src="js/menu.js?v=20"></script>
 <script>
 (function(){
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -406,7 +403,7 @@
                '<span class="matcat-head-row">' +
                  '<span class="cap lbl">'+esc(cat.label)+'</span>' +
                  '<span class="matcat-names">'+esc(groupNames)+'</span>' +
-                 '<span class="matcat-count">'+total+' MATERIALS</span>' +
+                 '<span class="matcat-count">'+total+(total === 1 ? ' MATERIAL' : ' MATERIALS')+'</span>' +
                  '<span class="matcat-chev">+</span>' +
                '</span>' +
              '</button>' +

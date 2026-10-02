@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>CONTACT · STUDIO NEWO</title>
+<title>CONTACT · STUDIO NEWO, industrial design, Toronto</title>
 <meta name="description" content="Contact Studio NEWO for project inquiries, collaborations, or consulting work.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/contact.html">
@@ -12,29 +12,26 @@
 <meta property="og:site_name" content="Studio NEWO">
 <meta property="og:title" content="Contact · Studio NEWO">
 <meta property="og:description" content="Contact Studio NEWO for project inquiries, collaborations, or consulting work.">
-<meta property="og:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Contact · Studio NEWO">
 <meta name="twitter:description" content="Contact Studio NEWO for project inquiries, collaborations, or consulting work.">
-<meta name="twitter:image" content="https://studionewo.com/projects/kart/hero.jpg">
+<meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" href="/logo/favicon-16.png?v=2" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=2" sizes="32x32" type="image/png">
-<!-- Google crops search-result favicons into a circle, and prefers a source
-     that is a multiple of 48px. The mark is a square with an inscribed circle
-     knocked out, so all its ink sits in the corners - exactly what a circular
-     crop removes. icon-192 draws the mark at 66% so the whole square survives
-     the crop; the 16 and 32 above are full-bleed because a browser tab draws a
-     SQUARE and a margin there reads as a white border.
-     favicon-48.png is deliberately NOT declared here even though the file
-     exists for the manifest: at 48 it would qualify as Google's preferred size
-     and it must not be able to win over the circle-safe one. -->
-<link rel="icon" href="/logo/icon-192.png?v=2" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png?v=2">
+<!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
+     one Google uses, and Google wants a size that is a multiple of 48 and a URL
+     that does not change. It carries the whole mark at 66% so Google's circular
+     crop cannot cut the corners off. The .ico / 16 / 32 are the browser-tab
+     icons: the same mark drawn full bleed, with frames for 125% and 150%
+     display scaling. Regenerate all of them with tools/make-icons.py. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=52">
+<link rel="stylesheet" href="css/style.css?v=53">
 <style>
   /* contact form: same editorial grammar as the rest of the site, no boxes,
      thin underline fields, tiny OCR-B labels, one red action. */
@@ -71,6 +68,12 @@
   .contact-alt{margin-top:clamp(34px,6vh,60px); font-size:10px; letter-spacing:.1em; text-transform:uppercase; line-height:2;}
   .contact-alt a{color:var(--ink); text-decoration:none; border-bottom:1px solid var(--red); padding-bottom:1px;}
   .contact-alt .sep{opacity:.4; margin:0 10px;}
+  .clead-more{max-width:60ch; margin:14px 0 6px; text-align:left;}
+  .clead-more a{color:inherit;}
+  .cnotify{display:flex; align-items:center; gap:10px; margin:4px 0 16px; font-size:13px; letter-spacing:.02em; cursor:pointer;}
+  .cnotify[hidden]{display:none;}
+  .cnotify input{width:16px; height:16px; accent-color:var(--red);}
+  .cprivacy{max-width:70ch; margin-top:clamp(50px,9vh,90px); font-size:11.5px; line-height:1.5; letter-spacing:.02em; opacity:.75;}
 </style>
 </head>
 <body>
@@ -94,6 +97,7 @@
        can see. .vh is defined in css/style.css. -->
   <h1 class="vh">Contact</h1>
   <p class="lead">For project inquiries, collaborations, or freelance and consulting work, get in touch.</p>
+  <p class="desc clead-more">It helps to say what you are making, your timeline, and a rough budget. Replies usually come within a few days. Services and price guides are on the <a href="solutions.html">Solutions</a> page.</p>
 
   <form class="cform" id="contactForm" novalidate>
     <div class="cfield">
@@ -108,6 +112,12 @@
       <label for="cf-message">Message</label>
       <textarea id="cf-message" name="message" required></textarea>
     </div>
+    <!-- shown only when the visitor arrived from a product's INQUIRE button
+         (contact.html?about=KART): one tick to hear when it can be bought -->
+    <label class="cnotify" id="cf-notify-wrap" hidden>
+      <input type="checkbox" name="notify_when_available" value="yes" id="cf-notify">
+      <span>Tell me when <span id="cf-notify-name">this</span> is available to buy</span>
+    </label>
     <!-- honeypot: bots fill it, humans never see it; a filled value is dropped -->
     <div class="cform-hp" aria-hidden="true">
       <label for="cf-company">Company</label>
@@ -130,6 +140,7 @@
     <span class="sep">/</span>
     <a href="https://www.instagram.com/studio.newo" target="_blank" rel="noopener">Instagram</a>
   </p>
+  <p class="cprivacy" id="privacy">Privacy: this form is delivered by Formspree and goes only to Studio NEWO. The home page asks Open-Meteo for the current weather near the main city of your time zone so it can draw the sky. Page views are counted with GoatCounter, which records the page, the referring site and the screen size, not who you are. No cookies, no advertising, nothing sold or shared.</p>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -144,9 +155,9 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=18"></script>
+<script src="js/projects-data.js?v=20"></script>
 <script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=18"></script>
+<script src="js/menu.js?v=20"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening
@@ -207,6 +218,25 @@
     setStatus("If your mail app did not open, use the address below.", true);
     box.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
+
+  /* INQUIRE on a project page links here as contact.html?about=KART. Start the
+     message with the project name so the enquiry arrives with its subject and
+     the visitor does not have to say which product they mean. */
+  var ABOUT = "";
+  try { ABOUT = (new URLSearchParams(location.search).get("about") || "").replace(/[^\w .,&+-]/g, "").slice(0, 40); } catch(e){}
+  if(ABOUT && !form.message.value){ form.message.value = "Inquiry about " + ABOUT + ":\n\n"; }
+  if(ABOUT && typeof PROJECTS !== "undefined"){
+    var isProduct = Object.keys(PROJECTS).some(function(k){ return String(PROJECTS[k].title).toUpperCase() === ABOUT.toUpperCase(); });
+    if(isProduct){
+      document.getElementById("cf-notify-name").textContent = ABOUT;
+      document.getElementById("cf-notify-wrap").hidden = false;
+    }
+  }
+  // subject line of the email Formspree sends (its _subject field)
+  var subj = document.createElement("input");
+  subj.type = "hidden"; subj.name = "_subject";
+  subj.value = "Studio NEWO inquiry" + (ABOUT ? ": " + ABOUT : "");
+  form.appendChild(subj);
 
   form.addEventListener("submit", function(e){
     e.preventDefault();

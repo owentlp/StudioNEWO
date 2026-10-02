@@ -70,3 +70,35 @@ const SOLUTIONS = [
     alt: "The LOOTS stool in stained lumber on display at the Design for Disassembly Exhibition"
   }
 ];
+
+
+/* ============================================================
+   SERVICES · the "Work with the studio" block at the top of solutions.html.
+   One object per row. `from` is the starting price in CAD shown in the last
+   column; set it to "" to show "Quote" instead. `time` is the usual duration.
+   RATES and TERMS are the two short lines under the table.
+   Edit the numbers here only; bump solutions-data.js ?v= in
+   tools/pages/solutions.meta.json and re-run tools/make-simple-page.py.
+   ============================================================ */
+const SERVICES = [
+  { name: "Feasibility study",
+    what: "Is it worth building, and how? Site or user research, benchmarks, options and a recommendation, written up as a report you can act on.",
+    time: "2 to 3 weeks", from: "1,800" },
+  { name: "Concept design",
+    what: "Three directions narrowed to one: sketches, a CAD concept model and renders that show what it is and how it works.",
+    time: "2 to 4 weeks", from: "2,400" },
+  { name: "Design for manufacture",
+    what: "The chosen concept turned into CAD that can be made: parts, assemblies, tolerances, materials, and a drawing package with a bill of materials.",
+    time: "3 to 6 weeks", from: "3,600" },
+  { name: "Working prototype",
+    what: "A looks-like, works-like prototype built in the shop. Wood, metal, 3D printing, and electronics with firmware where the product needs it.",
+    time: "4 to 8 weeks", from: "4,800" },
+  { name: "Renders and 3D for web",
+    what: "Studio renders, exploded views, and a 3D model that runs in a browser or in AR, from your CAD or mine.",
+    time: "1 to 2 weeks", from: "600" },
+  { name: "CAD, drafting and shop time",
+    what: "SolidWorks modelling, drawings, CNC files, fabrication and finishing by the hour or the day.",
+    time: "As needed", from: "65 / hour" }
+];
+const SERVICE_RATES = "Prices are starting points in Canadian dollars. Every project gets a fixed quote before any work starts. Hourly work is $65, a full day is $480. Materials and outside fabrication are billed at cost.";
+const SERVICE_TERMS = "Work runs in phases with a review at the end of each, and you can stop after any phase. 40% to start a phase, the balance on delivery. Two rounds of revisions are included. The design is yours once the final invoice is paid.";

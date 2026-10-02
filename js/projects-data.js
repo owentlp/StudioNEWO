@@ -42,6 +42,10 @@
         idx   : true                        (show the [NN] index number)
 
    TEXT FIELDS
+        status   where the product is right now, shown in the spec line under
+                    the hero photo after a small red square, e.g. "Prototype 01",
+                    "V2 in development", "Made to order", "Small batch, spring".
+                    Keep it factual and short. Leave "" to hide.
         kind     what the product IS, in plain words ("flat-pack lounge chair").
                     Goes into the page title and search/share previews:
                     "NEB, flat-pack lounge chair · STUDIO NEWO". Re-run
@@ -147,6 +151,7 @@ const PROJECTS = {
     objects:   true,
     title:     "KART",
     kind:      "presence-sensing table lamp",
+    status:    "Prototype 01 / V2 in development",
     code:      "L01.1",
     date:      "2026",
     teaser:    "A light that responds to your presence.",
@@ -229,6 +234,7 @@ const PROJECTS = {
     objects:   true,
     title:     "OMNI",
     kind:      "omnidirectional loudspeakers",
+    status:    "Prototype 01",
     code:      "AU01.1",
     date:      "2025",
     teaser:    "A continuous acoustic field.",
@@ -250,12 +256,12 @@ const PROJECTS = {
       "gallery-02.jpg": "OMNI from a low angle, the gap between cabinet and top plate revealing the driver firing up into the diffuser cone",
       "gallery-03.jpg": "The OMNI speaker on a wooden cabinet beside a window, showing its proportions in a room",
       "gallery-04.jpg": "OMNI photographed square on, the purpleheart grain running across the solid hardwood speaker cabinet",
-      "hero.jpg": "The OMNI omnidirectional speaker: a solid purpleheart cabinet with a floating top plate on steel posts",
+      "hero.jpg": "The OMNI omnidirectional speaker: a solid purpleheart cabinet with a floating top plate on machined aluminum standoffs",
       "scatter-01.jpg": "Purpleheart cabinet blanks for OMNI on the workbench beside a mallet and hand tools",
       "scatter-02.jpg": "The sand-casting mould opened to reveal OMNI's cast aluminum diffuser cone still sitting in the sand",
       "scatter-03.jpg": "Two raw sand-cast aluminum diffuser cones straight out of the mould, before machining",
       "scatter-04.jpg": "A machined aluminum diffuser cone beside a raw sand casting on the metal shop bench",
-      "scatter-05.jpg": "An assembled OMNI prototype, purpleheart cabinet and top plate mounted on their steel standoffs"
+      "scatter-05.jpg": "An assembled OMNI prototype, purpleheart cabinet and top plate mounted on their aluminum standoffs"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],
     heroVideo: "",
@@ -290,6 +296,7 @@ const PROJECTS = {
     objects:   true,
     title:     "NEB",
     kind:      "flat-pack lounge chair",
+    status:    "Prototype 01",
     code:      "S01.1",
     date:      "2024",
     teaser:    "A study in tension and flat-pack mechanics.",
@@ -362,6 +369,7 @@ const PROJECTS = {
     objects:   false,
     title:     "NAF",
     kind:      "crossflow desk fan",
+    status:    "Prototype 01",
     code:      "H01.1",
     date:      "2025",
     teaser:    "Clean, quiet airflow in a continuous curtain.",
@@ -437,6 +445,7 @@ const PROJECTS = {
     objects:   true,
     title:     "AMSALP",
     kind:      "plasma lamp",
+    status:    "Prototype 01",
     code:      "L02.1",
     date:      "2026",
     teaser:    "Noble gas, wirelessly ionized into light.",
