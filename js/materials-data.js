@@ -45,7 +45,7 @@ const MATERIAL_CATEGORIES = [
         lifecycle:  "",
         items: [
           { name:"Purpleheart", slug:"purpleheart", used:true, image:"purpleheart.jpg", usedIn:[{id:"omni",title:"OMNI"}], aliases:[],
-            copy:"Exceptionally high density and stiffness. Oxidizes to deep purple with UV exposure. High acoustic resonance." },
+            copy:"Exceptionally high density and stiffness. Oxidizes to deep purple with UV exposure. Mass and stiffness suit speaker enclosures." },
           { name:"Cherry", slug:"cherry", used:true, image:"cherry.jpg", usedIn:[{id:"kart",title:"KART"}], aliases:[],
             copy:"Medium density, uniform grain. Darkens with UV exposure. High machinability." },
           { name:"Walnut", slug:"walnut", used:false, image:"walnut.jpg", usedIn:[], aliases:[],
@@ -86,7 +86,7 @@ const MATERIAL_CATEGORIES = [
     intro: {
       properties: "Isotropic structure. High tensile and yield strength. Highly thermally and electrically conductive.",
       finishes:   "",
-      lifecycle:  "Infinitely recyclable. High initial embodied energy, offset by extreme longevity."
+      lifecycle:  "Recyclable again and again without loss of quality. High initial embodied energy, offset by a long service life."
     },
     groups: [
       {
@@ -142,7 +142,7 @@ const MATERIAL_CATEGORIES = [
     intro: {
       properties: "High compressive strength, scratch-resistant, brittle against impact.",
       finishes:   "",
-      lifecycle:  "100% recyclable if sorted by chemical formulation."
+      lifecycle:  "Recyclable without loss of quality if sorted by chemical formulation."
     },
     groups: [
       {
@@ -173,7 +173,7 @@ const MATERIAL_CATEGORIES = [
     intro: {
       properties: "Moldable synthetic polymers.",
       finishes:   "",
-      lifecycle:  "Generally anti-circular. We strictly use mechanical fasteners over adhesives to ensure parts can be separated for recycling."
+      lifecycle:  "Generally anti-circular. The studio strictly uses mechanical fasteners over adhesives to ensure parts can be separated for recycling."
     },
     groups: [
       {
@@ -216,7 +216,7 @@ const MATERIAL_CATEGORIES = [
         lifecycle:  "High degradation time. Difficult to recycle.",
         items: [
           { name:"Polyurethane foam", slug:"polyurethane-foam", used:false, image:"foam.jpg", usedIn:[], aliases:["foam"],
-            copy:"Industry standard. We design strictly around pre-cut, standard block dimensions to allow users to replace foam locally without proprietary orders." }
+            copy:"Industry standard. The studio designs strictly around pre-cut, standard block dimensions to allow users to replace foam locally without proprietary orders." }
         ]
       }
     ]

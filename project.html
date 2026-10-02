@@ -73,7 +73,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=54">
+<link rel="stylesheet" href="css/style.css?v=56">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -95,7 +95,7 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
-<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page proj" id="content" tabindex="-1"><!-- filled from data --></main>
 
@@ -114,8 +114,8 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=20"></script>
-<script src="js/materials-data.js?v=5"></script>
+<script src="js/projects-data.js?v=24"></script>
+<script src="js/materials-data.js?v=6"></script>
 <!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
      reserved before the files land (no reflow) and srcset can be emitted -->
 <script src="js/image-sizes.js?v=3"></script>
@@ -124,7 +124,7 @@
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
 <script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=21"></script>
+<script src="js/menu.js?v=25"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----
@@ -465,7 +465,7 @@
     if(!tagsHtml && !lifeHtml) return '';
     return '<div class="cell proc-note matl-note" style="grid-column:'+col+';margin-top:'+mt+'px;">' +
       tagsHtml + lifeHtml +
-      '<a class="matl-link" href="materials.html">MATERIAL GUIDE &rarr;</a>' +
+      '<a class="matl-link" href="materials.html?for='+encodeURIComponent(id)+'">MATERIAL GUIDE &rarr;</a>' +
     '</div>';
   }
 
@@ -573,7 +573,9 @@
     '<div class="hero-materials">' +
       matlWords.map(function(w){
         var slug = MAT_SLUGS[w.toLowerCase()];
-        return '<a href="materials.html'+(slug?'#'+slug:'')+'">'+esc(w.toUpperCase())+'</a>';
+        // ?for=<project> opens every material this project uses on the guide;
+        // #slug then scrolls to the one that was clicked
+        return '<a href="materials.html?for='+encodeURIComponent(id)+(slug?'#'+slug:'')+'">'+esc(w.toUpperCase())+'</a>';
       }).join('<span class="sep" aria-hidden="true">/</span>') +
     '</div>' : '';
 
@@ -588,7 +590,7 @@
       '<div class="hero-specs">' +
         (year?'<span class="sp">'+esc(year)+'</span>':'') +
         (real(p.size)?'<span class="sp">'+esc(p.size)+'</span>':'') +
-        (real(p.status)?'<span class="sp st">'+esc(p.status)+'</span>':'') +
+        (real(p.status)?'<span class="brk" aria-hidden="true"></span><span class="sp st">'+esc(p.status)+'</span>':'') +
         '<a class="inq" href="contact.html?about=' + encodeURIComponent(p.title) + '">INQUIRE &rarr;</a>' +
       '</div>' +
       heroMatl +
@@ -806,8 +808,10 @@
         '</div>' +
         '<div class="mv-group mv-mid">' +
           '<select class="mv-sel" aria-label="Material" hidden></select>' +
-          '<button class="mv-btn" data-act="power">LIGHT ON</button>' +
-          '<input class="mv-dim" type="range" min="0" max="100" value="80" aria-label="Lamp brightness">' +
+          // hidden until the model has loaded AND turned out to have a lamp in it
+          // (an emissive material). A speaker does not get a LIGHT ON button.
+          '<button class="mv-btn" data-act="power" hidden>LIGHT ON</button>' +
+          '<input class="mv-dim" type="range" min="0" max="100" value="80" aria-label="Lamp brightness" hidden>' +
         '</div>' +
       '</div>' +
     '</div>' : '';
@@ -895,7 +899,7 @@
   var hasMore = !!process;
   var readmore = hasMore ?
     '<div class="readmore" id="readmoreWrap">' +
-      '<button type="button" class="read-more-link" id="readMoreBtn" aria-expanded="false" aria-controls="procReveal">Read more, process and detail</button>' +
+      '<button type="button" class="read-more-link" id="readMoreBtn" aria-expanded="false" aria-controls="procReveal">Process and detail</button>' +
     '</div>' : '';
   var processReveal = hasMore ? '<div class="proc-reveal" id="procReveal" hidden>' + process + '</div>' : '';
 
@@ -1031,6 +1035,22 @@
     var ZOOM_IN = 1.25;          // 25% bigger than default, the whole range
     var framedOrbit = null;      // what RESET goes back to, once we know it
     var homeTheta = null, homePhi = null;
+    /* EXPLODED FRAMING. An exploded product is about twice the size of the
+       assembled one, so the camera backs off by p.modelExplode.zoom while it is
+       open and looks p.modelExplode.rise metres higher (the parts lift off the
+       floor). Both numbers come from the pipeline (<NAME>_web.json next to the
+       GLB). Without them the explode still plays, just at the assembled framing. */
+    var EXP = (p.modelExplode && p.modelExplode.zoom) ? p.modelExplode : { zoom:1, rise:0 };
+    var homeR = null, homeTarget = null, exOpen = false;
+    function applyExplodeFraming(){
+      if(homeR === null) return;
+      var z = exOpen ? EXP.zoom : 1;
+      var o = mv.getCameraOrbit();
+      mv.minCameraOrbit = "auto auto " + (homeR * z / ZOOM_IN).toFixed(5) + "m";
+      mv.maxCameraOrbit = "auto auto " + (homeR * z).toFixed(5) + "m";
+      mv.cameraOrbit = o.theta.toFixed(5)+"rad "+o.phi.toFixed(5)+"rad "+(homeR * z).toFixed(5)+"m";
+      if(homeTarget) mv.cameraTarget = homeTarget.x.toFixed(5)+"m "+(homeTarget.y + (exOpen ? (EXP.rise||0) : 0)).toFixed(5)+"m "+homeTarget.z.toFixed(5)+"m";
+    }
 
     function frameModel(){
       var stage = mv.parentElement;                       // .cad-stage
@@ -1056,10 +1076,24 @@
            the model shrinks rather than becoming unviewable. */
         var cap = (window.innerHeight || 900) * 1.2;
         if(targetPx > cap) targetPx = cap;
-        document.documentElement.style.setProperty("--model-fill-eff",
-          String(Math.round((targetPx / slotPx) * 1000) / 1000));
         var dims   = mv.getDimensions();                  // metres
         var modelH = dims && dims.y ? dims.y : 0;
+        /* WIDE PRODUCTS (2026-10-02, OMNI). Everything above sizes the model by
+           HEIGHT, which was tuned on a lamp: tall and thin, so 2.4 slots of
+           height is still a narrow object. A product that is as wide as it is
+           tall (a speaker cube) at that height is a metre of wood across the
+           text column beside it. So when the model is wide for its height, its
+           on-screen WIDTH is held inside the slot instead, and the height
+           follows. Width is the plan diagonal: the widest the model gets as it
+           turns. Tall products (ratio under 0.8) never reach this branch, so
+           KART is exactly as it was. */
+        var modelW = dims ? Math.sqrt(dims.x * dims.x + dims.z * dims.z) : 0;
+        if(modelH && modelW / modelH > 0.8){
+          var wLimit = stage.getBoundingClientRect().width * 0.84 * modelH / modelW;
+          if(wLimit < targetPx) targetPx = wLimit;
+        }
+        document.documentElement.style.setProperty("--model-fill-eff",
+          String(Math.round((targetPx / slotPx) * 1000) / 1000));
         var t      = Math.tan((mv.getFieldOfView() || 45) * Math.PI / 360);
         if(!modelH || !targetPx || !isFinite(t) || t <= 0) return;
         var r = (elH * modelH) / (2 * targetPx * t);
@@ -1075,6 +1109,9 @@
         mv.minCameraOrbit = "auto auto " + (r / ZOOM_IN).toFixed(5) + "m";
         mv.maxCameraOrbit = "auto auto " + r.toFixed(5) + "m";
         mv.cameraOrbit = o.theta.toFixed(5)+"rad "+o.phi.toFixed(5)+"rad "+r.toFixed(5)+"m";
+        homeR = r;
+        if(!homeTarget){ try { var ct = mv.getCameraTarget(); homeTarget = { x:ct.x, y:ct.y, z:ct.z }; } catch(e2){} }
+        if(exOpen) applyExplodeFraming();
       } catch(e){ /* leave model-viewer's own framing in place */ }
       finally { if(stage) stage.classList.add("mv-framed"); }
     }
@@ -1329,6 +1366,7 @@
       // the attribute's placeholder, and would put the model back at the wrong
       // size on anything but the window it was hand-tuned for.
       mv.cameraOrbit = framedOrbit || defaultOrbit;
+      if(exOpen){ applyExplodeFraming(); return; }      // exploded: keep the wider framing, just go home on the angles
       // also recentre. Panning is disabled now, but anyone who shifted the
       // model before this change still has that offset stored in cameraTarget,
       // and resetting the orbit alone would leave it stuck off-centre.
@@ -1342,17 +1380,58 @@
     // reads as "technical drawing" next to the textured render, same idea as
     // the reference's wireframe/render button. Swap this for a real asset
     // swap whenever one exists, this is a stand-in, not the final behaviour.
-    if(wfBtn){
-      var wireOn = false;
-      wfBtn.addEventListener("click", function(){
-        wireOn = !wireOn;
-        wfBtn.classList.toggle("active", wireOn);
-        mv.style.filter = wireOn ? "grayscale(1) contrast(1.35) brightness(1.08)" : "";
-        mv.exposure = wireOn ? 1.6 : 1;
-      });
+    /* REAL DRAWING VIEW (2026-10-02). A GLB from the NEWO pipeline carries its
+       own ink: every crease and border of every part as a thin tube, all in one
+       material called WEB_Ink, exported invisible. Drawing view turns that
+       material on and turns every other material into bare paper (no texture,
+       no metal, fully rough), so what is left is the linework with a soft tone
+       on the faces - and it still explodes, turns and zooms, because it is the
+       same model. Done entirely through model-viewer's material API.
+       A GLB without WEB_Ink (KART's, for now) keeps the old filter stand-in. */
+    var PAPER_LIN = [0.62, 0.607, 0.578, 1], INK_LIN = [0.007, 0.007, 0.007, 1];
+    var inkMat = null, drawSaved = null, wireOn = false;
+    function setDrawing(on){
+      wireOn = on;
+      if(wfBtn) wfBtn.classList.toggle("active", on);
+      // the button can be pressed before the load handler has run: look again
+      if(!inkMat){ try { inkMat = (mv.model.materials || []).filter(function(m){ return m.name === "WEB_Ink"; })[0] || null; } catch(e){} }
+      if(!inkMat){
+        mv.style.filter = on ? "grayscale(1) contrast(1.35) brightness(1.08)" : "";
+        mv.exposure = on ? 1.6 : 1;
+        return;
+      }
+      try {
+        var mats = (mv.model && mv.model.materials) || [];
+        if(on){
+          drawSaved = [];
+          mats.forEach(function(m){
+            if(m === inkMat || m.isLoaded === false) return;
+            var pb = m.pbrMetallicRoughness;
+            drawSaved.push({ m:m, c:pb.baseColorFactor.slice(), me:pb.metallicFactor, r:pb.roughnessFactor,
+                             t:(pb.baseColorTexture ? pb.baseColorTexture.texture : null), e:(m.emissiveFactor||[0,0,0]).slice() });
+            pb.setBaseColorFactor(PAPER_LIN); pb.setMetallicFactor(0); pb.setRoughnessFactor(1);
+            if(pb.baseColorTexture && pb.baseColorTexture.texture) pb.baseColorTexture.setTexture(null);
+            try { m.setEmissiveFactor([0,0,0]); } catch(e){}
+          });
+          inkMat.pbrMetallicRoughness.setBaseColorFactor(INK_LIN);
+          inkMat.setAlphaMode("OPAQUE");
+        } else if(drawSaved){
+          drawSaved.forEach(function(s){
+            var pb = s.m.pbrMetallicRoughness;
+            pb.setBaseColorFactor(s.c); pb.setMetallicFactor(s.me); pb.setRoughnessFactor(s.r);
+            if(s.t && pb.baseColorTexture) pb.baseColorTexture.setTexture(s.t);
+            try { s.m.setEmissiveFactor(s.e); } catch(e){}
+          });
+          drawSaved = null;
+          inkMat.pbrMetallicRoughness.setBaseColorFactor([INK_LIN[0], INK_LIN[1], INK_LIN[2], 0]);
+          inkMat.setAlphaMode("MASK");
+        }
+      } catch(e){}
     }
+    if(wfBtn) wfBtn.addEventListener("click", function(){ setDrawing(!wireOn); });
 
     mv.addEventListener("load", function(){
+      try { inkMat = (mv.model.materials || []).filter(function(m){ return m.name === "WEB_Ink"; })[0] || null; } catch(e){ inkMat = null; }
       frameModel();
       // two frames of settle, then reveal: the first frame model-viewer paints
       // is its own auto-framing, which at these element proportions is the
@@ -1382,9 +1461,14 @@
         else { mv.exposure = 0.3 + 1.1*v; }   // fallback: dim the whole scene
       }
       function setPwr(on){ lampOn=on; pwrBtn.classList.toggle("active",on); pwrBtn.textContent = on?"LIGHT ON":"LIGHT OFF"; applyLamp(); }
-      if(pwrBtn) pwrBtn.addEventListener("click", function(){ setPwr(!lampOn); });
-      if(dim) dim.addEventListener("input", function(){ level=(+dim.value)/100; if(!lampOn) lampOn=true; setPwr(true); });
-      setPwr(true);
+      // p.modelLight:true forces the controls on for a lamp whose emissive
+      // material could not be read (they then dim the whole scene instead).
+      var hasLamp = emis.length > 0 || p.modelLight === true;
+      if(hasLamp){
+        if(pwrBtn){ pwrBtn.hidden = false; pwrBtn.addEventListener("click", function(){ setPwr(!lampOn); }); }
+        if(dim){ dim.hidden = false; dim.addEventListener("input", function(){ level=(+dim.value)/100; if(!lampOn) lampOn=true; setPwr(true); }); }
+        setPwr(true);
+      }
 
       // material variants (KHR_materials_variants): show a picker if the GLB
       // carries them. Author them in Blender / gltf-transform; nothing to wire
@@ -1394,7 +1478,9 @@
         sel.hidden = false;
         sel.innerHTML = vs.map(function(v){ return '<option value="'+v+'">'+String(v).toUpperCase()+'</option>'; }).join("");
         sel.value = mv.variantName || vs[0];
-        sel.addEventListener("change", function(){ mv.variantName = sel.value; });
+        // a finish change swaps materials under the drawing view, so step out
+        // of it first: you asked to see a finish, show the finish.
+        sel.addEventListener("change", function(){ if(wireOn) setDrawing(false); mv.variantName = sel.value; });
       }
 
       // explode: plays a baked glTF animation whose name contains "explode".
@@ -1409,9 +1495,12 @@
         try { mv.currentTime = 0; } catch(e){}
         var open = false, raf = null;
         exBtn.addEventListener("click", function(){
-          open = !open;
+          open = !open; exOpen = open;
           exBtn.classList.toggle("active", open);
-          var dur = mv.duration || 1, from = mv.currentTime || 0, to = open ? dur : 0;
+          applyExplodeFraming();
+          // stop a hair short of the end: the clip loops, so currentTime = duration
+          // wraps straight back to 0 and the product snaps shut again
+          var dur = Math.max(0, (mv.duration || 1) - 0.02), from = mv.currentTime || 0, to = open ? dur : 0;
           var t0 = performance.now(), D = 620;
           cancelAnimationFrame(raf);
           (function step(now){

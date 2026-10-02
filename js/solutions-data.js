@@ -94,7 +94,7 @@ const SERVICES = [
     what: "A looks-like, works-like prototype built in the shop. Wood, metal, 3D printing, and electronics with firmware where the product needs it.",
     time: "4 to 8 weeks", from: "4,800" },
   { name: "Renders and 3D for web",
-    what: "Studio renders, exploded views, and a 3D model that runs in a browser or in AR, from your CAD or mine.",
+    what: "Studio renders, exploded views, and a 3D model that runs in a browser or in AR, from your CAD or the studio's.",
     time: "1 to 2 weeks", from: "600" },
   { name: "CAD, drafting and shop time",
     what: "SolidWorks modelling, drawings, CNC files, fabrication and finishing by the hour or the day.",

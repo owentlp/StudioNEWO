@@ -333,7 +333,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    context, so the panel's own z-index can't clear a sibling label on its own. */
 .comp-label.open{z-index:20;}
 .comp-info{display:inline-flex; align-items:center; gap:clamp(3px,.65cqw,6px); padding:3px 0; background:none; border:0; cursor:pointer; font-family:var(--body); color:var(--ink);}
-.comp-name{font-size:clamp(8px,2.1cqw,13px); letter-spacing:clamp(.05em,.9cqw,.14em); text-transform:uppercase; white-space:nowrap; text-shadow:0 0 4px var(--paper),0 0 4px var(--paper),0 0 4px var(--paper);}
+.comp-name{font-size:clamp(10px,2.1cqw,13px); letter-spacing:clamp(.05em,.9cqw,.14em); text-transform:uppercase; white-space:nowrap; text-shadow:0 0 4px var(--paper),0 0 4px var(--paper),0 0 4px var(--paper);}
 .comp-info img{width:clamp(8px,1.3cqw,12px); height:auto; display:block; flex:0 0 auto;}
 .comp-info:hover .comp-name,.comp-label.open .comp-name{color:var(--red);}
 .comp-panel{position:absolute; left:0; top:calc(100% + 6px); width:max-content; max-width:min(260px,60vw); background:var(--paper); border:1px solid rgba(20,20,20,.16); padding:11px 13px; display:none; z-index:5; box-shadow:0 8px 30px rgba(0,0,0,.12);}
@@ -1100,27 +1100,49 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    a drawing's title block carries its revision */
 .hero-specs .st{display:inline-flex; align-items:center; gap:7px; white-space:nowrap;}
 .hero-specs .st::before{content:""; width:7px; height:7px; background:var(--red); flex:none;}
-/* footer note: two halves that straddle the wordmark on its own line, so the
-   footer is no taller than its three marks. Copyright left, links right.
-   The wordmark is 5x as wide as it is tall, hence --hdr * 2.5 from centre. */
+/* a long status (KART) ran 6px off a phone screen: let it wrap there */
+@media (max-width:600px){ .hero-specs .st{white-space:normal;} }
+/* the status and INQUIRE always start the second line of the spec row, so the
+   row reads the same on every product whatever the length of the size */
+.hero-specs .brk{flex-basis:100%; height:0;}
+/* STACKED HERO (tablet / phone): the name and tagline come FIRST, above the
+   photo; the summary follows the materials. .hero-aside dissolves so its two
+   halves can be ordered as grid items of .hero. */
+@media (max-width:900px){
+  .hero-aside{display:contents;}
+  .hero-aside-top{grid-column:1 / 13; order:-1;}
+  .hero-aside-btm{grid-column:1 / 13; order:1;}
+  .hero-title{margin-bottom:0;}
+}
+@media (max-width:600px){
+  /* Read more: text runs the full width instead of a ~170px half column */
+  .scatter .cell.proc-note{grid-column:1 / -1 !important;}
+}
+/* footer note: two halves on the wordmark's own line, so the footer is no
+   taller than its three marks. Copyright sits in the MIDDLE of the gap between
+   the logo and the wordmark, the links in the middle of the gap between the
+   wordmark and the burger. Gap centre, from the footer's edge:
+     logo ends at --fe + --hdr, wordmark (5x as wide as tall) starts at
+     50% - 2.5 --hdr, so the middle is 25% + --fe/2 - .75 --hdr. */
+.site-foot{--fe:var(--mar);}
+.site-foot[data-autofoot]{--fe:var(--mar-edge);}
 .foot-note{position:absolute; top:0; height:var(--hdr); line-height:var(--hdr); white-space:nowrap; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink);}
-.foot-note.fn-l{right:calc(50% + var(--hdr) * 2.5 + 28px);}
-.foot-note.fn-r{left:calc(50% + var(--hdr) * 2.5 + 28px);}
+.foot-note.fn-l{left:calc(25% + var(--fe) / 2 - var(--hdr) * .75); transform:translateX(-50%);}
+.foot-note.fn-r{right:calc(25% + var(--fe) / 2 - var(--hdr) * .75); transform:translateX(50%);}
 .foot-note a{color:inherit; text-decoration:none; border-bottom:1px solid rgba(20,20,20,.35); padding-bottom:2px;}
 .foot-note a:hover{color:var(--red); border-color:var(--red);}
 /* bigger tap area without moving the underline */
 .foot-note a{position:relative;}
 .foot-note a::after{content:""; position:absolute; inset:-9px -4px;}
 .foot-note .sep{margin:0 9px; opacity:.5;}
-/* no room beside the wordmark: the halves drop into the footer's existing
-   bottom padding, left and right, still adding no height */
-@media (max-width:1040px){
-  .foot-note{top:calc(var(--hdr) + 5px); height:22px; line-height:22px; font-size:9px; letter-spacing:.12em;}
-  .foot-note.fn-l{right:auto; left:var(--mar);}
-  .foot-note.fn-r{left:auto; right:var(--mar);}
-  .site-foot[data-autofoot] .foot-note.fn-l{left:var(--mar-edge);}
-  .site-foot[data-autofoot] .foot-note.fn-r{right:var(--mar-edge);}
-  .foot-note .sep{margin:0 5px;}
+@media (max-width:1040px){ .foot-note{font-size:9px; letter-spacing:.12em;} .foot-note .sep{margin:0 5px;} }
+/* gap too narrow for the text: same centres, one line lower, inside the
+   footer's existing bottom padding (still no added height) */
+@media (max-width:880px){ .foot-note{top:calc(var(--hdr) + 5px); height:22px; line-height:22px;} }
+/* phones (same point --hdr drops to 30px): left and right edges */
+@media (max-width:600px){
+  .foot-note.fn-l{left:var(--fe); transform:none;}
+  .foot-note.fn-r{right:var(--fe); transform:none;}
 }
 @media (max-width:480px){
   .foot-note{font-size:8.5px; letter-spacing:.06em;}

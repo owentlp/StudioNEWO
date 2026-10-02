@@ -31,7 +31,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=54">
+<link rel="stylesheet" href="css/style.css?v=56">
 <style>
   /* contact form: same editorial grammar as the rest of the site, no boxes,
      thin underline fields, tiny OCR-B labels, one red action. */
@@ -87,7 +87,7 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
-<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page wrap" id="content" tabindex="-1">
   <!-- Header removed by request, same as the info page: the menu already says
@@ -96,8 +96,8 @@
        engines and screen readers, and losing it would be a regression nobody
        can see. .vh is defined in css/style.css. -->
   <h1 class="vh">Contact</h1>
-  <p class="lead">For project inquiries, collaborations, or freelance and consulting work, get in touch.</p>
-  <p class="desc clead-more">It helps to say what you are making, your timeline, and a rough budget. Replies usually come within a few days. Services and price guides are on the <a href="solutions.html">Solutions</a> page.</p>
+  <p class="lead" id="clead">For project inquiries, collaborations, or freelance and consulting work, get in touch.</p>
+  <p class="desc clead-more" id="cleadMore">It helps to say what you are making, your timeline, and a rough budget. Replies usually come within a few days. Services and price guides are on the <a href="solutions.html#services">Solutions</a> page.</p>
 
   <form class="cform" id="contactForm" novalidate>
     <div class="cfield">
@@ -155,9 +155,9 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=20"></script>
+<script src="js/projects-data.js?v=24"></script>
 <script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=21"></script>
+<script src="js/menu.js?v=25"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening
@@ -230,6 +230,12 @@
     if(isProduct){
       document.getElementById("cf-notify-name").textContent = ABOUT;
       document.getElementById("cf-notify-wrap").hidden = false;
+      /* One contact page for everything. Arriving from a product's INQUIRE
+         button, the lead is about that product instead of asking a would-be
+         buyer for a project timeline and budget. */
+      var T = ABOUT.toUpperCase();
+      document.getElementById("clead").textContent = "Asking about " + T + "? Send a note about availability, price, or a custom version.";
+      document.getElementById("cleadMore").innerHTML = 'Replies usually come within a few days. For design and consulting work, services and price guides are on the <a href="solutions.html#services">Solutions</a> page.';
     }
   }
   // subject line of the email Formspree sends (its _subject field)
