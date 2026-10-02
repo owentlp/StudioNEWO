@@ -134,7 +134,10 @@
   function css(c, a){ return "rgba(" + (c[0]|0) + "," + (c[1]|0) + "," + (c[2]|0) + "," + (a == null ? 1 : a) + ")"; }
 
   /* ---------- weather ---------- */
-  var WX = { cover: 0, kind: "clear" };   // kind: clear | rain | snow | fog | storm
+  /* cover + kind are what the weather service says. wet / fog / sn / st are the
+     same thing as numbers, so a change of weather can be eased rather than
+     snapped (see settle). */
+  var WX = { cover: 0, kind: "clear", wet: 0, fog: 0, sn: 0, st: 0 };   // kind: clear | rain | snow | fog | storm
   var FORCED = { clear:[0.02,"clear"], partly:[0.35,"clear"], cloudy:[0.65,"clear"], overcast:[0.95,"clear"],
                  rain:[0.9,"rain"], snow:[0.9,"snow"], fog:[0.8,"fog"], storm:[1,"storm"] };
   function kindFromCode(c){
@@ -145,24 +148,51 @@
     if(c >= 95) return "storm";
     return "clear";
   }
-  function getWeather(cb){
+  function factors(k){
+    return { wet: (k === "rain" || k === "storm") ? 1 : (k === "snow" ? 0.6 : 0), fog: k === "fog" ? 1 : 0,
+             sn: k === "snow" ? 1 : 0, st: k === "storm" ? 1 : 0 };
+  }
+  function setNow(cover, kind){
+    var f = factors(kind);
+    WX.cover = cover; WX.kind = kind; WX.wet = f.wet; WX.fog = f.fog; WX.sn = f.sn; WX.st = f.st;
+  }
+  /* THE LAST WEATHER SEEN IS KEPT (localStorage) and used for the very first
+     paint, so the sky behind the loading mark is already the sky the page ends
+     up with. It used to start clear and jump to the real weather when the
+     forecast answered. A fresh forecast still replaces it: unchanged = nothing
+     to see, changed = eased over about a second, never a jump. */
+  var WKEY = "newo-wx-" + LOC[0].toFixed(1) + "," + LOC[1].toFixed(1);
+  function stored(){ try { return JSON.parse(localStorage.getItem(WKEY) || "null"); } catch(e){ return null; } }
+  var easeT = null;
+  function settle(cover, kind, cb){
+    if(easeT){ clearInterval(easeT); easeT = null; }
+    var a = { cover: WX.cover, wet: WX.wet, fog: WX.fog, sn: WX.sn, st: WX.st }, b = factors(kind);
+    b.cover = cover;
+    var same = kind === WX.kind && Math.abs(cover - a.cover) < 0.03;
+    if(same || !last || document.hidden || RM){ setNow(cover, kind); if(last) draw(); return cb(); }
+    WX.kind = kind;
+    var t0 = Date.now(), DUR = 1200, N = ["cover", "wet", "fog", "sn", "st"];
+    easeT = setInterval(function(){
+      var t = Math.min(1, (Date.now() - t0) / DUR), e = t * t * (3 - 2 * t);
+      for(var i = 0; i < N.length; i++) WX[N[i]] = a[N[i]] + (b[N[i]] - a[N[i]]) * e;
+      draw();
+      if(t >= 1){ clearInterval(easeT); easeT = null; cb(); }
+    }, 66);
+  }
+  function getWeather(cb, force){
     var f = Q.get("wx");
-    if(f && FORCED[f]){ WX.cover = FORCED[f][0]; WX.kind = FORCED[f][1]; return cb(); }
-    var key = "newo-wx-" + LOC[0].toFixed(1) + "," + LOC[1].toFixed(1);
-    try {
-      var c = JSON.parse(sessionStorage.getItem(key) || "null");
-      if(c && Date.now() - c.at < 20 * 60000){ WX.cover = c.cover; WX.kind = c.kind; return cb(); }
-    } catch(e){}
+    if(f && FORCED[f]){ setNow(FORCED[f][0], FORCED[f][1]); if(last) draw(); return cb(); }
+    var c = stored();
+    if(!force && c && Date.now() - c.at < 20 * 60000) return settle(c.cover, c.kind, cb);
     var url = "https://api.open-meteo.com/v1/forecast?latitude=" + LOC[0].toFixed(2) + "&longitude=" + LOC[1].toFixed(2) +
               "&current=cloud_cover,weather_code&timezone=auto";
     var done = false, timer = setTimeout(function(){ if(!done){ done = true; cb(); } }, 4000);
     fetch(url).then(function(r){ return r.json(); }).then(function(j){
       if(done) return; done = true; clearTimeout(timer);
       var cur = j && j.current || {};
-      WX.cover = Math.max(0, Math.min(1, (cur.cloud_cover || 0) / 100));
-      WX.kind = kindFromCode(cur.weather_code);
-      try { sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), cover: WX.cover, kind: WX.kind })); } catch(e){}
-      cb();
+      var cover = Math.max(0, Math.min(1, (cur.cloud_cover || 0) / 100)), kind = kindFromCode(cur.weather_code);
+      try { localStorage.setItem(WKEY, JSON.stringify({ at: Date.now(), cover: cover, kind: kind })); } catch(e){}
+      settle(cover, kind, cb);
     }).catch(function(){ if(!done){ done = true; clearTimeout(timer); cb(); } });
   }
 
@@ -181,11 +211,10 @@
   function draw(){
     var date = now(), s = sun(date, LOC[0], LOC[1]), m = moon(date, LOC[0], LOC[1]);
     var P = palette(s.alt), cov = WX.cover, k = WX.kind;
-    var wet = (k === "rain" || k === "storm") ? 1 : (k === "snow" ? 0.6 : 0), fog = k === "fog" ? 1 : 0;
+    var wet = WX.wet, fog = WX.fog;
     // clouds and weather pull the sky toward grey; rain darkens, snow / fog lighten
     var g = Math.min(0.85, cov * 0.7 + wet * 0.2 + fog * 0.5);
-    var level = 1 - wet * 0.22 + (k === "snow" ? 0.12 : 0) + fog * 0.1;
-    if(k === "storm") level -= 0.15;
+    var level = 1 - wet * 0.22 + WX.sn * 0.12 + fog * 0.1 - WX.st * 0.15;
     var zen = grey(P.zen, g, level), hor = grey(P.hor, g * 0.9, level * 1.03);
     // horizon haze line slightly lighter than the horizon colour
     var haze = mix(hor, [255, 250, 240], 0.08 + fog * 0.25);
@@ -267,18 +296,18 @@
     var g = c.getContext("2d"), img = g.createImageData(w, h), D = img.data;
     var seed = 1337; function rnd(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
     var GS = 64, grid = []; for(var i = 0; i < GS * GS; i++) grid.push(rnd());
-    function n(x, y){ var xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
-      function v(a, b){ return grid[((a % GS + GS) % GS) + ((b % GS + GS) % GS) * GS]; }
+    function n(x, y, px){ var xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+      function v(a, b){ a = ((a % px) + px) % px; return grid[(a % GS) + ((b % GS + GS) % GS) * GS]; }   // px: wrap in x so the tile has no seam
       var u = xf * xf * (3 - 2 * xf), w2 = yf * yf * (3 - 2 * yf);
       return (v(xi, yi) * (1 - u) + v(xi + 1, yi) * u) * (1 - w2) + (v(xi, yi + 1) * (1 - u) + v(xi + 1, yi + 1) * u) * w2; }
     for(var y = 0; y < h; y++) for(var x = 0; x < w; x++){
       var fx = x / w * 8, fy = y / h * 4, a = 0, amp = 0.55, f = 1;
-      for(var o = 0; o < 5; o++){ a += n(fx * f, fy * f) * amp; f *= 2; amp *= 0.5; }
+      for(var o = 0; o < 5; o++){ a += n(fx * f, fy * f, 8 * f) * amp; f *= 2; amp *= 0.5; }
       D[(y * w + x) * 4 + 3] = Math.max(0, Math.min(255, a * 255));
     }
     g.putImageData(img, 0, 0); return c;
   }
-  var cloudKey = "";
+  var cloudKey = "", precipCls = null, LIVE = false;
   function paintClouds(P, zen, hor, cov, k, alt, clear){
     if(!clouds) return;
     var key = [cov.toFixed(2), k, Math.round(alt / 2), Math.round(clear * 10)].join("|");
@@ -310,18 +339,35 @@
     clouds.style.opacity = 1;
     clouds.classList.toggle("drift", !RM);
     if(precip){
-      precip.className = (k === "rain" || k === "storm") ? "rain" : (k === "snow" ? "snow" : "");
-      if(RM) precip.classList.add("still");
+      var pc = (k === "rain" || k === "storm") ? "rain" : (k === "snow" ? "snow" : "");
+      if(pc !== precipCls){
+        precipCls = pc;
+        // .in = fade it in. Only once the page is up: on the first paint it is simply there.
+        precip.className = pc + (pc && LIVE && !RM ? " in" : "") + (RM ? " still" : "");
+      }
     }
   }
 
   function tick(){ draw(); }
-  size(); getWeather(tick);
-  draw();                                               // first paint before the weather lands
+  size();
+  (function(){                                          // first paint = the last weather seen here
+    var f = Q.get("wx"), c = stored();
+    if(f && FORCED[f]) setNow(FORCED[f][0], FORCED[f][1]);
+    else if(c) setNow(c.cover, c.kind);
+  })();
+  draw();
+  /* .live switches on the cloud layer's fade. It is added AFTER the first paint,
+     so on load the clouds are just there instead of fading in behind the logo. */
+  setTimeout(function(){ LIVE = true; if(clouds) clouds.classList.add("live"); }, 80);
+  /* NEWO_SKY.ready resolves when the sky has settled on the real weather (or
+     after 1.5s if the forecast is slow). The home page holds its reveal on it. */
+  var readyDone, ready = new Promise(function(res){ readyDone = res; });
+  setTimeout(readyDone, 1500);
+  getWeather(function(){ readyDone(); });
   var rt; addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(function(){ size(); draw(); }, 200); });
   setInterval(function(){ if(!document.hidden) draw(); }, 60000);
   if(starTwinkle()) setInterval(function(){ if(!document.hidden && last && last.s.alt < -5) draw(); }, 2500);
   function starTwinkle(){ return !RM; }
-  setInterval(function(){ if(!document.hidden && !Q.get("wx")){ try { sessionStorage.clear(); } catch(e){} getWeather(tick); } }, 20 * 60000);
-  window.NEWO_SKY = { redraw: draw, state: function(){ return { loc: LOC, wx: WX, sun: last && last.s }; } };
+  setInterval(function(){ if(!document.hidden && !Q.get("wx")) getWeather(tick, true); }, 20 * 60000);
+  window.NEWO_SKY = { ready: ready, redraw: draw, state: function(){ return { loc: LOC, wx: WX, sun: last && last.s }; } };
 })();

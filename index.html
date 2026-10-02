@@ -87,7 +87,7 @@
      page genuinely needs to do differently - the fixed non-scrolling body, the
      background video, the card dock - still wins on source order. What is gone
      from below is only the duplicated half. -->
-<link rel="stylesheet" href="css/style.css?v=53">
+<link rel="stylesheet" href="css/style.css?v=54">
 
 <style>
 /* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
@@ -114,14 +114,18 @@ body{font-family:var(--body); color:var(--ink); background:var(--paper); overflo
    the clouds and rain only ever move with transform, so they stay on the
    compositor and cost nothing per frame on the main thread. ---- */
 #sky{position:fixed; top:0; left:0; width:100%; height:100vh; height:100lvh; z-index:-4; display:block; background:linear-gradient(#4f8bd2,#c8def0);}
-#sky-clouds{position:fixed; top:0; left:0; width:200%; height:72vh; height:72lvh; z-index:-3; pointer-events:none; opacity:0; transition:opacity 1.6s ease;
+#sky-clouds{position:fixed; top:0; left:0; width:200%; height:72vh; height:72lvh; z-index:-3; pointer-events:none; opacity:0;
   background-repeat:repeat-x; background-size:50% 100%;
   -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent); mask-image:linear-gradient(to bottom,#000 55%,transparent);}
+#sky-clouds.live{transition:opacity 1.6s ease;}
 #sky-clouds.drift{animation:skyDrift 600s linear infinite; will-change:transform;}
 @keyframes skyDrift{to{transform:translateX(-50%);}}
 #sky-precip{position:fixed; left:-10%; top:-20%; width:120%; height:140%; z-index:-2; pointer-events:none; display:none;}
 #sky-precip.rain{display:block; opacity:.55; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160'%3E%3Cg stroke='%23dfe6ee' stroke-width='1' stroke-linecap='round' opacity='.55'%3E%3Cpath d='M10 0l-6 22M58 40l-6 22M100 18l-6 22M32 92l-6 22M80 110l-6 22M114 76l-6 22'/%3E%3C/g%3E%3C/svg%3E"); animation:skyRain .55s linear infinite;}
 #sky-precip.snow{display:block; opacity:.8; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='%23ffffff' opacity='.75'%3E%3Ccircle cx='12' cy='20' r='1.6'/%3E%3Ccircle cx='70' cy='60' r='1.2'/%3E%3Ccircle cx='110' cy='14' r='1.8'/%3E%3Ccircle cx='40' cy='104' r='1.3'/%3E%3Ccircle cx='96' cy='118' r='1.6'/%3E%3C/g%3E%3C/svg%3E"); animation:skySnow 9s linear infinite;}
+#sky-precip.rain.in{animation:skyRain .55s linear infinite, skyIn 1.4s ease 1;}
+#sky-precip.snow.in{animation:skySnow 9s linear infinite, skyIn 1.4s ease 1;}
+@keyframes skyIn{from{opacity:0;}}
 #sky-precip.still{animation:none;}
 @keyframes skyRain{to{transform:translate(-22px,160px);}}
 @keyframes skySnow{to{transform:translate(30px,140px);}}
@@ -140,15 +144,19 @@ body.bg-sky #soundToggle{display:none;}
    loaded BEFORE the loader markup so the sky and data-sky exist by then. */
 #loader{background:transparent;}
 body[data-sky="dark"] #loader .ld-mark{filter:invert(1);}
-/* one line saying what the studio is - the only words on the page */
-#home-line{position:absolute; z-index:4; top:86px; left:50%; transform:translateX(-50%); width:max-content; max-width:calc(100vw - 48px); text-align:center;
-  font-size:12px; letter-spacing:.16em; line-height:1.5; text-transform:uppercase; color:var(--ink); transition:color .8s ease, opacity 700ms ease;}
-#home-line a{color:inherit; text-decoration:none; border-bottom:1px solid currentColor; padding-bottom:1px;}
-#home-line a:hover{color:var(--red); border-color:var(--red);}
+/* The only words on the page, kept out of the way: a small spine label hanging
+   under the logo, set vertically. Hidden (not removed) on phones, where the
+   cards fill the screen; it stays in the page for search engines and screen
+   readers. */
+#home-line{position:fixed; z-index:4; top:91px; left:34px; margin:0;
+  font:inherit; font-weight:400; font-size:9px; letter-spacing:.2em; line-height:1; text-transform:uppercase; white-space:nowrap;
+  writing-mode:vertical-rl; color:var(--ink); pointer-events:none;}
+#home-line span{opacity:.5; transition:opacity .25s ease;}
+/* a raised card can reach the label on a short window: it steps aside rather
+   than sit over the photo (no text over images) */
+body:has(.dc:hover) #home-line span, body:has(.dc:focus-visible) #home-line span{opacity:0;}
 body[data-sky="dark"] #home-line{color:var(--paper);}
-#home-line.fade-in{transform:translateX(-50%);}
-@media (max-width:760px), (hover: none){ #home-line{top:66px; font-size:10.5px; letter-spacing:.12em; max-width:calc(100vw - 44px);} }
-@media (max-width:600px){ #home-line .hl-long{display:none;} }
+@media (max-width:760px), (max-height:700px), (hover: none){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
 
 /* ---- header: real logo (left) · wordmark (centre) · hamburger (right); all the SAME height ---- */
 #home{position:fixed; z-index:5; top:24px; left:34px; display:block; width:45px; height:45px; color:var(--ink); cursor:pointer;}
@@ -288,6 +296,10 @@ body[data-sky="dark"] #home-line{color:var(--paper);}
 
 .fade-in{opacity:0; transform:translateY(6px); transition:opacity 700ms ease, transform 700ms ease;}
 body.ready .fade-in{opacity:1; transform:none;}
+/* while js/loader3d.js is holding the logo on screen (body.ld-pinned) nothing
+   else shows: the page is sky + mark only, and the cards come up in the same
+   moment the mark lets go. */
+body.ready.ld-pinned .fade-in{opacity:0; transform:translateY(6px);}
 body.ready .fade-in.d1{transition-delay:.05s;}
 body.ready .fade-in.d2{transition-delay:.2s;}
 
@@ -393,7 +405,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="sky-clouds" aria-hidden="true"></div>
 <div id="sky-precip" aria-hidden="true"></div>
 <div id="sky-grain" aria-hidden="true"></div>
-<script src="js/sky.js?v=2"></script>
+<script src="js/sky.js?v=3"></script>
 <video class="bgvid" id="vidA" muted playsinline preload="none"></video>
 <video class="bgvid" id="vidB" muted playsinline preload="none"></video>
 
@@ -402,7 +414,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=14"></script>
+<script src="js/loader3d.js?v=15"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -412,7 +424,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
 
-<p id="home-line" class="fade-in d2">Industrial design studio, Toronto. <span class="hl-long">Products built to be repaired. </span><a href="solutions.html">Consulting &rarr;</a></p>
+<h1 id="home-line" class="fade-in d2"><span>Industrial design studio, Toronto</span></h1>
 
 <button id="burger" class="fade-in d1" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
@@ -437,14 +449,15 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="about.html">INFO</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <script src="js/projects-data.js?v=20"></script>
-<!-- main.js: the ?guides / "g" layout overlay, which every page but this
-     one already had. Its page-reveal half is skipped here - this page
-     runs its own reveal at the bottom of the file and never sets
-     __DEFER_REVEAL, so main.js simply adds body.ready a beat earlier and
-     the local copy is idempotent. -->
+<!-- main.js: the ?guides / "g" layout overlay, and the page reveal.
+     __DEFER_REVEAL hands the WHEN to this page: the reveal at the bottom of
+     the file waits for the card images and the sky, then calls
+     window.__revealPage(). Without the flag main.js lifts the loader 80ms
+     after the document is parsed, before the cards have loaded. -->
+<script>window.__DEFER_REVEAL = true;</script>
 <script src="js/main.js?v=4"></script>
 <script src="js/image-sizes.js?v=3"></script>
-<script src="js/menu.js?v=20"></script>
+<script src="js/menu.js?v=21"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -726,14 +739,29 @@ if(BG_MODE !== "sky"){ var _sk = document.getElementById("sky"); if(_sk) _sk.rem
 })();
 
 (function(){
+  /* REVEAL. Until body.ready the page is the sky and the loading mark, nothing
+     else. It is held until what the visitor is about to see is really there:
+       - every card image downloaded and decoded
+       - the fonts
+       - the sky settled on the real weather (js/sky.js, NEWO_SKY.ready)
+     then the mark fades out as the cards fade in. 4s hard cap so a slow image
+     can never strand the page on the loader. */
   var done = false;
-  function reveal(){ if(done) return; done = true; document.body.classList.add("ready"); }
-  // lift the loader once the page is parsed plus a short beat. The background
-  // video fades itself in when its first frame is ready, so we never wait on it.
-  if(document.readyState !== "loading") setTimeout(reveal, 350);
-  else document.addEventListener("DOMContentLoaded", function(){ setTimeout(reveal, 350); });
-  window.addEventListener("load", reveal);   // safety net
-  setTimeout(reveal, 1800);                   // hard cap
+  function reveal(){
+    if(done) return; done = true;
+    if(window.__revealPage) window.__revealPage(); else document.body.classList.add("ready");
+  }
+  function decoded(im){ return im.decode ? im.decode().catch(function(){}) : null; }
+  var imgs = [].slice.call(document.querySelectorAll("#dock img")).map(function(im){
+    if(im.complete) return decoded(im);
+    return new Promise(function(res){
+      im.addEventListener("load", res, { once:true }); im.addEventListener("error", res, { once:true });
+    }).then(function(){ return decoded(im); });
+  });
+  var sky = (window.NEWO_SKY && NEWO_SKY.ready) || null;
+  var fonts = (document.fonts && document.fonts.ready) || null;
+  Promise.all(imgs.concat([sky, fonts])).then(function(){ setTimeout(reveal, 150); }, reveal);
+  setTimeout(reveal, 4000);                   // hard cap
 })();
 
 /* the top-right dropdown menu (burger toggle, links, close-on-escape) is

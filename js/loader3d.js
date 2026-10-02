@@ -124,6 +124,9 @@
   function pin(){
     if(pinned) return;
     pinned = true;
+    /* body.ld-pinned: the home page keeps its cards and header hidden while the
+       loader is held, so the page appears exactly as the loader lets go. */
+    document.body.classList.add("ld-pinned");
     loaderEl.style.opacity = "1";
     /* visibility must be pinned TOO, not just opacity. css/style.css sets
        `body.ready #loader{opacity:0; visibility:hidden}` (visibility delayed to
@@ -144,6 +147,7 @@
   function unpin(){
     if(!pinned) return;
     pinned = false;
+    document.body.classList.remove("ld-pinned");
     if(pinCap){ clearTimeout(pinCap); pinCap = null; }
     loaderEl.style.opacity = "";      // hand back to the body.ready CSS rule
     loaderEl.style.visibility = "";   // ...including the delayed visibility flip

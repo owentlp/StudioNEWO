@@ -1100,11 +1100,33 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    a drawing's title block carries its revision */
 .hero-specs .st{display:inline-flex; align-items:center; gap:7px; white-space:nowrap;}
 .hero-specs .st::before{content:""; width:7px; height:7px; background:var(--red); flex:none;}
-/* footer note under the three marks */
-.site-foot{flex-wrap:wrap;}
-.foot-note{flex:0 0 100%; margin-top:30px; text-align:center; font-size:10.5px; letter-spacing:.14em; line-height:1.9; text-transform:uppercase; color:var(--ink);}
-.foot-note a{color:inherit; text-decoration:none; border-bottom:1px solid rgba(20,20,20,.35); padding-bottom:1px;}
+/* footer note: two halves that straddle the wordmark on its own line, so the
+   footer is no taller than its three marks. Copyright left, links right.
+   The wordmark is 5x as wide as it is tall, hence --hdr * 2.5 from centre. */
+.foot-note{position:absolute; top:0; height:var(--hdr); line-height:var(--hdr); white-space:nowrap; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink);}
+.foot-note.fn-l{right:calc(50% + var(--hdr) * 2.5 + 28px);}
+.foot-note.fn-r{left:calc(50% + var(--hdr) * 2.5 + 28px);}
+.foot-note a{color:inherit; text-decoration:none; border-bottom:1px solid rgba(20,20,20,.35); padding-bottom:2px;}
 .foot-note a:hover{color:var(--red); border-color:var(--red);}
+/* bigger tap area without moving the underline */
+.foot-note a{position:relative;}
+.foot-note a::after{content:""; position:absolute; inset:-9px -4px;}
 .foot-note .sep{margin:0 9px; opacity:.5;}
+/* no room beside the wordmark: the halves drop into the footer's existing
+   bottom padding, left and right, still adding no height */
+@media (max-width:1040px){
+  .foot-note{top:calc(var(--hdr) + 5px); height:22px; line-height:22px; font-size:9px; letter-spacing:.12em;}
+  .foot-note.fn-l{right:auto; left:var(--mar);}
+  .foot-note.fn-r{left:auto; right:var(--mar);}
+  .site-foot[data-autofoot] .foot-note.fn-l{left:var(--mar-edge);}
+  .site-foot[data-autofoot] .foot-note.fn-r{right:var(--mar-edge);}
+  .foot-note .sep{margin:0 5px;}
+}
+@media (max-width:480px){
+  .foot-note{font-size:8.5px; letter-spacing:.06em;}
+  .foot-note .sep{margin:0 4px;}
+  .foot-note .fn-x{display:none;}
+}
+@media (max-width:374px){ .foot-note .fn-s{display:none;} }
 /* material chips: 24px tall tap target on touch screens */
-@media (hover:none){ .hero-materials a{display:inline-block; padding:3px 0 2px;} .foot-note a{display:inline-block; padding:4px 0 3px;} }
+@media (hover:none){ .hero-materials a{display:inline-block; padding:3px 0 2px;} }

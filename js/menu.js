@@ -121,12 +121,12 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=53",
+      "css/style.css?v=54",
       "js/projects-data.js?v=20",
       "js/image-sizes.js?v=3",
       "js/main.js?v=4",
-      "js/menu.js?v=20",
-      "js/loader3d.js?v=14",
+      "js/menu.js?v=21",
+      "js/loader3d.js?v=15",
       "js/loader3d-core.js?v=1",
       "js/loader3d.worker.js?v=4",
       "logo/3d-logo.stl"
@@ -366,13 +366,15 @@
     var feet = document.querySelectorAll(".site-foot");
     for(var i = 0; i < feet.length; i++){
       if(feet[i].querySelector(".foot-note")) continue;
-      var d = document.createElement("div");
-      d.className = "foot-note";
-      d.innerHTML = '&copy; ' + new Date().getFullYear() + ' Studio NEWO, Toronto' +
-        '<span class="sep">/</span><a href="mailto:owen@studionewo.com">owen@studionewo.com</a>' +
+      /* two halves, one each side of the wordmark, on the wordmark's own line
+         (css/style.css .foot-note): the footer gains no height */
+      var l = document.createElement("div"), r = document.createElement("div");
+      l.className = "foot-note fn-l"; r.className = "foot-note fn-r";
+      l.innerHTML = '&copy; ' + new Date().getFullYear() + ' <span class="fn-s">Studio </span>NEWO<span class="fn-x">, Toronto</span>';
+      r.innerHTML = '<a href="mailto:owen@studionewo.com">Email</a>' +
         '<span class="sep">/</span><a href="https://www.instagram.com/studio.newo" target="_blank" rel="noopener">Instagram</a>' +
         '<span class="sep">/</span><a href="contact.html#privacy">Privacy</a>';
-      feet[i].appendChild(d);
+      feet[i].appendChild(l); feet[i].appendChild(r);
     }
   }
   if(document.readyState !== "loading") footNote(); else document.addEventListener("DOMContentLoaded", footNote);
