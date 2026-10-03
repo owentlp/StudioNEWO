@@ -263,7 +263,7 @@ const PROJECTS = {
       "scatter-04.jpg": "A machined aluminum diffuser cone beside a raw sand casting on the metal shop bench",
       "scatter-05.jpg": "An assembled OMNI prototype, purpleheart cabinet and top plate mounted on their aluminum standoffs"
     },
-    gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],
+    gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],   // keep at 4 thumbnails: the 3D model and mechanism are laid out against the gallery columns
     heroVideo: "",
     galleryVideo: "",
     model:     "",
@@ -277,11 +277,12 @@ const PROJECTS = {
     components: [],
     mechNotes: [],
     process:   [
-      { src:"scatter-01.jpg", bleed:"left", span:6, ar:"4/3", mt:0, cap:"Spinning the cone" },
+      /* 2026-10-02 image pass: scatter-04 (parts lying on a scrap pile) cut.
+         Captions are not displayed; they are kept true to the image anyway. */
+      { src:"scatter-01.jpg", bleed:"left", span:6, ar:"4/3", mt:0, cap:"Cabinet blanks" },
       { src:"scatter-03.jpg", col:"8 / 13",           mt:70,  cap:"Cast, before trimming" },
-      { src:"scatter-04.jpg", col:"2 / 7",            mt:110, cap:"Mounted on standoffs" },
-      { src:"scatter-02.jpg", bleed:"right", span:7, ar:"3/2", mt:60,  cap:"Cone and base" },
-      { src:"scatter-05.jpg", col:"1 / 7",            mt:80, cap:"Enclosure, mitered" }
+      { src:"scatter-05.jpg", col:"2 / 7",            mt:90,  cap:"Assembled, second cabinet behind" },
+      { src:"scatter-02.jpg", bleed:"right", span:5, ar:"4/3", mt:40,  cap:"The mould, opened" }
     ],
     processNotes:[],
     processText:"The project was initiated after evaluating a high-end omnidirectional speaker, the BeoLab 5. The goal was to engineer a similar acoustic geometry using premium, raw materials but delivering it at a fraction of the cost through highly efficient fabrication.",
@@ -330,7 +331,7 @@ const PROJECTS = {
       "scatter-07.png": "CAD elevations of NEB in front, side and exploded views",
       "scatter-08.jpg": "Close detail of Baltic birch plywood, showing the face grain and the sanded edge"
     },
-    gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg", "gallery-05.jpg"],
+    gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],   // gallery-05 cut 2026-10-02: near duplicate of gallery-02, and the orphan thumbnail
     heroVideo: "",
     galleryVideo: "",
     model:     "",
@@ -343,17 +344,18 @@ const PROJECTS = {
     components: [],
     mechNotes: [],
     process:   [
-      { src:"scatter-01.jpg", col:"1 / 6",                     mt:0,   cap:"Dowel framework" },
+      { src:"scatter-01.jpg", col:"1 / 6",                     mt:0,   cap:"Parts, laid out" },
       /* scatter-02.jpg removed 2026-09-16: it was byte-identical to gallery-05.jpg
          (and to the unreferenced gallery-06.jpg), so the same shot of the dowel
          frame appeared twice on one page. It stays in the gallery, where it
          reads as a build shot, and is out of the process scatter. */
-      { src:"scatter-03.webp", cut:true, col:"2 / 8",           mt:100, cap:"Drawings" },
-      { src:"scatter-04.jpg", bleed:"left",  span:5, ar:"1/1", mt:50,  cap:"Floor texture" },
-      { src:"scatter-05.jpg", bleed:"right", span:7, ar:"3/2", mt:60,   cap:"Plywood grain" },
-      { src:"scatter-06.png", col:"1 / 6",                     mt:60,  cap:"Dimensions" },
-      { src:"scatter-07.png", col:"7 / 12",                    mt:120, cap:"Exploded" },
-      { src:"scatter-08.jpg", bleed:"left",  span:5, ar:"3/4", mt:40,  cap:"Front" }
+      /* 2026-10-02 image pass. Cut: scatter-03.webp (same photo as gallery-02),
+         scatter-06.png (CAD render with a fake dark wood texture), scatter-07.png
+         (CAD screenshot with the view cube showing). Placement rewritten for
+         what the remaining files actually are. */
+      { src:"scatter-04.jpg", bleed:"right", span:6, ar:"4/3", mt:60,  cap:"Side panel" },
+      { src:"scatter-05.jpg", cut:true, col:"2 / 8",           mt:100, cap:"Drawings" },
+      { src:"scatter-08.jpg", bleed:"right", span:4, ar:"3/4", mt:40,  cap:"Plywood grain" }
     ],
     processNotes:[],
     processText:"The primary engineering challenge was bridging the gap between flat-pack efficiency and timelessness. The solution was perfecting the mechanical tension across the dowels.",
@@ -406,7 +408,7 @@ const PROJECTS = {
       "scatter-11.jpg": "Sheets of dark rubber gasket material on a cutting mat during NAF's build",
       "scatter-12.jpg": "The finished NAF crossflow desk fans lined up, alternating brushed steel and painted red"
     },
-    gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg"],
+    gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-04.jpg"],   // 2026-10-02: gallery-02 cut (same shot as the hero, 820px); gallery-03 swapped for the tighter gallery-04
     heroVideo: "",
     galleryVideo: "",
     model:     "",
@@ -419,17 +421,19 @@ const PROJECTS = {
     components: [],
     mechNotes: [],
     process:   [
-      { src:"scatter-01.jpg", bleed:"left",  span:6, ar:"3/2", mt:0,   cap:"Sheet layout" },
-      { src:"scatter-02.jpg", col:"8 / 13",                    mt:60,  cap:"Jigs and tools" },
-      { src:"scatter-03.jpg", col:"2 / 7",                     mt:120, cap:"Reference: Braun HL 70" },
-      { src:"scatter-04.jpg", bleed:"right", span:5, ar:"1/1", mt:40,  cap:"Turbine" },
-      { src:"scatter-11.jpg", col:"1 / 6",                     mt:100, cap:"Deflector panels, cut" },
-      { src:"scatter-08.jpg", bleed:"right", span:6, ar:"3/2", mt:60,  cap:"Rolled housings and turbine" },
-      { src:"scatter-10.jpg", col:"7 / 12",                    mt:110, cap:"Modelling the turbine" },
-      { src:"scatter-09.jpg", bleed:"left",  span:6, ar:"3/2", mt:50,  cap:"Housings, welded" },
-      { src:"scatter-05.jpg", bleed:"full", ar:"2/1", mt:80,  cap:"Lined up" },
-      { src:"scatter-06.jpg", col:"2 / 7",            mt:90, cap:"Intake test" },
-      { src:"scatter-07.jpg", bleed:"right", span:5, ar:"4/3", mt:60, cap:"Deflector" },
+      /* 2026-10-02 image pass. Cut: scatter-11 (rubber sheet on a cutting mat),
+         scatter-05 (blanks, same as scatter-02), scatter-09 (three bodies,
+         scatter-12 shows five). Left / right alternation rebuilt for 9 images.
+         scatter-03 is the BRAUN HL 70, shown as inspiration: showCap prints its
+         caption under it so it is never read as a NAF prototype. */
+      { src:"scatter-01.jpg", bleed:"left",  span:6, ar:"3/2", mt:0,   cap:"Off-cuts" },
+      { src:"scatter-02.jpg", col:"8 / 13",                    mt:60,  cap:"Blanks, laid out" },
+      { src:"scatter-03.jpg", col:"2 / 7",                     mt:120, cap:"Reference: Braun HL 70 desk fan, 1971", showCap:true },
+      { src:"scatter-04.jpg", bleed:"right", span:5, ar:"1/1", mt:40,  cap:"Turbine, printing" },
+      { src:"scatter-08.jpg", bleed:"left",  span:6, ar:"3/2", mt:60,  cap:"Rolled housings and turbine" },
+      { src:"scatter-10.jpg", col:"8 / 13",                    mt:110, cap:"Modelling the turbine" },
+      { src:"scatter-06.jpg", col:"2 / 7",                     mt:90,  cap:"Reclaimed motor" },
+      { src:"scatter-07.jpg", bleed:"right", span:5, ar:"4/3", mt:60,  cap:"Perforation pattern" },
       { src:"scatter-12.jpg", bleed:"full", ar:"2/1", mt:90, cap:"Five colourways" }
     ],
     processNotes:[],

@@ -251,6 +251,7 @@ body.ready #loader{opacity:0; pointer-events:none; visibility:hidden; transition
    block-level child of .cell (the image's own grid column), so it naturally
    never runs wider than the photo it's captioning. */
 figcaption.cap{margin-top:6px; max-width:100%;}
+.ref-cap{display:block; margin-top:8px; font-size:11px; letter-spacing:.14em;}
 /* "boxy": both edges flush apart from the last (ragged) line, which aligns
    to whichever edge - image or page margin - this text block is actually
    attached to (2026-07-11: default LEFT, since most text on this site sits
@@ -404,6 +405,8 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .fig>img,.fig.vid>video{width:100%; height:100%; object-fit:cover; display:block;}
 .fig.cut{overflow:visible; background:none;}
 .fig.cut>img{width:100%; height:auto; object-fit:contain;}
+/* a JPG shown as a cut-out is a drawing on a white sheet: multiply prints it onto the paper */
+.fig.cut>img[src$=".jpg"]{mix-blend-mode:multiply;}
 .fig .idx{position:absolute; top:8px; left:9px; z-index:1; font-size:11px; letter-spacing:.16em; color:#fff; mix-blend-mode:difference;}
 
 /* ---------- HERO ----------
