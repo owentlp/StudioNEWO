@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NAF · airflow</title>
+<style>
+  /* Same family as projects/kart/mechanism.html and projects/omni/mechanism.html:
+     transparent canvas printed onto the page paper, ink line art, one red
+     accent, red block buttons, uppercase caption, quiet interaction hint. */
+  @font-face{
+    font-family:"OCR-B Local";
+    src:url("../../fonts/ocr-b.woff2") format("woff2"),url("../../fonts/ocr-b.otf") format("opentype");
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  :root{
+    --paper:#e9e7e2;
+    --ink:#141414;
+    --red:#e2191b;
+    --mono:"OCR-B Local","OCR B","OCR-B",ui-monospace,"Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:transparent;color:var(--ink);
+    font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:none;margin:0;padding:0;}
+  .stage{position:relative;background:transparent;}
+  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:none;}
+  /* Controls sit in flow UNDER the drawing (unlike KART, where they overlay a
+     transparent band): the airflow runs to the right edge of the canvas, so
+     there is no empty corner to put them in. Right-aligned like KART's. */
+  .ui{display:flex;flex-direction:column;align-items:flex-end;padding:6px 0 0;}
+  .modes{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:0 0 12px;}
+  /* Same block as INQUIRE / VIEW IN YOUR SPACE / the model controls: white on
+     red, 12px, .16em tracking. Red = available, ink = currently on. */
+  .modes button{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:#fff;background:var(--red);border:0;padding:8px 14px;cursor:pointer;border-radius:0;
+    transition:opacity .15s ease,background-color .15s ease;}
+  .modes button:hover{opacity:.82;}
+  .modes button[aria-pressed="true"]{background:var(--ink);opacity:1;}
+  .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
+  .meta{max-width:46ch;margin:0;font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;
+    text-transform:uppercase;text-align:right;}
+  /* speed: a drawn 1px rule with a red dot, like OMNI's volume and KART's dimmer */
+  .speed{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;}
+  .speed input{-webkit-appearance:none;appearance:none;width:140px;height:26px;margin:0;cursor:pointer;
+    background:linear-gradient(var(--ink),var(--ink)) center/100% 1px no-repeat;}
+  .speed input::-webkit-slider-runnable-track{height:26px;background:transparent;}
+  .speed input::-moz-range-track{height:26px;background:transparent;}
+  .speed input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:11px;height:11px;margin-top:7.5px;background:var(--red);border:0;border-radius:50%;}
+  .speed input::-moz-range-thumb{width:11px;height:11px;background:var(--red);border:0;border-radius:50%;}
+  .hint{margin-top:10px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.62;
+    white-space:nowrap;transition:opacity .3s ease;}
+  .hint.gone{opacity:0;}
+  @media (max-width:640px){
+    .ui{align-items:flex-start;padding-top:10px;}
+    .modes{justify-content:flex-start;gap:10px;}
+    .meta{text-align:left;font-size:13px;}
+    canvas{cursor:default;}
+  }
+  @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage">
+      <canvas id="c" role="img" aria-label="Top-down section of NAF: air drawn in through the perforated housing, through the crossflow turbine, and out of the slot as a flat curtain"></canvas>
+    </div>
+    <div class="ui">
+      <div class="modes" id="modes" role="group" aria-label="Fan type">
+        <button data-mode="cross" aria-pressed="true">Crossflow</button>
+        <button data-mode="axial" aria-pressed="false">Axial</button>
+      </div>
+      <p class="meta" id="desc"></p>
+      <label class="speed">Speed <input id="speed" type="range" min="0" max="100" value="60" aria-label="Fan speed"></label>
+    </div>
+  </div>
+
+<script>
+(function(){
+  /* ---------- GEOMETRY (logical units; the canvas scales to its width) ----------
+     Plan view, looking down on the fan. C is the turbine axis. The housing is
+     perforated around the back (left), and opens on the right into a slot with
+     a flat lip running out of it, as on the real NAF. */
+  const W=940, H=545;
+  /* The page hangs this frame 9.6% (90 units) past the left of its column, the
+     same transparent margin KART's graphic carries (BUF_X there), so nothing
+     drawn may sit left of x=90. */
+  const C={x:410,y:300}, R=150;                 // housing
+  const RO=118, RI=86, BLADES=30;               // turbine cage
+  const deg=Math.PI/180;
+  const SLOT_TOP=-38*deg, SLOT_BOT=12*deg;      // the outlet gap in the housing
+  const TOP_Y=C.y+R*Math.sin(SLOT_TOP), BOT_Y=C.y+R*Math.sin(SLOT_BOT);
+  const TOP_X=C.x+R*Math.cos(SLOT_TOP), BOT_X=C.x+R*Math.cos(SLOT_BOT);
+  const LIP_END=BOT_X+120;                      // the flat lip
+  const TEXT_BAND=105;                          // top of frame under the page's paragraph
+  const HOLES_FROM=118*deg, HOLES_TO=292*deg, HOLE_STEP=9.5*deg;
+
+  const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+  const descEl=document.getElementById('desc'), speedEl=document.getElementById('speed');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MODES={
+    cross:"Air is drawn in along the whole length of the turbine and leaves the slot as one flat, even curtain.",
+    axial:"A conventional axial fan throws a swirling cone of air that breaks up as it travels."
+  };
+  let mode='cross', scale=1;
+
+  /* ---------- STREAMLINES ----------
+     Each lane is a fixed path sampled into a polyline. Particles ride a lane by
+     distance, so the picture is exact and repeatable rather than a simulation:
+     this is a diagram of how the air moves, not a CFD run. */
+  function bez(p0,p1,p2,t){const u=1-t;return {x:u*u*p0.x+2*u*t*p1.x+t*t*p2.x,y:u*u*p0.y+2*u*t*p1.y+t*t*p2.y};}
+  function sampleLane(segs){
+    const pts=[]; segs.forEach((sg,i)=>{
+      const n=sg.n||24;
+      for(let k=(i?1:0);k<=n;k++){ const t=k/n; const p=sg.c?bez(sg.a,sg.c,sg.b,t):{x:sg.a.x+(sg.b.x-sg.a.x)*t,y:sg.a.y+(sg.b.y-sg.a.y)*t}; p.seg=i; pts.push(p); }
+    });
+    let L=0; pts[0].d=0;
+    for(let i=1;i<pts.length;i++){ L+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y); pts[i].d=L; }
+    return {pts,L};
+  }
+  function at(lane,d){
+    const p=lane.pts; if(d<=0) return p[0]; if(d>=lane.L) return p[p.length-1];
+    let lo=0,hi=p.length-1; while(hi-lo>1){const m=(lo+hi)>>1; if(p[m].d<d) lo=m; else hi=m;}
+    const t=(d-p[lo].d)/((p[hi].d-p[lo].d)||1);
+    return {x:p[lo].x+(p[hi].x-p[lo].x)*t, y:p[lo].y+(p[hi].y-p[lo].y)*t, seg:p[hi].seg};
+  }
+
+  function crossLanes(){
+    const lanes=[], N=26;
+    for(let i=0;i<N;i++){
+      const u=(i+0.5)/N;
+      const th=HOLES_FROM+(HOLES_TO-HOLES_FROM)*u;               // which perforation it enters by
+      const dir={x:Math.cos(th),y:Math.sin(th)};
+      const p0={x:C.x+dir.x*(R+210),y:C.y+dir.y*(R+210)};
+      const p1={x:C.x+dir.x*(R+2),y:C.y+dir.y*(R+2)};
+      const yOut=BOT_Y-8-(BOT_Y-TOP_Y-16)*u;                      // lane order is kept through the fan
+      const p3={x:TOP_X+18,y:yOut};
+      const q={x:C.x+6,y:C.y+(yOut-C.y)*0.35+18};
+      const p4={x:W+30,y:yOut+(yOut-(TOP_Y+BOT_Y)/2)*0.10};     // the curtain barely spreads
+      lanes.push(sampleLane([{a:p0,b:p1,n:20},{a:p1,c:q,b:p3,n:30},{a:p3,b:p4,n:40}]));
+    }
+    return lanes;
+  }
+  function axialLanes(){
+    const lanes=[], N=24;
+    for(let i=0;i<N;i++){
+      const u=(i+0.5)/N, v=u-0.5;
+      if(Math.abs(v)<0.07) continue;                               // the hub blocks the middle
+      const p0={x:-30,y:C.y+v*2*R*1.35};
+      const pd={x:C.x,y:C.y+v*2*R*0.85};
+      const pe={x:W+30,y:C.y+v*2*(R*0.85+190)};
+      lanes.push(sampleLane([{a:p0,c:{x:C.x-140,y:C.y+v*2*R*1.0},b:pd,n:30},{a:pd,b:pe,n:50}]));
+    }
+    return lanes;
+  }
+  const LANES={cross:crossLanes(), axial:axialLanes()};
+
+  // particles: a few per lane, staggered, plus a little vortex by the outlet tongue
+  let parts=[];
+  function seed(){
+    parts=[];
+    LANES[mode].forEach((ln,li)=>{
+      const per=mode==='cross'?6:4;
+      for(let k=0;k<per;k++) parts.push({lane:li,d:(k+Math.random()*0.6)/per*ln.L,s:Math.random()*6.28});
+    });
+  }
+  const VORTEX={x:TOP_X-58,y:TOP_Y+40,r:22};
+
+  /* ---------- LOCAL FLOW, for the ribbon ---------- */
+  function flowAt(p){
+    if(mode==='cross'){
+      const midY=(TOP_Y+BOT_Y)/2, half=(BOT_Y-TOP_Y)/2;
+      const spread=half+Math.max(0,p.x-TOP_X)*0.05;
+      if(p.x>TOP_X-10 && Math.abs(p.y-midY)<spread){
+        const edge=Math.abs(p.y-midY)/spread;                      // softer at the curtain's edges
+        return {vx:1, vy:(p.y-midY)/spread*0.05, k:1-0.35*edge, turb:0.10+0.25*edge};
+      }
+      const dx=C.x-p.x, dy=C.y-p.y, dist=Math.hypot(dx,dy);
+      if(p.x<C.x+R*0.4 && dist>R && dist<R+230) return {vx:dx/dist, vy:dy/dist, k:0.45*(R/dist), turb:0.08};
+      return {vx:0,vy:0,k:0,turb:0};
+    }
+    const dx=p.x-C.x;
+    if(dx>0){
+      const half=R*0.85+dx*0.36;
+      if(Math.abs(p.y-C.y)<half){
+        const decay=Math.max(0.25,1-dx/700);
+        return {vx:1, vy:(p.y-C.y)/half*0.38, k:decay, turb:0.9+dx/500};
+      }
+      return {vx:0,vy:0,k:0,turb:0};
+    }
+    if(dx>-260 && Math.abs(p.y-C.y)<R*1.3) return {vx:1, vy:(C.y-p.y)/R*0.15, k:0.35, turb:0.12};
+    return {vx:0,vy:0,k:0,turb:0};
+  }
+
+  /* ---------- RIBBON ---------- */
+  const RIB_N=16, RIB_L=9;
+  const restPt={x:BOT_X+150,y:(TOP_Y+BOT_Y)/2+6};
+  let holder={x:restPt.x,y:restPt.y}, target={x:restPt.x,y:restPt.y}, pointerOn=false;
+  const ribAng=new Array(RIB_N).fill(Math.PI*0.5);
+
+  /* ---------- DRAWING ---------- */
+  function housing(){
+    ctx.lineWidth=1.2; ctx.strokeStyle='#141414'; ctx.lineJoin='round'; ctx.lineCap='round';
+    ctx.beginPath(); ctx.arc(C.x,C.y,R,SLOT_BOT,SLOT_TOP+Math.PI*2); ctx.stroke();
+    // outlet: short upper wall with the inward tongue, long flat lip below
+    ctx.beginPath(); ctx.moveTo(TOP_X,TOP_Y); ctx.lineTo(TOP_X+26,TOP_Y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(TOP_X,TOP_Y); ctx.quadraticCurveTo(TOP_X-14,TOP_Y+4,TOP_X-20,TOP_Y+16); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(BOT_X,BOT_Y); ctx.lineTo(LIP_END,BOT_Y); ctx.stroke();
+    // perforations, the holes punched round the back of the body
+    for(let a=HOLES_FROM;a<=HOLES_TO+1e-6;a+=HOLE_STEP){
+      ctx.beginPath(); ctx.arc(C.x+Math.cos(a)*R,C.y+Math.sin(a)*R,4.2,0,Math.PI*2);
+      ctx.fillStyle='#e9e7e2'; ctx.fill(); ctx.lineWidth=1; ctx.stroke();
+    }
+  }
+  function turbine(phi){
+    ctx.lineWidth=1; ctx.strokeStyle='rgba(20,20,20,0.85)';
+    ctx.beginPath(); ctx.arc(C.x,C.y,RO,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle='rgba(20,20,20,0.35)';
+    ctx.beginPath(); ctx.arc(C.x,C.y,RI,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle='#141414'; ctx.lineWidth=1.3;
+    for(let i=0;i<BLADES;i++){                                    // forward-curved blades
+      const a=phi+i*2*Math.PI/BLADES;
+      const ix=C.x+Math.cos(a)*RI, iy=C.y+Math.sin(a)*RI;
+      const ox=C.x+Math.cos(a+0.20)*RO, oy=C.y+Math.sin(a+0.20)*RO;
+      const mx=C.x+Math.cos(a+0.06)*(RI+RO)/2*1.04, my=C.y+Math.sin(a+0.06)*(RI+RO)/2*1.04;
+      ctx.beginPath(); ctx.moveTo(ix,iy); ctx.quadraticCurveTo(mx,my,ox,oy); ctx.stroke();
+    }
+    hub();
+  }
+  function hub(){
+    ctx.lineWidth=1; ctx.strokeStyle='#141414';
+    ctx.beginPath(); ctx.arc(C.x,C.y,13,0,Math.PI*2); ctx.fillStyle='#e9e7e2'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(C.x,C.y,4.5,0,Math.PI*2); ctx.fillStyle='#e2191b'; ctx.fill();
+  }
+  function axialFan(phi){
+    ctx.lineWidth=1.2; ctx.strokeStyle='#141414';
+    // motor behind, guard round the blades
+    ctx.strokeRect(C.x-78,C.y-26,52,52);
+    ctx.beginPath(); ctx.moveTo(C.x-26,C.y); ctx.lineTo(C.x-13,C.y); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(C.x-24,C.y-R-6,48,2*R+12,24); ctx.stroke();
+    ctx.strokeStyle='rgba(20,20,20,0.25)';
+    for(let k=1;k<6;k++){ const y=C.y-R-6+k*(2*R+12)/6; ctx.beginPath(); ctx.moveTo(C.x-24,y); ctx.lineTo(C.x+24,y); ctx.stroke(); }
+    // three blades, seen edge-on from above, foreshortened as they turn
+    ctx.strokeStyle='#141414'; ctx.lineWidth=1.2;
+    for(let k=0;k<3;k++){
+      const a=phi+k*2*Math.PI/3, y=C.y+Math.sin(a)*R*0.62, h=10+52*Math.abs(Math.cos(a));
+      ctx.beginPath(); ctx.ellipse(C.x,y,6+3*Math.abs(Math.sin(a)),h/2*0.9,0,0,Math.PI*2);
+      ctx.fillStyle=Math.cos(a)>0?'#e9e7e2':'rgba(233,231,226,0.6)'; ctx.fill(); ctx.stroke();
+    }
+    hub();
+  }
+  function label(t,x,y,align){
+    // never under 9 screen px: on a phone the canvas is ~0.4x, so the
+    // logical size grows to keep the label readable
+    const px=Math.max(11, 9/((canvas.clientWidth||W)/W));
+    ctx.save(); ctx.font=px.toFixed(1)+'px "OCR-B Local", ui-monospace, monospace';
+    if('letterSpacing' in ctx) ctx.letterSpacing='2px';
+    ctx.fillStyle='rgba(20,20,20,0.75)'; ctx.textAlign=align||'left'; ctx.fillText(t,x,y); ctx.restore();
+  }
+  function leader(x1,y1,x2,y2){
+    ctx.save(); ctx.strokeStyle='rgba(20,20,20,0.45)'; ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore();
+  }
+  function labels(){
+    if(mode==='cross'){
+      label('INTAKE',C.x-R-150,C.y-R+6); leader(C.x-R-92,C.y-R+12,C.x-R*0.86,C.y-R*0.56);
+      label('TURBINE',C.x-28,C.y+R+52); leader(C.x+4,C.y+R+40,C.x+12,C.y+RO-2);
+      label('CURTAIN',LIP_END+40,BOT_Y+38); leader(LIP_END+66,BOT_Y+26,LIP_END+66,BOT_Y-10);
+    } else {
+      label('BLADE',C.x-20,C.y+R+52); leader(C.x,C.y+R+40,C.x,C.y+R+8);
+      label('SWIRL',W-150,C.y+R+120);
+    }
+  }
+
+  function particles(phi,spd,t){
+    const lanes=LANES[mode], spread=(mode==='axial');
+    ctx.lineCap='round';
+    for(const p of parts){
+      const ln=lanes[p.lane]; if(!ln) continue;
+      const a=at(ln,p.d), seg=a.seg;
+      let f=1, len=10;
+      if(mode==='cross'){ f=seg===0?0.55:seg===1?0.9:1.25; len=seg===2?16:9; }
+      else { f=seg===0?0.6:Math.max(0.45,1.5-(a.x-C.x)/520); len=seg===0?8:14; }
+      const b=at(ln,Math.max(0,p.d-len*(0.4+spd)));
+      let ax=a.x, ay=a.y, bx=b.x, by=b.y;
+      if(spread && a.x>C.x){                                      // turbulence grows downstream
+        const k=Math.pow((a.x-C.x)/(W-C.x),1.15)*30*(0.6+0.4*Math.sin(p.s*3));
+        ay+=Math.sin(a.x*0.032-t*5+p.s)*k; by+=Math.sin(b.x*0.032-t*5+p.s)*k;
+      }
+      // fade in at the start and out at the end of a lane
+      const e=Math.min(1,p.d/60,(ln.L-p.d)/80);
+      // the page's how-it-works paragraph sits over the top of this frame:
+      // streaks fade out before they reach it, so no text ever sits on them
+      const clear=Math.max(0,Math.min(1,(Math.min(ay,by)-TEXT_BAND)/50));
+      const fadeOut=spread&&a.x>C.x?Math.max(0.15,1-(a.x-C.x)/(W-C.x)*0.8):1;
+      ctx.strokeStyle=`rgba(20,20,20,${(0.15+0.5*spd)*Math.max(0,e)*fadeOut*clear})`;
+      ctx.lineWidth=1.1;
+      ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(ax,ay); ctx.stroke();
+      p.f=f;
+    }
+    if(mode==='cross' && spd>0.02){                               // the small vortex at the tongue
+      ctx.strokeStyle=`rgba(20,20,20,${0.2+0.3*spd})`; ctx.lineWidth=1;
+      for(let k=0;k<3;k++){
+        const a0=-t*4*spd*2+k*2.1;
+        ctx.beginPath(); ctx.arc(VORTEX.x,VORTEX.y,VORTEX.r-k*5,a0,a0+0.9); ctx.stroke();
+      }
+    }
+  }
+  function streamlines(){                                         // reduced motion: static diagram
+    ctx.strokeStyle='rgba(20,20,20,0.28)'; ctx.lineWidth=1;
+    LANES[mode].forEach((ln,i)=>{ if(i%2) return; ctx.beginPath(); ln.pts.forEach((q,j)=>j?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)); ctx.stroke(); });
+  }
+  function ribbon(spd,t,dt){
+    holder.x+=(target.x-holder.x)*(reduce?1:1-Math.exp(-dt/0.08));
+    holder.y+=(target.y-holder.y)*(reduce?1:1-Math.exp(-dt/0.08));
+    let x=holder.x, y=holder.y;
+    ctx.strokeStyle='#e2191b'; ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(x,y);
+    for(let i=0;i<RIB_N;i++){
+      const fl=flowAt({x,y}), strength=fl.k*spd;
+      let want;
+      if(strength>0.05){
+        const flutter=Math.sin(t*(9+fl.turb*14)-i*0.7)*(0.06+fl.turb*0.9)*(i/RIB_N)
+                     +Math.sin(t*23.1-i*1.9)*fl.turb*0.25*(i/RIB_N);
+        want=Math.atan2(fl.vy,fl.vx)+flutter;
+      } else {
+        want=Math.PI*0.5+Math.sin(t*0.8+i*0.5)*0.25;              // hangs limp, drifting
+      }
+      let d=want-ribAng[i]; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+      ribAng[i]+=d*(reduce?1:1-Math.exp(-dt/(0.05+0.25*(1-Math.min(1,strength)))));
+      x+=Math.cos(ribAng[i])*RIB_L; y+=Math.sin(ribAng[i])*RIB_L;
+      ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(holder.x,holder.y,3.4,0,Math.PI*2); ctx.fillStyle='#141414'; ctx.fill();
+  }
+
+  /* ---------- LOOP: only while visible, like KART's ---------- */
+  let phi=0, last=performance.now(), running=false, visible=true, clock=0;
+  function speed(){ return (+speedEl.value)/100; }
+  function frame(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    if(!visible){ running=false; return; }
+    const spd=speed();
+    clock+=dt;
+    if(!reduce){
+      phi+=dt*spd*(mode==='cross'?5.5:11);
+      for(const p of parts){
+        const ln=LANES[mode][p.lane]; if(!ln) continue;
+        p.d+=dt*spd*240*(p.f||1);
+        if(p.d>ln.L){ p.d-=ln.L; p.s=Math.random()*6.28; }
+      }
+    }
+    ctx.setTransform(scale,0,0,scale,0,0);
+    ctx.clearRect(0,0,W,H);
+    if(reduce) streamlines(); else particles(phi,spd,clock);
+    if(mode==='cross'){ housing(); turbine(phi); } else axialFan(phi);
+    labels();
+    ribbon(spd,clock,dt);
+    if(reduce){ running=false; return; }
+    requestAnimationFrame(frame);
+  }
+  function wake(){ if(!running && visible){ running=true; last=performance.now(); requestAnimationFrame(frame); } }
+
+  function resize(){
+    const cssW=canvas.parentElement.clientWidth;
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    let w=Math.round(cssW*dpr), h=Math.round(cssW*(H/W)*dpr);
+    const MAX_PX=2400000;
+    if(w*h>MAX_PX){ const k=Math.sqrt(MAX_PX/(w*h)); w=Math.round(w*k); h=Math.round(h*k); }
+    canvas.style.width=cssW+'px'; canvas.width=w; canvas.height=h; scale=canvas.width/W;
+    wake(); postHeight();
+  }
+  function postHeight(){
+    const wrap=document.querySelector('.wrap');
+    const h=wrap?Math.ceil(wrap.getBoundingClientRect().height):document.body.scrollHeight;
+    if(window.parent!==window) window.parent.postMessage({type:'mechHeight',height:h},'*');
+  }
+  function toLogical(e){ const r=canvas.getBoundingClientRect(); return {x:(e.clientX-r.left)/r.width*W, y:(e.clientY-r.top)/r.height*H}; }
+
+  window.addEventListener('message',ev=>{ const d=ev.data; if(!d||d.type!=='mechVisible') return; visible=!!d.visible; if(visible) wake(); });
+  document.addEventListener('visibilitychange',()=>{ visible=!document.hidden; if(visible) wake(); });
+  document.getElementById('modes').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b||b.dataset.mode===mode) return;
+    mode=b.dataset.mode;
+    [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+    descEl.textContent=MODES[mode];
+    canvas.setAttribute('aria-label', mode==='cross'
+      ? 'Top-down section of NAF: air drawn in through the perforated housing, through the crossflow turbine, and out of the slot as a flat curtain'
+      : 'Top-down view of a conventional axial fan: a swirling cone of air that spreads and breaks up');
+    seed(); wake();
+  });
+  speedEl.addEventListener('input',wake);
+  canvas.addEventListener('pointermove',e=>{ target=toLogical(e); pointerOn=true; wake(); });
+  canvas.addEventListener('pointerdown',e=>{ target=toLogical(e); pointerOn=true; wake(); });
+  canvas.addEventListener('pointerleave',e=>{ if(e.pointerType==='mouse'){ pointerOn=false; target={x:restPt.x,y:restPt.y}; wake(); } });
+  window.addEventListener('resize',resize);
+
+  descEl.textContent=MODES[mode];
+  seed(); resize(); wake();
+  window.addEventListener('load',postHeight);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(postHeight);
+  setTimeout(postHeight,300);
+  if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+
+  // interaction hint, gone after the first real touch or drag
+  (function(){
+    const h=document.createElement('div'); h.className='hint';
+    h.textContent=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)?'TOUCH TO HOLD THE RIBBON':'MOVE TO HOLD THE RIBBON';
+    document.querySelector('.ui').appendChild(h);
+    const gone=()=>h.classList.add('gone');
+    canvas.addEventListener('pointerdown',gone,{once:true});
+    canvas.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') gone(); },{once:true});
+  })();
+})();
+</script>
+</body>
+</html>

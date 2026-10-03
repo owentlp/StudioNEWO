@@ -30,10 +30,11 @@
 <link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
 <link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
 <link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=57">
+<link rel="stylesheet" href="css/style.css?v=58">
 <style>
   /* page-specific layout only: the shared editorial grammar (12-col grid,
      .cap/.desc type, .fig frames) lives in css/style.css and is reused as-is
@@ -115,6 +116,10 @@
   .matcat-hero img{width:100%; aspect-ratio:4/3; height:auto; object-fit:cover; display:block;
     filter:saturate(.92); transition:filter .3s ease;}
   .matcat-hero:hover img{filter:saturate(1.04);}
+  .matcat-hero .matcat-cap{display:block; margin-top:0; padding-top:8px; background:var(--paper);}
+  /* the swatch colour is only a fallback for a missing photo; with a photo and
+     a caption it showed as a hairline around the caption */
+  .matcat .matcat-hero:has(> img){background:none;}
   /* The text block is sized to sit flush with the image: its font-size is
      scaled by the script so the block's top and bottom line up with the top and
      bottom of the collapsed image. Hence font-size:inherit on the children -
@@ -253,10 +258,10 @@
 </footer>
 
 
-<script src="js/materials-data.js?v=6"></script>
-<script src="js/projects-data.js?v=24"></script>
-<script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=25"></script>
+<script src="js/materials-data.js?v=7"></script>
+<script src="js/projects-data.js?v=25"></script>
+<script src="js/main.js?v=5"></script>
+<script src="js/menu.js?v=26"></script>
 <script>
 (function(){
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -351,6 +356,7 @@
           ' width="1000" height="750"' +
           ' alt="'+esc(cat.label)+'" loading="'+(catIndex === 0 ? 'eager' : 'lazy')+'"' +
           ' decoding="async" onerror="this.remove()">' : '') +
+        (cat.image && real(cat.imageCaption) ? '<figcaption class="cap matcat-cap">'+esc(cat.imageCaption)+'</figcaption>' : '') +
       '</figure>' +
       '<div class="matcat-intro-text">'+introText+'</div></div>';
 
@@ -478,7 +484,10 @@
       //    value (CSS cannot animate height to `auto`). The image is 4:3 at
       //    100% of its column, so its full height is width * 3/4.
       var hero = c.querySelector(".matcat-hero");
-      if(hero) hero.style.setProperty("--matcat-full", Math.round(hero.clientWidth * 0.75) + "px");
+      // plus the caption under the photo, which only shows once the category opens
+      var mc = hero && hero.querySelector(".matcat-cap");
+      var capH = mc ? mc.offsetHeight + parseFloat(getComputedStyle(mc).marginTop || 0) : 0;
+      if(hero) hero.style.setProperty("--matcat-full", Math.round(hero.clientWidth * 0.75 + capH) + "px");
 
     });
   }

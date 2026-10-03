@@ -28,10 +28,11 @@
 <link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
 <link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
 <link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=57">
+<link rel="stylesheet" href="css/style.css?v=58">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -52,8 +53,14 @@
      or rules: no hairlines, no oversized display numerals, nothing invented
      just for this page. */
   .ab-grid{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:clamp(26px,4vh,44px); align-items:start; margin-top:clamp(26px,4vh,44px);}
-  .ab-statement{grid-column:1 / 8;}
-  .ab-who{grid-column:9 / 13;}
+  /* 2026-10-02: the bio column was 4 of 12 and the photo stacked above it, so
+     the justified bio had wide word gaps and the left side sat empty under the
+     statement. Now the photo sits beside the caption and bio, and the two
+     blocks split the row about evenly, so their heights match. */
+  .ab-statement{grid-column:1 / 6;}
+  .ab-who{grid-column:6 / 13; display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:var(--gut); align-items:start;}
+  .ab-who .ab-photo{grid-row:1 / 3; margin-bottom:0;}
+  .ab-who .cap, .ab-who .desc{grid-column:2;}
   .ab-who .desc{margin-top:10px;}
   /* .desc caps itself at --w-desc (32ch), which is right for a caption sitting
      beside a photo but leaves these blocks stranded well short of their grid
@@ -93,6 +100,8 @@
   @media (max-width:860px){
     .ab-fact:nth-child(1),.ab-fact:nth-child(2),.ab-fact:nth-child(3){grid-column:1 / -1;}
     .ab-statement, .ab-who{grid-column:1 / -1;}
+    .ab-who{display:block;}
+    .ab-who .ab-photo{margin-bottom:14px;}
     .principles{display:grid; grid-template-columns:1fr; row-gap:clamp(30px,5vh,46px);}
     .principle:nth-child(1),.principle:nth-child(2),
     .principle:nth-child(3),.principle:nth-child(4){grid-column:1 / -1; margin-top:0;}
@@ -206,8 +215,8 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=24"></script>
-<script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=25"></script>
+<script src="js/projects-data.js?v=25"></script>
+<script src="js/main.js?v=5"></script>
+<script src="js/menu.js?v=26"></script>
 </body>
 </html>

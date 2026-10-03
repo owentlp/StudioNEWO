@@ -40,6 +40,7 @@
 <link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
 <link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
 <link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
@@ -85,7 +86,7 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=57">
+<link rel="stylesheet" href="css/style.css?v=58">
 </head>
 <body class="proj-body" data-project="omni">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -126,8 +127,8 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=24"></script>
-<script src="js/materials-data.js?v=6"></script>
+<script src="js/projects-data.js?v=25"></script>
+<script src="js/materials-data.js?v=7"></script>
 <!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
      reserved before the files land (no reflow) and srcset can be emitted -->
 <script src="js/image-sizes.js?v=3"></script>
@@ -135,8 +136,8 @@
      model have loaded (see the readiness gate at the end of the page script);
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
-<script src="js/main.js?v=4"></script>
-<script src="js/menu.js?v=25"></script>
+<script src="js/main.js?v=5"></script>
+<script src="js/menu.js?v=26"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----
@@ -644,7 +645,7 @@
   // the page scrolls and its links stay clickable through the flooded model.
   var glbView = real(p.modelRender) ? p.modelRender : (real(p.model) ? p.model : "");
   // load the model-viewer library only when there is actually a model to show
-  var MV_SRC = "js/vendor/model-viewer.min.js?v=1";
+  var MV_SRC = "js/vendor/model-viewer.min.js?v=2";
   /* ---------- DEFERRED MODEL LOAD ----------
      This used to fire immediately: the module script went out with the page and
      the element carried loading="eager", so ~700KB of library plus the GLB (its
@@ -884,11 +885,13 @@
   // to two.
   // processText is the short top block; processMore is the fuller detail shown
   // as its own block lower in the scatter. Both are archive-only content.
+  // 4 columns, not 3 (2026-10-02): at 3 the justified text opened wide word
+  // gaps. Checked on all five projects: no cell overlaps, same section height.
   var procTextTop = real(p.processText) ?
-    '<div class="cell proc-note" style="grid-column:7 / 10;margin-top:0;">' +
+    '<div class="cell proc-note" style="grid-column:7 / 11;margin-top:0;">' +
       '<p class="desc">'+esc(p.processText)+'</p></div>' : '';
   var procTextBottom = real(p.processMore) ?
-    '<div class="cell proc-note" style="grid-column:3 / 6;">' +
+    '<div class="cell proc-note" style="grid-column:2 / 6;">' +
       '<p class="desc">'+esc(p.processMore)+'</p></div>' : '';
   var procCells = (procTextTop ? [procTextTop] : []).concat(procImgCells).concat(procTextBottom ? [procTextBottom] : []);
   // designTags: short, provable claims (Designed for disassembly, Repairable,
@@ -1068,6 +1071,50 @@
       if(homeTarget) mv.cameraTarget = homeTarget.x.toFixed(5)+"m "+(homeTarget.y + (exOpen ? (EXP.rise||0) : 0)).toFixed(5)+"m "+homeTarget.z.toFixed(5)+"m";
     }
 
+    /* ---------- OVERLAP WITH THE PHOTOS ABOVE (2026-10-02) ----------
+       Owen's rule: every 3D model overlaps the photos above it, slightly, for
+       depth. Never more than 20% of any photo; aim for 15% of the lowest photo
+       it sits under. Measured in HEIGHT (how far the model's top reaches into
+       the photo), which is stricter than area since the model is narrower than
+       a photo. Desktop and phone alike.
+       The model's on-screen box comes from the same numbers frameModel just
+       used: targetPx tall, centred on the slot, as wide as its footprint seen
+       from the home angle. The stage's top margin is then moved (up or down)
+       so the model's top lands on the target. Only the model column moves;
+       the mechanism beside it and the gallery above stay put. */
+    /* The estimate is the model's bounding box seen from the home camera angle:
+       height times sin(phi) plus HALF the depth times cos(phi), so a box seen
+       from above counts some of its top face. Half, because perspective shrinks
+       the far edge: calibrated against the rendered pixels of KART (a tall
+       cylinder) and OMNI (a cube), where the full depth over-shot by ~10 points
+       and none under-shot by 4 to 12. */
+    var OVERLAP_AIM = 0.15, OVERLAP_MAX = 0.19;
+    function fitOverlap(stage, targetPx, dims, theta, phi){
+      try {
+        var old = parseFloat(stage.style.marginTop) || 0;
+        var sr = stage.getBoundingClientRect();
+        var m = new DOMMatrix(getComputedStyle(mv).transform);
+        var scale = Math.sqrt(m.a * m.a + m.b * m.b) || 1;
+        var th = theta || 0, ph = (phi == null ? Math.PI / 2 : phi);
+        var perM  = targetPx * scale / dims.y;                 // screen px per metre
+        var wide  = Math.abs(dims.x * Math.cos(th)) + Math.abs(dims.z * Math.sin(th));
+        var deep  = Math.abs(dims.x * Math.sin(th)) + Math.abs(dims.z * Math.cos(th));
+        var h = perM * (dims.y * Math.sin(ph) + 0.5 * deep * Math.abs(Math.cos(ph)));
+        var w = perM * wide;
+        var cx = sr.left + sr.width / 2, cy = sr.top + sr.height / 2;
+        var top = cy - h / 2, left = cx - w / 2, right = cx + w / 2;
+        var imgs = Array.prototype.slice.call(document.querySelectorAll("#content img"))
+          .map(function(i){ return i.getBoundingClientRect(); })
+          .filter(function(b){ return b.height > 40 && b.bottom <= cy && b.right > left && b.left < right; });
+        if(!imgs.length) return;
+        var low = imgs.reduce(function(a, b){ return b.bottom > a.bottom ? b : a; });
+        var want = low.bottom - OVERLAP_AIM * low.height;
+        imgs.forEach(function(b){ want = Math.max(want, b.bottom - OVERLAP_MAX * b.height); });
+        var shift = Math.round(old + want - top);
+        stage.style.marginTop = shift ? shift + "px" : "";
+      } catch(e){}
+    }
+
     function frameModel(){
       var stage = mv.parentElement;                       // .cad-stage
       try{
@@ -1126,6 +1173,7 @@
         mv.maxCameraOrbit = "auto auto " + r.toFixed(5) + "m";
         mv.cameraOrbit = o.theta.toFixed(5)+"rad "+o.phi.toFixed(5)+"rad "+r.toFixed(5)+"m";
         homeR = r;
+        fitOverlap(stage, targetPx, dims, homeTheta, homePhi);
         if(!homeTarget){ try { var ct = mv.getCameraTarget(); homeTarget = { x:ct.x, y:ct.y, z:ct.z }; } catch(e2){} }
         if(exOpen) applyExplodeFraming();
       } catch(e){ /* leave model-viewer's own framing in place */ }
@@ -1773,7 +1821,13 @@
       else waits.push(settle(heroImg, "load", 8000));
     }
     var heroVid = content.querySelector(".hero-aside-btm video, .hero-vid video");
-    if(heroVid) waits.push(settle(heroVid, "canplay", 8000));   // first frame ready, not full download
+    // first frame ready, not full download. Checked first: on a fast or cached
+    // load canplay has often ALREADY fired by now, and waiting for it again
+    // held the loader for the full 8s timeout on every visit (2026-10-02).
+    if(heroVid){
+      if(heroVid.readyState >= 3) waits.push(Promise.resolve());
+      else waits.push(settle(heroVid, "canplay", 8000));
+    }
     /* The 3D MODEL IS NO LONGER WAITED ON (2026-08-29). It used to be the
        longest pole here by far - ~700KB of library, a draco decode, 22 texture
        uploads and a PMREM environment map - and all of it landed while the
@@ -1787,7 +1841,14 @@
     // starts loading until scrolled near, so waiting on it would just burn
     // the timeout. Near the fold - the KART/OMNI row - it loads immediately.)
     if(mechF && mechF.getBoundingClientRect().top < window.innerHeight * 2){
-      waits.push(settle(mechF, "load", 8000));
+      // same already-fired guard as the video: a same-origin frame that has
+      // finished loading will not fire load again
+      var mechDone = false;
+      try {
+        var md = mechF.contentDocument;
+        mechDone = !!md && md.readyState === "complete" && md.location.href !== "about:blank";
+      } catch(e){}
+      waits.push(mechDone ? Promise.resolve() : settle(mechF, "load", 8000));
     }
     Promise.all(waits).then(function(){
       /* IMAGE DECODING, IN TWO PASSES (revised 2026-08-29).

@@ -4,6 +4,7 @@
 
      CATEGORY  { label, slug, swatch, image, intro{...}, groups[] }
        image   category hero photo (e.g. a tree for WOOD, ore for METAL),
+       imageCaption  two words under the photo when the category is open,
                dropped in materials/<file>. Until the file exists a plain
                colour swatch shows in its place (onerror fallback), so a
                missing photo never breaks the page.
@@ -31,7 +32,7 @@
    ============================================================ */
 const MATERIAL_CATEGORIES = [
   {
-    label: "WOOD", slug: "wood", swatch: "wood", image: "cat-wood.jpg",
+    label: "WOOD", slug: "wood", swatch: "wood", image: "cat-wood.jpg", imageCaption: "Tree bark",
     intro: {
       properties: "Cellular structure that expands and contracts with ambient humidity. High tensile and compressive strength parallel to the grain.",
       finishes:   "Penetrating oils or hard waxes. Polyurethane is avoided to allow for localized sanding and clean composting.",
@@ -82,7 +83,7 @@ const MATERIAL_CATEGORIES = [
   },
 
   {
-    label: "METAL", slug: "metal", swatch: "metal", image: "cat-metal.jpg",
+    label: "METAL", slug: "metal", swatch: "metal", image: "cat-metal.jpg", imageCaption: "Iron ore",
     intro: {
       properties: "Isotropic structure. High tensile and yield strength. Highly thermally and electrically conductive.",
       finishes:   "",
@@ -117,7 +118,7 @@ const MATERIAL_CATEGORIES = [
   },
 
   {
-    label: "BIO MATERIALS", slug: "bio", swatch: "bio", image: "cat-bio.jpg",
+    label: "BIO MATERIALS", slug: "bio", swatch: "bio", image: "cat-bio.jpg", imageCaption: "Plant fiber",
     intro: {
       properties: "Derived from renewable biomass. Requires chemical or organic treatment to prevent decay during use.",
       finishes:   "",
@@ -138,7 +139,7 @@ const MATERIAL_CATEGORIES = [
   },
 
   {
-    label: "GLASS", slug: "glass", swatch: "glass", image: "cat-glass.jpg",
+    label: "GLASS", slug: "glass", swatch: "glass", image: "cat-glass.jpg", imageCaption: "Silica sand",
     intro: {
       properties: "High compressive strength, scratch-resistant, brittle against impact.",
       finishes:   "",
@@ -169,7 +170,7 @@ const MATERIAL_CATEGORIES = [
   },
 
   {
-    label: "PLASTICS", slug: "plastics", swatch: "plastic", image: "cat-plastics.jpg",
+    label: "PLASTICS", slug: "plastics", swatch: "plastic", image: "cat-plastics.jpg", imageCaption: "Plastic regrind",
     intro: {
       properties: "Moldable synthetic polymers.",
       finishes:   "",
@@ -192,7 +193,7 @@ const MATERIAL_CATEGORIES = [
   },
 
   {
-    label: "SOFT GOODS", slug: "soft-goods", swatch: "soft", image: "cat-soft.jpg",
+    label: "SOFT GOODS", slug: "soft-goods", swatch: "soft", image: "cat-soft.jpg", imageCaption: "Wound thread",
     intro: {
       properties: "Woven or extruded fibers. Requires tension or a skeletal frame for structure.",
       finishes:   "",

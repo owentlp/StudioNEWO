@@ -59,7 +59,7 @@
      at its URL). Jewelry and Photography switch on when their data lands. */
   var EXTRA_PAGES = [
     { href:"solutions.html",   label:"Solutions",   on:true  },
-    { href:"solutions.html#services", label:"Services", on:true },   // the consulting offer, lower on the Solutions page
+    { href:"solutions.html#services", label:"Services", on:false },  // off 2 Oct (Owen): reached from About and the foot of Solutions
     { href:"jewelry.html",     label:"Jewelry",     on:false },
     { href:"photography.html", label:"Photography", on:false },
     { href:"materials.html",   label:"Materials",   on:true  },
@@ -122,11 +122,11 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=57",
-      "js/projects-data.js?v=24",
+      "css/style.css?v=58",
+      "js/projects-data.js?v=25",
       "js/image-sizes.js?v=3",
-      "js/main.js?v=4",
-      "js/menu.js?v=25",
+      "js/main.js?v=5",
+      "js/menu.js?v=26",
       "js/loader3d.js?v=15",
       "js/loader3d-core.js?v=1",
       "js/loader3d.worker.js?v=4",
@@ -134,8 +134,8 @@
     ];
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
-    var MATERIALS_DATA = "js/materials-data.js?v=6";
-    var MV_LIB  = "js/vendor/model-viewer.min.js?v=1";
+    var MATERIALS_DATA = "js/materials-data.js?v=7";
+    var MV_LIB  = "js/vendor/model-viewer.min.js?v=2";
     var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
     var MECH_V  = "?v=20";     // must match the mechanism iframe src in project.html
     var DWELL_MS = 400;

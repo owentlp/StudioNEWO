@@ -134,6 +134,13 @@ img{display:block;}
 .site-wordmark svg{height:100%; width:auto; display:block; fill:currentColor;}
 #burger{position:fixed; z-index:50; top:var(--hdr-top); right:var(--mar-edge); width:var(--hdr); height:var(--hdr); background:none; border:0; padding:0; cursor:pointer; color:#fff; mix-blend-mode:difference;}
 #burger svg{width:100%; height:100%; display:block; fill:currentColor;}
+/* Hide on scroll down, back on scroll up (2026-10-02, Owen). They are fixed
+   with no background, so while reading they sat on body text and photos.
+   js/main.js toggles body.hdr-hidden; it never hides them near the top of the
+   page, while the menu is open, or while one of them has keyboard focus. */
+.site-home, #burger{transition:transform .32s ease, opacity .32s ease;}
+body.hdr-hidden .site-home, body.hdr-hidden #burger{transform:translateY(calc(-100% - var(--hdr-top))); opacity:0; pointer-events:none;}
+@media (prefers-reduced-motion:reduce){ .site-home, #burger{transition:opacity .2s ease;} body.hdr-hidden .site-home, body.hdr-hidden #burger{transform:none;} }
 
 /* ---- TOP-RIGHT DROPDOWN MENU (shared markup, built by js/menu.js) ----
    A compact panel anchored in the top-right corner. Objects and Archive

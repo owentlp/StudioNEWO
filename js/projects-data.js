@@ -414,26 +414,25 @@ const PROJECTS = {
     model:     "",
     modelRender: "",
     modelV2:   "",
-    mechanism: "",
+    mechanism: "mechanism.html",   // 2026-10-02: crossflow vs axial airflow, top-down section
     hiwVideo:  "",
     howItWorks:"A custom crossflow turbine spans the housing, moving a high volume of air at a much lower RPM than a conventional fan, significantly reducing noise and motor strain.",
     howItWorksMore:"",
     components: [],
     mechNotes: [],
     process:   [
-      /* 2026-10-02 image pass. Cut: scatter-11 (rubber sheet on a cutting mat),
-         scatter-05 (blanks, same as scatter-02), scatter-09 (three bodies,
-         scatter-12 shows five). Left / right alternation rebuilt for 9 images.
+      /* 2026-10-02, pass 2 (Owen: simplify). 9 -> 7. Cut scatter-02 (blanks,
+         same story as the off-cuts) and scatter-10 (cluttered modelling desk).
+         The turbine print and the perforated sheets are now the two LARGE
+         images (span 7); the rest sit smaller between them.
          scatter-03 is the BRAUN HL 70, shown as inspiration: showCap prints its
          caption under it so it is never read as a NAF prototype. */
-      { src:"scatter-01.jpg", bleed:"left",  span:6, ar:"3/2", mt:0,   cap:"Off-cuts" },
-      { src:"scatter-02.jpg", col:"8 / 13",                    mt:60,  cap:"Blanks, laid out" },
-      { src:"scatter-03.jpg", col:"2 / 7",                     mt:120, cap:"Reference: Braun HL 70 desk fan, 1971", showCap:true },
-      { src:"scatter-04.jpg", bleed:"right", span:5, ar:"1/1", mt:40,  cap:"Turbine, printing" },
-      { src:"scatter-08.jpg", bleed:"left",  span:6, ar:"3/2", mt:60,  cap:"Rolled housings and turbine" },
-      { src:"scatter-10.jpg", col:"8 / 13",                    mt:110, cap:"Modelling the turbine" },
-      { src:"scatter-06.jpg", col:"2 / 7",                     mt:90,  cap:"Reclaimed motor" },
-      { src:"scatter-07.jpg", bleed:"right", span:5, ar:"4/3", mt:60,  cap:"Perforation pattern" },
+      { src:"scatter-04.jpg", bleed:"left",  span:7, ar:"1/1", mt:0,   cap:"Turbine, printing" },
+      { src:"scatter-01.jpg", col:"9 / 13",                    mt:70,  cap:"Off-cuts" },
+      { src:"scatter-03.jpg", col:"2 / 6",                     mt:110, cap:"Reference: Braun HL 70 desk fan, 1971", showCap:true },
+      { src:"scatter-07.jpg", bleed:"right", span:7, ar:"4/3", mt:50,  cap:"Perforation pattern" },
+      { src:"scatter-08.jpg", bleed:"left",  span:6, ar:"3/2", mt:90,  cap:"Rolled housings and turbine" },
+      { src:"scatter-06.jpg", col:"9 / 13",                    mt:110, cap:"Reclaimed motor" },
       { src:"scatter-12.jpg", bleed:"full", ar:"2/1", mt:90, cap:"Five colourways" }
     ],
     processNotes:[],

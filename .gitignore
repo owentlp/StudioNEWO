@@ -48,3 +48,7 @@ _to_delete/
 
 # the Cowork desktop app saves files it delivers into here; never deploy them
 Claude outputs/
+
+# Claude Code project notes and settings, local only
+CLAUDE.md
+.claude/

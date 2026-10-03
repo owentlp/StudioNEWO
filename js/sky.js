@@ -310,9 +310,14 @@
   var cloudKey = "", precipCls = null, LIVE = false;
   function paintClouds(P, zen, hor, cov, k, alt, clear){
     if(!clouds) return;
+    /* A clear sky (under 6% cover) still gets a few faint wisps of the same
+       cloud texture, as a 20% floor, so a clear noon is not an empty field.
+       Real "clear" readings are 0-5% cover, so this stays true to the weather.
+       Removed 2026-10-02: a drawn-shapes version (Owen: the noise clouds are
+       better). */
+    if(cov < 0.06 && k === "clear") cov = 0.2;
     var key = [cov.toFixed(2), k, Math.round(alt / 2), Math.round(clear * 10)].join("|");
     if(key === cloudKey) return; cloudKey = key;
-    if(cov < 0.06 && k === "clear"){ clouds.style.opacity = 0; return; }
     if(!cloudTex) cloudTex = noiseTex(512, 160);
     var w = 512, h = 160, c = document.createElement("canvas"); c.width = w; c.height = h;
     var g = c.getContext("2d");

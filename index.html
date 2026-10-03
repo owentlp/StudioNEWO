@@ -28,6 +28,7 @@
 <link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
 <link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
 <link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
@@ -87,7 +88,7 @@
      page genuinely needs to do differently - the fixed non-scrolling body, the
      background video, the card dock - still wins on source order. What is gone
      from below is only the duplicated half. -->
-<link rel="stylesheet" href="css/style.css?v=57">
+<link rel="stylesheet" href="css/style.css?v=58">
 
 <style>
 /* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
@@ -405,7 +406,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="sky-clouds" aria-hidden="true"></div>
 <div id="sky-precip" aria-hidden="true"></div>
 <div id="sky-grain" aria-hidden="true"></div>
-<script src="js/sky.js?v=3"></script>
+<script src="js/sky.js?v=4"></script>
 <video class="bgvid" id="vidA" muted playsinline preload="none"></video>
 <video class="bgvid" id="vidB" muted playsinline preload="none"></video>
 
@@ -448,16 +449,16 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<script src="js/projects-data.js?v=24"></script>
+<script src="js/projects-data.js?v=25"></script>
 <!-- main.js: the ?guides / "g" layout overlay, and the page reveal.
      __DEFER_REVEAL hands the WHEN to this page: the reveal at the bottom of
      the file waits for the card images and the sky, then calls
      window.__revealPage(). Without the flag main.js lifts the loader 80ms
      after the document is parsed, before the cards have loaded. -->
 <script>window.__DEFER_REVEAL = true;</script>
-<script src="js/main.js?v=4"></script>
+<script src="js/main.js?v=5"></script>
 <script src="js/image-sizes.js?v=3"></script>
-<script src="js/menu.js?v=25"></script>
+<script src="js/menu.js?v=26"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
