@@ -122,11 +122,12 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=58",
+      "css/style.css?v=60",
       "js/projects-data.js?v=25",
       "js/image-sizes.js?v=3",
       "js/main.js?v=5",
-      "js/menu.js?v=26",
+      "js/menu.js?v=28",
+      "js/sky.js?v=5",
       "js/loader3d.js?v=15",
       "js/loader3d-core.js?v=1",
       "js/loader3d.worker.js?v=4",

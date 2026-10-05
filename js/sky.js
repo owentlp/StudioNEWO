@@ -11,11 +11,17 @@
       weather code at those approximate coordinates, cached for 20 min.
       If it fails, the sky is simply clear.
    4. Drawing: a small canvas (the gradient is smooth, so it is drawn at low
-      resolution and scaled up by CSS) with sun / moon glow and stars, a
-      procedural cloud layer that drifts with a compositor-only transform,
-      and rain / snow layers when the weather says so.
+      resolution and scaled up by CSS). MINIMAL SINCE 2026-10-05 (Owen: no
+      sun): no sun or moon discs, no glow spot. Time of day is the colour of
+      the sky alone, with a low band of warmth along the horizon at dawn and
+      dusk and a few faint, still stars at night. Weather is the procedural
+      cloud layer (drifts with a compositor-only transform), the grey of the
+      sky, and rain / snow layers.
    5. body[data-sky="dark"] is set when the sky is dark, so the header marks
-      switch to paper colour (see index.html CSS).
+      and the loading mark switch to paper colour (css/style.css, index.html).
+   6. The same sky sits under the loading mark on the project pages (inside
+      #loader there). It goes away with the loader; once the loader is gone
+      the layers are hidden and the timers stop.
 
    PREVIEW ANY STATE (URL parameters):
      ?t=18:40            local time to show
@@ -74,7 +80,7 @@
     return d;
   }
 
-  /* ---------- sun + moon position ---------- */
+  /* ---------- sun position ---------- */
   var R = Math.PI / 180;
   function sun(date, lat, lon){
     var d = (date.getTime() - 946728000000) / 86400000;
@@ -82,17 +88,6 @@
     var L = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * R, e = (23.439 - 0.00000036 * d) * R;
     var ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L)), dec = Math.asin(Math.sin(e) * Math.sin(L));
     return horizon(d, ra, dec, lat, lon);
-  }
-  function moon(date, lat, lon){
-    var d = (date.getTime() - 946728000000) / 86400000;
-    var Lm = (218.316 + 13.176396 * d) * R, M = (134.963 + 13.064993 * d) * R, F = (93.272 + 13.229350 * d) * R;
-    var l = Lm + 6.289 * R * Math.sin(M), b = 5.128 * R * Math.sin(F), e = 23.4397 * R;
-    var ra = Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l));
-    var dec = Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l));
-    var h = horizon(d, ra, dec, lat, lon);
-    // phase: 0 new, 0.5 full
-    var D = ((297.85 + 12.190749 * d) % 360 + 360) % 360;
-    h.phase = D / 360; return h;
   }
   function horizon(d, ra, dec, lat, lon){
     var gmst = (280.16 + 360.9856235 * d) * R;
@@ -103,18 +98,20 @@
   }
 
   /* ---------- palette by sun elevation: [elevation, zenith, horizon, glow] ---------- */
+  /* Muted, closer to a photograph than a screen gradient. glow is only the
+     colour of the low dawn / dusk band along the horizon. */
   var KEYS = [
-    [-90, "#05070f", "#0c1222", "#000000"],
-    [-18, "#070b1a", "#121a33", "#000000"],
-    [-12, "#0d1530", "#22305a", "#1a1f3a"],
-    [-7,  "#18275a", "#4b4f84", "#6a4f7a"],
-    [-3,  "#2c4a85", "#b47a86", "#e08a6a"],
-    [0,   "#3f68a8", "#efa06c", "#ffb070"],
-    [4,   "#5084c4", "#f5c08a", "#ffd3a0"],
-    [10,  "#4f8bd2", "#e6dcc4", "#fff0d6"],
-    [22,  "#3d80d4", "#c8def0", "#ffffff"],
-    [50,  "#2f73cc", "#b8d6f2", "#ffffff"],
-    [90,  "#2a6cc8", "#b0d2f2", "#ffffff"]
+    [-90, "#0a0d16", "#121826", "#000000"],
+    [-18, "#0b1020", "#171f36", "#000000"],
+    [-12, "#111a32", "#26304f", "#2a2a40"],
+    [-7,  "#1c2a52", "#454b70", "#6a5470"],
+    [-3,  "#2f4a7a", "#9c8088", "#d8957a"],
+    [0,   "#46669a", "#d4a488", "#eeb48c"],
+    [4,   "#5a7fb2", "#dcc0a4", "#f0caa6"],
+    [10,  "#6890c2", "#d6d8d2", "#f4e2cc"],
+    [22,  "#6a96c8", "#ccdae4", "#ffffff"],
+    [50,  "#5f8dc4", "#c2d5e6", "#ffffff"],
+    [90,  "#5a89c2", "#bed3e6", "#ffffff"]
   ];
   function hex(h){ return [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)]; }
   var KC = KEYS.map(function(k){ return [k[0], hex(k[1]), hex(k[2]), hex(k[3])]; });
@@ -199,7 +196,7 @@
   /* ---------- stars (fixed field, generated once) ---------- */
   var STARS = [];
   (function(){ var s = 7; function rnd(){ s = (s * 16807) % 2147483647; return s / 2147483647; }
-    for(var i = 0; i < 260; i++) STARS.push([rnd(), rnd() * 0.8, rnd() * 0.9 + 0.1, rnd()]); })();
+    for(var i = 0; i < 110; i++) STARS.push([rnd(), rnd() * 0.8, rnd() * 0.9 + 0.1, rnd()]); })();
 
   /* ---------- draw ---------- */
   var W = 0, H = 0, last = null;
@@ -209,7 +206,7 @@
     cv.width = W; cv.height = H;
   }
   function draw(){
-    var date = now(), s = sun(date, LOC[0], LOC[1]), m = moon(date, LOC[0], LOC[1]);
+    var date = now(), s = sun(date, LOC[0], LOC[1]);
     var P = palette(s.alt), cov = WX.cover, k = WX.kind;
     var wet = WX.wet, fog = WX.fog;
     // clouds and weather pull the sky toward grey; rain darkens, snow / fog lighten
@@ -227,57 +224,24 @@
     ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
 
-    // where things sit on screen: due south is the centre, the horizon line at 92%
-    function sx(az){ var rel = ((az - 180 + 540) % 360) - 180; return W * (0.5 + rel / 200); }
-    function sy(alt){ return H * (0.92 - alt / 75 * 0.85); }
+    // dawn and dusk: a low band of warmth along the whole horizon. No sun
+    // disc and no glow spot; the time of day is told by colour alone.
+    var tw = Math.max(0, 1 - Math.abs(s.alt - 1) / 9);
+    var clear = (1 - cov) * (1 - wet) * (1 - fog);
+    if(tw > 0.01){
+      var band = ctx.createLinearGradient(0, H, 0, H * 0.45);
+      band.addColorStop(0, css(P.glow, 0.32 * tw * (0.3 + 0.7 * clear)));
+      band.addColorStop(1, css(P.glow, 0));
+      ctx.fillStyle = band; ctx.fillRect(0, H * 0.45, W, H * 0.55);
+    }
 
-    // stars, faded by twilight and by cloud
-    var starA = Math.max(0, Math.min(1, (-s.alt - 6) / 8)) * (1 - cov * 0.9) * (1 - wet) * (1 - fog);
+    // a few faint stars, still, faded by twilight and by cloud
+    var starA = Math.max(0, Math.min(1, (-s.alt - 8) / 8)) * (1 - cov * 0.95) * (1 - wet) * (1 - fog);
     if(starA > 0.02){
       for(var i = 0; i < STARS.length; i++){
-        var st = STARS[i]; var tw = 0.65 + 0.35 * Math.sin(st[3] * 40 + date.getTime() / 1800 * st[3]);
-        ctx.fillStyle = "rgba(255,255,250," + (starA * st[2] * tw).toFixed(3) + ")";
-        var r = st[2] > 0.85 ? 1.1 : 0.7;
-        ctx.fillRect(st[0] * W, st[1] * H, r, r);
-      }
-    }
-
-    // sun glow (and the disc itself when the sky is clear enough)
-    var clear = (1 - cov) * (1 - wet) * (1 - fog);
-    if(s.alt > -8){
-      var x = sx(s.az), y = sy(Math.max(s.alt, -4));
-      var a = Math.max(0, Math.min(1, (s.alt + 8) / 8));
-      var rg = ctx.createRadialGradient(x, y, 0, x, y, H * (0.9 - Math.min(0.4, Math.max(0, s.alt) / 100)));
-      rg.addColorStop(0, css(P.glow, 0.55 * a * (0.35 + 0.65 * clear)));
-      rg.addColorStop(0.25, css(P.glow, 0.18 * a * (0.4 + 0.6 * clear)));
-      rg.addColorStop(1, css(P.glow, 0));
-      ctx.globalCompositeOperation = "screen"; ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
-      if(s.alt > -1 && clear > 0.25){
-        var dr = H * 0.018;
-        var dg = ctx.createRadialGradient(x, y, 0, x, y, dr * 3);
-        dg.addColorStop(0, "rgba(255,252,240," + (0.95 * clear) + ")");
-        dg.addColorStop(0.33, "rgba(255,245,225," + (0.85 * clear) + ")");
-        dg.addColorStop(1, "rgba(255,240,210,0)");
-        ctx.fillStyle = dg; ctx.fillRect(x - dr * 3, y - dr * 3, dr * 6, dr * 6);
-      }
-      ctx.globalCompositeOperation = "source-over";
-    }
-
-    // moon, with a rough phase shadow
-    if(m.alt > 0 && s.alt < 4){
-      var mx = sx(m.az), my = sy(m.alt), mr = H * 0.016;
-      var ma = Math.min(1, (4 - s.alt) / 8) * (0.25 + 0.75 * clear);
-      var mg = ctx.createRadialGradient(mx, my, 0, mx, my, mr * 9);
-      mg.addColorStop(0, "rgba(220,228,255," + (0.22 * ma) + ")"); mg.addColorStop(1, "rgba(220,228,255,0)");
-      ctx.fillStyle = mg; ctx.fillRect(mx - mr * 9, my - mr * 9, mr * 18, mr * 18);
-      ctx.fillStyle = "rgba(240,240,232," + (0.9 * ma) + ")";
-      ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.fill();
-      var f = (1 - Math.cos(m.phase * 2 * Math.PI)) / 2;            // 0 new, 1 full
-      if(f < 0.97){
-        ctx.save(); ctx.beginPath(); ctx.arc(mx, my, mr * 1.02, 0, Math.PI * 2); ctx.clip();
-        ctx.fillStyle = css(zen, 0.94);
-        ctx.beginPath(); ctx.arc(mx + (m.phase < 0.5 ? -1 : 1) * mr * 2 * f, my, mr * 1.04, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
+        var st = STARS[i];
+        ctx.fillStyle = "rgba(255,255,250," + (starA * st[2] * 0.55).toFixed(3) + ")";
+        ctx.fillRect(st[0] * W, st[1] * H * 0.75, 0.8, 0.8);
       }
     }
 
@@ -329,7 +293,7 @@
     var dayLit = mix([250, 248, 244], [212, 214, 220], Math.min(1, cov * 0.9));   // white puffs -> grey deck
     var nightLit = mix(skyMid, [118, 110, 104], 0.35);                           // faint city-lit undersides
     var lit = mix(nightLit, dayLit, day);
-    if(alt > -4 && alt < 8) lit = mix(lit, hex("#f3b089"), 0.35 * clear + 0.12);   // warm light at golden hour
+    if(alt > -4 && alt < 8) lit = mix(lit, hex("#e8b498"), 0.25 * clear + 0.08);   // warm light at golden hour
     var shade = mix(lit, skyMid, 0.45 + 0.3 * cov);
     var aMul = (0.5 + 0.4 * cov) * (0.5 + 0.5 * day) * (cov > 0.85 ? 0.7 : 1);
     for(var i = 0; i < D.length; i += 4){
@@ -369,10 +333,23 @@
   var readyDone, ready = new Promise(function(res){ readyDone = res; });
   setTimeout(readyDone, 1500);
   getWeather(function(){ readyDone(); });
-  var rt; addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(function(){ size(); draw(); }, 200); });
-  setInterval(function(){ if(!document.hidden) draw(); }, 60000);
-  if(starTwinkle()) setInterval(function(){ if(!document.hidden && last && last.s.alt < -5) draw(); }, 2500);
-  function starTwinkle(){ return !RM; }
-  setInterval(function(){ if(!document.hidden && !Q.get("wx")) getWeather(tick, true); }, 20 * 60000);
+  var rt; addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(function(){ if(cv.style.display !== "none"){ size(); draw(); } }, 200); });
+  var TIMERS = [
+    setInterval(function(){ if(!document.hidden) draw(); }, 60000),
+    setInterval(function(){ if(!document.hidden && !Q.get("wx")) getWeather(tick, true); }, 20 * 60000)
+  ];
+  /* PROJECT PAGES: the sky lives inside #loader, so the loading screen holds
+     the home page background. Once the loader has fully gone (body.ready, and
+     loader3d.js has let go of its pin) the layers are hidden and the timers
+     stop, so the project page pays nothing for it afterwards. */
+  var LD = cv.closest && cv.closest("#loader");
+  if(LD){
+    var off = setInterval(function(){
+      if(!document.body.classList.contains("ready")) return;
+      if(getComputedStyle(LD).visibility !== "hidden") return;
+      clearInterval(off); TIMERS.forEach(clearInterval);
+      [cv, clouds, precip, document.getElementById("sky-grain")].forEach(function(el){ if(el) el.style.display = "none"; });
+    }, 500);
+  }
   window.NEWO_SKY = { ready: ready, redraw: draw, state: function(){ return { loc: LOC, wx: WX, sun: last && last.s }; } };
 })();

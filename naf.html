@@ -86,16 +86,23 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=58">
+<link rel="stylesheet" href="css/style.css?v=60">
 </head>
 <body class="proj-body" data-project="naf">
 <a class="skip-link" href="#content">Skip to content</a>
 
-<div id="loader" aria-hidden="true">
+<!-- the loader holds the home page sky (js/sky.js): same time of day, same
+     weather, then it fades away with the logo. See css/style.css SKY. -->
+<div id="loader" class="ld-sky" aria-hidden="true">
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div id="sky-clouds" aria-hidden="true"></div>
+  <div id="sky-precip" aria-hidden="true"></div>
+  <div id="sky-grain" aria-hidden="true"></div>
   <div class="ld-mark">
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
+<script src="js/sky.js?v=5"></script>
 <script src="js/loader3d.js?v=15"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
@@ -137,7 +144,7 @@
      this flag tells main.js to hand reveal control to this page. -->
 <script>window.__DEFER_REVEAL = true;</script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=26"></script>
+<script src="js/menu.js?v=28"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----
@@ -778,7 +785,9 @@
              eager does NOT mean "load on page load" here - the src is not
              attached until loadModel() runs, so this only removes
              model-viewer's veto and leaves the timing to us. */
-          'disable-pan loading="eager" interaction-prompt="none" camera-orbit="-25deg 76deg 228%" ' +
+          // disable-zoom (Owen, 2026-10-05): the model turns, it does not zoom. It
+          // also means the wheel always scrolls the page, even over the model.
+          'disable-pan disable-zoom loading="eager" interaction-prompt="none" camera-orbit="-25deg 76deg 228%" ' +
           // These attribute values are only a first frame's worth of defaults -
           // the real limits are set in metres once the model loads, because
           // model-viewer does not clamp radius percentages here reliably.
@@ -811,6 +820,11 @@
           // to consider AR wired up, but we drive it from our own button above
           // via activateAR() so the layout is ours to control.
           '<span slot="ar-button" hidden></span>' +
+          // an EMPTY progress-bar slot: model-viewer's own loading bar is a
+          // thin line across the top of the element, which read as a stray
+          // scroll bar on the model's frame (Owen, 2026-10-05). The model now
+          // loads under the loading screen, so there is nothing to show.
+          '<div slot="progress-bar"></div>' +
         '</model-viewer>' +
       '</div>' +
       // controls sit OUTSIDE the tilted stage on their own row: exploded +
@@ -1051,7 +1065,7 @@
        METRES, never percentages: model-viewer does not clamp radius
        PERCENTAGES reliably ("105%" still let the camera through to about 60%,
        measured). Metres clamp exactly. */
-    var ZOOM_IN = 1.25;          // 25% bigger than default, the whole range
+    var ZOOM_IN = 1;             // no zoom (2026-10-05, was 1.25). See disable-zoom on the element.
     var framedOrbit = null;      // what RESET goes back to, once we know it
     var homeTheta = null, homePhi = null;
     /* EXPLODED FRAMING. An exploded product is about twice the size of the
@@ -1828,7 +1842,30 @@
       if(heroVid.readyState >= 3) waits.push(Promise.resolve());
       else waits.push(settle(heroVid, "canplay", 8000));
     }
-    /* The 3D MODEL IS NO LONGER WAITED ON (2026-08-29). It used to be the
+    /* THE 3D MODEL IS WAITED ON AGAIN (2026-10-05). Owen would rather the
+       loading screen run a little longer than have the model finish building
+       after he has already scrolled to it, or have the page seize up when he
+       starts scrolling straight away. The logo animation runs in a worker now
+       (js/loader3d.worker.js), so the model's main-thread work no longer
+       stutters it. armModel() starts the model at once and pins it inside the
+       viewport (.mv-warm) so model-viewer will actually draw it, shaders and
+       all, under the loader. This waits for model-viewer to report the model
+       drawn (model-visibility), at most 9s, then the reveal goes ahead with or
+       without it. (Not .mv-framed: frameModel() sets that even on an early
+       call before the model exists.) */
+    var stageEl = content.querySelector(".cad-stage"), mvWait = document.getElementById("mv");
+    if(stageEl && mvWait){
+      waits.push(new Promise(function(res){
+        var done = false;
+        function ok(){ if(done) return; done = true; setTimeout(res, 250); }
+        setTimeout(ok, 9000);
+        mvWait.addEventListener("model-visibility", function(e){ if(e.detail && e.detail.visible) ok(); });
+        mvWait.addEventListener("error", ok, { once:true });
+        // backstop if the event never comes: loaded, plus time for the first draw
+        mvWait.addEventListener("load", function(){ setTimeout(ok, 1500); }, { once:true });
+      }));
+    }
+    /* (history) The 3D MODEL WAS NOT WAITED ON from 2026-08-29. It used to be the
        longest pole here by far - ~700KB of library, a draco decode, 22 texture
        uploads and a PMREM environment map - and all of it landed while the
        logo was still tumbling. It now loads on scroll-approach instead; see
@@ -1868,8 +1905,15 @@
       var imgs = Array.prototype.slice.call(content.querySelectorAll("img"));
       var fold = window.innerHeight * 2;
       var near = [], far = [];
+      /* NOT RENDERED = FAR (2026-10-05). The process photos sit inside the
+         collapsed "Read more" section, where every rect is 0,0,0,0 - so "top <
+         fold" counted all of them as near. Their decode() never resolves while
+         they are not rendered (a lazy image out of layout is never fetched), so
+         the loader sat out the full 6s timeout on every project page. That was
+         most of the "6 seconds to load". */
       imgs.forEach(function(im){
-        (im.getBoundingClientRect().top < fold ? near : far).push(im);
+        var r = im.getBoundingClientRect();
+        (r.width > 0 && r.top < fold ? near : far).push(im);
       });
       function warm(list, ms){
         return Promise.all(list.map(function(im){
@@ -1885,9 +1929,10 @@
       later(function(){ warm(far, 20000); });
       return warm(near, 6000);
     }).then(function(){
-      // two frames of settle so the first full-page layout/paint (and the
-      // model's first composited frame) happen UNDER the loader, not during
-      // its fade
+      // put the model back in its slot (see .mv-warm), then two frames of
+      // settle so the first full-page layout/paint happens UNDER the loader,
+      // not during its fade
+      if(stageEl){ stageEl.classList.remove("mv-warm"); if(modelGate) modelGate.refresh(); }
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){ window.__revealPage(); });
       });
@@ -2076,12 +2121,13 @@
     var box = document.querySelector(".cad-stage");
     if(!box) return;
     var onScreen = false, holds = 0;
-    function apply(){ box.classList.toggle("mv-offscreen", !onScreen && holds === 0); }
+    // .mv-warm = pinned on screen under the loader (armModel), so it is never offscreen then
+    function apply(){ box.classList.toggle("mv-offscreen", !onScreen && holds === 0 && !box.classList.contains("mv-warm")); }
     apply();
     new IntersectionObserver(function(entries){
       onScreen = entries[0].isIntersecting; apply();
     }, { rootMargin: "50% 0px" }).observe(box);
-    modelGate = { hold: function(){ holds++; apply(); },
+    modelGate = { refresh: apply, hold: function(){ holds++; apply(); },
                   release: function(){ holds = Math.max(0, holds - 1); apply(); } };
   })();
 
@@ -2143,10 +2189,20 @@
         }, { rootMargin: "150% 0px" }).observe(box);
       } else if(!box){ go(); }
     }
-    (function whenReady(){
-      if(document.body.classList.contains("ready")){ setTimeout(arm, 400); return; }
-      setTimeout(whenReady, 80);
-    })();
+    /* 2026-10-05: no longer waits for body.ready. The model is built under
+       the loading screen (see holdLoader). While it builds, .mv-warm pins it
+       inside the viewport, behind the loader and the still-hidden page:
+       model-viewer only draws an element that is on screen, and the first
+       draw is where the expensive shader compile happens. Same size, so
+       nothing re-frames when it goes back to its slot at the reveal. */
+    if(box && !document.body.classList.contains("ready")){
+      box.classList.add("mv-warm");
+      // never leave it pinned: the reveal removes it, and so does this
+      var unpin = setInterval(function(){
+        if(document.body.classList.contains("ready")){ box.classList.remove("mv-warm"); if(modelGate) modelGate.refresh(); clearInterval(unpin); }
+      }, 200);
+    }
+    go();
   })();
 })();
 </script>
