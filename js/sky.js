@@ -246,6 +246,7 @@
     }
 
     // header marks: paper on a dark sky, ink on a light one
+    try { localStorage.setItem("newo-sky-c", JSON.stringify([zen, hor].map(function(c){ return "rgb(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + ")"; }))); } catch(e){}
     var topL = lum(zen), dark = topL < 0.32;
     document.body.setAttribute("data-sky", dark ? "dark" : "light");
     paintClouds(P, zen, hor, cov, k, s.alt, clear);

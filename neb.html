@@ -86,7 +86,25 @@
      the v4 line so an upstream major release can't silently break the page.
      To go fully offline, download model-viewer.min.js into js/vendor/ and
      point MV_SRC in the script below at it. -->
-<link rel="stylesheet" href="css/style.css?v=60">
+<script>
+/* LOADING SCREEN BACKGROUND (2026-10-07).
+   1. Coming from a paper page (anything but home) the loader is paper with the
+      ink mark (html.ld-paper, css/style.css). From home, or a fresh visit, it
+      keeps the sky. Either way the loader fades out, so paper to home and home
+      to paper both cross-fade.
+   2. Until js/sky.js has drawn, the #sky box shows its CSS gradient. That was a
+      fixed day blue, which flashed at night. It now uses the last sky colours
+      js/sky.js saved, or a night guess from the clock on a first visit. */
+(function(){
+  var h = document.documentElement;
+  try { var r = document.referrer ? new URL(document.referrer) : null;
+    if(r && r.origin === location.origin && !/\/(index\.html)?$/.test(r.pathname)) h.classList.add("ld-paper"); } catch(e){}
+  var c = null; try { c = JSON.parse(localStorage.getItem("newo-sky-c") || "null"); } catch(e){}
+  if(!c){ var hr = new Date().getHours(); if(hr < 6 || hr >= 20) c = ["rgb(10,13,24)", "rgb(26,30,44)"]; }
+  if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
+})();
+</script>
+<link rel="stylesheet" href="css/style.css?v=61">
 </head>
 <body class="proj-body" data-project="neb">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -102,7 +120,7 @@
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/sky.js?v=5"></script>
+<script src="js/sky.js?v=6"></script>
 <script src="js/loader3d.js?v=15"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
@@ -142,9 +160,13 @@
 <!-- project pages hold the loader until their hero image, hero video and 3D
      model have loaded (see the readiness gate at the end of the page script);
      this flag tells main.js to hand reveal control to this page. -->
-<script>window.__DEFER_REVEAL = true;</script>
+<script>window.__DEFER_REVEAL = true;
+/* LAST-RESORT REVEAL (2026-10-05). main.js holds the 12s hard cap, so if main.js
+   itself fails to arrive (GitHub Pages answered one request with a 503 during a
+   deploy), the loading screen never cleared. This one lives in the page. */
+setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=28"></script>
+<script src="js/menu.js?v=29"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----

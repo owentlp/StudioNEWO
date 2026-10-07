@@ -81,24 +81,21 @@ const SOLUTIONS = [
    tools/pages/solutions.meta.json and re-run tools/make-simple-page.py.
    ============================================================ */
 const SERVICES = [
-  { name: "Feasibility study",
-    what: "Is it worth building, and how? Site or user research, benchmarks, options and a recommendation, written up as a report you can act on.",
-    time: "2 to 3 weeks", from: "1,800" },
-  { name: "Concept design",
-    what: "Three directions narrowed to one: sketches, a CAD concept model and renders that show what it is and how it works.",
-    time: "2 to 4 weeks", from: "2,400" },
-  { name: "Design for manufacture",
-    what: "The chosen concept turned into CAD that can be made: parts, assemblies, tolerances, materials, and a drawing package with a bill of materials.",
-    time: "3 to 6 weeks", from: "3,600" },
-  { name: "Working prototype",
-    what: "A looks-like, works-like prototype built in the shop. Wood, metal, 3D printing, and electronics with firmware where the product needs it.",
-    time: "4 to 8 weeks", from: "4,800" },
-  { name: "Renders and 3D for web",
-    what: "Studio renders, exploded views, and a 3D model that runs in a browser or in AR, from your CAD or the studio's.",
-    time: "1 to 2 weeks", from: "600" },
-  { name: "CAD, drafting and shop time",
-    what: "SolidWorks modelling, drawings, CNC files, fabrication and finishing by the hour or the day.",
-    time: "As needed", from: "65 / hour" }
+  { name: "Product renders",
+    what: "Your CAD in, studio-lit stills out, with one light, set and colour grade across the set. Three stills minimum, five for $600.",
+    time: "2 to 3 weeks", from: "150 / still" },
+  { name: "Animation",
+    what: "A 10 to 20 second turntable or exploded-view clip. $350 when added to a render set.",
+    time: "2 to 3 weeks", from: "500 / clip" },
+  { name: "Launch bundle",
+    what: "Five stills, one clip and a 3D model that runs on your product page, in the browser or in AR. Built for Kickstarter and product launches.",
+    time: "2 to 3 weeks", from: "1,500" },
+  { name: "Drawing package",
+    what: "Your 3D model in; PDF production drawings, DXF flat patterns and STEP files out. Three sheets minimum.",
+    time: "2 to 3 weeks", from: "100 / sheet" },
+  { name: "CAD cleanup and DFM pass",
+    what: "Messy or STEP-only parts rebuilt as clean SolidWorks, with draft, walls, bends, fasteners and inserts fixed for manufacture, and a bill of materials. Fixed quote after seeing the files.",
+    time: "Quoted", from: "55 / hour" }
 ];
-const SERVICE_RATES = "Prices are starting points in Canadian dollars. Every project gets a fixed quote before any work starts. Hourly work is $65, a full day is $480. Materials and outside fabrication are billed at cost.";
-const SERVICE_TERMS = "Work runs in phases with a review at the end of each, and you can stop after any phase. 40% to start a phase, the balance on delivery. Two rounds of revisions are included. The design is yours once the final invoice is paid.";
+const SERVICE_RATES = "Prices are starting points in Canadian dollars; US clients are quoted the same numbers in US dollars. Every job gets a written scope and a fixed price before work starts. Product design, CAD and drawings only: drawings are not engineer-stamped.";
+const SERVICE_TERMS = "50% up front, the balance on delivery. Two rounds of revisions are included. Final files are released once the last invoice is paid. One job at a time, so each one gets full attention.";

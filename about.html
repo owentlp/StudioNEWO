@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=60">
+<link rel="stylesheet" href="css/style.css?v=61">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -94,6 +94,8 @@
   .ab-fact .af-m{margin-top:3px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;}
   .ab-fact .af-d{margin-top:5px; color:var(--ink-soft);}
   .ab-fact .cap2{display:block; margin-top:clamp(26px,4vh,38px);}
+  .ab-avail{margin-top:clamp(56px,10vh,120px);}
+  .ab-avail .desc{margin-top:10px; max-width:62ch;}
   .ab-cta{margin-top:clamp(30px,5vh,46px); display:flex; flex-wrap:wrap; gap:8px;}
   .ab-cta .inq{margin-top:0;}
 
@@ -134,7 +136,7 @@
     <div class="ab-who">
       <img class="ab-photo" src="about/owen-palmer.jpg" width="712" height="848" alt="Owen Palmer, industrial designer and founder of Studio NEWO" decoding="async">
       <span class="cap">Owen Palmer, designer</span>
-      <p class="desc">I came to industrial design from two years of mechanical engineering, and I still often think like an engineer: solving problems and rendering designs in my head before modelling them. I want to create products and develop solutions that bring the most value to as many people as possible.</p>
+      <p class="desc">I came to industrial design from two years of mechanical engineering and two years building and installing custom furniture and cabinetry, and I still think like an engineer: solving problems and rendering designs in my head before modelling them. Through Studio NEWO I design, build and sell my own products, and I make studio renders, animations and production drawings from other designers' and brands' CAD.</p>
     </div>
   </div>
 
@@ -167,20 +169,20 @@
     <div class="ab-fact">
       <span class="cap">Experience</span>
       <ul>
-        <li><span class="af-t">Founder and designer, Studio NEWO</span><span class="af-m">Toronto, 2024 to present</span><span class="af-d">Products designed and built end to end, from concept to working prototype: furniture, lighting, audio. Embedded firmware written in house (C++ on ESP32, LED matrices, mmWave radar).</span></li>
+        <li><span class="af-t">Founder and designer, Studio NEWO</span><span class="af-m">Toronto, 2024 to present</span><span class="af-d">Products designed and built end to end, from concept to working prototype: furniture, lighting, audio. Studio renders, turntables, exploded-view clips, 3D web models and production drawings made in house from SolidWorks. Embedded firmware written in house (C++ on ESP32, LED matrices, mmWave radar).</span></li>
         <li><span class="af-t">Project assistant, Wood by Design</span><span class="af-m">Peterborough, 2024 to 2026</span><span class="af-d">Led assembly, finishing and on-site installation of custom furniture and cabinetry. Prepared CAD files for CNC cutting and contributed to design decisions.</span></li>
-        <li><span class="af-t">Leak survey technician and GIS assistant, QSP Geographics</span><span class="af-m">Ottawa, 2023</span><span class="af-d">Field survey work with gas-detection equipment, and mapping of the survey data in GIS.</span></li>
       </ul>
     </div>
     <div class="ab-fact">
       <span class="cap">Capabilities</span>
       <ul>
         <li><span class="af-t">CAD</span><span class="af-d">SolidWorks, Onshape</span></li>
+        <li><span class="af-t">Rendering and animation</span><span class="af-d">Blender: studio stills, turntables, exploded views, 3D web models</span></li>
+        <li><span class="af-t">Drawings</span><span class="af-d">Production drawings, DXF flat patterns, STEP, bills of materials</span></li>
         <li><span class="af-t">Fabrication</span><span class="af-d">CNC, laser, 3D printing, welding, lathe, mill</span></li>
         <li><span class="af-t">Electronics and firmware</span><span class="af-d">ESP32, C++ / Arduino</span></li>
         <li><span class="af-t">Materials</span><span class="af-d">Wood, metal, plastic, foam, leather, vinyl</span></li>
-        <li><span class="af-t">3D scanning and AR</span><span class="af-d">Photogrammetry, AR integration</span></li>
-        <li><span class="af-t">Software and web</span><span class="af-d">Photoshop, Illustrator, XD, SketchUp, HTML / CSS / JS, Three.js</span></li>
+        <li><span class="af-t">Software and web</span><span class="af-d">Photoshop, Illustrator, HTML / CSS / JS, Three.js, photogrammetry and AR</span></li>
       </ul>
     </div>
     <div class="ab-fact">
@@ -196,6 +198,10 @@
         <li><span class="af-t">Mechanical Engineering, University of Ottawa</span><span class="af-m">2021 to 2023</span></li>
       </ul>
     </div>
+  </div>
+  <div class="ab-avail">
+    <span class="cap">Freelance</span>
+    <p class="desc">Studio NEWO takes on freelance work for designers, hardware startups and brands preparing a launch: product renders, animation, launch bundles, drawing packages and CAD cleanup. Fixed prices, one job at a time, a 2 to 3 week turnaround. Clients in Canada and the US.</p>
   </div>
   <p class="ab-cta">
     <a class="inq" href="solutions.html#services">WORK WITH THE STUDIO &rarr;</a>
@@ -217,6 +223,6 @@
 
 <script src="js/projects-data.js?v=25"></script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=28"></script>
+<script src="js/menu.js?v=29"></script>
 </body>
 </html>

@@ -88,7 +88,25 @@
      page genuinely needs to do differently - the fixed non-scrolling body, the
      background video, the card dock - still wins on source order. What is gone
      from below is only the duplicated half. -->
-<link rel="stylesheet" href="css/style.css?v=60">
+<script>
+/* LOADING SCREEN BACKGROUND (2026-10-07).
+   1. Coming from a paper page (anything but home) the loader is paper with the
+      ink mark (html.ld-paper, css/style.css). From home, or a fresh visit, it
+      keeps the sky. Either way the loader fades out, so paper to home and home
+      to paper both cross-fade.
+   2. Until js/sky.js has drawn, the #sky box shows its CSS gradient. That was a
+      fixed day blue, which flashed at night. It now uses the last sky colours
+      js/sky.js saved, or a night guess from the clock on a first visit. */
+(function(){
+  var h = document.documentElement;
+  try { var r = document.referrer ? new URL(document.referrer) : null;
+    if(r && r.origin === location.origin && !/\/(index\.html)?$/.test(r.pathname)) h.classList.add("ld-paper"); } catch(e){}
+  var c = null; try { c = JSON.parse(localStorage.getItem("newo-sky-c") || "null"); } catch(e){}
+  if(!c){ var hr = new Date().getHours(); if(hr < 6 || hr >= 20) c = ["rgb(10,13,24)", "rgb(26,30,44)"]; }
+  if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
+})();
+</script>
+<link rel="stylesheet" href="css/style.css?v=61">
 
 <style>
 /* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
@@ -125,7 +143,7 @@ body.bg-sky #soundToggle{display:none;}
 #home-line span{opacity:.5; transition:opacity .25s ease;}
 /* a raised card can reach the label on a short window: it steps aside rather
    than sit over the photo (no text over images) */
-body:has(.dc:hover) #home-line span, body:has(.dc:focus-visible) #home-line span{opacity:0;}
+body:has(.dc:hover) #home-line span, body:has(.dc:focus-visible) #home-line span, body:has(.dc.dc-lift) #home-line span{opacity:0;}
 body[data-sky="dark"] #home-line{color:var(--paper);}
 @media (max-width:760px), (max-height:700px), (hover: none){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
 
@@ -203,7 +221,7 @@ body[data-sky="dark"] #home-line{color:var(--paper);}
    everything. Reads as the card rising up from its place in the stack
    instead of popping to the front of it. */
 .dc:not(:first-child){ margin-left:min(calc(-1 * var(--dock-w) * .35), calc((100vw - var(--dock-n, 4) * var(--dock-w)) / (var(--dock-n, 4) - 1))); }
-.dc:hover, .dc:focus-visible{ transform:translateY(calc(var(--dock-peek) - var(--dock-rise))); }
+.dc:hover, .dc:focus-visible, .dc.dc-lift{ transform:translateY(calc(var(--dock-peek) - var(--dock-rise))); }
 /* the photo fills whatever height is left under the title band. The title
    band is a fixed-height sibling (title + date only, no animating text), so
    the photo doesn't reflow on hover - the whole card just slides up. */
@@ -237,7 +255,7 @@ body[data-sky="dark"] #home-line{color:var(--paper);}
    Do not add contain/will-change back here; both were tried and made it worse. */
 .dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1.015) translateZ(0); backface-visibility:hidden; transition:transform .5s cubic-bezier(.2,.8,.2,1);}
 .dc{backface-visibility:hidden;}
-.dc:hover .dc-media img, .dc:focus-visible .dc-media img{filter:saturate(1.05); transform:scale(1.096) translateZ(0);}
+.dc:hover .dc-media img, .dc:focus-visible .dc-media img, .dc.dc-lift .dc-media img{filter:saturate(1.05); transform:scale(1.096) translateZ(0);}
 /* title (+ date) is a paper band at the TOP of the card, ABOVE the photo (not
    over it), so the photo's top is never covered. It's what shows in the peeking
    sliver at rest, with the photo starting just beneath it. No catch-phrase/
@@ -376,7 +394,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="sky-clouds" aria-hidden="true"></div>
 <div id="sky-precip" aria-hidden="true"></div>
 <div id="sky-grain" aria-hidden="true"></div>
-<script src="js/sky.js?v=5"></script>
+<script src="js/sky.js?v=6"></script>
 <video class="bgvid" id="vidA" muted playsinline preload="none"></video>
 <video class="bgvid" id="vidB" muted playsinline preload="none"></video>
 
@@ -425,10 +443,14 @@ body.ready .fade-in.d2{transition-delay:.2s;}
      the file waits for the card images and the sky, then calls
      window.__revealPage(). Without the flag main.js lifts the loader 80ms
      after the document is parsed, before the cards have loaded. -->
-<script>window.__DEFER_REVEAL = true;</script>
+<script>window.__DEFER_REVEAL = true;
+/* LAST-RESORT REVEAL (2026-10-05). main.js holds the 12s hard cap, so if main.js
+   itself fails to arrive (GitHub Pages answered one request with a 503 during a
+   deploy), the loading screen never cleared. This one lives in the page. */
+setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=5"></script>
 <script src="js/image-sizes.js?v=3"></script>
-<script src="js/menu.js?v=28"></script>
+<script src="js/menu.js?v=29"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -545,6 +567,37 @@ const CLIP_PICK = (function(){
   // a phone rotating, or a 2-in-1 folding into tablet mode, changes the answer
   // without necessarily firing a resize the script would otherwise act on
   if(STACKED.addEventListener) STACKED.addEventListener("change", sizeDock);
+})();
+</script>
+
+<script>
+/* CARD CYCLE (2026-10-07): once the loader has gone, each card lifts in turn,
+   left to right, so a first-time visitor sees every project without hunting.
+   Desktop fan only (the phone column already shows every photo), once per
+   visit (sessionStorage), never with reduced motion, and it stops the moment
+   the visitor moves onto the cards, scrolls, or presses a key. */
+(function(){
+  var dock = document.getElementById("dock"), loader = document.getElementById("loader");
+  if(window.matchMedia("(max-width:760px), (hover: none), (prefers-reduced-motion: reduce)").matches) return;
+  try { if(sessionStorage.getItem("newo-cycle")) return; } catch(e){}
+  var HOLD = 900, STEP = 650, timers = [], stopped = false;
+  function stop(){
+    if(stopped) return; stopped = true;
+    timers.forEach(clearTimeout);
+    [].forEach.call(dock.children, function(c){ c.classList.remove("dc-lift"); });
+  }
+  dock.addEventListener("pointerenter", stop);
+  addEventListener("keydown", stop); addEventListener("wheel", stop, {passive:true}); addEventListener("touchstart", stop, {passive:true});
+  var wait = setInterval(function(){
+    if(!document.body.classList.contains("ready") || (loader && getComputedStyle(loader).visibility !== "hidden")) return;
+    clearInterval(wait);
+    if(stopped) return;
+    try { sessionStorage.setItem("newo-cycle", "1"); } catch(e){}
+    [].forEach.call(dock.children, function(c, i){
+      timers.push(setTimeout(function(){ if(!stopped) c.classList.add("dc-lift"); }, 300 + i * STEP));
+      timers.push(setTimeout(function(){ c.classList.remove("dc-lift"); }, 300 + i * STEP + HOLD));
+    });
+  }, 150);
 })();
 </script>
 

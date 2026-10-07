@@ -246,7 +246,9 @@ body.ready #loader{opacity:0; pointer-events:none; visibility:hidden; transition
    deliberately overflows .ld-mark, which has no overflow:hidden. */
 .ld-3d{display:block; opacity:0; transition:opacity .22s ease; pointer-events:none;}
 
-.wrap{max-width:1100px; margin:0 auto; padding:150px 48px 120px;}
+/* 2026-10-07: was a centred 1100px column. Now on the same left margin as the
+   project pages, so About, Solutions and Contact line up with the rest of the site. */
+.wrap{max-width:none; margin:0; padding:150px var(--mar) 120px;}
 .lead{font-size:22px; max-width:60ch; text-align:justify; text-align-last:left;}
 .eyebrow{display:block; font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft);}
 .wrap hr{border:0; height:1px; background:var(--ink); opacity:.16; max-width:60ch; margin:18px 0 26px;}
@@ -1108,8 +1110,10 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* Justified body text stays (Owen's choice). Hyphenating long words is what
    closes the big word gaps a justified monospace face opens in a narrow
    column; it changes no widths, heights or breakpoints, only where a line may
-   break. Words under 8 letters are never split. */
-.desc, .teaser{-webkit-hyphens:auto; hyphens:auto; hyphenate-limit-chars:8 4 4;}
+   break. 2026-10-07: loosened to the print standard (words of 6+ letters, at
+   least 3 letters each side of the hyphen) and applied to every justified
+   block, which closes most of the remaining gaps. */
+.desc, .teaser, .lead, .info-panel-in{-webkit-hyphens:auto; hyphens:auto; hyphenate-limit-chars:6 3 3;}
 /* product status, in the spec line: a small red square then the state, the way
    a drawing's title block carries its revision */
 .hero-specs .st{display:inline-flex; align-items:center; gap:7px; white-space:nowrap;}
@@ -1174,7 +1178,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* Every layer is fixed and below the content;
    the clouds and rain only ever move with transform, so they stay on the
    compositor and cost nothing per frame on the main thread. ---- */
-#sky{position:fixed; top:0; left:0; width:100%; height:100vh; height:100lvh; z-index:-4; display:block; background:linear-gradient(#4f8bd2,#c8def0);}
+#sky{position:fixed; top:0; left:0; width:100%; height:100vh; height:100lvh; z-index:-4; display:block; background:linear-gradient(var(--sky-zen,#4f8bd2),var(--sky-hor,#c8def0));}
 /* Two tiles side by side, each never narrower than the texture's own 3.2:1,
    so on a tall phone screen the clouds are not stretched into vertical streaks.
    The drift moves exactly one tile (-50%), so the loop stays seamless. */
@@ -1203,3 +1207,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    right after the sky markup, before loader3d.js, so data-sky exists by then. */
 #loader.ld-sky{background:transparent;}
 body[data-sky="dark"] #loader.ld-sky .ld-mark{filter:invert(1);}
+/* arriving from a paper page: paper loader, ink mark (head script, 2026-10-07) */
+html.ld-paper #loader.ld-sky{background:var(--paper);}
+html.ld-paper #loader #sky, html.ld-paper #loader #sky-clouds, html.ld-paper #loader #sky-precip, html.ld-paper #loader #sky-grain{display:none;}
+html.ld-paper body[data-sky] #loader.ld-sky .ld-mark{filter:none;}
