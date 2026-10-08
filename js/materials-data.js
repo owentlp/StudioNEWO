@@ -11,12 +11,16 @@
        swatch  colour family used for that fallback and the material
                thumbnails in this category: wood | metal | bio | glass |
                plastic | soft.
-       intro   { properties, finishes, lifecycle } - any of these can be ""
-               and it is skipped. Shown at the top of the open category.
+       take    one or two lines on how the studio uses this kind of material,
+               shown beside the photo (rewritten 2026-10-08 around lifespan,
+               use and environmental impact; no material is ruled in or out).
+       intro   { properties, finishes, lifecycle } - the technical notes behind
+               the category's info icon. Any can be "" and it is skipped.
+               lifecycle shows as "End of life".
 
      GROUP     { label, properties, bestUses, lifecycle, items[] }
-       properties / bestUses / lifecycle are short lines shown under the
-       group heading; leave "" to skip.
+       properties / bestUses / lifecycle show behind the info icon of every
+       material in the group; leave "" to skip.
 
      MATERIAL  { name, slug, used, image, usedIn[], aliases[], copy }
        used    IGNORED since 2026-10-01: materials.html works out which
@@ -28,15 +32,19 @@
        aliases optional extra names a project's material chip might use, so
                the chip on a project page can still deep-link here even when
                the chip word differs from `name`.
-       copy    the material description, one or two lines.
+       copy    the material description, one or two lines. Always visible.
+       origin  optional, behind the material's info icon: where it comes
+               from (species origin, mill, supplier, recycled content).
+       details optional, behind the info icon: anything more specific.
    ============================================================ */
 const MATERIAL_CATEGORIES = [
   {
     label: "WOOD", slug: "wood", swatch: "wood", image: "cat-wood.jpg", imageCaption: "Tree bark",
+    take: "Solid wood where a product is handled every day and can be sanded and refinished for decades. Plywood where stiffness and flatness matter more.",
     intro: {
       properties: "Cellular structure that expands and contracts with ambient humidity. High tensile and compressive strength parallel to the grain.",
-      finishes:   "Penetrating oils or hard waxes. Polyurethane is avoided to allow for localized sanding and clean composting.",
-      lifecycle:  "Biodegradable and carbon-sequestering if finished naturally."
+      finishes:   "Penetrating oils or hard waxes, so a worn surface can be sanded locally and refinished.",
+      lifecycle:  "Biodegradable and carbon-sequestering if finished naturally. Bonded composites such as plywood cannot be composted."
     },
     groups: [
       {
@@ -71,12 +79,12 @@ const MATERIAL_CATEGORIES = [
         label: "Composites",
         properties: "Engineered wood fiber and adhesives. More dimensionally stable than solid wood (resists warping).",
         bestUses:   "",
-        lifecycle:  "Adhesives prevent clean composting. Destined for landfill. Used strictly when solid wood fails engineering constraints.",
+        lifecycle:  "Bonded with adhesives, so it cannot be composted. Used where solid wood would warp, split or move too much.",
         items: [
           { name:"Baltic birch plywood", slug:"baltic-birch-plywood", used:true, image:"baltic-birch.jpg", usedIn:[{id:"neb",title:"NEB"}], aliases:["birch plywood"],
             copy:"Void-free cross-banded layers. High structural rigidity for tension mechanics. Edges can remain exposed." },
           { name:"MDF", slug:"mdf", used:false, image:"mdf.jpg", usedIn:[], aliases:[],
-            copy:"Medium density fiberboard. Heavy, isotropic. Poor moisture resistance and relies on toxic binders. Avoided." }
+            copy:"Medium density fiberboard. Heavy, isotropic. Poor moisture resistance. Its binders make clean disposal difficult." }
         ]
       }
     ]
@@ -84,10 +92,11 @@ const MATERIAL_CATEGORIES = [
 
   {
     label: "METAL", slug: "metal", swatch: "metal", image: "cat-metal.jpg", imageCaption: "Iron ore",
+    take: "Energy-intensive to make and close to endlessly recyclable. Used where strength, heat or weight keep a product working for years, long enough to pay that energy back.",
     intro: {
       properties: "Isotropic structure. High tensile and yield strength. Highly thermally and electrically conductive.",
       finishes:   "",
-      lifecycle:  "Recyclable again and again without loss of quality. High initial embodied energy, offset by a long service life."
+      lifecycle:  "Recyclable again and again without loss of quality. High embodied energy, offset by a long service life."
     },
     groups: [
       {
@@ -119,6 +128,7 @@ const MATERIAL_CATEGORIES = [
 
   {
     label: "BIO MATERIALS", slug: "bio", swatch: "bio", image: "cat-bio.jpg", imageCaption: "Plant fiber",
+    take: "Grown rather than mined. Used where the way it wears and ages suits the product, treated only as much as that life needs.",
     intro: {
       properties: "Derived from renewable biomass. Requires chemical or organic treatment to prevent decay during use.",
       finishes:   "",
@@ -140,6 +150,7 @@ const MATERIAL_CATEGORIES = [
 
   {
     label: "GLASS", slug: "glass", swatch: "glass", image: "cat-glass.jpg", imageCaption: "Silica sand",
+    take: "Used where light has to pass through or be softened. Glass outlasts almost anything if it is not broken, and recycles cleanly when sorted by type.",
     intro: {
       properties: "High compressive strength, scratch-resistant, brittle against impact.",
       finishes:   "",
@@ -171,10 +182,11 @@ const MATERIAL_CATEGORIES = [
 
   {
     label: "PLASTICS", slug: "plastics", swatch: "plastic", image: "cat-plastics.jpg", imageCaption: "Plastic regrind",
+    take: "Used where it performs best: precise, light and quick to remake. Printed parts are kept small and easy to reprint, so one broken part does not end the product.",
     intro: {
       properties: "Moldable synthetic polymers.",
       finishes:   "",
-      lifecycle:  "Generally anti-circular. The studio strictly uses mechanical fasteners over adhesives to ensure parts can be separated for recycling."
+      lifecycle:  "Recyclable only when parts come apart cleanly and are sorted by type. Mechanical fasteners are used over adhesives wherever they can be."
     },
     groups: [
       {
@@ -194,6 +206,7 @@ const MATERIAL_CATEGORIES = [
 
   {
     label: "SOFT GOODS", slug: "soft-goods", swatch: "soft", image: "cat-soft.jpg", imageCaption: "Wound thread",
+    take: "Fabric wears faster than the frame around it, so it is made to come off for washing or replacement.",
     intro: {
       properties: "Woven or extruded fibers. Requires tension or a skeletal frame for structure.",
       finishes:   "",
@@ -214,10 +227,10 @@ const MATERIAL_CATEGORIES = [
         label: "Foam",
         properties: "Cellular polymers for cushioning.",
         bestUses:   "",
-        lifecycle:  "High degradation time. Difficult to recycle.",
+        lifecycle:  "Slow to degrade and difficult to recycle, so it is kept replaceable on its own.",
         items: [
           { name:"Polyurethane foam", slug:"polyurethane-foam", used:false, image:"foam.jpg", usedIn:[], aliases:["foam"],
-            copy:"Industry standard. The studio designs strictly around pre-cut, standard block dimensions to allow users to replace foam locally without proprietary orders." }
+            copy:"Industry standard. Designed around pre-cut, standard block sizes, so foam can be replaced locally without a proprietary order." }
         ]
       }
     ]

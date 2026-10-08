@@ -126,7 +126,7 @@
       "js/projects-data.js?v=25",
       "js/image-sizes.js?v=3",
       "js/main.js?v=5",
-      "js/menu.js?v=29",
+      "js/menu.js?v=30",
       "js/sky.js?v=6",
       "js/loader3d.js?v=15",
       "js/loader3d-core.js?v=1",
@@ -135,7 +135,7 @@
     ];
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
-    var MATERIALS_DATA = "js/materials-data.js?v=7";
+    var MATERIALS_DATA = "js/materials-data.js?v=8";
     var MV_LIB  = "js/vendor/model-viewer.min.js?v=2";
     var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
     var MECH_V  = "?v=20";     // must match the mechanism iframe src in project.html
