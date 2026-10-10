@@ -480,9 +480,9 @@ const CLIP_PICK = (function(){
    by hand, every card is the same fixed size (see --dock-peek/--dock-rise
    in the CSS above). */
 (function(){
-  // chronological, most recent first: kart/amsalp 2026, omni/naf 2025,
-  // neb 2024. NAF joined the home page on 2026-10-02 (Owen).
-  var ORDER = ["kart","amsalp","omni","naf","neb"];
+  // chronological, most recent first: kart/halo 2026, omni/flow 2025,
+  // neb 2024. FLOW joined the home page on 2026-10-02 (Owen).
+  var ORDER = ["kart","halo","omni","flow","neb"];
   document.documentElement.style.setProperty("--dock-n", ORDER.length);
   function real(s){ return s && String(s).charAt(0)!=="["; }
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }

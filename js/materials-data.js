@@ -117,7 +117,7 @@ const MATERIAL_CATEGORIES = [
         bestUses:   "",
         lifecycle:  "",
         items: [
-          { name:"Mild sheet steel", slug:"mild-sheet-steel", used:true, image:"steel-mild.jpg", usedIn:[{id:"naf",title:"NAF"}], aliases:["sheet steel","steel"],
+          { name:"Mild sheet steel", slug:"mild-sheet-steel", used:true, image:"steel-mild.jpg", usedIn:[{id:"flow",title:"FLOW"}], aliases:["sheet steel","steel"],
             copy:"Formable, punches clean, welds easily via TIG/MIG. Used for folded housings and weighted bases." },
           { name:"Stainless steel", slug:"stainless-steel", used:false, image:"steel-stainless.jpg", usedIn:[], aliases:[],
             copy:"High rust resistance. Used for exposed hardware and high-moisture environments." }
@@ -195,7 +195,7 @@ const MATERIAL_CATEGORIES = [
         bestUses:   "",
         lifecycle:  "",
         items: [
-          { name:"PLA", slug:"pla", used:true, image:"pla.jpg", usedIn:[{id:"naf",title:"NAF"},{id:"kart",title:"KART"}], aliases:["polylactic acid"],
+          { name:"PLA", slug:"pla", used:true, image:"pla.jpg", usedIn:[{id:"flow",title:"FLOW"},{id:"kart",title:"KART"}], aliases:["polylactic acid"],
             copy:"Polylactic acid, a bio-based thermoplastic. Low glass transition temperature. Ideal for rapid prototyping and internal brackets. Requires industrial facilities to compost." },
           { name:"ABS / PETG", slug:"abs-petg", used:false, image:"abs-petg.jpg", usedIn:[], aliases:[],
             copy:"High impact and heat resistance. Used for functional parts requiring structural flexibility." },

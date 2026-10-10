@@ -489,7 +489,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
       // width; in a 2-column mobile scatter it would otherwise be ~180px wide.
       // showCap: the one case a process image carries a visible line UNDER it
       // (never over it): an image that is not the studio's own work, e.g. the
-      // Braun fan shown as NAF's reference.
+      // Braun fan shown as FLOW's reference.
       var refCap = (o && o.showCap && capTxt) ? '<span class="cap ref-cap">'+esc(capTxt)+'</span>' : '';
       return '<div class="cell cap-'+capSide+(isSpread?' has-spread':'')+'" style="'+colStyle+'">' + inner + refCap + '</div>';
     }).filter(Boolean);
@@ -562,7 +562,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
      This used to be a CSS multi-column (`columns:4`) masonry. Multi-column
      BALANCES: it works out an even height and fills columns to it, so five
      thumbs across four columns packed 2/2/1 and left the fourth column empty,
-     which is where NEB's and NAF's big dead strip on the right came from. It
+     which is where NEB's and FLOW's big dead strip on the right came from. It
      also could not be reasoned about in advance, because the balance depends
      on image heights that are not known until the files load.
 
@@ -763,6 +763,8 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
       // here it can only ever sit above the model.
       '<div class="mv-ar-row">' +
         '<button class="mv-ar" type="button" hidden>VIEW IN YOUR SPACE &rarr;</button>' +
+        // desktop only: the head-tracked window (js/headview.js, loaded on click)
+        '<button class="mv-ar mv-look" type="button" hidden style="margin-top:8px">LOOK AROUND IT &rarr;</button>' +
         '<div class="mv-qr" hidden>' +
           '<div class="mv-qr-img"></div>' +
           '<p class="mv-qr-note">Scan to open this page on your phone,<br>then tap View in your space.</p>' +
@@ -886,7 +888,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
      still received those margins, which collapsed the section and dragged the
      process grid up over the how-it-works text above it. That was the
      "first process image overlaps the last paragraph" bug on every project
-     without a mechanism (NEB, NAF, AMSALP). No box, no negative margins,
+     without a mechanism (NEB, FLOW, HALO). No box, no negative margins,
      no overlap. The `has-mech` class is what the crop margins key off now,
      so the crop can never apply to a box that has nothing to crop. */
   var graphicInner = mechEl + (real(p.hiwVideo) ? videoFig(p.hiwVideo,"16/9") : '');
@@ -1355,6 +1357,30 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
       // opens the QR, on a phone it opens AR. Nothing to wait for.
       arBtn.hidden = false;
       arBtn.setAttribute("aria-expanded", "false");
+
+      /* LOOK AROUND IT: head-tracked window, desktop only (a mouse and a
+         camera API). Phones keep VIEW IN YOUR SPACE. js/headview.js is only
+         fetched on the first click. */
+      var lookBtn = stage.querySelector('.mv-look');
+      var finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+      if(lookBtn && finePointer && !isIOS && !isAndroid &&
+         navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+        lookBtn.hidden = false;
+        lookBtn.addEventListener("click", function(){
+          if(qrOpen) toggleQR();
+          var go = function(){
+            window.NEWO_HEADVIEW.open({
+              src: mv.getAttribute("data-src"),
+              title: (mv.getAttribute("alt") || "").replace(/ 3D model$/, "")
+            });
+          };
+          if(window.NEWO_HEADVIEW) return go();
+          var hs = document.createElement("script");
+          hs.src = "js/headview.js?v=1";
+          hs.onload = go;
+          document.head.appendChild(hs);
+        });
+      }
 
       /* ---------- ?ardebug ----------
          Add &ardebug to the URL to print what this device actually detected,
@@ -1991,7 +2017,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
          32px default. Every measurement below was therefore taken with the row
          sitting 32px lower than the point the pull is actually applied from,
          which made `headroom` 32px too generous and overshot the pull by
-         exactly that much. On AMSALP and NEB (how-it-works copy with the
+         exactly that much. On HALO and NEB (how-it-works copy with the
          gallery directly above it and no model beside it) the overshoot landed
          the paragraph's first line 18px INSIDE the photo above it, at every
          width from 901px up - the one thing this function exists to prevent.

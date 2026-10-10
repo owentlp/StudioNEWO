@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NAF · airflow</title>
+<title>FLOW · airflow</title>
 <style>
   /* Same family as projects/kart/mechanism.html and projects/omni/mechanism.html:
      transparent canvas printed onto the page paper, ink line art, one red
@@ -63,7 +63,7 @@
 <body>
   <div class="wrap">
     <div class="stage">
-      <canvas id="c" role="img" aria-label="Top-down section of NAF: air drawn in through the perforated housing, through the crossflow turbine, and out of the slot as a flat curtain"></canvas>
+      <canvas id="c" role="img" aria-label="Top-down section of FLOW: air drawn in through the perforated housing, through the crossflow turbine, and out of the slot as a flat curtain"></canvas>
     </div>
     <div class="ui">
       <div class="modes" id="modes" role="group" aria-label="Fan type">
@@ -78,7 +78,7 @@
 <script>
 (function(){
   /* ---------- GEOMETRY (logical units; the canvas scales to its width) ----------
-     Plan view, looking down on NAF, flowing like the textbook crossflow diagram
+     Plan view, looking down on FLOW, flowing like the textbook crossflow diagram
      and built like the prototype: a perforated steel body with ONE narrow
      vertical slot, and two flat plates standing straight out of the slot. The
      slot faces the top of the drawing. The turbine turns clockwise: the solid
@@ -453,7 +453,7 @@
     [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
     descEl.textContent=MODES[mode];
     canvas.setAttribute('aria-label', mode==='cross'
-      ? 'Top-down section of NAF: air drawn in through the perforated body, wrapping around the crossflow turbine, and out of the slot between two plates as a flat curtain'
+      ? 'Top-down section of FLOW: air drawn in through the perforated body, wrapping around the crossflow turbine, and out of the slot between two plates as a flat curtain'
       : 'Top-down view of a conventional axial fan: a swirling cone of air that spreads and breaks up');
     seed(); wake();
   });

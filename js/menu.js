@@ -52,7 +52,7 @@
   var UNCATEGORIZED = "Other";   // where a project with a missing/odd code goes
 
   // every project, most recent first. This sets the order WITHIN each category.
-  var PROJECT_ORDER = ["kart", "amsalp", "omni", "naf", "neb"];
+  var PROJECT_ORDER = ["kart", "halo", "omni", "flow", "neb"];
 
   /* Top-level pages under the projects, in menu order. on:false keeps a page
      out of the menu while it has no content yet (the page itself still exists

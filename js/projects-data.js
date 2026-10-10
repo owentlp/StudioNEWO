@@ -77,16 +77,16 @@
    PRODUCT CODE (the "code" field, shown as the small L01.1-style tag)
         Format: CATEGORY + product number within that category + ".version"
           S  = Seating       (NEB is S01, the first seating piece)
-          L  = Lighting      (KART is L01, AMSALP is L02, a separate product)
+          L  = Lighting      (KART is L01, HALO is L02, a separate product)
           A  = Accessories
-          H  = Appliances    (NAF, a desk fan; kept distinct from "A" above)
+          H  = Appliances    (FLOW, a desk fan; kept distinct from "A" above)
           J  = Jewelry
           AU = Audio         (OMNI; two letters since "A" was already taken twice)
           X  = Other / uncategorized
         The number identifies the PRODUCT LINE (01 = the first seating design
         ever made); the .version identifies an iteration of that SAME product
         (a NEB V2 would be S01.2, not a new S02). A genuinely new, separate
-        product in the same category gets the next number instead (AMSALP is
+        product in the same category gets the next number instead (HALO is
         L02, not a version of KART). Not final, rename/renumber freely.
 
    HERO SPEC BLOCK (the small block under the hero photo)
@@ -368,15 +368,15 @@ const PROJECTS = {
     v2Video:   ""
   },
 
-  "naf": {
+  "flow": {
     objects:   false,
-    title:     "NAF",
+    title:     "FLOW",
     kind:      "crossflow desk fan",
     status:    "Prototype 01",
     code:      "H01.1",
     date:      "2025",
     teaser:    "Clean, quiet airflow in a continuous curtain.",
-    summary:   "The desk fan has seen little fundamental change in years, often resulting in noisy, low-quality plastic disks. Taking formal cues from 1970s Braun design and industrial HVAC systems, NAF utilizes tangential crossflow technology. It pulls air in along its full length and pushes it out as one steady, quiet curtain, while looking like an object you'd want on your desk.",
+    summary:   "The desk fan has seen little fundamental change in years, often resulting in noisy, low-quality plastic disks. Taking formal cues from 1970s Braun design and industrial HVAC systems, FLOW utilizes tangential crossflow technology. It pulls air in along its full length and pushes it out as one steady, quiet curtain, while looking like an object you'd want on your desk.",
     summaryMore:"",
     materials: "Sheet steel, PLA, rubber, reclaimed motor",
     lifecycle: "Built around a reclaimed motor and off-cut sheet steel. The turbine is a single printed part, so a damaged one can be printed again.",
@@ -390,23 +390,23 @@ const PROJECTS = {
        gallery and process arrays stay as they are. A file with no entry
        here falls back to the project title. */
     alt: {
-      "gallery-01.jpg": "NAF crossflow desk fan prototypes on a white plinth beside their spec card at a design show",
-      "gallery-02.jpg": "A single red NAF crossflow desk fan photographed against a plain background",
-      "gallery-03.jpg": "Three NAF crossflow fans in a row, two in brushed steel and one painted red",
-      "gallery-04.jpg": "Four NAF fan bodies grouped together in brushed steel and painted red, seen from above",
-      "hero.jpg": "The NAF crossflow desk fan in red, a perforated steel cylinder with a folded side vane",
-      "scatter-01.jpg": "Steel offcuts and formed sheet on the workbench after rolling NAF's fan bodies",
+      "gallery-01.jpg": "FLOW crossflow desk fan prototypes on a white plinth beside their spec card at a design show",
+      "gallery-02.jpg": "A single red FLOW crossflow desk fan photographed against a plain background",
+      "gallery-03.jpg": "Three FLOW crossflow fans in a row, two in brushed steel and one painted red",
+      "gallery-04.jpg": "Four FLOW fan bodies grouped together in brushed steel and painted red, seen from above",
+      "hero.jpg": "The FLOW crossflow desk fan in red, a perforated steel cylinder with a folded side vane",
+      "scatter-01.jpg": "Steel offcuts and formed sheet on the workbench after rolling FLOW's fan bodies",
       "scatter-02.jpg": "Flat steel blanks with a rule and layout tools, marked out before rolling",
-      "scatter-03.jpg": "Reference: the Braun HL 70 desk fan from 1971, a yellow crossflow fan on a clear stand, the precedent NAF takes its cues from",
-      "scatter-04.jpg": "NAF's impeller printing on the bed of a 3D printer",
-      "scatter-05.jpg": "Cut steel discs and sheet stock for NAF laid out on the bench, including a perforated end cap",
-      "scatter-06.jpg": "NAF's motor and wiring assembled inside a rolled steel fan body",
-      "scatter-07.jpg": "Two steel sheets marked out with NAF's perforation drilling pattern",
-      "scatter-08.jpg": "Rolled steel cylinders and end caps for NAF grouped on the bench mid-assembly",
-      "scatter-09.jpg": "Three perforated steel NAF fan bodies standing together on the workbench",
-      "scatter-10.jpg": "NAF assembly in progress: fan bodies, a motor and hand tools beside a laptop showing the CAD model",
-      "scatter-11.jpg": "Sheets of dark rubber gasket material on a cutting mat during NAF's build",
-      "scatter-12.jpg": "The finished NAF crossflow desk fans lined up, alternating brushed steel and painted red"
+      "scatter-03.jpg": "Reference: the Braun HL 70 desk fan from 1971, a yellow crossflow fan on a clear stand, the precedent FLOW takes its cues from",
+      "scatter-04.jpg": "FLOW's impeller printing on the bed of a 3D printer",
+      "scatter-05.jpg": "Cut steel discs and sheet stock for FLOW laid out on the bench, including a perforated end cap",
+      "scatter-06.jpg": "FLOW's motor and wiring assembled inside a rolled steel fan body",
+      "scatter-07.jpg": "Two steel sheets marked out with FLOW's perforation drilling pattern",
+      "scatter-08.jpg": "Rolled steel cylinders and end caps for FLOW grouped on the bench mid-assembly",
+      "scatter-09.jpg": "Three perforated steel FLOW fan bodies standing together on the workbench",
+      "scatter-10.jpg": "FLOW assembly in progress: fan bodies, a motor and hand tools beside a laptop showing the CAD model",
+      "scatter-11.jpg": "Sheets of dark rubber gasket material on a cutting mat during FLOW's build",
+      "scatter-12.jpg": "The finished FLOW crossflow desk fans lined up, alternating brushed steel and painted red"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-04.jpg"],   // 2026-10-02: gallery-02 cut (same shot as the hero, 820px); gallery-03 swapped for the tighter gallery-04
     heroVideo: "",
@@ -426,7 +426,7 @@ const PROJECTS = {
          The turbine print and the perforated sheets are now the two LARGE
          images (span 7); the rest sit smaller between them.
          scatter-03 is the BRAUN HL 70, shown as inspiration: showCap prints its
-         caption under it so it is never read as a NAF prototype. */
+         caption under it so it is never read as a FLOW prototype. */
       { src:"scatter-04.jpg", bleed:"left",  span:7, ar:"1/1", mt:0,   cap:"Turbine, printing" },
       { src:"scatter-01.jpg", col:"9 / 13",                    mt:70,  cap:"Off-cuts" },
       { src:"scatter-03.jpg", col:"2 / 6",                     mt:110, cap:"Reference: Braun HL 70 desk fan, 1971", showCap:true },
@@ -436,7 +436,7 @@ const PROJECTS = {
       { src:"scatter-12.jpg", bleed:"full", ar:"2/1", mt:90, cap:"Five colourways" }
     ],
     processNotes:[],
-    processText:"NAF was developed under a strict material brief: source three reused or found materials within a 3 km radius of home. A reclaimed motor and off-cut sheet steel dictated the structural parameters.",
+    processText:"FLOW was developed under a strict material brief: source three reused or found materials within a 3 km radius of home. A reclaimed motor and off-cut sheet steel dictated the structural parameters.",
     processMore:"The core design constraint was the crossflow turbine. Unlike an axial fan that requires a large circular housing, the crossflow layout allowed the fan to take the shape of a tall, minimal cylinder. The steel housing was manually cut, punched, formed, and TIG welded. Countless variations of the turbine blade were modelled and 3D printed to solve balancing issues, eventually moving to a single-piece, support-free print to achieve the precision needed for smooth performance.",
     processVideo: "",
     v2:        "V2 moves to a purpose-built motor and turbine assembly. Once that core is solid, it becomes a shared platform, the same mechanism dropping into different housings without a redesign each time.",
@@ -445,15 +445,15 @@ const PROJECTS = {
     v2Video:   ""
   },
 
-  "amsalp": {
+  "halo": {
     objects:   true,
-    title:     "AMSALP",
+    title:     "HALO",
     kind:      "plasma lamp",
     status:    "Prototype 01",
     code:      "L02.1",
     date:      "2026",
     teaser:    "Noble gas, wirelessly ionized into light.",
-    summary:   "AMSALP explores gas discharge physics for residential lighting. By driving a high-frequency electromagnetic field into a sealed glass orb, noble gas is ionized into a glowing plasma. It feels like no other lamp and gives off a magical, wireless light from a seemingly empty globe.",
+    summary:   "HALO explores gas discharge physics for residential lighting. By driving a high-frequency electromagnetic field into a sealed glass orb, noble gas is ionized into a glowing plasma. It feels like no other lamp and gives off a magical, wireless light from a seemingly empty globe.",
     summaryMore:"",
     materials: "Borosilicate glass, hardwood, plasma circuit",
     lifecycle: "The sealed orb has no wires or electrodes and simply lifts off its shelf. The electronics are housed separately in the wooden base.",
@@ -467,13 +467,13 @@ const PROJECTS = {
        gallery and process arrays stay as they are. A file with no entry
        here falls back to the project title. */
     alt: {
-      "gallery-01.jpg": "The AMSALP plasma lamp glowing orange, ionized noble gas filling the glass sphere and washing the hardwood base in red light",
-      "gallery-02.jpg": "AMSALP glowing orange-white on its cantilevered wooden shelf, beside the perforated wooden base that houses and ventilates its resonant inverter",
-      "gallery-03.jpg": "AMSALP running cooler, a ring of white plasma suspended inside the clear borosilicate orb with no electrode touching it",
-      "gallery-04.jpg": "AMSALP lit in daylight: the glass orb on a cantilevered wooden shelf projecting from the ventilated hardwood base",
-      "hero.jpg": "AMSALP wireless plasma lamp lit red-orange in darkness, a borosilicate glass orb of plasma resting in its hardwood cradle",
-      "scatter-01.jpg": "A hand-wound copper resonator coil held beside AMSALP's high-frequency driver electronics on the workbench",
-      "scatter-03.jpg": "AMSALP's resonator coil energised on the bench, a ring of blue-white plasma forming above the windings"
+      "gallery-01.jpg": "The HALO plasma lamp glowing orange, ionized noble gas filling the glass sphere and washing the hardwood base in red light",
+      "gallery-02.jpg": "HALO glowing orange-white on its cantilevered wooden shelf, beside the perforated wooden base that houses and ventilates its resonant inverter",
+      "gallery-03.jpg": "HALO running cooler, a ring of white plasma suspended inside the clear borosilicate orb with no electrode touching it",
+      "gallery-04.jpg": "HALO lit in daylight: the glass orb on a cantilevered wooden shelf projecting from the ventilated hardwood base",
+      "hero.jpg": "HALO wireless plasma lamp lit red-orange in darkness, a borosilicate glass orb of plasma resting in its hardwood cradle",
+      "scatter-01.jpg": "A hand-wound copper resonator coil held beside HALO's high-frequency driver electronics on the workbench",
+      "scatter-03.jpg": "HALO's resonator coil energised on the bench, a ring of blue-white plasma forming above the windings"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],
     heroVideo: "demo.mp4",
@@ -495,7 +495,7 @@ const PROJECTS = {
     processText:"The concept originated from a high-voltage science demonstration of a tokamak fusion reactor. The objective was to adapt this highly volatile, complex plasma toroid generator into a stable, quiet residential light.",
     processMore:"The primary engineering challenge was packaging and thermal management. The original off-the-shelf circuit board was visually cluttered and produced significant heat. The hardest compromise was ensuring the electronics were properly ventilated while completely hiding the induction coil to maintain the illusion of the floating orb. The circuit was consolidated and housed in a solid wood base with carefully engineered airflow routing.",
     processVideo: "",
-    v2:        "AMSALP proves a stable plasma discharge can be used as a residential light. Next is designing a custom PCB to consolidate the electronics and coil into a single plane. The high-frequency circuit interferes with everything near it, so shielding is the next necessary step. The base will be made from a solid block of aluminum, doubling as a Faraday cage around the oscillator.",
+    v2:        "HALO proves a stable plasma discharge can be used as a residential light. Next is designing a custom PCB to consolidate the electronics and coil into a single plane. The high-frequency circuit interferes with everything near it, so shielding is the next necessary step. The base will be made from a solid block of aluminum, doubling as a Faraday cage around the oscillator.",
     v2More:    "",
     v2images:  [{ src:"v2-01.jpg", bleed:"left", span:7, ar:"3/2" }],
     v2Video:   ""
