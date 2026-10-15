@@ -10,7 +10,7 @@
      box. Distance comes from the 3D gap between the irises, which hardly
      changes when the head turns.
    - One Euro filter on x, y, z: steady when still, quick when moving.
-   - Strength: head offsets are multiplied by DEPTH (default 1.6).
+   - Strength: head offsets x DEPTH (1.6). Replaced in v3, see below.
    - Product sits at the glass, not halfway back in the room.
    - Room is ink lines on paper plus one shadow catcher. No shaded walls.
    - Face lost: hold the last position 1.5 s, then drift slowly to centre.
@@ -20,8 +20,12 @@
      (96 px per inch, 60 deg webcam, 6.3 cm between pupils).
    - Quality drops itself (pixel ratio, then shadows) if frames run slow.
 
-   Modes: ON A SURFACE (gridded room, product on the floor at the glass)
-   and FLOATING (hangs at the glass, half in front, faint shadow far below).
+   v3 (2026-10-11, "stretching"): no head exaggeration by default (STRENGTH
+   slider, 1 = physically right); the strength now comes from a deep photo
+   studio behind the glass instead. See "The room (v3)".
+
+   Modes: ON A SURFACE (product on the studio floor at the glass)
+   and FLOATING (hovers at the glass, shadow on the floor below).
 
    Camera refused, no camera, or a library failed to load: the window closes.
    The page's own 3D model and VIEW IN YOUR SPACE are still there.
@@ -123,7 +127,7 @@
         '<button class="hv-btn active" type="button" data-mode="surface">ON A SURFACE</button>' +
         '<button class="hv-btn" type="button" data-mode="float">FLOATING</button>' +
         '<button class="hv-btn" type="button" data-act="centre">RECENTRE</button>' +
-        '<label class="hv-lab">DEPTH <input type="range" min="0.6" max="3" step="0.05" value="1.6" data-depth></label>' +
+        '<label class="hv-lab">STRENGTH <input type="range" min="0.8" max="1.6" step="0.05" value="1" data-depth></label>' +
         '<button class="hv-btn" type="button" data-act="setup">SET UP</button>' +
         '<button class="hv-btn" type="button" data-act="cam">HIDE CAMERA</button>' +
         '<canvas class="hv-cam" width="192" height="144" aria-hidden="true"></canvas>' +
@@ -207,6 +211,7 @@
     var scene = new THREE.Scene();
     var INK = 0x141414;
     scene.background = new THREE.Color(0xe9e7e2);
+    scene.fog = new THREE.Fog(0xe9e7e2, 500, 1800);   // haze with distance, toward paper
     var pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environmentIntensity = 0.6;
@@ -214,8 +219,9 @@
     // the one light: high, front left, as in the renders
     var sun = new THREE.DirectionalLight(0xfff4e6, 2.4);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024);
-    sun.shadow.bias = -0.0005;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.bias = -0.0003;
+    sun.shadow.normalBias = 0.05;
     scene.add(sun, sun.target);
 
     var cam = new THREE.PerspectiveCamera();
@@ -236,58 +242,84 @@
       return AUTO_CM_PER_PX;
     }
 
-    function gridLines(w, h, step, pts, map){
-      // lines on a w x h rectangle, mapped into 3D by map(u, v); centred so
-      // the middle line is always on the axis
-      var nu = Math.floor(w / 2 / step), nv = Math.floor(h / 2 / step), i;
-      for(i = -nu; i <= nu; i++) pts.push(map(i * step, -h/2), map(i * step, h/2));
-      for(i = -nv; i <= nv; i++) pts.push(map(-w/2, i * step), map(w/2, i * step));
-      pts.push(map(-w/2, -h/2), map(-w/2, h/2), map(w/2, -h/2), map(w/2, h/2));   // edges
-      pts.push(map(-w/2, -h/2), map(w/2, -h/2), map(-w/2, h/2), map(w/2, h/2));
-    }
-
+    /* The room (v3). A real-sized photo studio behind the glass, in cm. The
+       strength of the effect comes from DEPTH, not from exaggerating the head
+       (v2 did that, x1.6, and it read as stretching: the picture was drawn
+       for an eye that was not where the real eye was). Far things move most
+       against the window frame, so a deep space gives a strong, undistorted
+       effect.
+         A seamless paper sweep: floor from the glass back 3.5 m, an 80 cm
+         cove, then the back wall. A faint 25 cm ink grid on the floor.
+         A grey V-flat and a white flat just outside the view, so
+         they slide in as the head moves. One light, front left, as in the
+         renders. Haze toward paper with distance.
+         ON A SURFACE: the product stands on the sweep at the bottom of the
+         glass. FLOATING: same floor, the product hovers above it at the
+         glass, its shadow on the floor below. */
+    var ROOM = { deep:350, cove:80, wall:400, half:300 };
     function buildRoom(){
       if(room){
         scene.remove(room);
         room.traverse(function(o){ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); });
       }
       room = new THREE.Group();
-      var step = W / 14, pts = [], V = function(x, y, z){ return new THREE.Vector3(x, y, z); };
-      var floorY, floorZ, floorD;
-      if(mode === "surface"){
-        D = W * 0.9;
-        gridLines(W, D, step, pts, function(u, v){ return V(u, -H/2, v - D/2); });   // floor
-        gridLines(W, D, step, pts, function(u, v){ return V(u,  H/2, v - D/2); });   // ceiling
-        gridLines(W, H, step, pts, function(u, v){ return V(u, v, -D); });           // back
-        gridLines(D, H, step, pts, function(u, v){ return V(-W/2, v, u - D/2); });   // left
-        gridLines(D, H, step, pts, function(u, v){ return V( W/2, v, u - D/2); });   // right
-        floorY = -H/2; floorZ = -D/2; floorD = D;
-      } else {
-        D = W * 1.8;
-        gridLines(W * 3, H * 3, step * 1.5, pts, function(u, v){ return V(u, v, -D); });
-        floorY = -H * 0.75; floorZ = -W * 0.4; floorD = W * 1.6;
-      }
-      var lines = new THREE.LineSegments(
-        new THREE.BufferGeometry().setFromPoints(pts),
-        new THREE.LineBasicMaterial({ color:INK, transparent:true, opacity:mode === "surface" ? 0.28 : 0.12 })
-      );
-      room.add(lines);
+      var V = function(x, y, z){ return new THREE.Vector3(x, y, z); };
+      var B = -H/2, FY = B;
+      var R = ROOM.cove, ZC = -ROOM.deep, HX = ROOM.half;
 
-      // invisible floor that only shows the shadow
-      var catcher = new THREE.Mesh(
-        new THREE.PlaneGeometry(W * 3, floorD),
-        new THREE.ShadowMaterial({ color:INK, opacity:mode === "surface" ? 0.3 : 0.1 })
-      );
-      catcher.rotation.x = -Math.PI / 2;
-      catcher.position.set(0, floorY + 0.01, floorZ);
-      catcher.receiveShadow = true;
-      room.add(catcher);
+      // sweep profile in (y, z), extruded across x
+      var prof = [[FY, 5], [FY, -100], [FY, -220], [FY, ZC]], i, t;
+      for(i = 1; i <= 14; i++){ t = i / 14 * Math.PI / 2; prof.push([FY + R - R * Math.cos(t), ZC - R * Math.sin(t)]); }
+      prof.push([FY + ROOM.wall, ZC - R]);
+      var pos = [], idx = [];
+      prof.forEach(function(p){ pos.push(-HX, p[0], p[1], HX, p[0], p[1]); });
+      for(i = 0; i < prof.length - 1; i++){
+        var a = i * 2;
+        idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+      }
+      var g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      g.setIndex(idx); g.computeVertexNormals();
+      var sweep = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color:0xe6e3dc, roughness:1, side:THREE.DoubleSide }));
+      sweep.receiveShadow = true;
+      room.add(sweep);
+
+      // faint floor grid, fading into the haze
+      var pts = [], step = 25;
+      for(i = -HX; i <= HX; i += step) pts.push(V(i, FY + 0.05, 5), V(i, FY + 0.05, ZC));
+      for(i = 0; i >= ZC; i -= step) pts.push(V(-HX, FY + 0.05, i), V(HX, FY + 0.05, i));
+      room.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({ color:INK, transparent:true, opacity:0.12 })));
+
+      // studio flats, 120 x 240 x 3, standing on the floor. vflat: two hinged
+      // boards, hinge at the back, opening toward the product.
+      function board(parent, x, z, ry, color){
+        var m = new THREE.Mesh(new THREE.BoxGeometry(120, 240, 3),
+          new THREE.MeshStandardMaterial({ color:color, roughness:0.9 }));
+        m.position.set(x, 120, z); m.rotation.y = ry;
+        m.castShadow = true; m.receiveShadow = true;
+        parent.add(m);
+      }
+      function vflat(x, z, ry, color){
+        var grp = new THREE.Group();
+        grp.position.set(x, FY, z); grp.rotation.y = ry;
+        board(grp,  42.4, 42.4, -Math.PI / 4, color);
+        board(grp, -42.4, 42.4, -3 * Math.PI / 4, color);
+        room.add(grp);
+      }
+      vflat(-190, -360, 0.5, 0x8c8982);
+      var single = new THREE.Group(); single.position.y = FY; room.add(single);
+      board(single, 135, -320, -0.45, 0xf2f0eb);
+
+      D = 70;
       scene.add(room);
 
-      sun.position.set(-W * 0.35, H * 1.4, W * 0.5);
-      sun.target.position.set(0, floorY, 0);
-      var sc = sun.shadow.camera, r = Math.max(W, H) * 0.8;
-      sc.left = -r; sc.right = r; sc.top = r; sc.bottom = -r; sc.near = 1; sc.far = Math.max(W, H) * 5;
+      // the one light: front left, high
+      var tgt = V(0, FY, -20);
+      sun.target.position.copy(tgt);
+      sun.position.copy(tgt).add(V(-250, 300, 160));
+      var sc = sun.shadow.camera, r = 220;
+      sc.left = -r; sc.right = r; sc.top = r; sc.bottom = -r; sc.near = 1; sc.far = 1200;
       sc.updateProjectionMatrix();
     }
 
@@ -358,12 +390,13 @@
     cv.addEventListener("pointercancel", endDrag);
 
     /* ---------- controls ---------- */
-    var gain = cfg.depth || 1.6;
+    // 1 = physically right. Above 1 the effect is stronger but starts to stretch.
+    var gain = cfg.gain || 1;
     var depthIn = root.querySelector("[data-depth]");
     depthIn.value = gain;
     depthIn.addEventListener("input", function(){
-      gain = parseFloat(depthIn.value) || 1.6;
-      cfg.depth = gain; save(cfg);
+      gain = parseFloat(depthIn.value) || 1;
+      cfg.gain = gain; save(cfg);
     });
 
     root.querySelectorAll("[data-mode]").forEach(function(b){
