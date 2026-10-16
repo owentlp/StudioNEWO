@@ -21,9 +21,7 @@
    ============================================================ */
 "use strict";
 
-var THREE_SRC = "vendor/three.min.js?v=1";
-
-var renderer = null, view = null, tumble = null, core = null;
+var renderer = null, tumble = null, core = null;
 var canvas = null, dpr = 1, cssSize = 0;
 var pageReady = false, released = false, stopped = false;
 var turnCount = 0, phase = "settle", phaseElapsed = 0, lastTs = null;
@@ -53,16 +51,12 @@ self.onmessage = function(ev){
 };
 
 function applySize(){
-  if(!renderer || !view || !cssSize) return;
+  if(!renderer || !cssSize) return;
   // The canvas is OVERSCAN times the mark: the ortho frustum has to clear the
   // model's space diagonal so a corner never clips mid-tumble, but sitting
   // still it only shows its face. Sizing the canvas to the mark would draw the
   // logo at ~54% of the flat SVG it replaces. See loader3d-core.
-  var px = Math.max(1, Math.round(cssSize * view.OVERSCAN * dpr));
-  renderer.setSize(px, px, false);
-  view.camera.left = -view.FRUST; view.camera.right = view.FRUST;
-  view.camera.top  =  view.FRUST; view.camera.bottom = -view.FRUST;
-  view.camera.updateProjectionMatrix();
+  renderer.setSize(Math.max(1, Math.round(cssSize * renderer.OVERSCAN * dpr)));
 }
 
 function init(d){
@@ -70,46 +64,34 @@ function init(d){
   dpr     = d.dpr || 1;
   cssSize = d.cssSize || 104;
 
-  try { importScripts(THREE_SRC); }
-  catch(e){ return fail("three.js unreachable: " + e); }
-
-  try { importScripts(d.coreUrl); }
+  // the core and the baked logo mesh, together ~30 KB gzipped (three.js and
+  // the raw STL used to be ~330 KB before the first frame could draw)
+  try { importScripts(d.coreUrl, d.meshUrl); }
   catch(e){ return fail("core unreachable: " + e); }
 
   core = self.LOADER3D_CORE;
-  if(!core || typeof THREE === "undefined") return fail("core or THREE missing");
+  if(!core || !self.LOADER3D_MESH) return fail("core or mesh missing");
+  if(stopped) return;
+  var parsed = core.decodeMesh(self.LOADER3D_MESH);
+  if(!parsed) return fail("bad mesh");
 
-  fetch(d.stlUrl)
-    .then(function(r){ return r.arrayBuffer(); })
-    .then(function(buf){
-      if(stopped) return;
-      var parsed = core.parseSTL(buf);
-      if(!parsed) return fail("malformed STL");
+  // a browser that advertises OffscreenCanvas can still refuse a WebGL
+  // context on a worker thread; that hands the job back to the main thread
+  try { renderer = core.createRenderer(canvas, parsed); } catch(e){ renderer = null; }
+  if(!renderer) return fail("no worker WebGL");
 
-      try {
-        // Wrapped because three.js r128 predates OffscreenCanvas being common,
-        // and a browser that advertises OffscreenCanvas can still refuse a
-        // WebGL context on a worker thread. Any throw here hands the whole job
-        // back to the main thread rather than leaving a dead loader.
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-      } catch(e){ return fail("no worker WebGL: " + e); }
+  tumble = core.makeTumble();
+  applySize();
 
-      renderer.setClearColor(0x000000, 0);
-      view   = core.buildScene(THREE, parsed);
-      tumble = core.makeTumble(THREE);
-      applySize();
+  tumble.apply(0, 0);                       // start settled, front-on
+  renderer.render(tumble.q);                // paint frame one before revealing
+  // main thread fades the canvas up over the flat mark, then replies
+  // with {type:"begin"} to release the animation. See `begun` above.
+  // overscan tells the main thread the true canvas/mark ratio for THIS
+  // geometry, so the 3D mark always lands exactly the size of the 2D one
+  self.postMessage({ type: "firstFrame", overscan: renderer.OVERSCAN });
 
-      tumble.apply(view.group, 0, 0);          // start settled, front-on
-      renderer.render(view.scene, view.camera); // paint frame one before revealing
-      // main thread fades the canvas up over the flat mark, then replies
-      // with {type:"begin"} to release the animation. See `begun` above.
-      // overscan tells the main thread the true canvas/mark ratio for THIS
-      // geometry, so the 3D mark always lands exactly the size of the 2D one
-      self.postMessage({ type: "firstFrame", overscan: view.OVERSCAN });
-
-      requestAnimationFrame(frame);
-    })
-    .catch(function(e){ fail("STL fetch failed: " + e); });
+  requestAnimationFrame(frame);
 }
 
 function frame(ts){
@@ -128,10 +110,10 @@ function frame(ts){
     if(phase === "turn"){
       var seg = turnCount % 4;
       var t = Math.min(phaseElapsed / core.TURN_MS, 1);
-      tumble.apply(view.group, seg, tumble.ease(t));
+      tumble.apply(seg, tumble.ease(t));
       if(phaseElapsed >= core.TURN_MS){
-        tumble.apply(view.group, seg, 1);
-        tumble.land(view.group);
+        tumble.apply(seg, 1);
+        tumble.land();
         turnCount++;
         phase = "settle";
         phaseElapsed = 0;
@@ -151,7 +133,7 @@ function frame(ts){
     }
   }
 
-  renderer.render(view.scene, view.camera);
+  renderer.render(tumble.q);
 
   // keep drawing briefly after release so the page's own fade-out has
   // something live under it, then stand down
@@ -164,7 +146,6 @@ function frame(ts){
 
 function cleanup(){
   stopped = true;
-  try { if(view) view.dispose(); } catch(e){}
   try { if(renderer) renderer.dispose(); } catch(e){}
-  renderer = null; view = null;
+  renderer = null;
 }

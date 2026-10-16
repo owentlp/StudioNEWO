@@ -1,8 +1,8 @@
 /* ============================================================
    LOADER 3D · SHARED CORE
    ------------------------------------------------------------
-   The geometry parsing and the tumble maths, with NO DOM in them, so the
-   exact same code can run in two places:
+   The mesh decoding, a tiny WebGL renderer and the tumble maths, with NO DOM
+   in them, so the exact same code can run in two places:
 
      · js/loader3d.worker.js  - inside a Web Worker, drawing to an
                                 OffscreenCanvas (the normal path)
@@ -12,6 +12,15 @@
    Loaded by <script> on the main thread and by importScripts() in the
    worker, so it must not assume `window` exists - it hangs itself off
    whatever global object it finds.
+
+   NO THREE.JS (2026-10-15). The loader used to download three.js (600 KB,
+   148 KB gzipped) and the raw logo STL (177 KB, served uncompressed) before
+   it could draw anything, which on a phone meant the 4s cap often fired first
+   and the animation never showed. The geometry now comes pre-baked from
+   js/loader3d-mesh.js (tools/bake-logo-mesh.py, ~25 KB gzipped) and is drawn
+   by the ~100 lines below. The shading is three.js r128's MeshStandardMaterial
+   maths (Lambert diffuse + GGX specular, linear output, no tone mapping) with
+   the same lights, inks and roughness, so the mark looks the same.
    ============================================================ */
 (function(root){
   "use strict";
@@ -26,104 +35,172 @@
   CORE.MIN_TURNS = 1;
   CORE.MAX_TURNS = 8;
 
-  /* ---- binary STL -> two vertex lists, split by face normal ----
-     Faces whose normal is dominated by one axis (|n| > 0.99) are the cube's
-     flat sides; everything else is the sphere cut through it. Splitting them
-     lets each take its own material, which is what makes the recess read as
-     depth rather than a flat silhouette.
-     Positions are centred on the geometry's own bounding box, and `half`
-     (widest face) and `radius` (space diagonal) come back with it - the
-     camera needs both, and they must not be guessed. */
-  CORE.parseSTL = function(buf){
-    var dv = new DataView(buf);
-    var triCount = dv.getUint32(80, true);
-    if(84 + triCount * 50 !== buf.byteLength) return null;   // ASCII or corrupt
-
-    var flat = [], curved = [];
-    var min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
-    var off = 84, i, v, p, x, y, z;
-
-    for(i = 0; i < triCount; i++){
-      var nx = dv.getFloat32(off, true), ny = dv.getFloat32(off+4, true), nz = dv.getFloat32(off+8, true);
-      var dom = Math.max(Math.abs(nx), Math.abs(ny), Math.abs(nz));
-      var target = (dom > 0.99) ? flat : curved;
-      for(v = 0; v < 3; v++){
-        p = off + 12 + v*12;
-        x = dv.getFloat32(p, true); y = dv.getFloat32(p+4, true); z = dv.getFloat32(p+8, true);
-        if(x < min[0]) min[0] = x; if(x > max[0]) max[0] = x;
-        if(y < min[1]) min[1] = y; if(y > max[1]) max[1] = y;
-        if(z < min[2]) min[2] = z; if(z > max[2]) max[2] = z;
-        target.push(x, y, z);
+  /* ---- baked mesh -> two flat-shaded triangle lists ----
+     The bake keeps the old split: faces facing straight down an axis are the
+     cube's flat sides (listed first), everything else is the sphere cut. Each
+     gets its own material, which is what makes the recess read as depth.
+     Normals are per face, as computeVertexNormals() gave on the old
+     non-indexed geometry. `radius` (half the space diagonal) and `half` (half
+     the widest face) size the camera and the canvas, as before. */
+  CORE.decodeMesh = function(M){
+    if(!M || !M.data) return null;
+    var bin = atob(M.data), bytes = new Uint8Array(bin.length);
+    for(var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    var dv = new DataView(bytes.buffer);
+    var nv = M.verts, idxOff = nv * 6;
+    function pos(k, a){ return dv.getInt16(k*6 + a*2, true) * M.scale; }
+    function build(firstTri, count){
+      var out = new Float32Array(count * 18), o = 0;   // xyz + normal per vertex
+      for(var t = firstTri; t < firstTri + count; t++){
+        var a = dv.getUint16(idxOff + t*6, true), b = dv.getUint16(idxOff + t*6 + 2, true), c = dv.getUint16(idxOff + t*6 + 4, true);
+        var ax = pos(a,0), ay = pos(a,1), az = pos(a,2);
+        var bx = pos(b,0), by = pos(b,1), bz = pos(b,2);
+        var cx = pos(c,0), cy = pos(c,1), cz = pos(c,2);
+        // (C-B) x (A-B), the same winding three.js uses
+        var ux = cx-bx, uy = cy-by, uz = cz-bz, vx = ax-bx, vy = ay-by, vz = az-bz;
+        var nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx;
+        var l = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+        nx /= l; ny /= l; nz /= l;
+        out.set([ax,ay,az,nx,ny,nz, bx,by,bz,nx,ny,nz, cx,cy,cz,nx,ny,nz], o); o += 18;
       }
-      off += 50;
+      return out;
     }
-    if(!flat.length && !curved.length) return null;
-
-    var cx = (min[0]+max[0])/2, cy = (min[1]+max[1])/2, cz = (min[2]+max[2])/2;
-    function centre(arr){
-      for(var k = 0; k < arr.length; k += 3){ arr[k] -= cx; arr[k+1] -= cy; arr[k+2] -= cz; }
-      return new Float32Array(arr);
-    }
-    var sx = max[0]-min[0], sy = max[1]-min[1], sz = max[2]-min[2];
-
+    var s = M.size;
     return {
-      flat:   centre(flat),
-      curved: centre(curved),
-      // half the space DIAGONAL - the furthest a corner swings mid-tumble, so
-      // the ortho frustum sized off it never clips
-      radius: Math.sqrt(sx*sx + sy*sy + sz*sz) / 2,
-      // half the widest FACE - how much of that frustum the mark fills sitting
-      // still, front-on. The gap between the two is why the canvas has to be
-      // bigger than the mark; see the OVERSCAN note where the scene is built.
-      half:   Math.max(sx, sy, sz) / 2
+      flat:   build(0, M.flatTris),
+      curved: build(M.flatTris, M.curvedTris),
+      radius: Math.sqrt(s[0]*s[0] + s[1]*s[1] + s[2]*s[2]) / 2,
+      half:   Math.max(s[0], s[1], s[2]) / 2
     };
   };
 
-  /* ---- build the scene. Takes THREE so it works either side. ----
-     Orthographic on purpose: no perspective foreshortening, so the mark keeps
-     the flat, drawn look of the 2D logo even while it turns. */
-  CORE.buildScene = function(THREE, parsed){
-    var scene = new THREE.Scene();
-    var FRUST = parsed.radius * 1.06;
-    var camera = new THREE.OrthographicCamera(-FRUST, FRUST, FRUST, -FRUST, 1, parsed.radius * 20);
-    camera.position.set(0, 0, parsed.radius * 4);
-    camera.lookAt(0, 0, 0);
+  var VS = [
+    "attribute vec3 p; attribute vec3 n;",
+    "uniform mat3 R; uniform float F; uniform float D;",
+    "varying vec3 vN;",
+    "void main(){ vec3 q = R * p; vN = R * n;",
+    // orthographic: x,y straight off the frustum, depth = distance from the camera
+    "  gl_Position = vec4(q.xy / F, -q.z / D, 1.0); }"
+  ].join("\n");
 
-    // key from the upper LEFT front with low ambient, so the sphere's recessed
-    // interior falls into shadow and the cut reads as a real void
-    scene.add(new THREE.AmbientLight(0xffffff, 0.34));
-    var key = new THREE.DirectionalLight(0xffffff, 1.0);
-    key.position.set(-0.6, 0.8, 1.1);
-    scene.add(key);
-    var fill = new THREE.DirectionalLight(0xffffff, 0.18);
-    fill.position.set(0.7, -0.5, 0.4);
-    scene.add(fill);
+  // three.js r128 MeshStandardMaterial with non-physical lights: diffuse is
+  // dotNL * light * albedo, specular is dotNL * light * PI * GGX(F,G,D)
+  var FS = [
+    "precision highp float;",
+    "varying vec3 vN;",
+    "uniform vec3 C; uniform float Rg;",
+    "uniform vec3 L1; uniform vec3 L2;",
+    "const float PI = 3.141592653589793;",
+    "const float MET = 0.12;",
+    "vec3 light(vec3 N, vec3 L, float I, vec3 dif, vec3 f0, float a){",
+    "  vec3 V = vec3(0.0, 0.0, 1.0);",
+    "  float nl = clamp(dot(N, L), 0.0, 1.0);",
+    "  vec3 H = normalize(L + V);",
+    "  float nv = clamp(dot(N, V), 0.0, 1.0), nh = clamp(dot(N, H), 0.0, 1.0), lh = clamp(dot(L, H), 0.0, 1.0);",
+    "  float fr = exp2((-5.55473 * lh - 6.98316) * lh);",
+    "  vec3 Fs = (1.0 - f0) * fr + f0;",
+    "  float a2 = a * a;",
+    "  float gv = nl * sqrt(a2 + (1.0 - a2) * nv * nv), gl = nv * sqrt(a2 + (1.0 - a2) * nl * nl);",
+    "  float G = 0.5 / max(gv + gl, 1e-6);",
+    "  float dn = nh * nh * (a2 - 1.0) + 1.0;",
+    "  float Dg = a2 / (PI * dn * dn);",
+    "  return nl * I * (dif + PI * Fs * G * Dg);",
+    "}",
+    "void main(){",
+    "  vec3 N = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0);",
+    "  vec3 dif = C * (1.0 - MET);",
+    "  vec3 f0 = mix(vec3(0.04), C, MET);",
+    "  float r = max(Rg, 0.0525); float a = r * r;",
+    "  vec3 col = 0.34 * dif;",
+    "  col += light(N, L1, 1.0, dif, f0, a);",
+    "  col += light(N, L2, 0.18, dif, f0, a);",
+    "  gl_FragColor = vec4(col, 1.0);",
+    "}"
+  ].join("\n");
 
-    function meshFrom(arr, colour, roughness){
-      var g = new THREE.BufferGeometry();
-      g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
-      g.computeVertexNormals();
-      var m = new THREE.MeshStandardMaterial({
-        color: colour, roughness: roughness, metalness: 0.12, side: THREE.DoubleSide
-      });
-      return { mesh: new THREE.Mesh(g, m), geo: g, mat: m };
+  function norm(v){ var l = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]); return [v[0]/l, v[1]/l, v[2]/l]; }
+  function hex(h){ return [((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255]; }
+
+  /* ---- the renderer. Returns null if WebGL is refused, so the caller can
+     fall back exactly as it did when three.js threw. ---- */
+  CORE.createRenderer = function(canvas, parsed){
+    var gl = null;
+    try { gl = canvas.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: true }); } catch(e){}
+    if(!gl) return null;
+
+    function sh(type, src){
+      var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
     }
+    var vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
+    if(!vs || !fs) return null;
+    var prog = gl.createProgram();
+    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    gl.useProgram(prog);
 
-    var group = new THREE.Group();
+    var aP = gl.getAttribLocation(prog, "p"), aN = gl.getAttribLocation(prog, "n");
+    var u = {};
+    ["R", "F", "D", "C", "Rg", "L1", "L2"].forEach(function(k){ u[k] = gl.getUniformLocation(prog, k); });
+
+    var FRUST = parsed.radius * 1.06;
+    gl.uniform1f(u.F, FRUST);
+    gl.uniform1f(u.D, parsed.radius * 1.05);
+    // directional lights point from their position toward the origin; the
+    // camera sits on +Z with no rotation, so world space is view space
+    gl.uniform3fv(u.L1, norm([-0.6, 0.8, 1.1]));
+    gl.uniform3fv(u.L2, norm([0.7, -0.5, 0.4]));
+
+    function part(arr, colour, rough){
+      var b = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, b);
+      gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+      return { buf: b, count: arr.length / 6, col: hex(colour), rough: rough };
+    }
     // near-identical inks; the roughness split plus the lighting does the work
-    var cube   = meshFrom(parsed.flat,   0x141414, 0.32);
-    var sphere = meshFrom(parsed.curved, 0x161616, 0.30);
-    group.add(cube.mesh);
-    group.add(sphere.mesh);
-    scene.add(group);
+    var parts = [part(parsed.flat, 0x141414, 0.32), part(parsed.curved, 0x161616, 0.30)];
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.clearColor(0, 0, 0, 0);
+    var size = 1;
 
     return {
-      scene: scene, camera: camera, group: group,
       FRUST: FRUST,
       OVERSCAN: FRUST / (parsed.half || 1),   // ~1.84 for the current logo
+      setSize: function(px){
+        size = px;
+        if(canvas.width !== px) canvas.width = px;
+        if(canvas.height !== px) canvas.height = px;
+      },
+      // q = [x, y, z, w] rotation of the mark
+      render: function(q){
+        var x = q[0], y = q[1], z = q[2], w = q[3];
+        gl.viewport(0, 0, size, size);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.uniformMatrix3fv(u.R, false, [
+          1 - 2*(y*y + z*z), 2*(x*y + z*w),     2*(x*z - y*w),
+          2*(x*y - z*w),     1 - 2*(x*x + z*z), 2*(y*z + x*w),
+          2*(x*z + y*w),     2*(y*z - x*w),     1 - 2*(x*x + y*y)
+        ]);
+        for(var i = 0; i < parts.length; i++){
+          var pt = parts[i];
+          gl.bindBuffer(gl.ARRAY_BUFFER, pt.buf);
+          gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 3, gl.FLOAT, false, 24, 0);
+          gl.enableVertexAttribArray(aN); gl.vertexAttribPointer(aN, 3, gl.FLOAT, false, 24, 12);
+          gl.uniform3fv(u.C, pt.col);
+          gl.uniform1f(u.Rg, pt.rough);
+          gl.drawArrays(gl.TRIANGLES, 0, pt.count);
+        }
+      },
+      // give the context back now, not when the garbage collector gets to it:
+      // browsers allow only a handful, and model-viewer wants one next
       dispose: function(){
-        cube.geo.dispose(); cube.mat.dispose();
-        sphere.geo.dispose(); sphere.mat.dispose();
+        try {
+          parts.forEach(function(pt){ gl.deleteBuffer(pt.buf); });
+          gl.deleteProgram(prog);
+          var ext = gl.getExtension("WEBGL_lose_context");
+          if(ext) ext.loseContext();
+        } catch(e){}
       }
     };
   };
@@ -132,28 +209,34 @@
      Each segment turns 90 degrees about X and Y at once. The four sign pairs
      cycle so the mark works around the cube's symmetries rather than rocking
      between two poses. Every landing is a cube symmetry, which is why any
-     settle is a valid place to stop. */
-  CORE.makeTumble = function(THREE){
-    var AXIS_X = new THREE.Vector3(1, 0, 0);
-    var AXIS_Y = new THREE.Vector3(0, 1, 0);
+     settle is a valid place to stop. Quaternions are [x, y, z, w]. */
+  function qmul(a, b){
+    return [
+      a[3]*b[0] + a[0]*b[3] + a[1]*b[2] - a[2]*b[1],
+      a[3]*b[1] - a[0]*b[2] + a[1]*b[3] + a[2]*b[0],
+      a[3]*b[2] + a[0]*b[1] - a[1]*b[0] + a[2]*b[3],
+      a[3]*b[3] - a[0]*b[0] - a[1]*b[1] - a[2]*b[2]
+    ];
+  }
+  CORE.makeTumble = function(){
     var DIRX = [ 1, -1,  1, -1];
     var DIRY = [ 1,  1, -1, -1];
     var HALF_PI = Math.PI / 2;
-    var qBase = new THREE.Quaternion();
-    var qx = new THREE.Quaternion(), qy = new THREE.Quaternion(), qStep = new THREE.Quaternion();
-
-    return {
+    var qBase = [0, 0, 0, 1];
+    var T = {
+      q: [0, 0, 0, 1],
       ease: function(x){ return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2; },
-      apply: function(group, seg, e){
-        qy.setFromAxisAngle(AXIS_Y, e * DIRY[seg] * HALF_PI);
-        qx.setFromAxisAngle(AXIS_X, e * DIRX[seg] * HALF_PI);
-        qStep.copy(qx).multiply(qy);
-        group.quaternion.copy(qStep).multiply(qBase);
+      apply: function(seg, e){
+        var ax = e * DIRX[seg] * HALF_PI / 2, ay = e * DIRY[seg] * HALF_PI / 2;
+        var qx = [Math.sin(ax), 0, 0, Math.cos(ax)];
+        var qy = [0, Math.sin(ay), 0, Math.cos(ay)];
+        T.q = qmul(qmul(qx, qy), qBase);
       },
       // land EXACTLY on the settled pose and make it the new base, so repeated
       // turns cannot accumulate float drift off the symmetry
-      land: function(group){ qBase.copy(group.quaternion); }
+      land: function(){ qBase = T.q.slice(); }
     };
+    return T;
   };
 
   root.LOADER3D_CORE = CORE;

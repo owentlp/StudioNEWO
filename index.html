@@ -58,8 +58,8 @@
     if(cors) l.crossOrigin = "";
     document.head.appendChild(l);
   }
-  pre("js/vendor/three.min.js?v=1", "script");
-  pre("logo/3d-logo.stl", "fetch", true);
+  pre("js/loader3d-core.js?v=2", "script");
+  pre("js/loader3d-mesh.js?v=1", "script");
 })();
 </script>
 
@@ -356,8 +356,8 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 @media (prefers-reduced-motion:reduce){ .bgvid{display:none;} }
 </style>
 
-<link rel="prefetch" href="about.html" as="document">
-<link rel="prefetch" href="contact.html" as="document">
+<!-- about.html and contact.html are prefetched AFTER the reveal now (see
+     REVEAL below), so they no longer compete with the loader's own files. -->
 
 <script type="application/ld+json">
 {
@@ -394,7 +394,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="sky-clouds" aria-hidden="true"></div>
 <div id="sky-precip" aria-hidden="true"></div>
 <div id="sky-grain" aria-hidden="true"></div>
-<script src="js/sky.js?v=6"></script>
+<script src="js/sky.js?v=7"></script>
 <video class="bgvid" id="vidA" muted playsinline preload="none"></video>
 <video class="bgvid" id="vidB" muted playsinline preload="none"></video>
 
@@ -403,7 +403,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=15"></script>
+<script src="js/loader3d.js?v=16"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -450,7 +450,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=5"></script>
 <script src="js/image-sizes.js?v=3"></script>
-<script src="js/menu.js?v=30"></script>
+<script src="js/menu.js?v=31"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -774,6 +774,12 @@ if(BG_MODE !== "sky"){ var _sk = document.getElementById("sky"); if(_sk) _sk.rem
   function reveal(){
     if(done) return; done = true;
     if(window.__revealPage) window.__revealPage(); else document.body.classList.add("ready");
+    setTimeout(function(){
+      ["about.html", "contact.html"].forEach(function(h){
+        var l = document.createElement("link"); l.rel = "prefetch"; l.href = h; l.as = "document";
+        document.head.appendChild(l);
+      });
+    }, 1200);
   }
   function decoded(im){ return im.decode ? im.decode().catch(function(){}) : null; }
   var imgs = [].slice.call(document.querySelectorAll("#dock img")).map(function(im){

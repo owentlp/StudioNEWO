@@ -45,9 +45,9 @@
    mark (with the page's normal, un-delayed reveal timing) is all
    anyone sees.
 
-   Bring your own THREE: loads three.js r128 from js/vendor/, plus a small
-   hand-rolled binary STL parser below (instead of pulling in the separate
-   STLLoader addon file, one less thing that can 404).
+   No three.js since 2026-10-15: js/loader3d-core.js draws the mark with
+   plain WebGL from js/loader3d-mesh.js, which tools/bake-logo-mesh.py bakes
+   from the STL (~30 KB gzipped in all, against ~330 KB before).
 
    Source geometry: logo/3d-logo.stl - byte-identical to the
    prototype's uploads/3D-LOGO.STL, so there is nothing to copy
@@ -225,58 +225,6 @@
     }, REVISIT_HOLD_MS);
   }
 
-  /* ---- binary STL -> two vertex lists, split by face normal ----
-     A face whose normal is dominated by one axis (|n| > 0.99 on x, y or z) is
-     one of the cube's flat faces; anything else is part of the sphere cut
-     through it. Splitting them here lets each get its own material, which is
-     what makes the recess read as depth instead of a flat silhouette.
-     Positions are centred on the geometry's own bounding box (the prototype
-     hard-coded -127 for a 0..254 cube; deriving it means a re-exported STL at
-     a different scale still centres correctly). */
-  function parseSTL(buf){
-    var dv = new DataView(buf);
-    var triCount = dv.getUint32(80, true);
-    // sanity check: a malformed/ASCII STL would make this wildly wrong
-    if(84 + triCount*50 !== buf.byteLength) return null;
-
-    var flat = [], curved = [];
-    var min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
-    var off = 84, i, v, p, x, y, z;
-
-    for(i = 0; i < triCount; i++){
-      var nx = dv.getFloat32(off, true), ny = dv.getFloat32(off+4, true), nz = dv.getFloat32(off+8, true);
-      var dom = Math.max(Math.abs(nx), Math.abs(ny), Math.abs(nz));
-      var target = (dom > 0.99) ? flat : curved;
-      for(v = 0; v < 3; v++){
-        p = off + 12 + v*12;
-        x = dv.getFloat32(p, true); y = dv.getFloat32(p+4, true); z = dv.getFloat32(p+8, true);
-        if(x < min[0]) min[0] = x; if(x > max[0]) max[0] = x;
-        if(y < min[1]) min[1] = y; if(y > max[1]) max[1] = y;
-        if(z < min[2]) min[2] = z; if(z > max[2]) max[2] = z;
-        target.push(x, y, z);
-      }
-      off += 50;
-    }
-    if(!flat.length && !curved.length) return null;
-
-    var cx = (min[0]+max[0])/2, cy = (min[1]+max[1])/2, cz = (min[2]+max[2])/2;
-    function centre(arr){
-      for(var k = 0; k < arr.length; k += 3){ arr[k] -= cx; arr[k+1] -= cy; arr[k+2] -= cz; }
-      return arr;
-    }
-    var sx = max[0]-min[0], sy = max[1]-min[1], sz = max[2]-min[2];
-    // radius = half the space DIAGONAL: the furthest any corner swings from
-    // centre mid-tumble, so the ortho frustum sized off it never clips.
-    // half   = half the widest FACE: how much of that frustum the mark fills
-    //          when it is sitting still, front-on. The gap between the two is
-    //          what made the 3D mark render smaller than the flat one - see
-    //          the canvas sizing in init().
-    var radius = Math.sqrt(sx*sx + sy*sy + sz*sz) / 2;
-    var half = Math.max(sx, sy, sz) / 2;
-
-    return { flat: centre(flat), curved: centre(curved), radius: radius, half: half };
-  }
-
   function loadScript(src, ok, fail){
     var s = document.createElement("script");
     s.src = src; s.async = true;
@@ -291,7 +239,7 @@
      so page work physically cannot stall it. Everything DOM stays here.
 
      If anything at all goes wrong - no OffscreenCanvas, worker blocked, no
-     WebGL on the worker thread, three.js unreachable - it falls through to the
+     WebGL on the worker thread, core unreachable - it falls through to the
      main-thread version below, which is the code that shipped before. Nothing
      regresses; it just stops being smooth on those browsers. */
   var workerTried = false;
@@ -313,7 +261,7 @@
     canvas.style.transform = "translate(-50%, -50%)";
 
     var w;
-    try { w = new Worker(BASE + "loader3d.worker.js?v=4"); }
+    try { w = new Worker(BASE + "loader3d.worker.js?v=5"); }
     catch(e){ canvas.remove(); return false; }
 
     var handedOff;
@@ -400,8 +348,8 @@
       canvas: handedOff,
       dpr: Math.min(window.devicePixelRatio || 1, 1.5),
       cssSize: cssSize,
-      stlUrl: new URL("logo/3d-logo.stl", location.href).href,
-      coreUrl: BASE + "loader3d-core.js?v=1"
+      coreUrl: BASE + "loader3d-core.js?v=2",
+      meshUrl: BASE + "loader3d-mesh.js?v=1"
     }, [handedOff]);
 
     // tell it when the page is ready; it releases at its next settle
@@ -427,7 +375,7 @@
   }
   /* pinned is true only on a first view. On a revisit the kickoff is parked
      here and the hold above runs it if - and only if - the page is still
-     loading two seconds in, so a cached page never pays for three.js, the STL,
+     loading two seconds in, so a cached page never pays for the mesh,
      a worker or a WebGL context at all. */
   if(pinned) kickoff();
   else deferredKickoff = kickoff;
@@ -438,80 +386,31 @@
   // only because the pin was set late; now that it is set up front, an
   // un-unpinned exit would freeze the loader on screen.
   /* BASE + ..., not a bare relative path. loadScript() appends a <script src>,
-     and that resolves against the DOCUMENT, not against this file - so
-     "vendor/three.min.js" would ask for /vendor/three.min.js from the site
-     root, which does not exist. BASE is this script's own directory (/js/),
-     the same value the worker is pointed at. */
-  loadScript(BASE + "vendor/three.min.js?v=1", function(){
-    if(!pageStillLoading() || capFired){ unpin(); return; }   // the page (or the cap) beat us to it
-    fetch("logo/3d-logo.stl").then(function(r){ return r.arrayBuffer(); })
-      .then(function(buf){
-        if(!pageStillLoading() || capFired){ unpin(); return; }
-        var parsed = parseSTL(buf);
-        if(!parsed){ unpin(); return; }           // malformed/ASCII STL
-        init(parsed);
-      })
-      .catch(function(){ unpin(); });              // STL fetch failed
-  }, function(){ unpin(); });                      // CDN unreachable
+     and that resolves against the DOCUMENT, not against this file. BASE is
+     this script's own directory (/js/), the same value the worker is given. */
+  var CORE = null;
+  loadScript(BASE + "loader3d-core.js?v=2", function(){
+    loadScript(BASE + "loader3d-mesh.js?v=1", function(){
+      if(!pageStillLoading() || capFired){ unpin(); return; }   // the page (or the cap) beat us to it
+      CORE = window.LOADER3D_CORE;
+      var parsed = CORE && CORE.decodeMesh(window.LOADER3D_MESH);
+      if(!parsed){ unpin(); return; }
+      init(parsed);
+    }, function(){ unpin(); });
+  }, function(){ unpin(); });
 
   function init(parsed){
     var canvas = document.createElement("canvas");
     canvas.className = "ld-3d";
     mark.appendChild(canvas);
 
-    var renderer;
-    try{
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    } catch(e){ canvas.remove(); unpin(); return; }   // no WebGL context available
-    renderer.setClearColor(0x000000, 0);
-    /* Pixel ratio capped at 1.5, not 2. This animation is unusual in that it
-       runs during the single busiest moment of the page's life - HTML parsing,
-       font loading, hero image decoding and (on project pages) model-viewer's
-       ~700KB parse all land in the same window. It is competing for the main
-       thread with all of it, which is where the choppiness comes from, not from
-       the geometry. Asking for 44% fewer pixels per frame buys real headroom,
-       and at this size the difference is not visible on a matte ink logo. */
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-
-    var scene = new THREE.Scene();
-
-    // ORTHOGRAPHIC, per the prototype: no perspective foreshortening, so the
-    // mark stays flat and drawn-looking rather than photographic as it turns.
-    // The frustum is padded past the geometry's space-diagonal radius so a
-    // corner mid-tumble never clips the edge of the box.
-    var FRUST = parsed.radius * 1.06;
-    var camera = new THREE.OrthographicCamera(-FRUST, FRUST, FRUST, -FRUST, 1, parsed.radius * 20);
-    camera.position.set(0, 0, parsed.radius * 4);
-    camera.lookAt(0, 0, 0);
-
-    // key from the upper LEFT front with low ambient, so the sphere's recessed
-    // interior walls fall into shadow and the cut reads as a real void.
-    scene.add(new THREE.AmbientLight(0xffffff, 0.34));
-    var key = new THREE.DirectionalLight(0xffffff, 1.0);
-    key.position.set(-0.6, 0.8, 1.1);
-    scene.add(key);
-    var fill = new THREE.DirectionalLight(0xffffff, 0.18);
-    fill.position.set(0.7, -0.5, 0.4);
-    scene.add(fill);
-
-    function meshFrom(arr, colour, roughness){
-      var g = new THREE.BufferGeometry();
-      g.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3));
-      g.computeVertexNormals();
-      var m = new THREE.MeshStandardMaterial({
-        color: colour, roughness: roughness, metalness: 0.12, side: THREE.DoubleSide
-      });
-      return { mesh: new THREE.Mesh(g, m), geo: g, mat: m };
-    }
-
-    var group = new THREE.Group();
-    // the two materials are nearly the same ink; the difference that actually
-    // does the work is the roughness split plus the lighting above.
-    var cube   = meshFrom(parsed.flat,   0x141414, 0.32);
-    var sphere = meshFrom(parsed.curved, 0x161616, 0.30);
-    group.add(cube.mesh);
-    group.add(sphere.mesh);
-    scene.add(group);
+    var renderer = null;
+    try { renderer = CORE.createRenderer(canvas, parsed); } catch(e){}
+    if(!renderer){ canvas.remove(); unpin(); return; }   // no WebGL context available
+    /* Pixel ratio capped at 1.5, not 2: this runs during the busiest moment of
+       the page's life on the main thread, and at this size the difference is
+       not visible on a matte ink logo. */
+    var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
     /* ---- canvas sizing, and why the canvas is BIGGER than the mark ----
        The ortho frustum has to clear the model's space diagonal (220) so a
@@ -526,7 +425,7 @@
        exactly --ld-size, and let the canvas overflow the mark (nothing clips
        it) to give the tumble its room back. Derived from the geometry rather
        than hard-coded, so a re-exported STL still lines up. */
-    var OVERSCAN = FRUST / (parsed.half || 1);   // ~1.84 for the current logo
+    var OVERSCAN = renderer.OVERSCAN;   // ~1.84 for the current logo
     canvas.style.position = "absolute";
     canvas.style.left = "50%";
     canvas.style.top = "50%";
@@ -537,10 +436,7 @@
       var px = Math.round(m * OVERSCAN);
       canvas.style.width = px + "px";
       canvas.style.height = px + "px";
-      renderer.setSize(px, px, false);
-      camera.left = -FRUST; camera.right = FRUST;
-      camera.top = FRUST; camera.bottom = -FRUST;
-      camera.updateProjectionMatrix();
+      renderer.setSize(Math.max(1, Math.round(px * DPR)));
     }
 
     resize();
@@ -563,22 +459,9 @@
        is back where it started, so running on indefinitely stays seamless.
        Every landing is a cube symmetry, which is why any settle is a valid
        place to stop. */
-    var AXIS_X = new THREE.Vector3(1, 0, 0);
-    var AXIS_Y = new THREE.Vector3(0, 1, 0);
-    var DIRX = [ 1, -1,  1, -1];
-    var DIRY = [ 1,  1, -1, -1];
-    var HALF_PI = Math.PI / 2;
-    function easeInOutCubic(x){ return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2; }
-
-    var qBase = new THREE.Quaternion();   // the settled pose the current turn starts from
-    var qx = new THREE.Quaternion(), qy = new THREE.Quaternion(), qStep = new THREE.Quaternion();
-
-    function applyTurn(seg, e){
-      qy.setFromAxisAngle(AXIS_Y, e * DIRY[seg] * HALF_PI);
-      qx.setFromAxisAngle(AXIS_X, e * DIRX[seg] * HALF_PI);
-      qStep.copy(qx).multiply(qy);
-      group.quaternion.copy(qStep).multiply(qBase);
-    }
+    var tumble = CORE.makeTumble();
+    function applyTurn(seg, e){ tumble.apply(seg, e); }
+    function easeInOutCubic(x){ return tumble.ease(x); }
 
     var turnCount = 0, phase = "settle", phaseElapsed = 0, released = false;
     applyTurn(0, 0);   // start settled on the front face
@@ -592,7 +475,7 @@
        mark, and only hide the flat mark once the fade is done. Hiding it first
        (which is what this did before) left a frame or two of bare paper and
        read as a flicker. */
-    renderer.render(scene, camera);
+    renderer.render(tumble.q);
     // A CSS transition only runs if the browser has computed a STARTING value
     // for the property first. The canvas was appended and its opacity set in
     // the same frame, so there was no starting value and the .22s fade was
@@ -626,7 +509,7 @@
             // land EXACTLY on the settled quaternion and make it the new base,
             // so repeated turns can't accumulate float drift off the symmetry
             applyTurn(seg, 1);
-            qBase.copy(group.quaternion);
+            tumble.land();
             turnCount++;
             phase = "settle";
             phaseElapsed = 0;
@@ -651,7 +534,7 @@
         }
       }
 
-      renderer.render(scene, camera);
+      renderer.render(tumble.q);
       rafId = requestAnimationFrame(frame);
     }
     rafId = requestAnimationFrame(frame);
@@ -665,8 +548,6 @@
           stopped = true;
           if(rafId) cancelAnimationFrame(rafId);
           renderer.dispose();
-          cube.geo.dispose(); cube.mat.dispose();
-          sphere.geo.dispose(); sphere.mat.dispose();
           try { canvas.remove(); } catch(e){}
         }, 700);
       } else {

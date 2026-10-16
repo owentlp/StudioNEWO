@@ -330,9 +330,10 @@
      so on load the clouds are just there instead of fading in behind the logo. */
   setTimeout(function(){ LIVE = true; if(clouds) clouds.classList.add("live"); }, 80);
   /* NEWO_SKY.ready resolves when the sky has settled on the real weather (or
-     after 1.5s if the forecast is slow). The home page holds its reveal on it. */
+     after 1s if the forecast is slow; the saved sky colours cover the gap).
+     The home page holds its reveal on it. */
   var readyDone, ready = new Promise(function(res){ readyDone = res; });
-  setTimeout(readyDone, 1500);
+  setTimeout(readyDone, 1000);
   getWeather(function(){ readyDone(); });
   var rt; addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(function(){ if(cv.style.display !== "none"){ size(); draw(); } }, 200); });
   var TIMERS = [
