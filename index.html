@@ -145,7 +145,7 @@ body.bg-sky #soundToggle{display:none;}
    than sit over the photo (no text over images) */
 body:has(.dc:hover) #home-line span, body:has(.dc:focus-visible) #home-line span, body:has(.dc.dc-lift) #home-line span{opacity:0;}
 body[data-sky="dark"] #home-line{color:var(--paper);}
-@media (max-width:760px), (max-height:700px), (hover: none){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
+@media (max-width:760px), (max-height:700px), (hover: none) and (max-width:1100px){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
 
 /* ---- header: real logo (left) · wordmark (centre) · hamburger (right); all the SAME height ---- */
 #home{position:fixed; z-index:5; top:24px; left:34px; display:block; width:45px; height:45px; color:var(--ink); cursor:pointer;}
@@ -301,9 +301,16 @@ body.ready .fade-in.d2{transition-delay:.2s;}
    desktop dock is fixed with the body set to overflow:hidden, there is no way
    to scroll to the rest of it either. You saw the titles and a strip of photo,
    and that was the whole home page.
-   `(hover: none)` catches every touch device whatever its size, and the width
-   term stays for a narrow window on a desktop, where the fan has no room. */
-@media (max-width:760px), (hover: none){
+   `(hover: none) and (max-width:1100px)` catches phones in landscape and
+   iPads, and the plain width term stays for a narrow window on a desktop,
+   where the fan has no room.
+   THE 1100px CAP IS NOT OPTIONAL (2026-10-26). Owen's touchscreen laptop, in
+   Chrome, reports hover:none, any-hover:none, pointer:coarse and no fine
+   pointer at all, at 1829px wide, so (hover: none) alone and (any-hover: none)
+   both gave it the phone stack. Input type cannot be trusted on Windows touch
+   laptops; size can. The touchpad still raises the cards (:hover works
+   whatever the media query says). */
+@media (max-width:760px), (hover: none) and (max-width:1100px){
   /* scroll vertically only - never sideways. See the matching note in
      css/style.css: iOS needs the axis pinned explicitly or a stray wide child
      gives you a dead margin you can drag the page into. */
@@ -550,7 +557,7 @@ const CLIP_PICK = (function(){
   // margin-left rule), so N cards occupy width * (1 + (N-1)*0.65). Solve that
   // for the viewport width and set --dock-w. Recompute on resize. On mobile
   // the dock is a plain stacked column (CSS), so leave it to the stylesheet.
-  var STACKED = window.matchMedia("(max-width:760px), (hover: none)");
+  var STACKED = window.matchMedia("(max-width:760px), (hover: none) and (max-width:1100px)");
   function sizeDock(){
     var n = dock.children.length;
     if(!n) return;
@@ -578,7 +585,7 @@ const CLIP_PICK = (function(){
    the visitor moves onto the cards, scrolls, or presses a key. */
 (function(){
   var dock = document.getElementById("dock"), loader = document.getElementById("loader");
-  if(window.matchMedia("(max-width:760px), (hover: none), (prefers-reduced-motion: reduce)").matches) return;
+  if(window.matchMedia("(max-width:760px), (hover: none) and (max-width:1100px), (prefers-reduced-motion: reduce)").matches) return;
   try { if(sessionStorage.getItem("newo-cycle")) return; } catch(e){}
   var HOLD = 900, STEP = 650, timers = [], stopped = false;
   function stop(){
