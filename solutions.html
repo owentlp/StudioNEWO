@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SOLUTIONS · Product design consulting · STUDIO NEWO</title>
-<meta name="description" content="Product design consulting from Studio NEWO, Toronto: feasibility studies, concept design, CAD for manufacture, working prototypes. Selected work, services and price guide.">
+<title>SOLUTIONS · Renders, animation and drawings · STUDIO NEWO</title>
+<meta name="description" content="Product renders, animation, 3D web models and production drawings from your CAD at fixed prices, plus custom furniture and lighting. Studio NEWO, Toronto.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/solutions.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/solutions.html">
 <meta property="og:site_name" content="Studio NEWO">
 <meta property="og:title" content="Solutions · Studio NEWO">
-<meta property="og:description" content="Product design consulting from Studio NEWO, Toronto: feasibility studies, concept design, CAD for manufacture, working prototypes. Selected work, services and price guide.">
+<meta property="og:description" content="Product renders, animation, 3D web models and production drawings from your CAD at fixed prices, plus custom furniture and lighting. Studio NEWO, Toronto.">
 <meta property="og:image" content="https://studionewo.com/solutions/vacancy-to-value.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Solutions · Studio NEWO">
-<meta name="twitter:description" content="Product design consulting from Studio NEWO, Toronto: feasibility studies, concept design, CAD for manufacture, working prototypes. Selected work, services and price guide.">
+<meta name="twitter:description" content="Product renders, animation, 3D web models and production drawings from your CAD at fixed prices, plus custom furniture and lighting. Studio NEWO, Toronto.">
 <meta name="twitter:image" content="https://studionewo.com/solutions/vacancy-to-value.jpg">
 <link rel="manifest" href="/site.webmanifest">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
@@ -38,7 +38,10 @@
      (number, name, type, year, links); opening a row shows the cover image,
      the abstract and the buttons. Rendered from js/solutions-data.js. */
   .sol{max-width:1400px;}
-  .sol-intro{max-width:46ch; margin-bottom:clamp(36px,7vh,80px);}
+  .sol-intro{max-width:46ch;}
+  /* jump to the prices: services sit under the selected work (Owen, 2 Oct),
+     so a client arriving from the menu gets one button straight to them */
+  .sol-jump{margin:16px 0 clamp(36px,7vh,80px);}
   .sol-head, .sol-sum{display:grid; grid-template-columns:3.2em minmax(0,5fr) minmax(0,2fr) 4.5em minmax(0,2.4fr) 1.4em; column-gap:var(--gut); align-items:baseline;}
   .sol-head{padding:0 0 10px; border-bottom:1px solid rgba(20,20,20,.16);}
   .sol-head span{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
@@ -127,7 +130,8 @@
 <main class="page wrap sol" id="content" tabindex="-1">
   <h1 class="vh">Solutions</h1>
   <h2 class="svc-h" id="work">Selected work</h2>
-  <p class="desc sol-intro">Proposals, research and prototypes outside the product line. Each one opens to a summary, with the full document as a PDF.</p>
+  <p class="desc sol-intro">Proposals, research and prototypes outside the product line, each with the full document as a PDF.</p>
+  <p class="sol-jump"><a class="sol-btn" href="#services">Services and prices &darr;</a></p>
   <div class="sol-head" aria-hidden="true"><span></span><span>Solution</span><span>Type</span><span>Year</span><span>Files</span><span></span></div>
   <div class="sol-list" id="sol-list"></div>
   <noscript><p class="desc">This list needs JavaScript. The documents are in the solutions folder: vacancy-to-value.pdf, sonic-touch.pdf, loots.pdf.</p></noscript>
@@ -137,7 +141,7 @@
        from SERVICES in js/solutions-data.js. -->
   <section class="svc" id="services">
     <h2 class="svc-h">Work with the studio</h2>
-    <p class="desc svc-intro">Studio NEWO makes studio renders, animations and production drawings from your CAD, for designers, hardware startups and brands preparing a launch. The studio designs, builds and sells its own products, so every file comes from someone who knows how things get made.</p>
+    <p class="desc svc-intro">Studio NEWO makes product renders, animations and production drawings from your CAD for designers, hardware startups and brands preparing a launch, and takes on custom furniture and lighting. The studio designs, builds and sells its own products, so every file comes from someone who knows how things get made. The 3D models on the product pages are samples of the work.</p>
     <div class="svc-head" aria-hidden="true"><span></span><span>Service</span><span>Turnaround</span><span>From (CA$)</span></div>
     <div id="svc-list"></div>
     <div class="svc-notes">
@@ -165,10 +169,10 @@
 
 
 
-<script src="js/solutions-data.js?v=5"></script>
-<script src="js/projects-data.js?v=25"></script>
+<script src="js/solutions-data.js?v=6"></script>
+<script src="js/projects-data.js?v=26"></script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=31"></script>
+<script src="js/menu.js?v=32"></script>
 <script>
 (function(){
   (function(){

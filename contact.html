@@ -74,6 +74,20 @@
   .cnotify{display:flex; align-items:center; gap:10px; margin:4px 0 16px; font-size:13px; letter-spacing:.02em; cursor:pointer;}
   .cnotify[hidden]{display:none;}
   .cnotify input{width:16px; height:16px; accent-color:var(--red);}
+  /* TOPIC (2026-10-26): what the message is about, as four chips in the site's
+     button style, red at rest and ink when chosen. Optional. It puts the topic
+     in the email subject and swaps the prompt in the message box, so a buyer,
+     a commission and a client brief each get asked the right thing. */
+  .ctopic{border:0; padding:0; margin:0; min-width:0;}
+  .ctopic legend{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); padding:0; margin-bottom:10px;}
+  .ctopic-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .ctopic label{position:relative; cursor:pointer;}
+  .ctopic input{position:absolute; opacity:0; width:1px; height:1px; margin:0;}
+  .ctopic span{display:inline-block; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); padding:7px 12px; transition:opacity .15s ease;}
+  .ctopic label:hover span{opacity:.82;}
+  .ctopic input:checked + span{background:var(--ink);}
+  .ctopic input:focus-visible + span{outline:2px solid var(--ink); outline-offset:2px;}
+  .cfield textarea::placeholder{color:var(--ink-soft); opacity:.7;}
   .cprivacy{max-width:70ch; margin-top:clamp(50px,9vh,90px); font-size:12px; line-height:1.5; letter-spacing:.02em; opacity:.75;}
 </style>
 </head>
@@ -97,10 +111,19 @@
        engines and screen readers, and losing it would be a regression nobody
        can see. .vh is defined in css/style.css. -->
   <h1 class="vh">Contact</h1>
-  <p class="lead" id="clead">For project inquiries, collaborations, or freelance and consulting work, get in touch.</p>
-  <p class="desc clead-more" id="cleadMore">It helps to say what you are making, your timeline, and a rough budget. Replies usually come within a few days. Services and price guides are on the <a href="solutions.html#services">Solutions</a> page.</p>
+  <p class="lead" id="clead">Ask about a product, a custom piece, or design work.</p>
+  <p class="desc clead-more" id="cleadMore">Replies usually come within a few days. Services and prices are on the <a href="solutions.html#services">Solutions</a> page.</p>
 
   <form class="cform" id="contactForm" novalidate>
+    <fieldset class="ctopic">
+      <legend>About</legend>
+      <div class="ctopic-row">
+        <label><input type="radio" name="topic" value="Product"><span>A product</span></label>
+        <label><input type="radio" name="topic" value="Custom piece"><span>Custom piece</span></label>
+        <label><input type="radio" name="topic" value="Services"><span>Services</span></label>
+        <label><input type="radio" name="topic" value="Other"><span>Other</span></label>
+      </div>
+    </fieldset>
     <div class="cfield">
       <label for="cf-name">Name</label>
       <input id="cf-name" name="name" type="text" autocomplete="name" required>
@@ -111,7 +134,7 @@
     </div>
     <div class="cfield">
       <label for="cf-message">Message</label>
-      <textarea id="cf-message" name="message" required></textarea>
+      <textarea id="cf-message" name="message" required placeholder="What you are making, your timeline and a rough budget."></textarea>
     </div>
     <!-- shown only when the visitor arrived from a product's INQUIRE button
          (contact.html?about=KART): one tick to hear when it can be bought -->
@@ -156,9 +179,9 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=25"></script>
+<script src="js/projects-data.js?v=26"></script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=31"></script>
+<script src="js/menu.js?v=32"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening
@@ -225,9 +248,10 @@
      the visitor does not have to say which product they mean. */
   var ABOUT = "";
   try { ABOUT = (new URLSearchParams(location.search).get("about") || "").replace(/[^\w .,&+-]/g, "").slice(0, 40); } catch(e){}
-  if(ABOUT && !form.message.value){ form.message.value = "Inquiry about " + ABOUT + ":\n\n"; }
-  if(ABOUT && typeof PROJECTS !== "undefined"){
-    var isProduct = Object.keys(PROJECTS).some(function(k){ return String(PROJECTS[k].title).toUpperCase() === ABOUT.toUpperCase(); });
+  var isProduct = !!ABOUT && typeof PROJECTS !== "undefined" &&
+    Object.keys(PROJECTS).some(function(k){ return String(PROJECTS[k].title).toUpperCase() === ABOUT.toUpperCase(); });
+  if(isProduct && !form.message.value){ form.message.value = "Inquiry about " + ABOUT + ":\n\n"; }
+  if(ABOUT){
     if(isProduct){
       document.getElementById("cf-notify-name").textContent = ABOUT;
       document.getElementById("cf-notify-wrap").hidden = false;
@@ -236,14 +260,33 @@
          buyer for a project timeline and budget. */
       var T = ABOUT.toUpperCase();
       document.getElementById("clead").textContent = "Asking about " + T + "? Send a note about availability, price, or a custom version.";
-      document.getElementById("cleadMore").innerHTML = 'Replies usually come within a few days. For design and consulting work, services and price guides are on the <a href="solutions.html#services">Solutions</a> page.';
+      document.getElementById("cleadMore").textContent = "Replies usually come within a few days.";
     }
   }
   // subject line of the email Formspree sends (its _subject field)
   var subj = document.createElement("input");
   subj.type = "hidden"; subj.name = "_subject";
-  subj.value = "Studio NEWO inquiry" + (ABOUT ? ": " + ABOUT : "");
   form.appendChild(subj);
+
+  /* TOPIC. ?about= picks one: a product name -> A product, Consulting ->
+     Services, Custom -> Custom piece. Each topic has its own prompt. */
+  var PROMPTS = {
+    "Product": "Which product, and what you would like to know: price, availability, a finish.",
+    "Custom piece": "What you have in mind: size, material, where it will live, timeline and a rough budget.",
+    "Services": "What you are making, which service, your timeline and a rough budget.",
+    "Other": ""
+  };
+  var DEFAULT_PROMPT = form.message.getAttribute("placeholder") || "";
+  function topic(){ var t = form.querySelector('input[name="topic"]:checked'); return t ? t.value : ""; }
+  function syncTopic(){
+    var t = topic();
+    form.message.setAttribute("placeholder", t ? PROMPTS[t] : DEFAULT_PROMPT);
+    subj.value = "Studio NEWO inquiry" + (t ? ": " + t : "") + (isProduct ? " (" + ABOUT + ")" : "");
+  }
+  var pick = isProduct ? "Product" : /^consult|^service/i.test(ABOUT) ? "Services" : /^custom/i.test(ABOUT) ? "Custom piece" : "";
+  if(pick){ var r = form.querySelector('input[name="topic"][value="' + pick + '"]'); if(r) r.checked = true; }
+  form.addEventListener("change", function(e){ if(e.target.name === "topic") syncTopic(); });
+  syncTopic();
 
   form.addEventListener("submit", function(e){
     e.preventDefault();
@@ -267,7 +310,7 @@
        depends on being able to detect whether the mail app actually opened -
        the browser does not tell you, which is the whole problem. */
     if(!FORMSPREE_ENDPOINT){
-      var subject = encodeURIComponent("Studio NEWO inquiry from " + name);
+      var subject = encodeURIComponent((topic() ? topic() + ": " : "") + "Studio NEWO inquiry from " + name);
       var body = encodeURIComponent(message + "\n\n" + name + "\n" + email);
       try { window.location.href = "mailto:" + MAILTO + "?subject=" + subject + "&body=" + body; }
       catch(err){}
@@ -284,6 +327,7 @@
     }).then(function(res){
       if(res.ok){
         form.reset();
+        syncTopic();
         setStatus("Thanks. Your message is on its way.");
       } else {
         setStatus("Something went wrong. Email " + MAILTO + " instead.", true);

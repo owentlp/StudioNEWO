@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ABOUT · Owen Palmer, industrial designer · STUDIO NEWO</title>
-<meta name="description" content="Studio NEWO. Owen Palmer, industrial designer in Toronto. How the practice works.">
+<meta name="description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: furniture and lighting, custom pieces, and product renders and drawings for brands.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/about.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/about.html">
 <meta property="og:site_name" content="Studio NEWO">
-<meta property="og:title" content="Info · Studio NEWO">
-<meta property="og:description" content="Studio NEWO. Owen Palmer, industrial designer in Toronto. How the practice works.">
+<meta property="og:title" content="About · Studio NEWO">
+<meta property="og:description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: furniture and lighting, custom pieces, and product renders and drawings for brands.">
 <meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Info · Studio NEWO">
-<meta name="twitter:description" content="Studio NEWO. Owen Palmer, industrial designer in Toronto. How the practice works.">
+<meta name="twitter:title" content="About · Studio NEWO">
+<meta name="twitter:description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: furniture and lighting, custom pieces, and product renders and drawings for brands.">
 <meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
@@ -58,7 +58,7 @@
      statement. Now the photo sits beside the caption and bio, and the two
      blocks split the row about evenly, so their heights match. */
   .ab-statement{grid-column:1 / 6;}
-  .ab-who{grid-column:6 / 13; display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:var(--gut); align-items:start;}
+  .ab-who{grid-column:6 / 13; display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto 1fr; column-gap:var(--gut); align-items:start;}
   .ab-who .ab-photo{grid-row:1 / 3; margin-bottom:0;}
   .ab-who .cap, .ab-who .desc{grid-column:2;}
   .ab-who .desc{margin-top:10px;}
@@ -66,16 +66,13 @@
      beside a photo but leaves these blocks stranded well short of their grid
      column. The column is the measure here, so release the cap and let the
      grid do the constraining. */
-  .ab-grid .desc, .principle .desc{max-width:none;}
+  .ab-grid .desc, .principle .desc, .ab-route .desc{max-width:none;}
 
-  /* Principles sit on the same 12 columns, each starting at a different point
-     so the column reads as composed rather than stacked - the same trick the
-     process scatter uses. Spans stay wide enough to hold a readable measure. */
-  .principles{margin-top:clamp(56px,10vh,120px); display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:clamp(40px,7vh,80px); align-items:start;}
-  .principle:nth-child(1){grid-column:1 / 6;}
-  .principle:nth-child(2){grid-column:7 / 12; margin-top:clamp(20px,4vh,52px);}
-  .principle:nth-child(3){grid-column:2 / 7;}
-  .principle:nth-child(4){grid-column:8 / 13; margin-top:clamp(20px,4vh,52px);}
+  /* Principles: one sentence each since 2026-10-26, so they sit two by two on
+     the 12 columns. The old stagger was built for four long paragraphs and left
+     holes once they were short; four across made the justified lines gap. */
+  .principles{margin-top:clamp(56px,10vh,120px); display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:clamp(30px,5vh,46px); align-items:start;}
+  .principle{grid-column:span 6;}
   /* .vh (visually hidden) moved to css/style.css - about and contact both use
      it now for their hidden <h1>. */
   /* red, matching the [NN] marks these headings replaced - the numbers carried
@@ -94,19 +91,31 @@
   .ab-fact .af-m{margin-top:3px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;}
   .ab-fact .af-d{margin-top:5px; color:var(--ink-soft);}
   .ab-fact .cap2{display:block; margin-top:clamp(26px,4vh,38px);}
-  .ab-avail{margin-top:clamp(56px,10vh,120px);}
-  .ab-avail .desc{margin-top:10px; max-width:62ch;}
+  /* ROUTES (2026-10-26): what a visitor can do here, one column each, on the
+     same 4 / 4 / 4 split as the facts below. Replaced the Freelance paragraph,
+     which spoke to one of the three. */
+  .ab-routes{margin-top:clamp(56px,10vh,120px); display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:clamp(30px,5vh,46px); align-items:stretch;}
+  .ab-route{display:flex; flex-direction:column; align-items:flex-start;}
+  .ab-route:nth-child(1){grid-column:1 / 5;}
+  .ab-route:nth-child(2){grid-column:5 / 9;}
+  .ab-route:nth-child(3){grid-column:9 / 13;}
+  .ab-route .desc{margin:10px 0 16px;}
   .ab-cta{margin-top:clamp(30px,5vh,46px); display:flex; flex-wrap:wrap; gap:8px;}
   .ab-cta .inq{margin-top:0;}
+  .ab-route .inq{margin-top:auto;}
+  /* tools: one line in the project pages' material-chip idiom (.hero-materials)
+     instead of a seven-row list; the CV has the detail */
+  .ab-tools{margin-top:clamp(30px,5vh,46px);}
+  .ab-tools p{margin-top:10px; font-size:13px; line-height:1.9; letter-spacing:.1em; text-transform:uppercase;}
+  .ab-tools .sep{margin:0 3px; color:var(--ink-soft); opacity:.5;}
 
   @media (max-width:860px){
-    .ab-fact:nth-child(1),.ab-fact:nth-child(2),.ab-fact:nth-child(3){grid-column:1 / -1;}
+    .ab-fact:nth-child(1),.ab-fact:nth-child(2),.ab-fact:nth-child(3),
+    .ab-route:nth-child(1),.ab-route:nth-child(2),.ab-route:nth-child(3){grid-column:1 / -1;}
     .ab-statement, .ab-who{grid-column:1 / -1;}
     .ab-who{display:block;}
     .ab-who .ab-photo{margin-bottom:14px;}
-    .principles{display:grid; grid-template-columns:1fr; row-gap:clamp(30px,5vh,46px);}
-    .principle:nth-child(1),.principle:nth-child(2),
-    .principle:nth-child(3),.principle:nth-child(4){grid-column:1 / -1; margin-top:0;}
+    .principle{grid-column:1 / -1;}
   }
 </style>
 </head>
@@ -131,22 +140,44 @@
        engines and screen readers, and losing it would be a real regression
        nobody can see. -->
   <h1 class="vh">Studio NEWO</h1>
+  <!-- 2026-10-26 review: the page was about 500 words (4,240px on a phone).
+       Cut to the essentials: who, what you can come here for, how the studio
+       works, the short CV. The full CV stays a download. -->
   <div class="ab-grid">
-    <p class="desc ab-statement">Studio NEWO is an industrial design practice in Toronto, making furniture, lighting, and objects out of raw materials and current technology, built to be opened, repaired, and kept. Working is the minimum. How a product feels, looks, gets made, fixed, and eventually taken apart is the actual goal.</p>
+    <p class="desc ab-statement">Studio NEWO is an industrial design practice in Toronto, making furniture, lighting and objects from raw materials and current technology, built to be opened, repaired and kept. Working is the minimum. How a product feels, gets made, gets fixed and comes apart is the actual goal.</p>
     <div class="ab-who">
       <img class="ab-photo" src="about/owen-palmer.jpg" width="712" height="848" alt="Owen Palmer, industrial designer and founder of Studio NEWO" decoding="async">
       <span class="cap">Owen Palmer, designer</span>
-      <p class="desc">I came to industrial design from two years of mechanical engineering and two years building and installing custom furniture and cabinetry, and I still think like an engineer: solving problems and rendering designs in my head before modelling them. Through Studio NEWO I design, build and sell my own products, and I make studio renders, animations and production drawings from other designers' and brands' CAD.</p>
+      <p class="desc">I came to industrial design from two years of mechanical engineering and two years building custom furniture and cabinetry, and I still think like an engineer, solving problems and rendering designs in my head before modelling them. Through Studio NEWO I design, build and sell my own products, and make renders, animations and drawings for other designers and brands.</p>
+    </div>
+  </div>
+
+  <!-- ROUTES: the three reasons to be here, each with its one next step -->
+  <div class="ab-routes">
+    <div class="ab-route">
+      <span class="cap">Products</span>
+      <p class="desc">Lighting, furniture, audio and appliances, designed and built in house. Ask about price or availability on any of them.</p>
+      <a class="inq" href="index.html">SEE THE PRODUCTS &rarr;</a>
+    </div>
+    <div class="ab-route">
+      <span class="cap">Custom</span>
+      <p class="desc">Any studio product in another size, material or finish, or custom furniture and lighting designed and built to order.</p>
+      <a class="inq" href="contact.html?about=Custom">ASK ABOUT CUSTOM &rarr;</a>
+    </div>
+    <div class="ab-route">
+      <span class="cap">For brands and designers</span>
+      <p class="desc">Product renders, animation, 3D web models and production drawings from your CAD, at fixed prices.</p>
+      <a class="inq" href="solutions.html#services">SERVICES AND PRICES &rarr;</a>
     </div>
   </div>
 
   <!-- the [01]-[04] index numbers were removed by request: the principles are
-       not an ordered list and the titles already separate them, so the numerals
-       were only decoration. The .pn style went with them. -->
+       not an ordered list and the titles already separate them. One sentence
+       each since 2026-10-26; the Materials page carries the lifecycle detail. -->
   <div class="principles">
     <div class="principle">
       <h2>Spatial prototyping</h2>
-      <p class="desc">Design ideation gets resolved in CAD, then moves quickly to a physical prototype where interlocks, tolerances, and structure are finalized in real material.</p>
+      <p class="desc">Ideas are resolved in CAD, then proven quickly in real material, where interlocks, tolerances and structure are settled.</p>
     </div>
     <div class="principle">
       <h2>Constraint-driven form</h2>
@@ -154,35 +185,23 @@
     </div>
     <div class="principle">
       <h2>Pragmatism and value</h2>
-      <p class="desc">Every part and every line of code should earn its place. If it does not improve how the product works, how long it lasts, how it looks, or how it feels, it is unnecessary.</p>
+      <p class="desc">Every part and every line of code should earn its place. If it does not improve the product, it is unnecessary.</p>
     </div>
     <div class="principle">
       <h2>Lifecycle</h2>
-      <p class="desc">Products are designed for their whole life, not just the sale. Materials are chosen for how long the product will last, how it will be used, and their environmental impact, and kept to as few as the product needs. Fasteners and sub-assemblies are chosen so parts can be swapped out, repaired, or replaced.</p>
+      <p class="desc">Products are designed for their whole life, not just the sale. Materials and fasteners are chosen so parts can be repaired or replaced.</p>
     </div>
   </div>
 
-  <!-- FACTS (2026-10-02), from Owen's resume. Clients hire a person: this is
-       the short version of the CV, with the full one as a download. The PDF in
+  <!-- FACTS (2026-10-02), from Owen's resume, cut to the short version on
+       2026-10-26: Capabilities became the one-line Tools list. The PDF in
        about/ has the phone number and personal email removed on purpose. -->
   <div class="ab-facts">
     <div class="ab-fact">
       <span class="cap">Experience</span>
       <ul>
-        <li><span class="af-t">Founder and designer, Studio NEWO</span><span class="af-m">Toronto, 2024 to present</span><span class="af-d">Products designed and built end to end, from concept to working prototype: furniture, lighting, audio. Studio renders, turntables, exploded-view clips, 3D web models and production drawings made in house from SolidWorks. Embedded firmware written in house (C++ on ESP32, LED matrices, mmWave radar).</span></li>
-        <li><span class="af-t">Project assistant, Wood by Design</span><span class="af-m">Peterborough, 2024 to 2026</span><span class="af-d">Led assembly, finishing and on-site installation of custom furniture and cabinetry. Prepared CAD files for CNC cutting and contributed to design decisions.</span></li>
-      </ul>
-    </div>
-    <div class="ab-fact">
-      <span class="cap">Capabilities</span>
-      <ul>
-        <li><span class="af-t">CAD</span><span class="af-d">SolidWorks, Onshape</span></li>
-        <li><span class="af-t">Rendering and animation</span><span class="af-d">Blender: studio stills, turntables, exploded views, 3D web models</span></li>
-        <li><span class="af-t">Drawings</span><span class="af-d">Production drawings, DXF flat patterns, STEP, bills of materials</span></li>
-        <li><span class="af-t">Fabrication</span><span class="af-d">CNC, laser, 3D printing, welding, lathe, mill</span></li>
-        <li><span class="af-t">Electronics and firmware</span><span class="af-d">ESP32, C++ / Arduino</span></li>
-        <li><span class="af-t">Materials</span><span class="af-d">Wood, metal, plastic, foam, leather, vinyl</span></li>
-        <li><span class="af-t">Software and web</span><span class="af-d">Photoshop, Illustrator, HTML / CSS / JS, Three.js, photogrammetry and AR</span></li>
+        <li><span class="af-t">Founder and designer, Studio NEWO</span><span class="af-m">Toronto, 2024 to present</span></li>
+        <li><span class="af-t">Project assistant, Wood by Design</span><span class="af-m">Peterborough, 2024 to 2026</span><span class="af-d">Led assembly, finishing and installation of custom furniture and cabinetry. Prepared CAD files for CNC cutting.</span></li>
       </ul>
     </div>
     <div class="ab-fact">
@@ -192,20 +211,22 @@
         <li><span class="af-t">LOOTS, Design for Disassembly Exhibition</span><span class="af-m">2025</span></li>
         <li><span class="af-t">First place, design-day competition, University of Ottawa</span><span class="af-m">Two years running</span></li>
       </ul>
-      <span class="cap cap2">Education</span>
+    </div>
+    <div class="ab-fact">
+      <span class="cap">Education</span>
       <ul>
         <li><span class="af-t">Industrial Design, OCAD University</span><span class="af-m">Toronto, 2024 to 2027</span></li>
         <li><span class="af-t">Mechanical Engineering, University of Ottawa</span><span class="af-m">2021 to 2023</span></li>
       </ul>
     </div>
   </div>
-  <div class="ab-avail">
-    <span class="cap">Freelance</span>
-    <p class="desc">Studio NEWO takes on freelance work for designers, hardware startups and brands preparing a launch: product renders, animation, launch bundles, drawing packages and CAD cleanup. Fixed prices, one job at a time, a 2 to 3 week turnaround. Clients in Canada and the US.</p>
+  <div class="ab-tools">
+    <span class="cap">Tools</span>
+    <p>SolidWorks&nbsp;<span class="sep">/</span> Onshape&nbsp;<span class="sep">/</span> Blender&nbsp;<span class="sep">/</span> KeyShot&nbsp;<span class="sep">/</span> CNC&nbsp;<span class="sep">/</span> Laser&nbsp;<span class="sep">/</span> 3D&nbsp;printing&nbsp;<span class="sep">/</span> Welding&nbsp;<span class="sep">/</span> Lathe&nbsp;<span class="sep">/</span> Mill&nbsp;<span class="sep">/</span> ESP32&nbsp;<span class="sep">/</span> C++&nbsp;<span class="sep">/</span> Three.js&nbsp;<span class="sep">/</span> AR</p>
   </div>
   <p class="ab-cta">
-    <a class="inq" href="solutions.html#services">WORK WITH THE STUDIO &rarr;</a>
     <a class="inq" href="about/Owen-Palmer-CV.pdf" target="_blank" rel="noopener">CV (PDF) &rarr;</a>
+    <a class="inq" href="contact.html">CONTACT &rarr;</a>
   </p>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
@@ -221,8 +242,8 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=25"></script>
+<script src="js/projects-data.js?v=26"></script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=31"></script>
+<script src="js/menu.js?v=32"></script>
 </body>
 </html>

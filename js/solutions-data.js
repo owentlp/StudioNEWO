@@ -95,7 +95,12 @@ const SERVICES = [
     time: "2 to 3 weeks", from: "100 / sheet" },
   { name: "CAD cleanup and DFM pass",
     what: "Messy or STEP-only parts rebuilt as clean SolidWorks, with draft, walls, bends, fasteners and inserts fixed for manufacture, and a bill of materials. Fixed quote after seeing the files.",
-    time: "Quoted", from: "55 / hour" }
+    time: "Quoted", from: "55 / hour" },
+  /* 2026-10-26 review: custom work had no home on the site except a line on
+     the contact page. No price: quoted per piece. Delete this row to drop it. */
+  { name: "Custom piece",
+    what: "Any studio product in another size, material or finish, or custom furniture and lighting designed and built to order.",
+    time: "By scope", from: "" }
 ];
-const SERVICE_RATES = "Prices are starting points in Canadian dollars; US clients are quoted the same numbers in US dollars. Every job gets a written scope and a fixed price before work starts. Product design, CAD and drawings only: drawings are not engineer-stamped.";
-const SERVICE_TERMS = "50% up front, the balance on delivery. Two rounds of revisions are included. Final files are released once the last invoice is paid. One job at a time, so each one gets full attention.";
+const SERVICE_RATES = "Prices are starting points in Canadian dollars; US clients are quoted the same numbers in US dollars. Every job gets a written scope and a fixed price before work starts. Drawings are not engineer-stamped.";
+const SERVICE_TERMS = "50% up front, the balance on delivery. Two rounds of revisions included. Final files are released once the last invoice is paid. One job at a time, so each gets full attention.";
