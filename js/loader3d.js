@@ -67,6 +67,85 @@
   var MIN_TURNS = 1;     // always play at least one full turn, even on an instant load
   var MAX_TURNS = 8;     // safety cap in case body.ready somehow never arrives
 
+  /* ================= QUIET WINDOWS (2026-10-26) =================
+     Owen: "the logo animation is choppy, especially on the first load of a
+     project with a 3D model". The tumble runs on a worker, so main-thread work
+     cannot stall it, but the GPU is shared by every canvas on the page. The
+     model's first build (about 30 shader programs linked, 20-odd texture
+     uploads, the environment map) and the page's own first paint each block
+     the GPU for tens to hundreds of milliseconds, and whatever frame of the
+     tumble was due in that time is late. Mid-turn, that is the judder.
+
+     None of that work gets cheaper, so it is moved to where it cannot be seen:
+
+       NEWO_LOADER.quiet(function(done){ ...heavy work...; done(); })
+
+     waits until the mark is resting on a settled pose (it finishes the turn it
+     is in, never cuts one short), runs the work, and keeps the mark still until
+     done() is called. Then the tumble carries on, or the loader releases if the
+     page is ready by then. If no 3D mark is running (flat mark, revisit, reduced
+     motion, already released) the work simply runs at once. QUIET_MAX_MS caps
+     each window so a done() that never comes cannot freeze the mark. */
+  var QUIET_MAX_MS = 3000;
+  var Q = {
+    live: false,       // a 3D mark is running and may be mid-turn
+    resting: false,    // the mark has reported it is at rest for the current hold
+    count: 0,          // open quiet windows
+    queue: [],         // work waiting for the mark to come to rest
+    send: null,        // tells the animating path the hold is on (true) or off (false)
+    restingNow: null   // optional: true if the path knows it is at rest right now
+  };
+  function qRun(fn){
+    var finished = false;
+    var cap = setTimeout(finish, QUIET_MAX_MS);
+    function finish(){
+      if(finished) return; finished = true; clearTimeout(cap);
+      if(Q.count > 0 && --Q.count === 0){ Q.resting = false; if(Q.send) Q.send(false); }
+    }
+    try { fn(finish); } catch(e){ finish(); }
+  }
+  function qGrant(){ Q.resting = true; var list = Q.queue; Q.queue = []; list.forEach(qRun); }
+  // the 3D mark has finished (released, aborted or failed): nothing left to protect
+  function qEnd(){
+    Q.live = false; Q.send = null; Q.restingNow = null;
+    var list = Q.queue; Q.queue = [];
+    list.forEach(function(fn){ try { fn(function(){}); } catch(e){} });
+    Q.count = 0; Q.resting = false;
+  }
+  /* Calls fn once the page is producing frames steadily again: three frames in
+     a row under 25ms apart, after at least minMs, and never later than maxMs.
+     A frame that is still waiting on the GPU (a first paint, texture uploads)
+     holds back the next requestAnimationFrame, so a steady run means that work
+     has drained. Used to decide when a quiet window may close. */
+  function whenSmooth(fn, minMs, maxMs){
+    var t0 = performance.now(), last = t0, run = 0, fired = false;
+    function fire(){ if(fired) return; fired = true; fn(); }
+    setTimeout(fire, maxMs);
+    (function tick(now){
+      if(fired) return;
+      run = (now - last < 25) ? run + 1 : 0;
+      last = now;
+      if(run >= 3 && now - t0 >= minMs) return fire();
+      requestAnimationFrame(tick);
+    })(t0);
+  }
+  window.NEWO_LOADER = {
+    whenSmooth: whenSmooth,
+    quiet: function(fn){
+      if(!Q.live){ try { fn(function(){}); } catch(e){} return; }
+      Q.count++;
+      if(Q.resting){ qRun(fn); return; }
+      Q.queue.push(fn);
+      if(Q.count === 1 && Q.send) Q.send(true);
+      if(!Q.send || (Q.restingNow && Q.restingNow())){ qGrant(); return; }
+      // the longest wait is one turn plus a frame or two; never more than that
+      setTimeout(function(){ if(Q.queue.length) qGrant(); }, TURN_MS + 400);
+    }
+  };
+
+  // the head's "hide the flat mark" rule (index.html / project.html) is only a
+  // first-paint guard; from here on this file decides (see showFlat)
+  (function(){ var st = document.getElementById("ld-3d-first"); if(st) st.remove(); })();
   function hasWebGL(){
     try{
       var c = document.createElement("canvas");
@@ -145,6 +224,8 @@
     }, PIN_CAP_MS);
   }
   function unpin(){
+    qEnd();
+    if(!started3d) showFlat();
     if(!pinned) return;
     pinned = false;
     document.body.classList.remove("ld-pinned");
@@ -167,12 +248,16 @@
        gives up, leaving the canvas behind for good. A few cheap re-checks
        cover every ordering, and the first one lands after the loader's own
        650ms fade so nothing blanks early. */
-    var tries = 0;
-    var sweep = setInterval(function(){
-      var c = loaderEl.querySelector("canvas.ld-3d");
-      if(c){ try { c.remove(); } catch(e){} clearInterval(sweep); }
-      else if(++tries > 8) clearInterval(sweep);   // ~3.6s, then stop looking
-    }, 450);
+    /* 2026-10-26: the 3D mark now fades out WITH the loader (no hand-back to
+       the flat mark), so the first look is after the 650ms fade, not during it. */
+    var tries = 0, sweep = null;
+    setTimeout(function(){
+      sweep = setInterval(function(){
+        var c = loaderEl.querySelector("canvas.ld-3d");
+        if(c){ try { c.remove(); } catch(e){} clearInterval(sweep); }
+        else if(++tries > 8) clearInterval(sweep);   // ~3.6s more, then stop looking
+      }, 450);
+    }, 400);
   }
   /* ================= WHEN THE ANIMATION IS ALLOWED TO PLAY =================
      Owen's rule, 2026-09-16: the tumble is a LOADING animation, so it should
@@ -261,7 +346,7 @@
     canvas.style.transform = "translate(-50%, -50%)";
 
     var w;
-    try { w = new Worker(BASE + "loader3d.worker.js?v=5"); }
+    try { w = new Worker(BASE + "loader3d.worker.js?v=6"); }
     catch(e){ canvas.remove(); return false; }
 
     var handedOff;
@@ -273,12 +358,20 @@
       aborted = true;
       try { w.terminate(); } catch(e){}
       try { canvas.remove(); } catch(e){}
-      flatLogo.style.display = "";   // make sure the 2D mark is what fades out
+      showFlat();   // make sure the 2D mark is what fades out
     };
+    /* Quiet windows: before the first frame the flat SVG is showing, which is
+       already still, so a hold is granted at once and the worker is told with
+       its init message (or by this message, which it reads after init). After
+       that only the worker knows whether it is mid-turn, so it answers "held". */
+    Q.send = function(on){ try { w.postMessage({ type: on ? "hold" : "unhold" }); } catch(e){} };
+    Q.restingNow = function(){ return !started3d; };
     w.onmessage = function(ev){
       var d = ev.data || {};
       if(aborted) return;
-      if(d.type === "firstFrame"){
+      if(d.type === "held"){
+        if(Q.count > 0 && !Q.resting) qGrant();
+      } else if(d.type === "firstFrame"){
         if(d.overscan) OVERSCAN_EL = d.overscan;
         started3d = true;
         if(pinCap){ clearTimeout(pinCap); pinCap = null; }
@@ -288,6 +381,7 @@
         // only hide that once the fade is done - same handoff as the fallback
         void canvas.offsetWidth;
         canvas.style.opacity = "1";
+        clearTimeout(flatLate);
         setTimeout(function(){
           flatLogo.style.display = "none";
           // ONLY NOW may the tumble start. The worker holds its settled first
@@ -297,29 +391,23 @@
         }, 260);
       } else if(d.type === "released"){
         settled = true;
-        /* Hand BACK to the 2D mark before the loader fades. The settled pose
-           and the flat SVG are the same silhouette, so restoring the flat mark
-           under the canvas and fading the canvas out is invisible - and it
-           means the loader's own fade-out always shows the crisp 2D logo, with
-           no live WebGL involved. Owen's spec: 2D -> 3D turn(s) -> rest as the
-           2D logo -> fade out. */
-        flatLogo.style.display = "";
-        void canvas.offsetWidth;
-        canvas.style.opacity = "0";
+        /* 2026-10-26 (Owen: the swap back to the 2D logo flickered): no
+           hand-back. The 3D mark is resting front-on, and the loader fades out
+           with it as it is. The canvas keeps its last frame, so nothing is
+           drawn during the fade. */
+        unpin();
+        // The canvas is an OffscreenCanvas holding a live WebGL context, and
+        // browsers allow only a handful of those per page - on KART the page
+        // goes on to want one for model-viewer. Drop it once the fade is done.
         setTimeout(function(){
-          unpin();
-          // The canvas is an OffscreenCanvas holding a live WebGL context, and
-          // browsers allow only a handful of those per page - on KART the page
-          // goes on to want one for model-viewer. Drop it as soon as the 2D
-          // mark is back.
           try { w.terminate(); } catch(e){}
           try { canvas.remove(); } catch(e){}
-        }, 240);
+        }, 900);
       } else if(d.type === "failed"){
         // worker could not do it: clean up and let the main-thread path try
         try { w.terminate(); } catch(e){}
         canvas.remove();
-        flatLogo.style.display = "";
+        showFlat();
         if(!started3d){ startMainThread(); }
         else { unpin(); }
       }
@@ -327,7 +415,7 @@
     w.onerror = function(){
       try { w.terminate(); } catch(e){}
       canvas.remove();
-      flatLogo.style.display = "";
+      showFlat();
       if(!started3d) startMainThread(); else unpin();
     };
 
@@ -348,6 +436,7 @@
       canvas: handedOff,
       dpr: Math.min(window.devicePixelRatio || 1, 1.5),
       cssSize: cssSize,
+      hold: Q.count > 0,
       coreUrl: BASE + "loader3d-core.js?v=2",
       meshUrl: BASE + "loader3d-mesh.js?v=1"
     }, [handedOff]);
@@ -366,7 +455,20 @@
     return true;
   }
 
+  /* 2026-10-26 (Owen: no flicker, no 2D version): on a first view the flat
+     mark is kept hidden while the 3D one starts (about a tenth of a second),
+     so the 3D logo is the first thing shown rather than a swap from 2D. If it
+     is not up within FLAT_LATE_MS, the flat mark fades in after all and the
+     3D one dissolves over it when it arrives, as before. Every way out of the
+     3D path calls showFlat(), so the loader is never left without a logo. */
+  var FLAT_LATE_MS = 600, flatLate = null;
+  function showFlat(){
+    clearTimeout(flatLate);
+    flatLogo.style.display = "";
+    flatLogo.style.opacity = "";
+  }
   function kickoff(){
+    Q.live = true;
     if(tryWorker()){
       mark.classList.add("has3d");
     } else {
@@ -377,7 +479,12 @@
      here and the hold above runs it if - and only if - the page is still
      loading two seconds in, so a cached page never pays for the mesh,
      a worker or a WebGL context at all. */
-  if(pinned) kickoff();
+  if(pinned){
+    flatLogo.style.transition = "opacity .22s ease";
+    flatLogo.style.opacity = "0";
+    flatLate = setTimeout(showFlat, FLAT_LATE_MS);
+    kickoff();
+  }
   else deferredKickoff = kickoff;
 
   // ================= MAIN-THREAD FALLBACK =================
@@ -389,6 +496,11 @@
      and that resolves against the DOCUMENT, not against this file. BASE is
      this script's own directory (/js/), the same value the worker is given. */
   var CORE = null;
+  // quiet windows on this path: the frame loop below reads Q.count directly.
+  // Until it is running the flat mark is showing, which is already at rest.
+  var fbResting = function(){ return true; };
+  Q.send = function(){};
+  Q.restingNow = function(){ return fbResting(); };
   loadScript(BASE + "loader3d-core.js?v=2", function(){
     loadScript(BASE + "loader3d-mesh.js?v=1", function(){
       if(!pageStillLoading() || capFired){ unpin(); return; }   // the page (or the cap) beat us to it
@@ -437,6 +549,7 @@
       canvas.style.width = px + "px";
       canvas.style.height = px + "px";
       renderer.setSize(Math.max(1, Math.round(px * DPR)));
+      if(tumble) renderer.render(tumble.q);   // resizing clears the canvas
     }
 
     resize();
@@ -483,6 +596,7 @@
     // flush that gives opacity:0 a chance to exist before we set it to 1.
     void canvas.offsetWidth;
     canvas.style.opacity = "1";
+    clearTimeout(flatLate);
     // same handshake as the worker path: hold the settled pose until the flat
     // mark has finished fading out, so motion never overlaps the cross-fade.
     var begun = false;
@@ -492,12 +606,14 @@
     }, 260);
 
     var lastTs = null, rafId = null, stopped = false;
+    fbResting = function(){ return phase === "settle" || released; };
     function frame(ts){
       if(stopped) return;
       if(lastTs === null) lastTs = ts;
       var dt = Math.min(ts - lastTs, 50);   // ms, clamped so a stalled tab can't jump the animation
       lastTs = ts;
-      if(!begun) dt = 0;                    // rendering, but not yet animating
+      if(!begun) dt = 0;                    // holding the first pose, not yet animating
+      var moved = false;
 
       if(!released){
         phaseElapsed += dt;
@@ -505,6 +621,7 @@
           var seg = turnCount % 4;
           var t = Math.min(phaseElapsed / TURN_MS, 1);
           applyTurn(seg, easeInOutCubic(t));
+          moved = true;
           if(phaseElapsed >= TURN_MS){
             // land EXACTLY on the settled quaternion and make it the new base,
             // so repeated turns can't accumulate float drift off the symmetry
@@ -517,15 +634,14 @@
         } else {   // "settle" - the only phase the loader is ever allowed to release from
           if(phaseElapsed >= SETTLE_MS){
             var pageReady = document.body.classList.contains("ready");
-            if(turnCount >= MIN_TURNS && (pageReady || turnCount >= MAX_TURNS)){
+            if(Q.count > 0){
+              // resting through a quiet window (see NEWO_LOADER.quiet): no new
+              // turn and no release until it closes
+            } else if(turnCount >= MIN_TURNS && (pageReady || turnCount >= MAX_TURNS)){
               released = true;
-              // same hand-back as the worker path: restore the flat mark, fade
-              // the canvas out over it, THEN release the loader - so the fade
-              // always shows the 2D logo at rest, never live WebGL.
-              flatLogo.style.display = "";
-              void canvas.offsetWidth;
-              canvas.style.opacity = "0";
-              setTimeout(unpin, 240);
+              // no hand-back to the flat mark (see the worker path): the loader
+              // fades out with the 3D mark resting front-on
+              unpin();
             } else {
               phase = "turn";
               phaseElapsed = 0;
@@ -534,7 +650,11 @@
         }
       }
 
-      renderer.render(tumble.q);
+      // the mark is at rest: let any work waiting for a quiet window run
+      if(Q.queue.length && !Q.resting && fbResting()) qGrant();
+      // a still pose is the same picture, and the canvas keeps its last frame,
+      // so only draw when it moved (same rule as the worker)
+      if(moved) renderer.render(tumble.q);
       rafId = requestAnimationFrame(frame);
     }
     rafId = requestAnimationFrame(frame);
@@ -549,7 +669,7 @@
           if(rafId) cancelAnimationFrame(rafId);
           renderer.dispose();
           try { canvas.remove(); } catch(e){}
-        }, 700);
+        }, 900);
       } else {
         requestAnimationFrame(waitForReleased);
       }

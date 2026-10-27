@@ -72,6 +72,18 @@
   }
   pre("js/loader3d-core.js?v=2", "script");
   pre("js/loader3d-mesh.js?v=1", "script");
+  /* 2026-10-26: a first view will show the 3D logo, so keep the flat one
+     hidden from the very first paint (it used to show for a moment before
+     js/loader3d.js arrived, then swap). loader3d.js removes this at once and
+     takes over; if it never runs, the flat mark fades in at 1.2s anyway. */
+  try {
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if(navigator.connection && navigator.connection.saveData) return;
+    var st = document.createElement("style");
+    st.id = "ld-3d-first";
+    st.textContent = ".ld-logo{opacity:0;animation:ldFlatLate .22s ease 1.2s forwards}@keyframes ldFlatLate{to{opacity:1}}";
+    document.head.appendChild(st);
+  } catch(e){}
 })();
 </script>
 <!-- model-viewer is fetched LATE now (on scroll-approach, see "DEFERRED MODEL
@@ -121,7 +133,7 @@
   </div>
 </div>
 <script src="js/sky.js?v=7"></script>
-<script src="js/loader3d.js?v=16"></script>
+<script src="js/loader3d.js?v=17"></script>
 
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -166,7 +178,7 @@
    deploy), the loading screen never cleared. This one lives in the page. */
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=32"></script>
+<script src="js/menu.js?v=33"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----
@@ -1895,11 +1907,10 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
        after he has already scrolled to it, or have the page seize up when he
        starts scrolling straight away. The logo animation runs in a worker now
        (js/loader3d.worker.js), so the model's main-thread work no longer
-       stutters it. armModel() starts the model at once and pins it inside the
-       viewport (.mv-warm) so model-viewer will actually draw it, shaders and
-       all, under the loader. This waits for model-viewer to report the model
-       drawn (model-visibility), at most 9s, then the reveal goes ahead with or
-       without it. (Not .mv-framed: frameModel() sets that even on an early
+       stutters it. armModel() starts the model at once. This waits for it to
+       be prepared (see gateFirstDraw: compiled and uploaded, not yet drawn),
+       at most 9s, then the reveal goes ahead with or without it.
+       (Not .mv-framed: frameModel() sets that even on an early
        call before the model exists.) */
     var stageEl = content.querySelector(".cad-stage"), mvWait = document.getElementById("mv");
     if(stageEl && mvWait){
@@ -1907,10 +1918,12 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         var done = false;
         function ok(){ if(done) return; done = true; setTimeout(res, 250); }
         setTimeout(ok, 9000);
-        mvWait.addEventListener("model-visibility", function(e){ if(e.detail && e.detail.visible) ok(); });
+        // shaders compiled and textures up (gateFirstDraw); the draw itself
+        // waits until the loader has gone
+        mvWait.addEventListener("newo-model-ready", ok, { once:true });
         mvWait.addEventListener("error", ok, { once:true });
-        // backstop if the event never comes: loaded, plus time for the first draw
-        mvWait.addEventListener("load", function(){ setTimeout(ok, 1500); }, { once:true });
+        // backstop if the event never comes: loaded, plus time to prepare
+        mvWait.addEventListener("load", function(){ setTimeout(ok, 3000); }, { once:true });
       }));
     }
     /* (history) The 3D MODEL WAS NOT WAITED ON from 2026-08-29. It used to be the
@@ -1977,13 +1990,23 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
       later(function(){ warm(far, 20000); });
       return warm(near, 6000);
     }).then(function(){
-      // put the model back in its slot (see .mv-warm), then two frames of
-      // settle so the first full-page layout/paint happens UNDER the loader,
-      // not during its fade
-      if(stageEl){ stageEl.classList.remove("mv-warm"); if(modelGate) modelGate.refresh(); }
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){ window.__revealPage(); });
-      });
+      /* two frames of settle so the first full-page layout/paint happens
+         UNDER the loader, not during its fade, and inside a quiet window: that
+         paint (every image near the top going up to the GPU at once) is a GPU
+         stall, so it waits for the logo's next rest instead of landing
+         mid-turn. The logo is resting there anyway before it hands over. */
+      function show(done){
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            window.__revealPage();
+            // the logo may move again once that first paint has drained
+            if(window.NEWO_LOADER) window.NEWO_LOADER.whenSmooth(done, 150, 800);
+            else done();
+          });
+        });
+      }
+      if(window.NEWO_LOADER) window.NEWO_LOADER.quiet(show);
+      else show(function(){});
     });
   })();
 
@@ -2169,8 +2192,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
     var box = document.querySelector(".cad-stage");
     if(!box) return;
     var onScreen = false, holds = 0;
-    // .mv-warm = pinned on screen under the loader (armModel), so it is never offscreen then
-    function apply(){ box.classList.toggle("mv-offscreen", !onScreen && holds === 0 && !box.classList.contains("mv-warm")); }
+    function apply(){ box.classList.toggle("mv-offscreen", !onScreen && holds === 0); }
     apply();
     new IntersectionObserver(function(entries){
       onScreen = entries[0].isIntersecting; apply();
@@ -2208,6 +2230,145 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
      guarantee for the case where idle never comes (a busy tab, or a browser
      without requestIdleCallback that also beat the timeout) - whichever fires
      first wins, and `fired` makes sure it happens exactly once. */
+  /* ---------- THE MODEL'S FIRST DRAW (2026-10-26) ----------
+     Owen: the logo tumble was choppy on a project's first load. The tumble
+     runs on its own thread, but every canvas shares the GPU, and model-viewer's
+     first draw links about 30 shader programs in one blocking step, then uploads
+     every texture. That landed in the middle of a turn.
+     So model-viewer is not allowed to draw this model until:
+       1. its shaders are compiled with three.js compileAsync, which uses the
+          browser's background compile (KHR_parallel_shader_compile) where it
+          exists, so the GPU is not blocked while the logo turns,
+       2. its textures are uploaded, one per frame (small enough to hide), and
+       3. the loading screen has faded out.
+     Then the first draw is cheap, and it happens after the logo has gone.
+     "newo-model-ready" on the element marks step 2 (holdLoader waits for it).
+     This reaches into model-viewer's internals (its renderer, found by symbol
+     name). If a model-viewer update moves them, it does nothing and the model
+     draws the old way, with model-visibility standing in for the ready event. */
+  function gateFirstDraw(mvEl){
+    if(!mvEl || gateFirstDraw.done) return;
+    gateFirstDraw.done = true;
+    function ready(){ try { mvEl.dispatchEvent(new CustomEvent("newo-model-ready")); } catch(e){} }
+    function fallback(){
+      mvEl.addEventListener("model-visibility", function(e){ if(e.detail && e.detail.visible) ready(); });
+    }
+    function sym(o, name){
+      for(var p = o; p; p = Object.getPrototypeOf(p)){
+        var list = Object.getOwnPropertySymbols(p);
+        for(var i = 0; i < list.length; i++) if(list[i].description === name) return list[i];
+      }
+      return null;
+    }
+    var R, scene, three;
+    try {
+      R = mvEl[sym(mvEl, "renderer")];
+      scene = mvEl[sym(mvEl, "scene")];
+      three = R && R.threeRenderer;
+    } catch(e){}
+    if(!R || !scene || !three || typeof R.shouldRender !== "function" ||
+       typeof three.compileAsync !== "function" || typeof three.initTexture !== "function"){
+      return fallback();
+    }
+
+    var state = 0;           // 0 waiting for the model, 1 preparing, 2 prepared
+    var goneAt = 0;          // when the loading screen was first seen gone
+    function loaderGone(){
+      var b = document.body.classList;
+      if(!b.contains("ready") || b.contains("ld-pinned")){ goneAt = 0; return false; }
+      if(!goneAt) goneAt = performance.now();
+      return performance.now() - goneAt > 700;   // its fade is 650ms
+    }
+    function prepare(){
+      if(state !== 0 || !mvEl.loaded) return;
+      state = 1;
+      var tm = three.toneMapping, getRT = three.getRenderTarget;
+      var p, jobs = [];
+      try {
+        // the same tone mapping model-viewer renders with, so the programs match
+        three.toneMapping = scene.toneMapping;
+        jobs.push(three.compileAsync(scene, scene.camera));
+        /* The frosted glass (transmission) draws the scene a second time into
+           an offscreen target, in linear colour with no tone mapping, and the
+           glass's back face on its own. Those are different shader programs,
+           and were the bulk of the first-draw stall. three.js picks the
+           program from getRenderTarget(), so for this compile it is told a
+           target is bound (nothing is actually bound or drawn). */
+        var backs = [];
+        scene.traverse(function(o){
+          var m = o.material;
+          if(m && !Array.isArray(m) && m.transmission > 0 && m.side === 2) backs.push(m);
+        });
+        if(backs.length){
+          three.getRenderTarget = function(){ return { isXRRenderTarget: false, texture: {} }; };
+          jobs.push(three.compileAsync(scene, scene.camera));
+          backs.forEach(function(m){ m.side = 1; m.needsUpdate = true; });
+          jobs.push(three.compileAsync(scene, scene.camera));
+          backs.forEach(function(m){ m.side = 2; m.needsUpdate = true; });
+        }
+      } catch(e){}
+      three.getRenderTarget = getRT;
+      three.toneMapping = tm;
+      p = Promise.all(jobs);
+      /* No background compile in this browser (no KHR_parallel_shader_compile):
+         the link would block at the first draw, after the loader, maybe
+         mid-scroll. Force it now instead, while the logo rests (quiet window). */
+      var gl = null, parallel = false;
+      try { gl = three.getContext(); parallel = !!gl.getExtension("KHR_parallel_shader_compile"); } catch(e){}
+      if(!parallel && gl){
+        p = p.catch(function(){}).then(function(){
+          return new Promise(function(res){
+            function link(done){
+              try {
+                (three.info.programs || []).forEach(function(pr){
+                  if(pr && pr.program) gl.getProgramParameter(pr.program, gl.LINK_STATUS);
+                });
+              } catch(e){}
+              res();
+              if(window.NEWO_LOADER) window.NEWO_LOADER.whenSmooth(done, 0, 400); else done();
+            }
+            if(window.NEWO_LOADER) window.NEWO_LOADER.quiet(link); else link(function(){});
+          });
+        });
+      }
+      p.catch(function(){}).then(function(){
+        var tex = [], seen = new Set();
+        scene.traverse(function(o){
+          var mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+          mats.forEach(function(m){
+            for(var k in m){
+              var v = m[k];
+              if(v && v.isTexture && !seen.has(v)){ seen.add(v); tex.push(v); }
+            }
+          });
+        });
+        (function upload(){
+          if(tex.length){
+            try { three.initTexture(tex.shift()); } catch(e){}
+            return requestAnimationFrame(upload);
+          }
+          state = 2;
+          ready();
+          try { scene.queueRender(); } catch(e){}
+        })();
+      });
+    }
+    var shouldRender = R.shouldRender;
+    R.shouldRender = function(s){
+      if(s === scene){
+        if(state === 0) prepare();
+        if(state !== 2 || !loaderGone()) return false;
+      }
+      return shouldRender.apply(this, arguments);
+    };
+    mvEl.addEventListener("load", prepare);
+    // nothing asks for a frame once the loader has gone, so nudge one
+    (function nudge(){
+      if(state === 2 && loaderGone()){ try { scene.queueRender(); } catch(e){} return; }
+      setTimeout(nudge, 100);
+    })();
+  }
+
   (function armModel(){
     if(!loadModel) return;
     var box = document.querySelector(".cad-stage"), fired = false;
@@ -2237,18 +2398,15 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         }, { rootMargin: "150% 0px" }).observe(box);
       } else if(!box){ go(); }
     }
-    /* 2026-10-05: no longer waits for body.ready. The model is built under
-       the loading screen (see holdLoader). While it builds, .mv-warm pins it
-       inside the viewport, behind the loader and the still-hidden page:
-       model-viewer only draws an element that is on screen, and the first
-       draw is where the expensive shader compile happens. Same size, so
-       nothing re-frames when it goes back to its slot at the reveal. */
-    if(box && !document.body.classList.contains("ready")){
-      box.classList.add("mv-warm");
-      // never leave it pinned: the reveal removes it, and so does this
-      var unpin = setInterval(function(){
-        if(document.body.classList.contains("ready")){ box.classList.remove("mv-warm"); if(modelGate) modelGate.refresh(); clearInterval(unpin); }
-      }, 200);
+    /* 2026-10-26: the model is fetched, decoded and its shaders compiled
+       under the loading screen, but it is not DRAWN until the loader has gone
+       (gateFirstDraw). While the page loads, the logo is the only thing the GPU
+       draws. (The old .mv-warm pin, which forced a first draw behind the
+       loader, is gone: that draw was what stalled the logo's turn.) */
+    if(window.customElements && customElements.whenDefined){
+      customElements.whenDefined("model-viewer").then(function(){
+        gateFirstDraw(document.getElementById("mv"));
+      });
     }
     go();
   })();

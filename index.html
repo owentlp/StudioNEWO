@@ -60,6 +60,18 @@
   }
   pre("js/loader3d-core.js?v=2", "script");
   pre("js/loader3d-mesh.js?v=1", "script");
+  /* 2026-10-26: a first view will show the 3D logo, so keep the flat one
+     hidden from the very first paint (it used to show for a moment before
+     js/loader3d.js arrived, then swap). loader3d.js removes this at once and
+     takes over; if it never runs, the flat mark fades in at 1.2s anyway. */
+  try {
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if(navigator.connection && navigator.connection.saveData) return;
+    var st = document.createElement("style");
+    st.id = "ld-3d-first";
+    st.textContent = ".ld-logo{opacity:0;animation:ldFlatLate .22s ease 1.2s forwards}@keyframes ldFlatLate{to{opacity:1}}";
+    document.head.appendChild(st);
+  } catch(e){}
 })();
 </script>
 
@@ -410,7 +422,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=16"></script>
+<script src="js/loader3d.js?v=17"></script>
 
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
@@ -457,7 +469,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=5"></script>
 <script src="js/image-sizes.js?v=3"></script>
-<script src="js/menu.js?v=32"></script>
+<script src="js/menu.js?v=33"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is

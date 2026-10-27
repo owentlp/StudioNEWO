@@ -126,12 +126,12 @@
       "js/projects-data.js?v=26",
       "js/image-sizes.js?v=3",
       "js/main.js?v=5",
-      "js/menu.js?v=32",
+      "js/menu.js?v=33",
       "js/sky.js?v=7",
-      "js/loader3d.js?v=16",
+      "js/loader3d.js?v=17",
       "js/loader3d-core.js?v=2",
       "js/loader3d-mesh.js?v=1",
-      "js/loader3d.worker.js?v=5"
+      "js/loader3d.worker.js?v=6"
     ];
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
