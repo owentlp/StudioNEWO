@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=61">
+<link rel="stylesheet" href="css/style.css?v=62">
 <style>
   /* contact form: same editorial grammar as the rest of the site, no boxes,
      thin underline fields, tiny OCR-B labels, one red action. */
@@ -47,10 +47,11 @@
   .cfield textarea{resize:vertical; min-height:96px; line-height:1.5;}
   .cfield input:focus, .cfield textarea:focus{outline:0; border-color:var(--red);}
   .cform-hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
+  /* the site's one button style: white on red, 12px, .16em (was 10px / .2em) */
   .cform button{
-    justify-self:start; font-family:var(--body); font-size:10px; letter-spacing:.2em;
-    text-transform:uppercase; color:var(--paper); background:var(--red); border:0;
-    padding:10px 18px; cursor:pointer; transition:opacity .18s ease;
+    justify-self:start; font-family:var(--body); font-size:12px; letter-spacing:.16em;
+    text-transform:uppercase; color:#fff; background:var(--red); border:0;
+    padding:8px 14px; cursor:pointer; transition:opacity .18s ease;
   }
   .cform button:hover{opacity:.85;}
   .cform button:disabled{opacity:.5; cursor:default;}
@@ -88,6 +89,16 @@
   .ctopic input:checked + span{background:var(--ink);}
   .ctopic input:focus-visible + span{outline:2px solid var(--ink); outline-offset:2px;}
   .cfield textarea::placeholder{color:var(--ink-soft); opacity:.7;}
+  /* IMAGES (2026-10-27): optional sketches, photos or references. Thumbnails
+     in a row under the button, each removable. */
+  .cfiles-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px;}
+  .cfiles-note{font-size:10px; letter-spacing:.06em; color:var(--ink-soft);}
+  .cfiles input[type=file]{position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;}
+  .cf-thumbs{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px;}
+  .cf-thumbs:empty{display:none;}
+  .cf-thumbs li{position:relative; width:64px; height:64px; background:rgba(20,20,20,.06);}
+  .cf-thumbs img{width:100%; height:100%; object-fit:cover; display:block;}
+  .cform .cf-thumbs button{position:absolute; top:0; right:0; padding:0; width:20px; height:20px; font-size:12px; letter-spacing:0; line-height:20px; text-align:center;}
   .cprivacy{max-width:70ch; margin-top:clamp(50px,9vh,90px); font-size:12px; line-height:1.5; letter-spacing:.02em; opacity:.75;}
 </style>
 </head>
@@ -136,6 +147,15 @@
       <label for="cf-message">Message</label>
       <textarea id="cf-message" name="message" required placeholder="What you are making, your timeline and a rough budget."></textarea>
     </div>
+    <div class="cfield cfiles">
+      <label for="cf-files">Images (optional)</label>
+      <input id="cf-files" type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true">
+      <div class="cfiles-row">
+        <button type="button" id="cf-add">Add images</button>
+        <span class="cfiles-note" id="cf-files-note">Up to 5. Sketches, photos, references.</span>
+      </div>
+      <ul class="cf-thumbs" id="cf-thumbs"></ul>
+    </div>
     <!-- shown only when the visitor arrived from a product's INQUIRE button
          (contact.html?about=KART): one tick to hear when it can be bought -->
     <label class="cnotify" id="cf-notify-wrap" hidden>
@@ -181,7 +201,7 @@
 
 <script src="js/projects-data.js?v=26"></script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=33"></script>
+<script src="js/menu.js?v=34"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening
@@ -288,6 +308,64 @@
   form.addEventListener("change", function(e){ if(e.target.name === "topic") syncTopic(); });
   syncTopic();
 
+  /* IMAGES. Picked files are shrunk in the browser (longest side 2000px,
+     JPEG) so a phone photo goes up as about half a megabyte, not ten, then
+     sent with the message as "attachment" fields. Formspree only accepts
+     files on its paid plans: if it turns them down, the message is sent again
+     without them and the visitor is told to email the images instead, so the
+     enquiry itself is never lost. */
+  var MAX_FILES = 5, MAX_SIDE = 2000;
+  var files = [];   // { name, blob, url }
+  var fileIn = document.getElementById("cf-files");
+  var thumbs = document.getElementById("cf-thumbs");
+  var addBtn = document.getElementById("cf-add");
+  var noteEl = document.getElementById("cf-files-note");
+  var NOTE = noteEl.textContent;
+  function shrink(file){
+    return new Promise(function(resolve){
+      if(!/^image\/(jpeg|png|webp)$/.test(file.type)){ resolve(file); return; }   // HEIC, GIF, SVG: as they are
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onload = function(){
+        var k = Math.min(1, MAX_SIDE / Math.max(im.naturalWidth, im.naturalHeight));
+        if(k === 1 && file.size < 1.5e6){ URL.revokeObjectURL(url); resolve(file); return; }
+        var c = document.createElement("canvas");
+        c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+        var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function(b){ resolve(b || file); }, "image/jpeg", 0.85);
+      };
+      im.onerror = function(){ URL.revokeObjectURL(url); resolve(file); };
+      im.src = url;
+    });
+  }
+  function drawThumbs(){
+    thumbs.innerHTML = "";
+    files.forEach(function(f, i){
+      var li = document.createElement("li");
+      var im = document.createElement("img"); im.src = f.url; im.alt = f.name;
+      var x = document.createElement("button"); x.type = "button"; x.textContent = "\u00d7";
+      x.setAttribute("aria-label", "Remove " + f.name);
+      x.addEventListener("click", function(){ URL.revokeObjectURL(f.url); files.splice(i, 1); drawThumbs(); });
+      li.appendChild(im); li.appendChild(x); thumbs.appendChild(li);
+    });
+    addBtn.disabled = files.length >= MAX_FILES;
+    noteEl.textContent = files.length ? files.length + " of " + MAX_FILES + " added." : NOTE;
+  }
+  addBtn.addEventListener("click", function(){ fileIn.click(); });
+  fileIn.addEventListener("change", function(){
+    var picked = Array.prototype.slice.call(fileIn.files || []).filter(function(f){ return /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name); });
+    fileIn.value = "";
+    picked = picked.slice(0, MAX_FILES - files.length);
+    Promise.all(picked.map(shrink)).then(function(blobs){
+      blobs.forEach(function(b, i){
+        var name = picked[i].name.replace(/\.[^.]+$/, "") + (b.type === "image/jpeg" ? ".jpg" : (picked[i].name.match(/\.[^.]+$/) || [""])[0]);
+        files.push({ name:name, blob:b, url:URL.createObjectURL(b) });
+      });
+      drawThumbs();
+    });
+  });
+
   form.addEventListener("submit", function(e){
     e.preventDefault();
     if(form.querySelector('[name="_gotcha"]').value) return;   // bot caught
@@ -314,21 +392,31 @@
       var body = encodeURIComponent(message + "\n\n" + name + "\n" + email);
       try { window.location.href = "mailto:" + MAILTO + "?subject=" + subject + "&body=" + body; }
       catch(err){}
-      showMailFallback(name, email, message);
+      showMailFallback(name, email, message + (files.length ? "\n\n(Attach your " + files.length + " image" + (files.length > 1 ? "s" : "") + " to the email.)" : ""));
       return;
     }
 
     btn.disabled = true;
     setStatus("Sending...");
-    fetch(FORMSPREE_ENDPOINT, {
-      method: "POST",
-      headers: { "Accept": "application/json" },
-      body: new FormData(form)
+    function send(withFiles){
+      var fd = new FormData(form);
+      if(withFiles) files.forEach(function(f){ fd.append("attachment", f.blob, f.name); });
+      else if(files.length) fd.set("message", message + "\n\n(" + files.length + " image" + (files.length > 1 ? "s" : "") + " could not be attached.)");
+      return fetch(FORMSPREE_ENDPOINT, { method: "POST", headers: { "Accept": "application/json" }, body: fd });
+    }
+    var hadFiles = files.length > 0;
+    send(hadFiles).then(function(res){
+      // files refused (plan limit, size): send the words on their own
+      if(!res.ok && hadFiles && res.status >= 400 && res.status < 500) return send(false).then(function(r2){ r2.imagesDropped = true; return r2; });
+      return res;
     }).then(function(res){
       if(res.ok){
         form.reset();
+        files.forEach(function(f){ URL.revokeObjectURL(f.url); }); files = []; drawThumbs();
         syncTopic();
-        setStatus("Thanks. Your message is on its way.");
+        setStatus(res.imagesDropped
+          ? "Thanks. Your message is on its way, but the images could not be attached. Please email them to " + MAILTO + "."
+          : "Thanks. Your message is on its way.", !!res.imagesDropped);
       } else {
         setStatus("Something went wrong. Email " + MAILTO + " instead.", true);
       }

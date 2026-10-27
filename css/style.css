@@ -285,7 +285,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    tap target clears the 24px minimum on a phone without the icon growing or
    the line it sits on getting taller (the negative margins cancel the extra
    box back out of the inline flow). */
-.info-btn{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; padding:5.5px; margin-left:1px; margin-top:-5.5px; margin-bottom:-5.5px; background:none; border:0; color:var(--ink-soft); cursor:pointer; vertical-align:-8px; transition:opacity .15s ease;}
+.info-btn{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; padding:5.5px; margin-left:1px; margin-top:-5.5px; margin-bottom:-5.5px; background:none; border:0; color:var(--ink-soft); cursor:pointer; vertical-align:baseline; transition:opacity .15s ease;}
 /* Owen's info.svg is a solid black icon, not a tintable outline, so hover/
    open feedback is opacity rather than the red-on-hover other buttons use. */
 .info-btn img{width:100%; height:100%; display:block; object-fit:contain;}
@@ -293,10 +293,17 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* block-level (breaks out of the inline flow onto its own line) but its width
    comes from the nearest block ancestor (the paragraph/label it's attached
    to), not from .info-wrap, so it can never widen the line it sits on while collapsed. */
-.info-panel{display:grid; grid-template-rows:0fr; width:100%; transition:grid-template-rows .35s ease;}
-.info-panel.open{grid-template-rows:1fr;}
-.info-panel-in{display:block; overflow:hidden; min-height:0; font-size:13px; line-height:1.6; color:var(--ink-soft); max-width:var(--w-desc); text-align:justify; text-align-last:left;}
-.info-panel.open .info-panel-in{margin-top:var(--txt-gap);}
+/* (2026-10-27) The reveal used to animate grid-template-rows, which re-laid
+   out the page (and re-justified and re-hyphenated the text) on every frame:
+   choppy on Materials, where the panel sits in a long page. Now the space
+   opens in one step and the text fades and settles in on opacity and
+   transform only, the site rule for anything animated. */
+.info-panel{display:none; width:100%;}
+.info-panel.open{display:block;}
+.info-panel-in{display:block; font-size:13px; line-height:1.6; color:var(--ink-soft); max-width:var(--w-desc); text-align:justify; text-align-last:left;
+  margin-top:var(--txt-gap); animation:info-in .32s ease both;}
+@keyframes info-in{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){ .info-panel-in{animation:none;} }
 
 /* ---------- COMPONENT SPREAD: a parts photo with positioned info labels ---------- */
 /* container-type makes every size below relative to the SPREAD'S OWN WIDTH
@@ -474,7 +481,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* READ MORE: a single italic button at the bottom of the storefront content
    that reveals the fuller process / portfolio section below it, on the same
    page. Styled as a quiet mark, not a filled button. */
-.readmore{margin-top:52px; padding:0 var(--mar); display:flex; justify-content:center;}
+.readmore{margin-top:52px; padding:0 var(--mar); display:flex; justify-content:center; position:relative; z-index:2;}   /* above the mechanism iframe, whose cropped bottom margin can reach it */
 .read-more-link{font-family:var(--disp); font-style:italic; font-size:clamp(16px,1.9vw,26px); color:var(--ink); background:none; border:0; border-bottom:1px solid var(--red); padding:0 0 2px; cursor:pointer; text-decoration:none; transition:color .18s ease;}
 .read-more-link:hover{color:var(--red);}
 /* the process section starts hidden and fades in when Read more is pressed */
@@ -926,7 +933,8 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      the radar. Negative margins crop that reserved space (the buffer is
      transparent, so overlapping the text/next section is invisible). Tune the
      -% values if the radar sits too high/low in a narrow window. */
-  .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech{width:auto; margin-left:0; margin-top:-20%; margin-bottom:-12%;}
+  /* bottom crop capped at its phone value (2026-10-27): at tablet width -12% reached into the mode buttons and the hint, and over Process and detail */
+  .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech{width:auto; margin-left:0; margin-top:-20%; margin-bottom:max(-12%, -48px);}
   /* stacked OMNI: drop the sideways crop entirely. It exists on desktop to
      pull the artwork out toward the page edges, but in one narrow column a
      negative side margin just pushes the mode buttons off the left of the

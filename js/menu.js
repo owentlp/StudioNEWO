@@ -122,11 +122,11 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=61",
+      "css/style.css?v=62",
       "js/projects-data.js?v=26",
       "js/image-sizes.js?v=3",
       "js/main.js?v=5",
-      "js/menu.js?v=33",
+      "js/menu.js?v=34",
       "js/sky.js?v=7",
       "js/loader3d.js?v=17",
       "js/loader3d-core.js?v=2",
@@ -138,7 +138,7 @@
     var MATERIALS_DATA = "js/materials-data.js?v=8";
     var MV_LIB  = "js/vendor/model-viewer.min.js?v=2";
     var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
-    var MECH_V  = "?v=20";     // must match the mechanism iframe src in project.html
+    var MECH_V  = "?v=21";     // must match the mechanism iframe src in project.html
     var DWELL_MS = 400;
 
     function shell(){ SHELL.forEach(link); }

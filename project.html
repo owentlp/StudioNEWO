@@ -104,7 +104,7 @@
   if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
 })();
 </script>
-<link rel="stylesheet" href="css/style.css?v=61">
+<link rel="stylesheet" href="css/style.css?v=62">
 </head>
 <body class="proj-body">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -166,7 +166,7 @@
    deploy), the loading screen never cleared. This one lives in the page. */
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=33"></script>
+<script src="js/menu.js?v=34"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----
@@ -874,7 +874,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=20" title="mechanism" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=21" title="mechanism" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="mechanism"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
@@ -1005,15 +1005,17 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
        competing with model-viewer's WebGL loop and whatever else is running.
        The parent can see it clearly, so it just tells them. */
     (function(){
-      /* Two independent reasons to hold the loop: the graphic is scrolled off
-         screen, or the visitor is scrolling RIGHT NOW. It runs only when
-         neither applies, so the two are tracked separately and combined -
-         otherwise the scroll handler would restart a loop the observer had
-         just stopped, or vice versa. */
-      var onScreen = true, scrolling = false, sent = null;
-      function sync(){
-        var run = onScreen && !scrolling;
-        if(run === sent) return;          // don't spam the iframe every frame
+      /* Two reasons to hold the loop: the graphic is scrolled off screen, or
+         the tab is hidden. Tracked separately so coming back to the tab does
+         not leave it stopped when it is still on screen.
+         (2026-10-27) It no longer pauses WHILE SCROLLING. That pause read as
+         the animation freezing every time the page moved, and a message lost
+         mid-scroll could leave it stopped until it was scrolled away and back.
+         The off-screen pause covers the cost that matters. */
+      var onScreen = true, tabOn = !document.hidden, sent = null;
+      function sync(force){
+        var run = onScreen && tabOn;
+        if(run === sent && !force) return;   // don't spam the iframe
         sent = run;
         try { mechFrame.contentWindow.postMessage({ type:"mechVisible", visible:run }, "*"); } catch(e){}
       }
@@ -1024,31 +1026,12 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         new IntersectionObserver(function(entries){
           post(entries[0].isIntersecting);
         }, { rootMargin: "200px 0px" }).observe(mechFrame);
-      } else {
-        post(true);   // no IO: leave it running, same as before
       }
-
-      /* PAUSE WHILE SCROLLING. The KART mechanism repaints a ~1.4 megapixel
-         canvas on every frame, which competed with the compositor for exactly
-         the frames the scroll needed. It is not worth watching mid-scroll, so
-         it stops while the page is moving and picks up again 240ms after it
-         settles. Nothing is torn down or reloaded - the mechanism keeps its
-         state, it just stops drawing for a moment.
-         model-viewer used to be paused here too (its auto-rotate was a
-         permanent render loop). auto-rotate is gone as of 2026-08-29, so the
-         model is already idle whenever nobody is dragging it and there is
-         nothing left to pause. */
-      var idle = null;
-      window.addEventListener("scroll", function(){
-        if(!scrolling){ scrolling = true; sync(); }
-        clearTimeout(idle);
-        idle = setTimeout(function(){ scrolling = false; sync(); }, 240);
-      }, { passive: true });
-      // a hidden tab should not be animating either
       document.addEventListener("visibilitychange", function(){
-        if(document.hidden) post(false);
+        tabOn = !document.hidden; sync();
       });
-      mechFrame.addEventListener("load", function(){ post(true); });
+      // the iframe may not have been listening for the first message
+      mechFrame.addEventListener("load", function(){ sync(true); });
     })();
   }
 
@@ -1442,7 +1425,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 
       var hint = document.createElement("div");
       hint.className = "mv-hint";
-      hint.textContent = coarse ? "TOUCH TO INTERACT" : "CLICK TO INTERACT";
+      hint.textContent = coarse ? "TOUCH TO INTERACT" : "DRAG TO INTERACT";
       box.appendChild(hint);
 
       /* ---------- WHY TOUCH IS HANDLED SEPARATELY ----------
@@ -1464,27 +1447,85 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
          "pan-y" already lets a vertical swipe scroll the page straight
          through it, and the mobile CSS keeps the element close to its slot so
          it is not sitting invisibly on top of neighbouring sections. */
-      if(coarse){
-        mv.style.pointerEvents = "auto";
-        var fade = function(){ box.classList.add("mv-live"); };
-        mv.addEventListener("pointerdown", fade, { once:true });
-        box.addEventListener("touchstart", fade, { once:true, passive:true });
-        return;
+      /* ---------- ONLY THE MODEL ITSELF IS LIVE (2026-10-27) ----------
+         The element is far bigger than the model (room for the explode and the
+         overlap), so "inside the element" or even "inside the slot box" also
+         covered the buttons beside and below it: on OMNI, the widest model,
+         Process and detail could not be pressed. The live area is now the
+         model's own silhouette: model-viewer ray-casts the point against the
+         meshes. PAD px of slack round the edge, sampled at five points, covers
+         thin parts and the small error from the desktop tilt transform. */
+      var PAD = 14;
+      function onModel(x, y){
+        var r = mv.getBoundingClientRect();
+        if(x < r.left || x > r.right || y < r.top || y > r.bottom) return false;
+        if(!mv.loaded || !mv.positionAndNormalFromPoint) return inBox({ clientX:x, clientY:y });
+        var pts = [[0,0],[PAD,0],[-PAD,0],[0,PAD],[0,-PAD]];
+        try {
+          for(var i = 0; i < pts.length; i++){
+            if(mv.positionAndNormalFromPoint(x + pts[i][0], y + pts[i][1])) return true;
+          }
+        } catch(e){ return inBox({ clientX:x, clientY:y }); }
+        return false;
       }
-
-      var live = false;
       function inBox(e){
         var r = box.getBoundingClientRect();
         return e.clientX >= r.left && e.clientX <= r.right &&
                e.clientY >= r.top  && e.clientY <= r.bottom;
       }
+
+      /* TOUCH: the element has to be live BEFORE the finger lands (see above),
+         so it stays live, and a touch that starts off the model is stopped in
+         the capture phase before model-viewer sees it. A vertical swipe still
+         scrolls (touch-action pan-y); a tap is handed to whatever is under the
+         model at that point, so the buttons and links there work. */
+      if(coarse){
+        mv.style.pointerEvents = "auto";
+        var fade = function(){ box.classList.add("mv-live"); };
+        var offTap = null;
+        window.addEventListener("pointerdown", function(e){
+          offTap = null;
+          if(e.target !== mv) return;
+          if(onModel(e.clientX, e.clientY)){ fade(); return; }
+          e.stopPropagation();
+          offTap = { x:e.clientX, y:e.clientY };
+        }, true);
+        mv.addEventListener("click", function(e){
+          if(!offTap) return;
+          var t = offTap; offTap = null;
+          mv.style.pointerEvents = "none";
+          var under = document.elementFromPoint(t.x, t.y);
+          mv.style.pointerEvents = "auto";
+          if(under && under !== mv) under.click();
+        });
+        return;
+      }
+
+      /* MOUSE: live only while the cursor is over the model, so a click just
+         off it (a button, a link, the gallery) reaches the page. Pointer-events
+         is set on pointermove, before the press, which is what the browser
+         hit-tests. Held live through a drag even when it leaves the model. */
+      var live = false, dragging = false, queued = null;
       function setLive(on){
         if(live === on) return;
         live = on;
         mv.style.pointerEvents = on ? "auto" : "none";
-        box.classList.toggle("mv-live", on);
       }
-      window.addEventListener("pointerdown", function(e){ setLive(inBox(e)); }, true);
+      window.addEventListener("pointermove", function(e){
+        if(dragging || e.pointerType !== "mouse") return;
+        if(queued){ queued.x = e.clientX; queued.y = e.clientY; return; }
+        queued = { x:e.clientX, y:e.clientY };
+        requestAnimationFrame(function(){
+          var q = queued; queued = null;
+          if(!dragging) setLive(onModel(q.x, q.y));
+        });
+      }, { passive:true });
+      window.addEventListener("pointerdown", function(e){
+        if(e.pointerType === "mouse" && !live) setLive(onModel(e.clientX, e.clientY));
+        if(live && e.target === mv){ dragging = true; box.classList.add("mv-live"); }
+      }, true);
+      window.addEventListener("pointerup", function(){ dragging = false; }, true);
+      window.addEventListener("pointercancel", function(){ dragging = false; }, true);
     })();
 
     rsBtn.addEventListener("click", function(){
@@ -2076,14 +2117,19 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
          how-it-works paragraph on some future project cannot reintroduce the
          bug. */
       var t = txt.getBoundingClientRect();
-      var deepest = 0;
+      /* -Infinity, not 0: these are viewport coordinates, so a photo scrolled
+         above the screen has a NEGATIVE bottom. Starting at 0 threw those
+         away, and any resize while scrolled down (opening Process and detail
+         fires one, so does turning a tablet) dropped the clamp and landed the
+         text on the photo: 10px into it on FLOW at 1180 (2026-10-27). */
+      var deepest = -Infinity;
       imgs.forEach(function(im){
         var r = im.getBoundingClientRect();
         // only photos that actually sit in this paragraph's horizontal band
         if(r.right > t.left + 2 && r.left < t.right - 2) deepest = Math.max(deepest, r.bottom);
       });
       var pull = t.height;
-      if(deepest){
+      if(deepest > -Infinity){
         /* No Math.max(0, ...) here. Clamping at zero meant that when the
            paragraph already sat too close to the photo above it, the best this
            could do was pull nothing - it could not push the row back DOWN to
