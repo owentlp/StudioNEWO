@@ -691,7 +691,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* the controls and the mechanism half stay ABOVE the flooding model */
 .mv-bar{position:relative; z-index:3;}
 .cad-hiw-mech{z-index:3;}
-/* two rows: DRAWING VIEW + RESET on top, LIGHT ON + dimmer stacked under them */
+/* two rows: EXPLODED VIEW + RESET on top, LIGHT ON / OFF under them */
 .mv-bar{display:flex; flex-direction:column; align-items:flex-start; gap:clamp(8px,1vw,12px); padding:0 var(--mar);}
 /* tighter than the old text buttons needed: these are blocks now, so the gap
    between them reads as a gap rather than as word spacing. */
@@ -708,16 +708,6 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   background-position:calc(100% - 17px) calc(50% + 1px),calc(100% - 12px) calc(50% + 1px);
   background-size:5px 5px,5px 5px; background-repeat:no-repeat;}
 .mv-sel option{color:var(--ink); background:var(--paper);}
-/* lamp brightness slider. The RULE stays 1px - it is meant to read as a drawn
-   line, not a UI widget - but the element is 26px tall with the line painted
-   as a centred background, so there is something to actually grab. At height:1px
-   the hit area was one pixel tall, which is unusable on a touchscreen and
-   fiddly with a mouse. */
-.mv-dim{-webkit-appearance:none; appearance:none; width:96px; height:26px; background:linear-gradient(var(--ink),var(--ink)) center/100% 1px no-repeat; cursor:pointer; align-self:center;}
-.mv-dim::-webkit-slider-runnable-track{height:26px; background:transparent;}
-.mv-dim::-moz-range-track{height:26px; background:transparent;}
-.mv-dim::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:11px; height:11px; background:var(--red); border:0; border-radius:50%; cursor:pointer;}
-.mv-dim::-moz-range-thumb{width:11px; height:11px; background:var(--red); border:0; border-radius:50%; cursor:pointer;}
 /* ---- AR row -------------------------------------------------------------
    Sits in NORMAL FLOW directly above .cad-stage. It used to be slotted inside
    <model-viewer> at position:absolute;right:0 - but that element is ~1500px
@@ -970,7 +960,6 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      contents flattens the two groups so every control wraps in one flow. */
   .mv-bar{flex-direction:row; flex-wrap:wrap; align-items:center; gap:10px; margin-top:14px;}
   .mv-bar .mv-left,.mv-bar .mv-mid{display:contents;}
-  .mv-dim{width:min(140px,40vw);}
   /* AR row is in normal flow now, so nothing to reposition - just let the QR
      panel (desktop-only anyway) wrap rather than squeeze on a narrow window. */
   .mv-qr{flex-wrap:wrap;}

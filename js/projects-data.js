@@ -268,7 +268,7 @@ const PROJECTS = {
     galleryVideo: "",
     model:     "",
     modelRender: "modelrender.glb",
-    modelExplode: { zoom: 1.97, rise: 0.109 },   // from OMNI_web.json (pipeline): camera backs off and looks higher while exploded
+    modelExplode: { zoom: 1.97, rise: 0.109 },   // from OMNI_web.json (pipeline). Unused since 2026-10-28: project.html fits the exploded framing from the parts
     modelV2:   "",
     mechanism: "mechanism.html",
     hiwVideo:  "",

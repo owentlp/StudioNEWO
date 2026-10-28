@@ -116,7 +116,7 @@
   if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
 })();
 </script>
-<link rel="stylesheet" href="css/style.css?v=62">
+<link rel="stylesheet" href="css/style.css?v=63">
 </head>
 <body class="proj-body" data-project="omni">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -164,7 +164,7 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=26"></script>
+<script src="js/projects-data.js?v=27"></script>
 <script src="js/materials-data.js?v=8"></script>
 <!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
      reserved before the files land (no reflow) and srcset can be emitted -->
@@ -178,7 +178,7 @@
    deploy), the loading screen never cleared. This one lives in the page. */
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=34"></script>
+<script src="js/menu.js?v=35"></script>
 <script>
 (function(){
   /* ---- LEGACY URL REDIRECT ----
@@ -779,7 +779,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         '<button class="mv-ar mv-look" type="button" hidden style="margin-top:8px">LOOK AROUND IT &rarr;</button>' +
         '<div class="mv-qr" hidden>' +
           '<div class="mv-qr-img"></div>' +
-          '<p class="mv-qr-note">Scan to open this page on your phone,<br>then tap View in your space.</p>' +
+          '<p class="mv-qr-note">Scan with your phone<br>to see it in your space.</p>' +
         '</div>' +
       '</div>' +
       '<div class="cad-stage">' +
@@ -864,21 +864,19 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         '</model-viewer>' +
       '</div>' +
       // controls sit OUTSIDE the tilted stage on their own row: exploded +
-      // wireframe as quiet text, the material picker (and the light
-      // control) beside them. No borders or chips; these should read as
+      // reset, the material picker (and the light switch) beside them. No borders or chips; these should read as
       // printed text until touched.
       '<div class="mv-bar">' +
         '<div class="mv-group mv-left">' +
           '<button class="mv-btn" data-act="explode" hidden>EXPLODED VIEW</button>' +
-          '<button class="mv-btn" data-act="wireframe">DRAWING VIEW</button>' +
           '<button class="mv-btn" data-act="reset">RESET</button>' +
         '</div>' +
         '<div class="mv-group mv-mid">' +
           '<select class="mv-sel" aria-label="Material" hidden></select>' +
           // hidden until the model has loaded AND turned out to have a lamp in it
           // (an emissive material). A speaker does not get a LIGHT ON button.
+          // On / off only (Owen, 2026-10-28: the brightness slider is gone).
           '<button class="mv-btn" data-act="power" hidden>LIGHT ON</button>' +
-          '<input class="mv-dim" type="range" min="0" max="100" value="80" aria-label="Lamp brightness" hidden>' +
         '</div>' +
       '</div>' +
     '</div>' : '';
@@ -1054,8 +1052,6 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
     var exBtn = stage.querySelector('[data-act="explode"]');
     var rsBtn = stage.querySelector('[data-act="reset"]');
     var pwrBtn= stage.querySelector('[data-act="power"]');
-    var wfBtn = stage.querySelector('[data-act="wireframe"]');
-    var dim   = stage.querySelector('.mv-dim');
     var sel   = stage.querySelector('.mv-sel');
     var defaultOrbit = mv.getAttribute("camera-orbit");
 
@@ -1087,21 +1083,142 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
     var ZOOM_IN = 1;             // no zoom (2026-10-05, was 1.25). See disable-zoom on the element.
     var framedOrbit = null;      // what RESET goes back to, once we know it
     var homeTheta = null, homePhi = null;
-    /* EXPLODED FRAMING. An exploded product is about twice the size of the
-       assembled one, so the camera backs off by p.modelExplode.zoom while it is
-       open and looks p.modelExplode.rise metres higher (the parts lift off the
-       floor). Both numbers come from the pipeline (<NAME>_web.json next to the
-       GLB). Without them the explode still plays, just at the assembled framing. */
-    var EXP = (p.modelExplode && p.modelExplode.zoom) ? p.modelExplode : { zoom:1, rise:0 };
+    /* EXPLODED FRAMING (2026-10-28, replaces the fixed p.modelExplode.zoom).
+       The old way backed the camera off by one number from the pipeline the
+       instant EXPLODED VIEW was pressed, so the model snapped small (OMNI 1.97x)
+       before the parts had moved, and stayed smaller than it needed to be.
+       Now the camera is solved from the parts themselves, every frame of the
+       explode: the clip is sampled once (exSamples), each sample's corners are
+       projected through the real camera, and the radius is the SMALLEST that
+       keeps every part inside what the visitor can see of the viewer (the
+       element, the window, and clear of the mechanism column and the button
+       row). Never closer than the assembled framing. The look-at point rises
+       with the centre of the parts. So the model stays as big as it can and
+       the zoom moves with the parts, not ahead of them. Works for any GLB with
+       an "explode" clip; nothing per project. */
     var homeR = null, homeTarget = null, exOpen = false;
-    function applyExplodeFraming(){
+    var exSamples = null, exFit = null, exT = 0;     // exT: explode progress 0..1 on screen now
+    function mvScene(){
+      var k = Object.getOwnPropertySymbols(mv).filter(function(s){ return s.description === "scene"; })[0];
+      return k ? mv[k] : null;
+    }
+    // part corners in model coordinates (the frame camera-target is given in),
+    // at EX_N points through the clip. Setting currentTime poses the parts at once.
+    var EX_N = 24;
+    function sampleExplode(dur){
+      var sc = mvScene(); if(!sc || !sc.target) return null;
+      var keep = mv.currentTime || 0, out = [];
+      try {
+        for(var i = 0; i <= EX_N; i++){
+          mv.currentTime = dur * i / EX_N;
+          sc.updateMatrixWorld(true);
+          var to = sc.target.matrixWorld.elements, pts = [], lo = 1e9, hi = -1e9;
+          sc.target.traverse(function(o){
+            if(!o.isMesh || !o.visible || !o.geometry) return;
+            var g = o.geometry; if(!g.boundingBox) g.computeBoundingBox();
+            var b = g.boundingBox, V = b.min.constructor;
+            for(var c = 0; c < 8; c++){
+              var v = new V(c & 1 ? b.max.x : b.min.x, c & 2 ? b.max.y : b.min.y, c & 4 ? b.max.z : b.min.z).applyMatrix4(o.matrixWorld);
+              // world -> model: the Target node only carries the camera-target offset
+              var y = v.y - to[13];
+              pts.push(v.x - to[12], y, v.z - to[14]);
+              if(y < lo) lo = y; if(y > hi) hi = y;
+            }
+          });
+          out.push({ pts:pts, lo:lo, hi:hi, mid:(lo + hi) / 2 });
+        }
+      } catch(e){ out = null; }
+      try { mv.currentTime = keep; } catch(e){}
+      return out && out[0].pts.length ? out : null;
+    }
+    // what the visitor can see of the viewer, in px from the element's centre
+    function exBounds(){
+      var r = mv.getBoundingClientRect();
+      var m = new DOMMatrix(getComputedStyle(mv).transform);
+      var half = mv.offsetHeight * (Math.sqrt(m.a * m.a + m.b * m.b) || 1) / 2;
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var vw = document.documentElement.clientWidth || window.innerWidth;
+      var pad = 12, b = { half:half, l:Math.min(half, cx - pad), r:Math.min(half, vw - pad - cx), u:half, d:half };
+      var mech = stage.querySelector(".cad-hiw-mech") || document.querySelector(".cad-hiw-mech");
+      if(mech){ var mr = mech.getBoundingClientRect(); if(mr.width && mr.left > cx && mr.top < cy + half && mr.bottom > cy - half) b.r = Math.min(b.r, mr.left - pad - cx); }
+      var bar = stage.querySelector(".mv-bar");
+      if(bar){ var br = bar.getBoundingClientRect(); if(br.height && br.top > cy) b.d = Math.min(b.d, br.top - pad - cy); }
+      // a little air, and room for the hover tilt (rotate -2deg, scale .97)
+      ["l","r","u","d"].forEach(function(k){ b[k] = Math.max(40, b[k] * 0.94); });
+      return b;
+    }
+    // smallest radius that fits one sample at camera angles (th, ph)
+    function exNeed(s, th, ph, ty, b){
+      var K = b.half / Math.tan((mv.getFieldOfView() || 30) * Math.PI / 360);
+      var st = Math.sin(th), ct = Math.cos(th), sp = Math.sin(ph), cp = Math.cos(ph);
+      var vx = sp * st, vy = cp, vz = sp * ct;                 // target -> camera
+      var ux = -cp * st, uy = sp, uz = -cp * ct;               // screen up
+      var p = s.pts, need = 0;
+      for(var i = 0; i < p.length; i += 3){
+        var x = p[i] - homeTarget.x, y = p[i+1] - ty, z = p[i+2] - homeTarget.z;
+        var dv = x * vx + y * vy + z * vz, dr = x * ct - z * st, du = x * ux + y * uy + z * uz;
+        var w = Math.max(Math.abs(dr) * K / (dr > 0 ? b.r : b.l), Math.abs(du) * K / (du > 0 ? b.u : b.d));
+        if(dv + w > need) need = dv + w;
+      }
+      return need;
+    }
+    /* Radius and look-at height for every sample, at the current pitch. The
+       radius covers the whole turn (24 headings), so the size holds while the
+       model is spun; only a change of pitch refits it (on release). The look-at
+       height for the fully open product is the one that lets it be biggest
+       (the need is convex in it, so a ternary search finds it); the samples in
+       between move toward it as their parts rise. If the assembled product
+       already crosses a bound at rest, the plan is scaled so it starts exactly
+       on the assembled framing (no jump on the first frame). */
+    function exPlan(ph){
+      if(!exSamples || homeR === null || !homeTarget) return null;
+      if(ph == null) ph = mv.getCameraOrbit().phi;
+      var b = exBounds(), plan = [], n = exSamples.length - 1;
+      function needAll(s, ty){ var m = 0; for(var a = 0; a < 24; a++) m = Math.max(m, exNeed(s, a * Math.PI / 12, ph, ty, b)); return m; }
+      var last = exSamples[n], lo = last.lo, hi = last.hi;
+      for(var it = 0; it < 18; it++){
+        var m1 = lo + (hi - lo) / 3, m2 = hi - (hi - lo) / 3;
+        if(needAll(last, m1) < needAll(last, m2)) hi = m2; else lo = m1;
+      }
+      var best = (lo + hi) / 2, span = last.mid - exSamples[0].mid;
+      for(var i = 0; i <= n; i++){
+        var f = Math.abs(span) > 1e-6 ? (exSamples[i].mid - exSamples[0].mid) / span : i / n;
+        var ty = homeTarget.y + (best - homeTarget.y) * Math.max(0, Math.min(1, f));
+        plan.push({ r:needAll(exSamples[i], ty), ty:ty });
+      }
+      var g = homeR / Math.max(homeR, plan[0].r);
+      plan.forEach(function(q){ q.r = Math.max(homeR, q.r * g); });
+      return plan;
+    }
+    // radius and look-at height for explode progress k (0..1)
+    function exAt(k){
+      if(!exFit || k <= 0) return { r:homeR, ty:homeTarget ? homeTarget.y : 0 };
+      var x = Math.min(1, k) * (exFit.length - 1), i = Math.min(exFit.length - 2, Math.floor(x)), f = x - i;
+      return { r:exFit[i].r + (exFit[i+1].r - exFit[i].r) * f, ty:exFit[i].ty + (exFit[i+1].ty - exFit[i].ty) * f };
+    }
+    // the zoom range is the radius itself (disable-zoom); lo/hi open it while it moves
+    function exLimits(lo, hi){
+      mv.minCameraOrbit = "auto auto " + (lo / ZOOM_IN).toFixed(5) + "m";
+      mv.maxCameraOrbit = "auto auto " + hi.toFixed(5) + "m";
+    }
+    // put the camera at progress k. jump: land this frame (during the explode,
+    // so the zoom stays locked to the parts); otherwise model-viewer eases there.
+    function exCamera(k, jump, th, ph){
       if(homeR === null) return;
-      var z = exOpen ? EXP.zoom : 1;
-      var o = mv.getCameraOrbit();
-      mv.minCameraOrbit = "auto auto " + (homeR * z / ZOOM_IN).toFixed(5) + "m";
-      mv.maxCameraOrbit = "auto auto " + (homeR * z).toFixed(5) + "m";
-      mv.cameraOrbit = o.theta.toFixed(5)+"rad "+o.phi.toFixed(5)+"rad "+(homeR * z).toFixed(5)+"m";
-      if(homeTarget) mv.cameraTarget = homeTarget.x.toFixed(5)+"m "+(homeTarget.y + (exOpen ? (EXP.rise||0) : 0)).toFixed(5)+"m "+homeTarget.z.toFixed(5)+"m";
+      var q = exAt(k), o = mv.getCameraOrbit();
+      if(th == null) th = o.theta; if(ph == null) ph = o.phi;
+      mv.cameraOrbit = th.toFixed(5)+"rad "+ph.toFixed(5)+"rad "+q.r.toFixed(5)+"m";
+      if(homeTarget) mv.cameraTarget = homeTarget.x.toFixed(5)+"m "+q.ty.toFixed(5)+"m "+homeTarget.z.toFixed(5)+"m";
+      if(jump && mv.jumpCameraToGoal) mv.jumpCameraToGoal();
+    }
+    // refit at the current window and pitch (resize, pitch change, reset)
+    function applyExplodeFraming(jump, th, ph){
+      if(homeR === null) return;
+      exFit = exPlan(ph) || exFit;
+      var r = exAt(exT).r, now = mv.getCameraOrbit().radius;
+      exLimits(Math.min(r, now), Math.max(r, now));
+      exCamera(exT, jump, th, ph);
+      exLimits(r, r);
     }
 
     /* ---------- OVERLAP WITH THE PHOTOS ABOVE (2026-10-02) ----------
@@ -1208,7 +1325,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         homeR = r;
         fitOverlap(stage, targetPx, dims, homeTheta, homePhi);
         if(!homeTarget){ try { var ct = mv.getCameraTarget(); homeTarget = { x:ct.x, y:ct.y, z:ct.z }; } catch(e2){} }
-        if(exOpen) applyExplodeFraming();
+        if(exT > 0) applyExplodeFraming(true);
       } catch(e){ /* leave model-viewer's own framing in place */ }
       finally { if(stage) stage.classList.add("mv-framed"); }
     }
@@ -1304,6 +1421,37 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         window.location.href = href;
       }
 
+      /* Open Google Scene Viewer directly with an intent URL, the same one
+         model-viewer builds. Used when model-viewer cannot (Firefox on
+         Android, or the GLB not attached yet) and for the QR hand-off below.
+         The fallback URL is this page WITHOUT ?ar=1, so a phone without the
+         Google app lands back here instead of looping. */
+      function openSceneViewer(){
+        var glb = new URL(mv.getAttribute("data-src"), location.href).href;
+        var title = (mv.getAttribute("alt") || "").replace(/ 3D model$/, "");
+        window.location.href = "intent://arvr.google.com/scene-viewer/1.0" +
+          "?file=" + encodeURIComponent(glb) +
+          "&mode=ar_preferred&resizable=false" +
+          "&title=" + encodeURIComponent(title) +
+          "#Intent;scheme=https;package=com.google.android.googlequicksearchbox;" +
+          "action=android.intent.action.VIEW;" +
+          "S.browser_fallback_url=" + encodeURIComponent(location.href) + ";end;";
+      }
+
+      /* The desktop QR does not point at this page, it points at this page
+         with ?ar=1. A phone that arrives with that flag opens AR by itself,
+         so scanning goes straight into the room instead of landing on the
+         page and needing a second tap. */
+      function arLink(){
+        try {
+          var u = new URL(location.href);
+          u.hash = "";
+          u.searchParams.delete("cb");
+          u.searchParams.set("ar", "1");
+          return u.href;
+        } catch(e){ return location.href; }
+      }
+
       // lazy: the QR library is only fetched if someone actually asks for the
       // code, so phones (which go straight to AR) never pay for it.
       var QR_SRC = "js/vendor/qrcode.js?v=1";
@@ -1312,19 +1460,19 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         function make(){
           try{
             var q = qrcode(0, "M");
-            q.addData(location.href);
+            q.addData(arLink());
             q.make();
             qrImg.innerHTML = q.createImgTag(5, 0);
           } catch(e){
             // no QR? fall back to the plain URL, still readable by eye
-            qrImg.innerHTML = '<code class="mv-qr-url">' + esc(location.href) + '</code>';
+            qrImg.innerHTML = '<code class="mv-qr-url">' + esc(arLink()) + '</code>';
           }
         }
         if(window.qrcode){ make(); return; }
         var s = document.createElement("script");
         s.src = QR_SRC;
         s.onload = make;
-        s.onerror = function(){ qrDrawn = false; qrImg.innerHTML = '<code class="mv-qr-url">' + esc(location.href) + '</code>'; };
+        s.onerror = function(){ qrDrawn = false; qrImg.innerHTML = '<code class="mv-qr-url">' + esc(arLink()) + '</code>'; };
         document.head.appendChild(s);
       }
 
@@ -1344,9 +1492,39 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
             try { mv.activateAR(); return; } catch(e){}
           }
           if(isIOS && iosSrc){ openQuickLook(); return; }
+          if(isAndroid){ openSceneViewer(); return; }
         }
         toggleQR();
       });
+
+      /* ARRIVED FROM THE QR (?ar=1). The flag is taken off the address first,
+         so Back from AR, a reload or a shared link shows the normal page and
+         never relaunches. Then, on a phone, AR opens on its own once the page
+         has loaded (launching mid-load can cancel the page's own requests).
+         The button is scrolled into view first, so if the browser refuses to
+         open AR without a tap (some Android browsers do), it is right there.
+         iOS uses a plain navigation to the .usdz, not the rel="ar" anchor:
+         that anchor is meant for a tap, while the navigation works in every
+         iOS browser with or without one. */
+      if(/[?&]ar=1(&|$)/.test(location.search)){
+        try {
+          var clean = new URL(location.href);
+          clean.searchParams.delete("ar");
+          history.replaceState(history.state, "", clean.href);
+        } catch(e){}
+        var phoneAR = (isIOS && iosSrc) || isAndroid;
+        if(phoneAR){
+          var launch = function(){
+            setTimeout(function(){
+              try { arBtn.scrollIntoView({ block: "center" }); } catch(e){}
+              if(isIOS) window.location.href = iosSrc + "#allowsContentScaling=0";
+              else openSceneViewer();
+            }, 300);
+          };
+          if(document.readyState === "complete") launch();
+          else window.addEventListener("load", launch, { once: true });
+        }
+      }
 
       // The button itself is always shown once there is a model - on desktop it
       // opens the QR, on a phone it opens AR. Nothing to wait for.
@@ -1355,8 +1533,11 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 
       /* LOOK AROUND IT: head-tracked window, desktop only (a mouse and a
          camera API). Phones keep VIEW IN YOUR SPACE. js/headview.js is only
-         fetched on the first click. */
-      var lookBtn = stage.querySelector('.mv-look');
+         fetched on the first click.
+         OFF for now (Owen, 2026-10-28: not polished enough for the live site).
+         Set LOOK_AROUND to true to bring it back; nothing else changes. */
+      var LOOK_AROUND = false;
+      var lookBtn = LOOK_AROUND ? stage.querySelector('.mv-look') : null;
       var finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
       if(lookBtn && finePointer && !isIOS && !isAndroid &&
          navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
@@ -1544,8 +1725,8 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
       // framedOrbit is the computed home for THIS screen; defaultOrbit is only
       // the attribute's placeholder, and would put the model back at the wrong
       // size on anything but the window it was hand-tuned for.
+      if(exT > 0){ applyExplodeFraming(false, homeTheta, homePhi); return; }   // exploded: refit at the home angles
       mv.cameraOrbit = framedOrbit || defaultOrbit;
-      if(exOpen){ applyExplodeFraming(); return; }      // exploded: keep the wider framing, just go home on the angles
       // also recentre. Panning is disabled now, but anyone who shifted the
       // model before this change still has that offset stored in cameraTarget,
       // and resetting the orbit alone would leave it stuck off-centre.
@@ -1553,64 +1734,10 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
       mv.resetTurntableRotation && mv.resetTurntableRotation();
     });
 
-    // WIREFRAME / render toggle: model-viewer has no real wireframe shader
-    // mode, so until there's an actual wireframe-textured export (or a second
-    // GLB) to switch to, this flips a desaturated, high-contrast look that
-    // reads as "technical drawing" next to the textured render, same idea as
-    // the reference's wireframe/render button. Swap this for a real asset
-    // swap whenever one exists, this is a stand-in, not the final behaviour.
-    /* REAL DRAWING VIEW (2026-10-02). A GLB from the NEWO pipeline carries its
-       own ink: every crease and border of every part as a thin tube, all in one
-       material called WEB_Ink, exported invisible. Drawing view turns that
-       material on and turns every other material into bare paper (no texture,
-       no metal, fully rough), so what is left is the linework with a soft tone
-       on the faces - and it still explodes, turns and zooms, because it is the
-       same model. Done entirely through model-viewer's material API.
-       A GLB without WEB_Ink (KART's, for now) keeps the old filter stand-in. */
-    var PAPER_LIN = [0.62, 0.607, 0.578, 1], INK_LIN = [0.007, 0.007, 0.007, 1];
-    var inkMat = null, drawSaved = null, wireOn = false;
-    function setDrawing(on){
-      wireOn = on;
-      if(wfBtn) wfBtn.classList.toggle("active", on);
-      // the button can be pressed before the load handler has run: look again
-      if(!inkMat){ try { inkMat = (mv.model.materials || []).filter(function(m){ return m.name === "WEB_Ink"; })[0] || null; } catch(e){} }
-      if(!inkMat){
-        mv.style.filter = on ? "grayscale(1) contrast(1.35) brightness(1.08)" : "";
-        mv.exposure = on ? 1.6 : 1;
-        return;
-      }
-      try {
-        var mats = (mv.model && mv.model.materials) || [];
-        if(on){
-          drawSaved = [];
-          mats.forEach(function(m){
-            if(m === inkMat || m.isLoaded === false) return;
-            var pb = m.pbrMetallicRoughness;
-            drawSaved.push({ m:m, c:pb.baseColorFactor.slice(), me:pb.metallicFactor, r:pb.roughnessFactor,
-                             t:(pb.baseColorTexture ? pb.baseColorTexture.texture : null), e:(m.emissiveFactor||[0,0,0]).slice() });
-            pb.setBaseColorFactor(PAPER_LIN); pb.setMetallicFactor(0); pb.setRoughnessFactor(1);
-            if(pb.baseColorTexture && pb.baseColorTexture.texture) pb.baseColorTexture.setTexture(null);
-            try { m.setEmissiveFactor([0,0,0]); } catch(e){}
-          });
-          inkMat.pbrMetallicRoughness.setBaseColorFactor(INK_LIN);
-          inkMat.setAlphaMode("OPAQUE");
-        } else if(drawSaved){
-          drawSaved.forEach(function(s){
-            var pb = s.m.pbrMetallicRoughness;
-            pb.setBaseColorFactor(s.c); pb.setMetallicFactor(s.me); pb.setRoughnessFactor(s.r);
-            if(s.t && pb.baseColorTexture) pb.baseColorTexture.setTexture(s.t);
-            try { s.m.setEmissiveFactor(s.e); } catch(e){}
-          });
-          drawSaved = null;
-          inkMat.pbrMetallicRoughness.setBaseColorFactor([INK_LIN[0], INK_LIN[1], INK_LIN[2], 0]);
-          inkMat.setAlphaMode("MASK");
-        }
-      } catch(e){}
-    }
-    if(wfBtn) wfBtn.addEventListener("click", function(){ setDrawing(!wireOn); });
+    /* DRAWING VIEW removed (Owen, 2026-10-28). Pipeline GLBs still carry the
+       WEB_Ink linework material; it is exported invisible, so it never shows. */
 
     mv.addEventListener("load", function(){
-      try { inkMat = (mv.model.materials || []).filter(function(m){ return m.name === "WEB_Ink"; })[0] || null; } catch(e){ inkMat = null; }
       frameModel();
       // two frames of settle, then reveal: the first frame model-viewer paints
       // is its own auto-framing, which at these element proportions is the
@@ -1633,19 +1760,19 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
           if(lit){ emis.push(m); base.push([ef[0],ef[1],ef[2]]); }
         });
       } catch(e){}
-      var lampOn = true, level = (dim ? (+dim.value)/100 : 0.8);
+      var lampOn = true, level = 0.8;     // the glow it always had at the slider's default
       function applyLamp(){
         var v = lampOn ? level : 0;
         if(emis.length){ emis.forEach(function(m,i){ var b=base[i]; try{ m.setEmissiveFactor([b[0]*v,b[1]*v,b[2]*v]); }catch(e){} }); }
         else { mv.exposure = 0.3 + 1.1*v; }   // fallback: dim the whole scene
       }
       function setPwr(on){ lampOn=on; pwrBtn.classList.toggle("active",on); pwrBtn.textContent = on?"LIGHT ON":"LIGHT OFF"; applyLamp(); }
-      // p.modelLight:true forces the controls on for a lamp whose emissive
-      // material could not be read (they then dim the whole scene instead).
+      // p.modelLight:true forces the switch on for a lamp whose emissive
+      // material could not be read (it then dims the whole scene instead).
       var hasLamp = emis.length > 0 || p.modelLight === true;
-      if(hasLamp){
-        if(pwrBtn){ pwrBtn.hidden = false; pwrBtn.addEventListener("click", function(){ setPwr(!lampOn); }); }
-        if(dim){ dim.hidden = false; dim.addEventListener("input", function(){ level=(+dim.value)/100; if(!lampOn) lampOn=true; setPwr(true); }); }
+      if(hasLamp && pwrBtn){
+        pwrBtn.hidden = false;
+        pwrBtn.addEventListener("click", function(){ setPwr(!lampOn); });
         setPwr(true);
       }
 
@@ -1657,9 +1784,7 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         sel.hidden = false;
         sel.innerHTML = vs.map(function(v){ return '<option value="'+v+'">'+String(v).toUpperCase()+'</option>'; }).join("");
         sel.value = mv.variantName || vs[0];
-        // a finish change swaps materials under the drawing view, so step out
-        // of it first: you asked to see a finish, show the finish.
-        sel.addEventListener("change", function(){ if(wireOn) setDrawing(false); mv.variantName = sel.value; });
+        sel.addEventListener("change", function(){ mv.variantName = sel.value; });
       }
 
       // explode: plays a baked glTF animation whose name contains "explode".
@@ -1676,18 +1801,38 @@ setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
         exBtn.addEventListener("click", function(){
           open = !open; exOpen = open;
           exBtn.classList.toggle("active", open);
-          applyExplodeFraming();
           // stop a hair short of the end: the clip loops, so currentTime = duration
-          // wraps straight back to 0 and the product snaps shut again
-          var dur = Math.max(0, (mv.duration || 1) - 0.02), from = mv.currentTime || 0, to = open ? dur : 0;
+          // wraps straight back to 0 and the product snaps shut again. Read at
+          // click time: right after load, duration is not known yet.
+          var dur = Math.max(0, (mv.duration || 1) - 0.02);
+          if(!exSamples) exSamples = sampleExplode(dur);
+          exFit = exPlan();
+          var from = mv.currentTime || 0, to = open ? dur : 0;
           var t0 = performance.now(), D = 620;
+          var rs = (exFit || [{ r:homeR }]).map(function(q){ return q.r; });
+          exLimits(Math.min(homeR, mv.getCameraOrbit().radius), Math.max.apply(null, rs.concat([mv.getCameraOrbit().radius])));
           cancelAnimationFrame(raf);
           (function step(now){
             var k = Math.min(1, (now - t0) / D);
             var e = k < .5 ? 2*k*k : -1 + (4 - 2*k)*k;
-            try { mv.currentTime = from + (to - from) * e; } catch(err){}
+            var t = from + (to - from) * e;
+            try { mv.currentTime = t; } catch(err){}
+            exT = dur ? t / dur : 0;
+            exCamera(exT, true);            // the zoom moves with the parts
             if(k < 1) raf = requestAnimationFrame(step);
+            else { var r = exAt(exT).r; exLimits(r, r); }
           })(performance.now());
+        });
+        // a change of pitch while exploded can bring a part to the edge: refit
+        // once the drag is let go (spinning alone never needs it, see exPlan)
+        var exPhi = null;
+        mv.addEventListener("pointerdown", function(){ exPhi = mv.getCameraOrbit().phi; });
+        window.addEventListener("pointerup", function(){
+          if(exPhi === null) return;
+          var was = exPhi; exPhi = null;
+          setTimeout(function(){
+            if(exT > 0 && Math.abs(mv.getCameraOrbit().phi - was) > 0.02) applyExplodeFraming(false);
+          }, 250);
         });
       }
     });
