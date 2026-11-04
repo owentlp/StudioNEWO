@@ -1,54 +1,10 @@
-# reference docs, local only - never committed, never served on the live site
-*.txt
-# ...except robots.txt, which MUST ship so search engines can read it
-!robots.txt
-
-# the whole docs folder is working notes for Owen only. It was previously
-# committed (only *.txt was ignored, not *.md), which meant the handoff notes
-# and publish walkthrough were readable by anyone at
-# studionewo.com/docs/PUBLISH_STEPS.md. Ignoring the folder stops NEW commits,
-# but files already in the repo stay there until deleted - see docs/ROADMAP.md
-# step 0 for the one-time cleanup.
-docs/
-
-# local build/maintenance scripts, not part of the site.
-# NOTE: make-image-variants.py only WRITES files that do ship (the sm/ and md/
-# copies and js/image-sizes.js); the script itself never needs to be served.
-push-to-repo.ps1
-PUSH.bat
-
-# 2026-09-25: the build scripts moved out of the root into tools/ (and the two
-# finished ones into tools/retired/). They only ever WRITE files that ship -
-# the sm/ and md/ image copies, js/image-sizes.js, the five project pages,
-# favicon.ico and logo/*.png - so the scripts themselves never need serving.
-# Ignoring the folder covers any new one without another edit here.
-tools/
-
-# intermediate written by an earlier run of the variant script; the real
-# output is js/image-sizes.js. cleanup.ps1 deletes this.
-js/image-sizes.json
-
-# the loader-animation prototype. Its motion is already ported into
-# js/loader3d.js and its 3D-LOGO.STL is byte-identical to logo/3d-logo.stl,
-# so shipping it would only add ~1.1 MB of screenshots and duplicate fonts to
-# the live site. Kept on disk as Owen's reference.
-logo/3D Logo Loading Animation/
-
-# local backups of pre-compression originals - kept on disk, never deployed
+# StudioNEWO-source: private working copy of the Website folder for cloud sessions.
 _backup_originals/
-
-# OS / editor noise
-.DS_Store
+_to_delete/
+push-log.txt
+push-clone.txt
+.claude/settings.local.json
 Thumbs.db
 desktop.ini
-$null
-
-# staged deletions - review then delete, or run cleanup.ps1
-_to_delete/
-
-# the Cowork desktop app saves files it delivers into here; never deploy them
-Claude outputs/
-
-# Claude Code project notes and settings, local only
-CLAUDE.md
-.claude/
+.DS_Store
+*.whl

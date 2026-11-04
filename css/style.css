@@ -24,6 +24,24 @@
   font-display:swap;
 }
 
+/* FALLBACKS SIZED LIKE THE WEB FONTS (3 Nov 2026). The page is no longer at
+   opacity 0 while it loads (so Lighthouse and field data record an LCP), which
+   means the swap from the fallback to OCR B now counts as layout shift: OCR B is
+   44% wider than Courier, so every paragraph re-wrapped (CLS 0.3 to 0.45 on
+   Solutions and Materials, mobile Lighthouse). These faces stretch the local
+   fallback to the web font's advance and line metrics, so the swap only changes
+   the letterforms. Measured: OCR B 5384 / Courier 3740 = 144%; GOST B italic 2682
+   / Georgia italic 2759 = 97%. Metrics from the font files' hhea tables. */
+@font-face{
+  font-family:"OCR B fallback";
+  src:local("Courier New"), local("CourierNewPSMT"), local("Liberation Mono"), local("Cousine"), local("DejaVu Sans Mono"), local("Menlo"), local("Consolas");
+  size-adjust:144%; ascent-override:89.4%; descent-override:22.5%; line-gap-override:0.7%;
+}
+@font-face{
+  font-family:"GOST B fallback";
+  src:local("Georgia Italic"), local("Georgia-Italic"), local("Liberation Serif Italic"), local("DejaVu Serif Italic");
+  font-style:italic; size-adjust:97.2%; ascent-override:91.5%; descent-override:21.1%; line-gap-override:0%;
+}
 :root{
   --ink:#141414;
   /* deliberately the SAME value as --ink: hierarchy on this site comes from
@@ -33,8 +51,10 @@
   --ink-soft:var(--ink);
   --paper:#e9e7e2;
   --red:#e2191b;
-  --disp:"GOST B",Georgia,serif;
-  --body:"OCR B","Courier New",monospace;
+  --red-text:#b5120f;             /* darker red for red TEXT under 18px (5.6:1 on paper); buttons, rules and the big italics keep --red */
+  --red-on-dark:#ff5a4f;          /* red TEXT on the dark lightbox box (#141311): about 6:1. --red there is 3.9:1 */
+  --disp:"GOST B","GOST B fallback",Georgia,serif;
+  --body:"OCR B","OCR B fallback","Courier New",monospace;
 
   --mar-edge:clamp(11px,1.4vw,20px); /* margin for the LOGO, burger + running title (the fixed marks) */
   --mar:calc(var(--mar-edge) / 2);   /* margin for images + text: HALF the mark margin, so content hugs the edge a touch tighter than the logo sits in */
@@ -45,7 +65,8 @@
   --hdr-top:24px;                 /* shared top so all three line up */
 
   /* consistent text-block widths (paragraphs match each other, captions match each other) */
-  --w-desc:32ch;                  /* every description paragraph */
+  --w-desc:37.5ch;                /* every use is min(var(--w-desc), 37.5ch): js/project.js varies it per product (35-38ch) and the cap keeps 38 real characters the most. */
+                                  /* every description paragraph (32ch -> 38ch 2026-11-02; 37.5ch 2026-11-03: CSS ch leaves out the -.006em tracking, so 38ch measured 38.3 real characters. Exit test is 31 to 38) */
   --w-teaser:23ch;                /* the italic teaser line */
 
   /* ---- HERO / GALLERY / VIEWER KNOBS (safe to tweak the numbers) ----
@@ -114,8 +135,11 @@ img{display:block;}
 /* ---------- SKIP LINK: hidden until keyboard-focused, then it drops in at the
    top-left so a keyboard/screen-reader user can jump past the fixed marks
    straight to the page content. Invisible to mouse users. ---------- */
-.skip-link{position:absolute; left:8px; top:-60px; z-index:20; background:var(--ink); color:var(--paper); font-size:10px; letter-spacing:.16em; text-transform:uppercase; text-decoration:none; padding:8px 12px; transition:top .15s ease;}
-.skip-link:focus{top:8px; outline:2px solid var(--red); outline-offset:2px;}
+.skip-link{position:absolute; left:8px; top:8px; z-index:20; background:var(--ink); color:var(--paper); font-size:10px; letter-spacing:.16em; text-transform:uppercase; text-decoration:none; padding:8px 12px; transform:translateY(-68px); transition:transform .15s ease;}   /* 2026-11-03: slides with transform (was top), same travel */
+.skip-link:focus{transform:none; outline:2px solid var(--red); outline-offset:2px;}
+/* one focus ring everywhere (browsers differ); the lightbox is dark, so paper there */
+:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+.lightbox :focus-visible{outline-color:#eceae5;}
 /* .vh - visually hidden, but still read by search engines and screen readers.
    The about and contact pages had their visible headlines removed, so each
    keeps its <h1> with this class: a page still needs one heading, and dropping
@@ -154,10 +178,12 @@ body.hdr-hidden .site-home, body.hdr-hidden #burger{transform:translateY(calc(-1
   background:var(--paper); color:var(--ink);
   padding:calc(var(--hdr-top) + var(--hdr) + 20px) clamp(20px,2.4vw,34px) 28px;
   box-shadow:-2px 3px 22px rgba(0,0,0,.16);
-  opacity:0; transform:translateY(-10px); pointer-events:none;
-  transition:opacity .18s ease, transform .2s ease;
+  opacity:0; transform:translateY(-10px); pointer-events:none; visibility:hidden;
+  /* visibility keeps the closed panel's links out of the tab order; it flips
+     at once on open and only after the fade on close */
+  transition:opacity .18s ease, transform .2s ease, visibility 0s linear .2s;
 }
-#menu-overlay.menu-panel.open{opacity:1; transform:none; pointer-events:auto;}
+#menu-overlay.menu-panel.open{opacity:1; transform:none; pointer-events:auto; visibility:visible; transition-delay:0s;}
 .menu-nav{display:flex; flex-direction:column; gap:clamp(9px,1.3vh,14px);}
 
 /* ---- category dropdowns (built by js/menu.js off each project's `code`) ----
@@ -170,11 +196,11 @@ body.hdr-hidden .site-home, body.hdr-hidden #burger{transform:translateY(calc(-1
 .menu-head{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
   width:100%; background:none; border:0; padding:6px 0; margin:0;
-  font-family:inherit; font-size:8px; letter-spacing:.24em; text-transform:uppercase;
-  color:var(--ink); opacity:.48; cursor:pointer; text-align:left;
-  transition:opacity .15s ease, color .15s ease;
+  font-family:inherit; font-size:10px; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--ink); opacity:.7; cursor:pointer; text-align:left;
+  transition:opacity .15s ease;   /* colour switches, not animated (3 Nov 2026: animate only transform and opacity) */
 }
-.menu-head:hover, .menu-head:focus-visible{opacity:1; color:var(--red);}
+.menu-head:hover, .menu-head:focus-visible{opacity:1; color:var(--red-text);}
 .menu-cat.open > .menu-head{opacity:.85;}
 /* the +/- mark: two 1px rules, the vertical one rotating away when open, so it
    reads as a drawn cross rather than a UI glyph. */
@@ -189,32 +215,50 @@ body.hdr-hidden .site-home, body.hdr-hidden #burger{transform:translateY(calc(-1
 /* collapse/expand. grid-template-rows 0fr -> 1fr animates to the content's
    natural height with no hard-coded max-height and no JS measuring. Browsers
    that don't animate it simply snap open/closed, which is fine. visibility is
-   what actually keeps collapsed links out of the tab order. */
-.menu-cat-wrap{
-  display:grid; grid-template-rows:0fr; visibility:hidden;
-  transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s linear .28s;
-}
-.menu-cat.open > .menu-cat-wrap{
-  grid-template-rows:1fr; visibility:visible;
-  transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1), visibility 0s;
-}
-.menu-cat-list{min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; padding-bottom:6px;}
-.menu-cat-list a{font-family:var(--disp); font-style:italic; font-size:clamp(20px,2vw,27px); line-height:1.12; color:var(--ink); text-decoration:none; transition:color .15s ease, opacity .15s ease;}
+   what actually keeps collapsed links out of the tab order. The open state
+   INHERITS visibility rather than forcing it visible: a forced `visible` on a
+   child wins over the closed panel's `hidden`, which put the five project links
+   back in the tab order of a closed menu (found 2026-11-02). */
+/* 3 Nov 2026: the height no longer animates (grid-template-rows re-lays out the
+   panel every frame; the site animates only transform and opacity). The space
+   opens in one step and the links fade and settle in, as the info panel does. */
+.menu-cat-wrap{display:grid; grid-template-rows:0fr; visibility:hidden;}
+.menu-cat.open > .menu-cat-wrap{grid-template-rows:1fr; visibility:inherit;}
+.menu-cat-list{min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; padding-bottom:6px;
+  opacity:0; transform:translateY(-6px); transition:opacity .24s ease, transform .28s cubic-bezier(.2,.8,.2,1);}
+.menu-cat.open > .menu-cat-wrap > .menu-cat-list{opacity:1; transform:none;}
+.menu-cat-list a{font-family:var(--disp); font-style:italic; font-size:clamp(20px,2vw,27px); line-height:1.12; color:var(--ink); text-decoration:none; transition:opacity .15s ease;}
 .menu-cat-list a:hover, .menu-cat-list a:focus-visible{color:var(--red);}
+/* PHONE MENU TAP TARGETS (3 Nov 2026, axe target-size, menu open at 360 / 390).
+   Under 1000px the links are 20px at line-height 1.12, 22.4px boxes 2px apart.
+   2px of padding top and bottom makes each 26.4px; the words do not move
+   relative to each other by more than the 4px. The category headings get a
+   24px floor the same way. Same breakpoint as the clamp's 20px floor. */
+@media (max-width:1000px){
+  .menu-cat-list a{padding:2px 0;}
+  .menu-head{min-height:24px;}
+}
+/* the hover / focus red is the big-italic red only where the links are large
+   text (24px and up, 1200px wide and over); smaller, the small-text red
+   (--red #e2191b was 3.84:1 at 20px on the phone, focus-visible) */
+@media (max-width:1199px){
+  .menu-cat-list a:hover, .menu-cat-list a:focus-visible{color:var(--red-text);}
+}
 /* the project you are already looking at, marked with a red rule rather than a
    colour change so it doesn't read as a hover state */
-.menu-cat-list a.is-here{opacity:.55;}
+.menu-cat-list a.is-here{opacity:.68;}   /* .55 was 3.8:1 at 20px (axe, menu open); .68 is about 5.6:1. The red dash still marks it (2026-11-03) */
 .menu-cat-list a.is-here::before{content:""; display:inline-block; width:14px; height:1px; background:var(--red); vertical-align:middle; margin-right:7px;}
 
 @media (prefers-reduced-motion:reduce){
   .menu-cat-wrap, .menu-cat.open > .menu-cat-wrap, .menu-head-mark::before, .menu-head-mark::after{transition:none;}
+  .menu-cat-list{transform:none; transition:opacity .24s ease;}
 }
 
 .menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px; margin-top:9px;}
-.menu-links a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-decoration:none; transition:color .15s ease;}
-.menu-links a:hover, .menu-links a:focus-visible{color:var(--red);}
+.menu-links a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-decoration:none; padding:6px 0;}   /* padding: 32px rows to tap; colour switches on hover, not animated */
+.menu-links a:hover, .menu-links a:focus-visible{color:var(--red-text);}
 
-.page{opacity:0; transition:opacity 500ms ease;}
+.page{opacity:.002; transition:opacity 500ms ease;}
 body.ready .page{opacity:1;}
 
 /* ---------- LOADER (logo mark: static fallback + JS-driven 3D spin) ---------- */
@@ -249,7 +293,7 @@ body.ready #loader{opacity:0; pointer-events:none; visibility:hidden; transition
 /* 2026-10-07: was a centred 1100px column. Now on the same left margin as the
    project pages, so About, Solutions and Contact line up with the rest of the site. */
 .wrap{max-width:none; margin:0; padding:150px var(--mar) 120px;}
-.lead{font-size:22px; max-width:60ch; text-align:justify; text-align-last:left;}
+.lead{font-size:22px; max-width:min(var(--w-desc), 37.5ch); text-align:justify; text-align-last:left;}
 .eyebrow{display:block; font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft);}
 .wrap hr{border:0; height:1px; background:var(--ink); opacity:.16; max-width:60ch; margin:18px 0 26px;}
 
@@ -269,7 +313,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    hand before this class existed). Width still comes from --w-desc or
    whatever container it's in (image cell, hero-aside column, etc), so it
    never runs past that edge either way. */
-.desc{font-size:15px; line-height:1.42; letter-spacing:-.006em; color:var(--ink); max-width:var(--w-desc); text-align:justify; text-align-last:left;}
+.desc{font-size:15px; line-height:1.42; letter-spacing:-.006em; color:var(--ink); max-width:min(var(--w-desc), 37.5ch); text-align:justify; text-align-last:left;}
 .desc.side-right{text-align-last:right;}
 .teaser{font-family:var(--disp); font-style:italic; font-size:clamp(17px,1.5vw,21px); color:var(--ink); max-width:var(--w-teaser); line-height:1.12; margin-bottom:12px; text-align:justify; text-align-last:left;}
 
@@ -300,7 +344,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    transform only, the site rule for anything animated. */
 .info-panel{display:none; width:100%;}
 .info-panel.open{display:block;}
-.info-panel-in{display:block; font-size:13px; line-height:1.6; color:var(--ink-soft); max-width:var(--w-desc); text-align:justify; text-align-last:left;
+.info-panel-in{display:block; font-size:13px; line-height:1.6; color:var(--ink-soft); max-width:min(var(--w-desc), 37.5ch); text-align:justify; text-align-last:left;
   margin-top:var(--txt-gap); animation:info-in .32s ease both;}
 @keyframes info-in{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:none;}}
 @media (prefers-reduced-motion: reduce){ .info-panel-in{animation:none;} }
@@ -352,7 +396,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .comp-info{display:inline-flex; align-items:center; gap:clamp(3px,.65cqw,6px); padding:3px 0; background:none; border:0; cursor:pointer; font-family:var(--body); color:var(--ink);}
 .comp-name{font-size:clamp(10px,2.1cqw,13px); letter-spacing:clamp(.05em,.9cqw,.14em); text-transform:uppercase; white-space:nowrap; text-shadow:0 0 4px var(--paper),0 0 4px var(--paper),0 0 4px var(--paper);}
 .comp-info img{width:clamp(8px,1.3cqw,12px); height:auto; display:block; flex:0 0 auto;}
-.comp-info:hover .comp-name,.comp-label.open .comp-name{color:var(--red);}
+.comp-info:hover .comp-name,.comp-label.open .comp-name{color:var(--red-text);}
 .comp-panel{position:absolute; left:0; top:calc(100% + 6px); width:max-content; max-width:min(260px,60vw); background:var(--paper); border:1px solid rgba(20,20,20,.16); padding:11px 13px; display:none; z-index:5; box-shadow:0 8px 30px rgba(0,0,0,.12);}
 .comp-label.open .comp-panel{display:block;}
 .comp-panel-name{display:block; font-family:var(--disp); font-style:italic; font-size:clamp(15px,1.5vw,19px); line-height:1.1; margin-bottom:6px; color:var(--ink);}
@@ -437,19 +481,21 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .hero-main{grid-column:1 / 7; grid-row:1; align-self:start; position:relative; cursor:zoom-in;}
 /* same rule as the gallery: transform animates, filter snaps. See the note on
    .hero-gallery .gthumb img below. */
-.hero-main img{display:block; width:100%; height:auto; object-fit:contain; transform:translateZ(0); backface-visibility:hidden; transition:transform .35s ease; filter:saturate(.97);}
-.hero-main:hover img{transform:scale(1.035) translateZ(0); filter:saturate(1.05);}
+.hero-main img{display:block; width:100%; height:auto; object-fit:contain; transform:translateZ(0); backface-visibility:hidden; transition:transform .35s ease-out; filter:saturate(.97);}
+.hero-main:hover img{transform:scale(1.035) translateZ(0);}   /* 3 Nov 2026: the filter no longer changes on hover (a new filter value re-rasters the promoted photo on every hover; Windows, fractional DPR). The resting saturate(.97) is the only one */
 /* specs + INQUIRE share one row directly under the hero image (same width as
    the image); the red inquire block sits at the row's far right. */
 .hero-specs{grid-column:1 / 7; grid-row:2; align-self:start; display:flex; flex-wrap:wrap; align-items:center; gap:3px 16px; font-size:13px; letter-spacing:.04em; line-height:1.35; text-transform:uppercase; color:var(--ink);}
 .hero-specs .sp{white-space:nowrap;}
+/* the availability line may wrap (js/project.js sets it white-space:normal); balanced, so it never leaves one word ("is.") alone (3 Nov 2026) */
+.hero-specs .av{text-wrap:balance;}
 .hero-specs .inq{margin-left:auto; margin-top:0;}
 /* material chips: single words, each a link to its Material Guide entry.
    Sits directly under the specs line, same terse register. */
 .hero-materials{grid-column:1 / 7; grid-row:3; align-self:start; margin-top:var(--txt-gap); font-size:13px; letter-spacing:.1em; text-transform:uppercase;}
-.hero-materials a{color:var(--ink); text-decoration:none; padding-bottom:1px; border-bottom:1px solid transparent; transition:color .15s ease, border-color .15s ease;}
-.hero-materials a:hover{color:var(--red); border-color:var(--red);}
-.hero-materials .sep{margin:0 8px; color:var(--ink-soft); opacity:.5;}
+.hero-materials a{display:inline-block; white-space:nowrap; color:var(--ink); text-decoration:none; padding-bottom:1px; border-bottom:1px solid transparent;}   /* hover switches, not animated (3 Nov 2026) */
+.hero-materials a:hover{color:var(--red-text); border-color:var(--red-text);}
+.hero-materials .sep{margin:0 8px; color:var(--ink-soft); opacity:.62;}   /* .62: 4.8:1, every text node AA (was .5, 3.3:1), 3 Nov 2026 */
 /* title + teaser + summary column beside the image: a comfortable ~5-column
    measure, TOP-aligned and flowing naturally (title, then teaser, then the
    justified summary). No bottom-pinning - that forced a cramped 2-column
@@ -461,29 +507,59 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* title large, tagline small - sized so the two lines read at the same width.
    Tune font-size + tagline max-width to match widths exactly for a given title. */
 .hero-title{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(56px,8vw,124px); line-height:.9; letter-spacing:-.02em; margin:0;}
-.hero-tagline{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(18px,1.9vw,26px); line-height:1.2; max-width:22ch; margin:15px 0 0; color:var(--ink);}
+.hero-tagline{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(18px,1.9vw,26px); line-height:1.2; max-width:24ch; margin:15px 0 0; color:var(--ink);}
 /* bottom row: paragraph on the left, video pushed out to the right page margin,
    both bottom-aligned so their baselines sit level with the image's bottom. */
 .hero-aside-btm{display:flex; align-items:flex-end; gap:clamp(16px,2vw,34px);}
-.hero-aside-btm .desc{flex:0 1 auto; max-width:30ch; margin:0;}
+.hero-aside-btm .desc{flex:0 1 auto; max-width:min(var(--w-desc), 37.5ch); margin:0;}   /* was its own 30ch cap; one lever now (the video beside it still bounds it at 1440) */
 /* video is large but right-aligned to the content edge (margin-left:auto), so
    enlarging it never pushes past the page margin. */
 /* pure vw (no px cap) so the video holds a constant size across zoom */
 .hero-aside-btm .hero-vid{flex:0 0 auto; width:20vw; max-width:100%; margin-left:auto;}
+/* 2026-11-03 (review 2 Nov (2) finding 5, Q10 "shrink"): WHEN A VIDEO SITS BESIDE
+   THE PARAGRAPH, THE VIDEO GIVES WAY FIRST. The paragraph keeps at least 31ch and
+   at most its own --w-desc; the video takes what is left, aiming at about 140-150px
+   at 1180 and growing to the old 20vw by about 1700. Keyed on the video's presence
+   (:has), so products without one keep the plain rule above. If even 31ch plus a
+   140px video do not fit (about 900-1160px wide) the row wraps and the video drops
+   under the paragraph, still at the right margin. Widths only: type and
+   alignment are untouched. */
+.hero-aside-btm:has(.hero-vid){flex-wrap:wrap;}
+.hero-aside-btm:has(.hero-vid) .desc{flex:0 0 clamp(31ch, 100% - clamp(16px,2vw,34px) - clamp(140px, 31.6vw - 233px, 20vw), min(var(--w-desc), 37.5ch)); min-width:min(31ch,100%);}   /* min-width outranks the max-width js/main.js fits (it may narrow up to 15%), so 31ch holds */
+.hero-aside-btm:has(.hero-vid) .hero-vid{flex:1 1 clamp(140px, 31.6vw - 233px, 20vw); width:auto; max-width:20vw; min-width:0;}
+/* 901-1165px: 31ch plus a 140px video no longer fit side by side, and a video
+   wrapped under the paragraph made the aside taller than the photo (140px of
+   empty space above the specs at 1024). In this band the video leaves the
+   paragraph's row and hangs at the right edge directly under the aside, in
+   the empty space beside the specs and chips (rows 2-3 of the hero are at
+   least 180px tall here; the video is 20vw x 16:9, about 115-130px). The
+   paragraph then takes its full --w-desc. */
+@media (min-width:901px) and (max-width:1165px){
+  .hero-aside:has(.hero-vid){position:relative;}
+  .hero-aside-btm:has(.hero-vid) .desc{flex:0 1 auto;}
+  .hero-aside-btm:has(.hero-vid) .hero-vid{position:absolute; top:calc(100% + 22px); right:0; width:20vw; max-width:100%; margin:0;}
+}
 .hero-aside-btm .hero-vid .fig{margin:0; width:100%;}
 /* the hero description now inherits the shared .desc justify + left-last-line
    default (it was overriding text-align to plain left before, which meant
    this specific paragraph wasn't actually justified at all - a leftover
    inconsistency, hero-aside is attached to the hero image on its LEFT so
    left is the correct last-line side, it just needed the justify back). */
-.inq{display:inline-block; margin-top:12px; font-size:13px; letter-spacing:.2em; text-decoration:none; color:#fff; background:var(--red); padding:7px 13px; transition:opacity .2s;}
-.inq:hover{opacity:.82;}
+/* INQUIRE and the other button-links. The look (outline at rest, solid red on
+   hover / focus / press) is the ONE BUTTON STYLE block near the end of this file. */
+.inq{display:inline-block; margin-top:12px;}
 /* READ MORE: a single italic button at the bottom of the storefront content
    that reveals the fuller process / portfolio section below it, on the same
    page. Styled as a quiet mark, not a filled button. */
 .readmore{margin-top:52px; padding:0 var(--mar); display:flex; justify-content:center; position:relative; z-index:2;}   /* above the mechanism iframe, whose cropped bottom margin can reach it */
-.read-more-link{font-family:var(--disp); font-style:italic; font-size:clamp(16px,1.9vw,26px); color:var(--ink); background:none; border:0; border-bottom:1px solid var(--red); padding:0 0 2px; cursor:pointer; text-decoration:none; transition:color .18s ease;}
+.read-more-link{position:relative; font-family:var(--disp); font-style:italic; font-size:clamp(16px,1.9vw,26px); color:var(--ink); background:none; border:0; border-bottom:1px solid var(--red); padding:8px 0 2px; cursor:pointer; text-decoration:none;}
+/* tap target: 8px of padding above, and the hit box runs 8px under the rule
+   without moving the rule away from the text */
+.read-more-link::after{content:""; position:absolute; left:0; right:0; top:0; bottom:-8px;}
 .read-more-link:hover{color:var(--red);}
+/* under 24px (the clamp passes 24 at about 1263px wide) the hover is small
+   text: the small-text red (3 Nov 2026, a11y A4) */
+@media (max-width:1263px){ .read-more-link:hover, .read-more-link:focus-visible{color:var(--red-text);} }
 /* the process section starts hidden and fades in when Read more is pressed */
 .proc-reveal[hidden]{display:none;}
 .proc-reveal{opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease;}
@@ -528,9 +604,9 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    other animated property makes the browser re-rasterize the image on EVERY
    frame, which on a photo this large is what reads as choppy.
 
-   1. `filter` is NOT in the transition list. It still changes on hover, it just
-      snaps instead of animating - imperceptible going from .94 to 1.05, and it
-      takes a per-frame raster down to a single one.
+   1. `filter` does not change on hover at all (3 Nov 2026; it used to snap
+      from .94 to 1.05, which still cost one re-raster of the layer per hover,
+      the likely Windows stutter). One constant saturate(.94).
    2. Promotion is PERMANENT, via translateZ(0) in the resting transform, and
       `will-change` is not used at all. Toggling will-change on hover (which an
       earlier version did, scoped to the gallery) makes Chrome rebuild the
@@ -549,9 +625,9 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    translateZ(0) in the resting transform already gives the element a permanent
    layer, so the hint added nothing and cost that flash. Promote once, stay
    promoted, animate transform only. */
-.hero-gallery .gthumb img{display:block; width:100%; height:auto; filter:saturate(.94); transform-origin:center center; transform:translateZ(0); backface-visibility:hidden; transition:transform .3s ease;}
+.hero-gallery .gthumb img{display:block; width:100%; height:auto; filter:saturate(.94); transform-origin:center bottom; transform:translateZ(0); backface-visibility:hidden; transition:transform .3s ease-out;}
 .hero-gallery .gthumb:hover{opacity:1; z-index:6;}
-.hero-gallery .gthumb:hover img{transform:scale(1.35) translateZ(0); filter:saturate(1.05);}
+.hero-gallery .gthumb:hover img{transform:scale(1.1) translateZ(0);}   /* 3 Nov 2026 (Owen: "only expand by a little bit, like 10%"; was 1.35). It grows UP from its bottom edge (transform-origin above) into the 64px gap over the gallery, so it never reaches the how-it-works paragraph under it (from the centre it covered 2-10px of it at 1024-1920). Filter constant at .94, see .hero-main:hover img */
 
 /* ---------- MODEL + MECHANISM, SIDE BY SIDE ----------
    2026-07-22: restructured from two stacked sections (model above,
@@ -669,11 +745,20 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .cad-stage model-viewer:hover{transform:translate(-50%,-50%) rotate(-2deg) scale(.97);}
 /* click-to-interact cue: shown until the model is engaged, then fades. Sits at
    the bottom of the slot box, above the model, ignores pointer input itself. */
-.mv-hint{position:absolute; left:50%; bottom:8px; transform:translateX(-50%); z-index:4;
+/* 2026-11-02: the hint is the FIRST child of .mv-bar (the control row under
+   the stage), a static line of its own above the buttons (flex-basis:100%),
+   not a label drawn on the model. It only ever fades (opacity), so the row
+   never reflows when the model is engaged. */
+.mv-hint{flex:0 0 100%; width:auto; margin:0;
   font-family:var(--body); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
   color:var(--ink-soft); pointer-events:none; opacity:.75; transition:opacity .3s ease; white-space:nowrap;}
 .cad-stage.mv-framed model-viewer{opacity:1;}
+/* mv-live is set on .cad-stage (project.html); the hint lives in its sibling
+   .mv-bar, so the fade is keyed on the shared parent. The old in-stage rule
+   stays for markup that still appends the hint to the stage. Two rules, not
+   one list: a browser without :has() would drop the whole list. */
 .cad-stage.mv-live .mv-hint{opacity:0;}
+.cad-hiw-model:has(.cad-stage.mv-live) .mv-hint{opacity:0;}
 /* OFF-SCREEN: stop the model costing the compositor anything while you are
    reading somewhere else on the page. The element is 130vw x five --model-slot
    rows - about 6.5 megapixels - and even with nothing being redrawn (auto-rotate
@@ -684,55 +769,57 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    contents, so coming back is instant with no redraw. Toggled from project.html
    at 100% viewport margin, so it is always visible well before you reach it. */
 .cad-stage.mv-offscreen model-viewer{visibility:hidden;}
-/* WARM-UP (2026-10-05): while the loading screen is up, the model is pinned to
-   the middle of the viewport (same size, behind the loader, inside the hidden
-   page) so model-viewer draws its first frame there. Removed at the reveal. */
-.cad-stage.mv-warm model-viewer{position:fixed; transition:none;}
+/* KEYBOARD FOCUS ON THE MODEL (3 Nov 2026, a11y A2). The viewer element is far
+   bigger than its stage (it floods the row, partly off screen), so a ring on
+   the element itself would be mostly out of view: the ring goes on the stage,
+   the box the model is framed in. Keyed on :focus-within: model-viewer puts
+   focus on its own input box inside its shadow root, so the host never
+   matches :focus-visible; a mouse press does not focus it (measured, OMNI
+   1440), so in practice only the keyboard draws the ring. A browser without
+   :has() draws no ring, as before.
+   It is a drawn frame (::before), not an outline: Chromium wraps an outline
+   round the flooding, tilted viewer too, which drew a page-sized slanted box. */
+.cad-stage:has(model-viewer:focus-within)::before{content:""; position:absolute; inset:-4px; z-index:2; border:2px solid var(--ink); pointer-events:none;}
+/* COMPONENT LABEL KEPT OFF ITS PART (hook for js/project.js, 3 Nov 2026,
+   layout D2): when compSpread() finds an .on-img label would sit on the part's
+   pixels it adds .to-gut, and the label moves into the gutter at the left of
+   the photo, level with the part (top unchanged), at the gutter's own fraction
+   --fg (default 0). General: no label is named. */
+.comp-label.on-img.to-gut{left:calc((100% - var(--spread-img)) * var(--fg, 0));}
 /* the controls and the mechanism half stay ABOVE the flooding model */
 .mv-bar{position:relative; z-index:3;}
 .cad-hiw-mech{z-index:3;}
-/* two rows: EXPLODED VIEW + RESET on top, LIGHT ON / OFF under them */
-.mv-bar{display:flex; flex-direction:column; align-items:flex-start; gap:clamp(8px,1vw,12px); padding:0 var(--mar);}
+/* one wrapping row at every width (2026-11-02; it was two rows, which left
+   RESET and LIGHT ON stacked alone when a product has no exploded view) */
+.mv-bar{display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:10px; padding:0 var(--mar);}
 /* tighter than the old text buttons needed: these are blocks now, so the gap
    between them reads as a gap rather than as word spacing. */
-.mv-bar .mv-left,.mv-bar .mv-mid{display:flex; gap:clamp(8px,1vw,12px); flex-wrap:wrap; align-items:center;}
-/* Same block as .inq (INQUIRE) and .mv-ar (VIEW IN YOUR SPACE): white on red,
-   12px, .16em tracking, 8px/14px padding. These used to be quiet ink text that
-   turned red when active; as red blocks the ACTIVE state needs somewhere else
-   to go, so it inverts to ink. Red = available, ink = currently on. */
-.mv-btn,.mv-sel{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; border-radius:0; transition:opacity .15s ease, background-color .15s ease;}
-.mv-btn:hover,.mv-sel:hover{color:#fff; opacity:.82;}
-.mv-btn.active{background:var(--ink); color:#fff;}
-.mv-sel{padding-right:30px; -webkit-appearance:none; appearance:none; border-bottom:0;
-  background-image:linear-gradient(45deg,transparent 50%,#fff 50%),linear-gradient(135deg,#fff 50%,transparent 50%);
+.mv-bar .mv-left,.mv-bar .mv-mid{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+/* Same button as .inq (INQUIRE) and .mv-ar (VIEW IN YOUR SPACE): the ONE
+   BUTTON STYLE block near the end of this file. EXPLODED VIEW and LIGHT are
+   toggles (solid red while on), RESET an action (solid red on hover). */
+/* look and states: ONE BUTTON STYLE block near the end of this file */
+.mv-sel{padding-right:29px; -webkit-appearance:none; appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--red-text) 50%),linear-gradient(135deg,var(--red-text) 50%,transparent 50%);
   background-position:calc(100% - 17px) calc(50% + 1px),calc(100% - 12px) calc(50% + 1px);
   background-size:5px 5px,5px 5px; background-repeat:no-repeat;}
 .mv-sel option{color:var(--ink); background:var(--paper);}
-/* ---- AR row -------------------------------------------------------------
-   Sits in NORMAL FLOW directly above .cad-stage. It used to be slotted inside
-   <model-viewer> at position:absolute;right:0 - but that element is ~1500px
-   wide and overflows its slot on purpose, so right:0 landed the button off the
-   right edge of the window and widened the page on Safari. Keeping it in flow
-   here means it can only ever sit above the model, whatever the model does.
-   The button is hidden until project.html decides what it does: launch AR on a
-   phone, or open the QR panel on a desktop. */
-/* PINNED OVER THE MODEL, and taking no space in the flow.
-   Owen wants VIEW IN YOUR SPACE reading as a label printed on the render, not
-   as another control in the bar. In normal flow it did that, but it also
-   occupied ~50px above .cad-stage, and every pixel it took pushed the stage
-   down and came straight off the model's overlap with the gallery above, one
-   for one - measured, that overlap fell from 238 to 172px at 1920 and from 62
-   to 7px on a phone, which is most of the effect Owen asked for in the first
-   place. A fixed negative margin cannot compensate, because the row collapses
-   to zero height while the button is still hidden (the script decides at click
-   time whether it launches AR or opens the QR panel).
-   Absolute against .cad-hiw-model instead: the stage keeps the top of the
-   column, the button floats over the model's upper half, and the z-index keeps
-   it printed on top rather than behind. The QR panel still hangs off this row,
-   so nothing about that changes. */
-.mv-ar-row{position:absolute; top:0; left:0; z-index:6; display:flex; flex-direction:column; align-items:flex-start; padding:0 var(--mar);}
-.mv-ar{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; transition:opacity .15s ease;}
-.mv-ar:hover{opacity:.82;}
+/* VIEW IN YOUR SPACE in the control bar (wave 2, template session): the group
+   ends the row at the right, and the QR panel hangs UP from the button over
+   the model, so opening it moves nothing. Phones: left with the others. */
+.mv-arw{position:relative; display:flex; align-items:center; gap:10px; margin-left:auto;}
+.mv-arw .mv-qr{top:auto; bottom:100%; left:auto; right:0; margin:0 0 10px;}
+@media (max-width:900px){ .mv-arw{margin-left:0;} .mv-arw .mv-qr{left:0; right:auto;} }
+/* 3 Nov 2026 (layout D3): hung from the button, the panel covered LIGHT ON
+   and the hint at 1024 and RESET / LIGHT ON at 360 / 390 whenever the row had
+   wrapped onto two lines. It now hangs from the WHOLE control row (.mv-bar is
+   the positioned box), so it always opens above the hint and every button,
+   over the model, and still moves nothing. Right edge on the row's padding
+   where VIEW IN YOUR SPACE ends the row; left edge on the margin under 900px,
+   where the row wraps and the button starts a line at the left. */
+.mv-bar .mv-arw{position:static;}
+.mv-bar .mv-arw .mv-qr{right:var(--mar);}
+@media (max-width:900px){ .mv-bar .mv-arw .mv-qr{left:var(--mar); right:auto;} }
 .mv-ar[hidden]{display:none;}
 /* QR panel. ABSOLUTE, hanging off the bottom of the button, so opening it
    floats OVER the model instead of pushing the model (and everything under it)
@@ -756,7 +843,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    edge; its own mode buttons + mode description live inside it, bottom
    right. The one short line of copy (if any) sits above the graphic as a
    small caption-weight block. */
-.hiw-text{padding:0 var(--mar); max-width:var(--w-desc);}
+.hiw-text{padding:0 var(--mar); max-width:min(var(--w-desc), 37.5ch);}
 /* set by alignHiw() in project.html when the gallery column above forces the
    paragraph narrower than the site's normal measure - justification at ~20ch
    is all rivers. */
@@ -773,7 +860,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    is transparent up top, so the copy stays fully readable over the graphic.
    Knobs: the -clamp(...) margin-top is how far it underlaps; the +6vw / -6vw
    pair is how much bigger it gets. */
-.cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-text{position:relative; z-index:2;}
+.cad-hiw-mech .hiw-text{position:relative; z-index:2;}   /* every row (w2): the paragraph stays above the mechanism iframe's box, so it can be selected */
 .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech{position:relative; z-index:1;
   /* THE DRAWN ROOM FILLS THE COLUMN EXACTLY, edge to edge.
      The canvas carries a transparent buffer around the artwork so the lamp's
@@ -826,9 +913,6 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    again, re-check that .readmore still clears the graphic's bottom edge. */
 .cad-hiw.solo-mech .cad-hiw-mech .hiw-graphic.has-mech{position:relative; z-index:1;
   margin-top:-13%; margin-bottom:-5%; margin-left:-9%; margin-right:-9%;}
-.fignotes{list-style:none;}
-.fignotes li{position:relative; padding:0 0 16px 22px; font-size:14px; line-height:1.45; max-width:var(--w-desc);}
-.fignotes .fn{position:absolute; left:0; top:1px; font-size:11px; letter-spacing:.1em; color:var(--red);}
 /* the interactive mechanism sits on the paper with no frame; height synced from inside */
 .mech-frame{width:100%; border:0; background:transparent; display:block; min-height:60vh;}
 /* NOTE: min-height above is close to decorative - the iframe reports its own
@@ -844,10 +928,10 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    PROCESS instead of its own section - the per-material chips moved up under
    the hero image, see .hero-materials). Same family as .proc-note. ---------- */
 /* no rules/boxes per the site's art direction: hierarchy is colour + spacing only */
-.matl-tags{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); line-height:1.7; margin-bottom:10px;}
+.matl-tags{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--red-text); line-height:1.7; margin-bottom:10px;}
 .matl-note .desc{margin-bottom:10px;}
 .matl-link{display:inline-block; font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none;}
-.matl-link:hover{color:var(--red);}
+.matl-link:hover{color:var(--red-text);}
 
 /* ---------- SCATTER SECTIONS (full-bleed, edge to edge) ----------
    The PROCESS scatter is a real 12-column grid with dense auto-flow: each
@@ -857,27 +941,15 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    offsets, full-bleed bands) while making overlap impossible - there are no
    hand-set margin-top offsets or negative shifts that can collide. */
 .proc{margin-top:40px; width:100vw; margin-left:calc(50% - 50vw);}
-.aesth{margin-top:var(--sec); width:100vw; margin-left:calc(50% - 50vw);}
-.aesth>.lbl{padding:0 var(--mar); margin-bottom:clamp(40px,7vh,90px);}
 .scatter{display:grid; grid-template-columns:repeat(12,1fr); grid-auto-flow:row dense; column-gap:var(--gut); row-gap:64px; align-items:start; padding:0 var(--mar);}
 .scatter.big{row-gap:84px;}
 .scatter .cell{min-width:0;}
-/* captions hug the side of the cell nearest the page edge */
-.scatter .cell.cap-right{text-align:right;}
-.scatter figcaption.cap-right{text-align:right; margin-left:auto;}
 /* let bleed cells run past the page margin to touch the edge */
 .scatter .cell[style*="grid-column:1 /"]{margin-left:calc(var(--mar) * -1); padding-left:0;}
 .scatter .cell[style*="/ -1"]{margin-right:calc(var(--mar) * -1);}
 /* keep captions on edge-hugging cells off the very edge so no letters clip */
 .scatter .cell[style*="grid-column:1 /"] figcaption{padding-left:6px;}
 .scatter .cell[style*="/ -1"] figcaption{padding-right:6px;}
-.scatter figcaption.cap-left{padding-left:2px;}
-.scatter figcaption.cap-right{padding-right:2px;}
-/* a caption that sits ON the image instead of under it */
-.cell.cap-over{position:relative;}
-.cell.cap-over figcaption.cap{position:absolute; bottom:8px; margin-top:0; max-width:70%; padding:4px 7px; background:rgba(233,231,226,.9); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); color:var(--ink);}
-.cell.cap-over figcaption.cap-left{left:8px; padding-left:7px;}
-.cell.cap-over figcaption.cap-right{right:8px; margin-left:0; padding-right:7px;}
 
 
 /* The .viewer block that used to sit here (a frameless three.js viewer with its
@@ -909,7 +981,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   .hero-title{margin-bottom:10px; font-size:clamp(40px,13vw,76px);}
   .hero-tagline{max-width:none;}
   .hero-aside-btm{display:block;}
-  .hero-aside-btm .desc{margin-left:0; text-align:justify; text-align-last:left; max-width:none;}
+  .hero-aside-btm .desc{margin-left:0; text-align:justify; text-align-last:left; max-width:min(var(--w-desc), 37.5ch);}   /* 3 Nov 2026: the site measure in one column too (was none: 54-63 characters at 820) */
   .hero-aside-btm .hero-vid{width:min(100%,360px); margin:clamp(16px,4vw,28px) 0 0;}
   .hero-gallery{grid-row:auto;}
   /* model + mechanism stack back to one column on small screens - side by
@@ -958,7 +1030,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   /* row, not column: as text these could stack down the page and still read
      as a list, but as solid blocks a vertical stack is a wall of red. display:
      contents flattens the two groups so every control wraps in one flow. */
-  .mv-bar{flex-direction:row; flex-wrap:wrap; align-items:center; gap:10px; margin-top:14px;}
+  .mv-bar{margin-top:14px;}
   .mv-bar .mv-left,.mv-bar .mv-mid{display:contents;}
   /* AR row is in normal flow now, so nothing to reposition - just let the QR
      panel (desktop-only anyway) wrap rather than squeeze on a narrow window. */
@@ -973,7 +1045,13 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      everything sized off --hdr (logo, burger, wordmark, running title)
      scales down with this one value. Revert by deleting this line. */
   :root{--hdr:30px;}
-  #burger{display:block;}
+  /* a 44px button around the 30px glyph (border-box: the padding is the
+     difference), pulled out by the same 7px so the glyph does not move. 44px
+     since 3 Nov 2026: it is the only navigation on a phone (was 36px). */
+  #burger{display:block; width:44px; height:44px; padding:7px; top:calc(var(--hdr-top) - 7px); right:calc(var(--mar-edge) - 7px);}
+  /* the footer's menu button: the same 44px box, cancelled out of the row by
+     negative margins, so the 30px mark stays exactly where it was */
+  .foot-burger{width:44px; height:44px; padding:7px; margin:-7px;}
   .site-home{left:var(--mar-edge);}
   .proj{padding-top:92px;}
   .scatter{grid-template-columns:repeat(2,1fr);}
@@ -999,12 +1077,14 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    judgement applied everywhere the measure gets that short. */
 @media (max-width:600px){
   .desc, .teaser, .lead, .info-panel-in,
-  .matg-intro, .matcat-intro-text, .matitem-text, .matgroup-intro{
+  .matg-intro, .matitem-text{
     text-align:left; text-align-last:left;
   }
 }
 
-@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto;} .page{transition:none;} }
+/* html is named on its own: html{scroll-behavior:smooth} above outranks a bare *
+   (finding 11, 2 Nov (2)), so reduced motion never stopped the glide. */
+@media (prefers-reduced-motion:reduce){ html, *{scroll-behavior:auto;} .page{transition:none;} }
 
 /* ---------- LIGHTBOX: click the hero image or any gallery thumb to open a
    near-fullscreen viewer with prev/next arrows + arrow-key cycling through
@@ -1032,17 +1112,18 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .lb-close,.lb-prev,.lb-next{
   position:fixed; z-index:301; background:none; border:0; padding:0; margin:0;
   color:#eceae5; font-family:var(--body); cursor:pointer; -webkit-tap-highlight-color:transparent;
-  transition:color .15s ease, opacity .15s ease;
+  transition:opacity .15s ease;
 }
-.lb-close:hover,.lb-prev:hover,.lb-next:hover{color:var(--red);}
-.lb-close{top:22px; right:26px; font-size:9px; letter-spacing:.16em; text-transform:uppercase;}
-.lb-prev,.lb-next{top:50%; transform:translateY(-50%); font-size:22px; line-height:1; padding:14px 10px;}
+.lb-close:hover,.lb-prev:hover,.lb-next:hover{color:var(--red-on-dark);}   /* --red was 3.88:1 on the #141311 box at 9px (axe, FLOW lightbox) */
+/* tap targets: CLOSE about 90x40 (the word stays where it was), arrows 44x60 */
+.lb-close{top:10px; right:14px; padding:12px; font-size:9px; letter-spacing:.16em; text-transform:uppercase;}
+.lb-prev,.lb-next{top:50%; transform:translateY(-50%); width:44px; height:60px; padding:0; display:flex; align-items:center; justify-content:center; font-size:22px; line-height:1;}
 .lb-prev{left:6px;}
 .lb-next{right:6px;}
 .lb-prev[disabled],.lb-next[disabled]{opacity:.25; cursor:default;}
 .lb-count{position:fixed; z-index:301; bottom:22px; left:50%; transform:translateX(-50%); font-size:8.5px; letter-spacing:.16em; color:#eceae5; opacity:.65;}
 @media (max-width:640px){
-  .lb-prev{left:2px; padding:12px 8px;} .lb-next{right:2px; padding:12px 8px;}
+  .lb-prev{left:2px;} .lb-next{right:2px;}
   .lightbox{padding:16px;}
 }
 
@@ -1110,11 +1191,16 @@ figcaption.cap{margin-top:6px; max-width:100%;}
    break. 2026-10-07: loosened to the print standard (words of 6+ letters, at
    least 3 letters each side of the hyphen) and applied to every justified
    block, which closes most of the remaining gaps. */
-.desc, .teaser, .lead, .info-panel-in{-webkit-hyphens:auto; hyphens:auto; hyphenate-limit-chars:6 3 3;}
+.desc, .teaser, .info-panel-in{-webkit-hyphens:auto; hyphens:auto; hyphenate-limit-chars:5 3 2;}
+/* 2026-11-02: 5 3 2 lets "residential", "transient", "plastic" break. The lead is
+   a heading: it never auto-hyphenates (it stays justified). */
+.lead{-webkit-hyphens:manual; hyphens:manual;}
 /* product status, in the spec line: a small red square then the state, the way
    a drawing's title block carries its revision */
-.hero-specs .st{display:inline-flex; align-items:center; gap:7px; white-space:nowrap;}
-.hero-specs .st::before{content:""; width:7px; height:7px; background:var(--red); flex:none;}
+.hero-specs .st{display:inline-flex; align-items:flex-start; gap:7px; white-space:nowrap;}
+/* the square sits on the FIRST line (centred in its 17.5px line box), so a
+   status that wraps on a phone keeps it beside the first word */
+.hero-specs .st::before{content:""; width:7px; height:7px; margin-top:5px; background:var(--red); flex:none;}
 /* a long status (KART) ran 6px off a phone screen: let it wrap there */
 @media (max-width:600px){ .hero-specs .st{white-space:normal;} }
 /* the status and INQUIRE always start the second line of the spec row, so the
@@ -1129,6 +1215,21 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   .hero-aside-btm{grid-column:1 / 13; order:1;}
   .hero-title{margin-bottom:0;}
 }
+/* PROCESS NOTES UNDER 1300px (3 Nov 2026, measure exit test): the two Read more
+   notes sit on 4 of the 12 columns (js/project.js), which is 20 to 29
+   characters a line from 820 to 1180. Here they take 6, keeping their side:
+   the upper note runs to the right edge, the lower one starts at the left.
+   Their paragraphs are still capped at the site measure. */
+@media (min-width:601px) and (max-width:1299px){
+  .scatter .cell.proc-note[style*="grid-column:7 / 11"]{grid-column:7 / 13 !important;}
+  .scatter .cell.proc-note[style*="grid-column:2 / 6"]{grid-column:1 / 7 !important;}
+}
+@media (min-width:601px) and (max-width:900px){   /* half the page is still under 31 characters here */
+  .scatter .cell.proc-note[style]{grid-column:1 / -1 !important;}   /* the material note too */
+}
+/* the how-it-works paragraph is set ragged at every width (2026-10-01, it sits
+   in a gallery column too narrow to justify); its info panel follows it */
+.hiw-text .info-panel-in{text-align:left; text-align-last:left;}
 @media (max-width:600px){
   /* Read more: text runs the full width instead of a ~170px half column */
   .scatter .cell.proc-note{grid-column:1 / -1 !important;}
@@ -1140,33 +1241,47 @@ figcaption.cap{margin-top:6px; max-width:100%;}
      logo ends at --fe + --hdr, wordmark (5x as wide as tall) starts at
      50% - 2.5 --hdr, so the middle is 25% + --fe/2 - .75 --hdr. */
 .site-foot{--fe:var(--mar);}
+/* product pages build the footer AFTER <main> (contentinfo landmark, w2 template): out of .proj's --mar padding it carries the whole --mar-edge itself, so every mark sits on the pixel it did inside */
+body > .site-foot:not([data-autofoot]){padding:0 var(--mar-edge) 44px; --fe:var(--mar-edge);}
 .site-foot[data-autofoot]{--fe:var(--mar-edge);}
 .foot-note{position:absolute; top:0; height:var(--hdr); line-height:var(--hdr); white-space:nowrap; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink);}
 .foot-note.fn-l{left:calc(25% + var(--fe) / 2 - var(--hdr) * .75); transform:translateX(-50%);}
 .foot-note.fn-r{right:calc(25% + var(--fe) / 2 - var(--hdr) * .75); transform:translateX(50%);}
 .foot-note a{color:inherit; text-decoration:none; border-bottom:1px solid rgba(20,20,20,.35); padding-bottom:2px;}
-.foot-note a:hover{color:var(--red); border-color:var(--red);}
+.foot-note a:hover{color:var(--red-text); border-color:var(--red-text);}
 /* bigger tap area without moving the underline */
 .foot-note a{position:relative;}
 .foot-note a::after{content:""; position:absolute; inset:-9px -4px;}
-.foot-note .sep{margin:0 9px; opacity:.5;}
+.foot-note .sep{margin:0 9px; opacity:.62;}   /* 4.8:1 (was .5) */
 @media (max-width:1040px){ .foot-note{font-size:9px; letter-spacing:.12em;} .foot-note .sep{margin:0 5px;} }
 /* gap too narrow for the text: same centres, one line lower, inside the
    footer's existing bottom padding (still no added height) */
-@media (max-width:880px){ .foot-note{top:calc(var(--hdr) + 5px); height:22px; line-height:22px;} }
+@media (max-width:880px){
+  .foot-note{top:calc(var(--hdr) + 5px); height:22px; line-height:22px; font-size:10px;}
+  /* 24px tall links to tap; the underline is drawn by text-decoration here so
+     it stays against the letters instead of at the foot of the taller box */
+  .foot-note a{display:inline-block; line-height:24px; vertical-align:top; border-bottom:0; padding-bottom:0; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; text-decoration-color:rgba(20,20,20,.35);}
+  .foot-note a:hover{text-decoration-color:var(--red-text);}
+}
 /* phones (same point --hdr drops to 30px): left and right edges */
 @media (max-width:600px){
   .foot-note.fn-l{left:var(--fe); transform:none;}
   .foot-note.fn-r{right:var(--fe); transform:none;}
 }
 @media (max-width:480px){
-  .foot-note{font-size:8.5px; letter-spacing:.06em;}
+  /* 10px (was 8.5) so it can be read; "Studio" goes at this width (it went at
+     374 before) so the two notes keep clear of each other at 390 */
+  .foot-note{font-size:10px; letter-spacing:.06em;}
   .foot-note .sep{margin:0 4px;}
-  .foot-note .fn-x{display:none;}
+  .foot-note .fn-x, .foot-note .fn-s{display:none;}
 }
-@media (max-width:374px){ .foot-note .fn-s{display:none;} }
-/* material chips: 24px tall tap target on touch screens */
-@media (hover:none){ .hero-materials a{display:inline-block; padding:3px 0 2px;} }
+/* touch screens: material chips 32px tall; the info button a 34px hit box
+   (the 15px mark and the line it sits on do not move: the extra is padding,
+   cancelled out of the inline flow by the negative margins) */
+@media (hover:none){
+  .hero-materials a{padding:7px 0;}   /* 18px chip + 14 = 32px. inline-block is set for every input now (3 Nov 2026): an inline nowrap chip butted to its "/" gave no break, so a narrow window WITHOUT touch clipped "ALUMINIUM" */
+  .info-btn{width:34px; height:34px; padding:9.5px; margin:-9.5px -4px -9.5px -3px;}
+}
 
 /* ---------- SKY (js/sky.js) ----------
    Shared since 2026-10-05. The home page draws it as its background; the
@@ -1184,16 +1299,25 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent); mask-image:linear-gradient(to bottom,#000 55%,transparent);}
 #sky-clouds.live{transition:opacity 1.6s ease;}
 #sky-clouds.drift{animation:skyDrift 600s linear infinite; will-change:transform;}
+/* phones: clouds stay, static (no drift layer to composite) */
+@media (max-width:760px){ #sky-clouds.drift{animation:none; will-change:auto;} }
 @keyframes skyDrift{to{transform:translateX(-50%);}}
-#sky-precip{position:fixed; left:-10%; top:-20%; width:120%; height:140%; z-index:-2; pointer-events:none; display:none;}
-#sky-precip.rain{display:block; opacity:.55; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160'%3E%3Cg stroke='%23dfe6ee' stroke-width='1' stroke-linecap='round' opacity='.55'%3E%3Cpath d='M10 0l-6 22M58 40l-6 22M100 18l-6 22M32 92l-6 22M80 110l-6 22M114 76l-6 22'/%3E%3C/g%3E%3C/svg%3E"); animation:skyRain .55s linear infinite;}
-#sky-precip.snow{display:block; opacity:.8; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='%23ffffff' opacity='.75'%3E%3Ccircle cx='12' cy='20' r='1.6'/%3E%3Ccircle cx='70' cy='60' r='1.2'/%3E%3Ccircle cx='110' cy='14' r='1.8'/%3E%3Ccircle cx='40' cy='104' r='1.3'/%3E%3Ccircle cx='96' cy='118' r='1.6'/%3E%3C/g%3E%3C/svg%3E"); animation:skySnow 9s linear infinite;}
-#sky-precip.rain.in{animation:skyRain .55s linear infinite, skyIn 1.4s ease 1;}
-#sky-precip.snow.in{animation:skySnow 9s linear infinite, skyIn 1.4s ease 1;}
+/* 2026-11-03 (finding 12, Q16, from the template session): the layer is oversized for a
+   rotated travel; the drift is the rotation, and each loop moves exactly one tile
+   (480px) in the rotated frame, so it ends on the same pattern. No width/height. */
+#sky-precip{position:fixed; top:calc(-480px - max(200px, 15vmax)); bottom:min(-200px, -15vmax); left:min(-200px, -15vmax); right:min(-200px, -15vmax); z-index:-2; pointer-events:none; display:none;}
+/* 2026-11-02: 360x480 tile, 22 streaks at irregular x and lengths (was a 120x160
+   six-streak tile that read as a grid). The loop moves exactly one tile height
+   at the old speed, transform only. */
+#sky-precip.rain{display:block; opacity:.55; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='480'%3E%3Cg stroke='%23dfe6ee' stroke-width='1' stroke-linecap='round' opacity='.55'%3E%3Cpath d='M14 6l-3.2 24M61 118l-2.5 19M97 41l-3.8 28M133 214l-2.9 22M171 9l-2.4 18M203 153l-3.4 26M241 77l-2.8 21M279 311l-3.2 24M318 36l-4 30M349 187l-2.7 20M37 284l-3 23M118 362l-3.6 27M156 431l-2.5 19M224 243l-3.4 25M259 409l-2.9 22M296 131l-2.4 18M331 447l-3.8 28M76 201l-2.8 21M187 336l-3.2 24M28 397l-3.4 26M340 271l-2.7 20M109 22l-2.9 22'/%3E%3C/g%3E%3C/svg%3E"); animation:skyRain 1.65s linear infinite;}
+/* 480x480 tile, 30 dots of three sizes, no grid (was 140x140, five dots) */
+#sky-precip.snow{display:block; opacity:.8; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480'%3E%3Cg fill='%23ffffff' opacity='.75'%3E%3Ccircle cx='23' cy='31' r='1.6'/%3E%3Ccircle cx='118' cy='58' r='2'/%3E%3Ccircle cx='209' cy='71' r='1.6'/%3E%3Ccircle cx='263' cy='19' r='1.2'/%3E%3Ccircle cx='357' cy='9' r='1.4'/%3E%3Ccircle cx='451' cy='34' r='1.7'/%3E%3Ccircle cx='44' cy='122' r='1.3'/%3E%3Ccircle cx='151' cy='109' r='1.2'/%3E%3Ccircle cx='197' cy='166' r='1.6'/%3E%3Ccircle cx='298' cy='113' r='2'/%3E%3Ccircle cx='339' cy='174' r='1.2'/%3E%3Ccircle cx='437' cy='101' r='1.3'/%3E%3Ccircle cx='468' cy='181' r='1.5'/%3E%3Ccircle cx='16' cy='214' r='1.8'/%3E%3Ccircle cx='131' cy='228' r='1.6'/%3E%3Ccircle cx='187' cy='281' r='1.3'/%3E%3Ccircle cx='281' cy='262' r='1.7'/%3E%3Ccircle cx='379' cy='291' r='1.2'/%3E%3Ccircle cx='423' cy='223' r='1.9'/%3E%3Ccircle cx='38' cy='331' r='1.2'/%3E%3Ccircle cx='146' cy='318' r='1.3'/%3E%3Ccircle cx='206' cy='352' r='1.9'/%3E%3Ccircle cx='316' cy='383' r='1.5'/%3E%3Ccircle cx='417' cy='371' r='1.7'/%3E%3Ccircle cx='9' cy='428' r='1.6'/%3E%3Ccircle cx='63' cy='463' r='1.3'/%3E%3Ccircle cx='176' cy='447' r='1.8'/%3E%3Ccircle cx='292' cy='452' r='1.6'/%3E%3Ccircle cx='343' cy='424' r='1.2'/%3E%3Ccircle cx='443' cy='436' r='1.8'/%3E%3C/g%3E%3C/svg%3E"); animation:skySnow 31s linear infinite;}
+#sky-precip.rain.in{animation:skyRain 1.65s linear infinite, skyIn 1.4s ease 1;}
+#sky-precip.snow.in{animation:skySnow 31s linear infinite, skyIn 1.4s ease 1;}
 @keyframes skyIn{from{opacity:0;}}
 #sky-precip.still{animation:none;}
-@keyframes skyRain{to{transform:translate(-22px,160px);}}
-@keyframes skySnow{to{transform:translate(30px,140px);}}
+@keyframes skyRain{from{transform:rotate(7.8deg) translateY(0);} to{transform:rotate(7.8deg) translateY(480px);}}
+@keyframes skySnow{from{transform:rotate(-11.8deg) translateY(0);} to{transform:rotate(-11.8deg) translateY(480px);}}
 /* paper-like grain over the sky so it reads as printed, not a flat screen gradient */
 #sky-grain{position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.09;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");}
@@ -1208,3 +1332,205 @@ body[data-sky="dark"] #loader.ld-sky .ld-mark{filter:invert(1);}
 html.ld-paper #loader.ld-sky{background:var(--paper);}
 html.ld-paper #loader #sky, html.ld-paper #loader #sky-clouds, html.ld-paper #loader #sky-precip, html.ld-paper #loader #sky-grain{display:none;}
 html.ld-paper body[data-sky] #loader.ld-sky .ld-mark{filter:none;}
+
+/* ---------- FINISH ROW: colour / material / finish options (2026-11-02) ----------
+   Drawn by project.html under the material chips when a product's `variants`
+   list in js/projects-data.js has two or more options. Swatches are 22px
+   squares carrying the option's colour or swatch image (--sw); the chosen one
+   is ringed in ink (swatches are not buttons: they keep the ink ring). Keyboard: arrows move
+   between swatches (radiogroup). */
+.hero-finish{grid-column:1 / 7; grid-row:4; align-self:start; margin-top:6px; display:flex; flex-wrap:wrap; align-items:center; gap:10px; font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink);}
+.hero-finish .fin-label{margin-right:4px;}
+.hero-finish .fin-sw{box-sizing:border-box; width:22px; height:22px; padding:0; border:1px solid var(--ink); background:var(--sw, #888) center / cover no-repeat; cursor:pointer; transition:opacity .15s ease;}
+.hero-finish .fin-sw:hover{opacity:.82;}
+/* 2026-11-03: SELECTED is not the focus ring. Selected = a heavy 3px ink frame
+   with a paper hairline inside it, drawn within the swatch (border-box, so the
+   size does not change); FOCUS stays the site ring (outline 2px ink, 2px off),
+   so a keyboard user sees both, separately, on the same swatch. */
+.hero-finish .fin-sw[aria-checked="true"], .hero-finish .fin-sw.fin-on{border:3px solid var(--ink); box-shadow:inset 0 0 0 1px var(--paper); outline:0;}
+.hero-finish .fin-sw[aria-checked="true"]:focus-visible, .hero-finish .fin-sw.fin-on:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+/* the name always takes its own line under the swatches, with two lines
+   reserved, so choosing a longer name never moves the gallery below
+   (finding 6 / F11). Names over two lines at 390 (about 80 characters) would
+   still push; none is near that. When the template moves INQUIRE into the row
+   (.fin-inq, after the name in the markup) it ends the swatch line at the right
+   edge and the name drops under both (order), so nothing moves when the name
+   changes length. */
+.hero-finish .fin-name{flex-basis:100%; order:2; margin-left:0; line-height:1.35; min-height:2.7em;}
+.hero-finish .fin-inq{margin-left:auto; margin-top:0;}
+/* ...and inside .hero-materials it would take the chip links' ink colour, border
+   and (on touch) 7px 0 padding: the button rule wins back here */
+.hero-materials a.inq{color:var(--red-text); border:1px solid var(--red-text); padding:7px 13px;}
+.hero-materials a.inq:hover, .hero-materials a.inq:focus-visible, .hero-materials a.inq:active{color:#fff; border-color:var(--red);}
+@media (hover:none){ .hero-materials a.inq{display:inline-flex; align-items:center; min-height:44px;} }
+.fin-ar-note{margin:6px 0 0; min-height:1.5em;}   /* its line is always kept (js/project.js toggles visibility), so a finish click never moves the gallery */
+/* ...and where the hero column is narrow the note can run to two lines
+   ("Photos show <a long default name>." wrapped at 1024, 1180, 390 and 360:
+   the first click moved the page 20px). Two lines are reserved there: phones
+   and small tablets (column under about 690px) and the side column from 901
+   to 1439 (498 to 690px wide). 820 (809px) and 1440 up (700px+) keep one. */
+@media (max-width:700px), (min-width:901px) and (max-width:1439px){ .fin-ar-note{min-height:3.1em; min-height:2lh;} }   /* 2lh: two of its own line boxes exactly (3em was 1px short) */
+/* stacks at the same width as the hero (was 760, which left 761-900 with the
+   row above the chips at half width: finding 6) */
+@media (max-width:900px){ .hero-finish{grid-column:1 / 13; grid-row:auto;} }
+@media (hover:none){ .hero-finish .fin-sw{width:28px; height:28px;} }
+
+/* ============ 2026-11-03: layout and accessibility pass (review 2 Nov (2)) ============ */
+
+/* VIEWER FAILED (finding 16). project.html tags the stage, the model half and
+   the row with .mv-failed when the library or the GLB fails and hides the
+   controls; until now nothing collapsed, so the mechanism kept half a row
+   beside a 710px hole. The model half goes, and the row becomes the same
+   contained, left-aligned row a mechanism-only product (.solo-mech) has. The
+   :has() forms cover the case where only the stage or the half is tagged. */
+.cad-hiw-model.mv-failed, .cad-hiw-model:has(> .cad-stage.mv-failed){display:none;}
+.cad-hiw.mv-failed, .cad-hiw:has(> .cad-hiw-model.mv-failed){width:auto; margin-left:0;}
+.cad-hiw.mv-failed .cad-hiw-mech, .cad-hiw:has(> .cad-hiw-model.mv-failed) .cad-hiw-mech{grid-column:1 / -1; max-width:clamp(560px,66vw,900px); margin-inline:0 auto; width:100%;}
+/* the paired-row crop sizes the drawn room against a column that runs to the
+   window edge (minus --mar); contained, it is sized against the column itself */
+.cad-hiw.mv-failed:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech, .cad-hiw:not(.solo-mech):has(> .cad-hiw-model.mv-failed) .cad-hiw-mech .hiw-graphic.has-mech{width:calc(100% * 1.2368); margin-left:calc(100% * -0.1184);}
+.cad-hiw.mv-failed:not(.solo-mech) .cad-hiw-mech .hiw-text, .cad-hiw:not(.solo-mech):has(> .cad-hiw-model.mv-failed) .cad-hiw-mech .hiw-text{padding-left:0;}
+@media (max-width:900px){
+  .cad-hiw.mv-failed:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech, .cad-hiw:not(.solo-mech):has(> .cad-hiw-model.mv-failed) .cad-hiw-mech .hiw-graphic.has-mech{width:auto; margin-left:0;}
+}
+
+/* CUSTOM LINE under the chips (F6). The link was underlined with the chip
+   row's border, so on touch screens, where the chips get 7px of tap padding,
+   the line hung 8px under the words. Drawn with text-decoration instead, which
+   stays on the letters at any padding. border-width (not border) so the
+   inline border colour project.html sets has nothing to draw. */
+.hero-custom{margin:8px 0 0;}   /* the same values the template sets inline today; the inline styles can go */
+.hero-custom-link{white-space:nowrap;}   /* its underline: text-decoration, below (not the border) */
+.hero-custom a{border-bottom-width:0; padding-bottom:0; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; text-decoration-color:currentColor;}
+.hero-custom a:hover{text-decoration-color:var(--red-text);}
+
+/* WIDOWS in headings and taglines (C8, OMNI "A continuous acoustic / field.").
+   pretty only re-breaks the last lines to avoid a lone word; sizes, measure and
+   alignment are unchanged, and browsers without it ignore it. */
+h1, h2, h3, .hero-tagline, .lead, .cap, .eyebrow, .svc-proof{text-wrap:pretty;}
+/* phones: headings balance their lines, so a one-word last line cannot happen
+   ("...the full life of the / object." on Materials at 360, 3 Nov 2026). Only
+   under 600px, where the lead is ragged anyway; wider, the justified lead
+   keeps its full lines. */
+@media (max-width:600px){ h1, h2, h3, h1.lead, h2.lead{text-wrap:balance;} }   /* h1.lead: .lead{text-wrap:pretty} above outranks a bare h1 */
+
+/* PHONE: hyphens off where the text is already ragged (F4, fix o). At 600px and
+   under, the blocks above are set left-aligned, and hyphens there only add
+   breaks. The project hero paragraph stays justified on the phone (hard rule,
+   Q11), so it keeps its hyphenation. */
+@media (max-width:600px){
+  .desc, .teaser, .lead, .info-panel-in, .matg-intro, .matitem-text, .svc-intro, .sol-txt .desc{-webkit-hyphens:manual; hyphens:manual;}
+  .hero-aside-btm .desc{-webkit-hyphens:auto; hyphens:auto;}
+}
+/* the same for the block that is left-aligned at EVERY width: the
+   how-it-works paragraph. (The Solutions intro, abstracts and notes were here
+   too; they are justified since 3 Nov 2026 and hyphenate like every .desc.) */
+.hiw-text .desc{-webkit-hyphens:manual; hyphens:manual;}
+/* ...and the how-it-works info panel, ragged with its paragraph at every
+   width (:1189 area), which still auto-hyphenated on desktop: "con-veniences",
+   "dim-ming", "elec-tronics", "ply-wood" at 1180 to 1920 (3 Nov 2026) */
+.hiw-text .info-panel-in{-webkit-hyphens:manual; hyphens:manual;}
+
+/* TAP TARGETS on touch screens (F5): every link at least 24px tall. These are
+   the text links that measured under it at 390 (Materials "Used in", the 404
+   links, Solutions SAMPLES). inline-block
+   plus vertical padding; the underline is drawn by text-decoration where the
+   page uses one, so it does not move. The selectors carry one more class or
+   type than the page's own rules, so they win over the page <style>. */
+@media (hover:none){
+  main .mi-in a, main .backlinks a, main .svc-samples a{display:inline-block; padding-top:4px; padding-bottom:4px; min-height:24px; box-sizing:border-box;}
+  /* underlined with a border: the padding goes above, so the line stays
+     where it was under the words. (The contact email line is sized in
+     contact.html by the copy session.) */
+  main .backlinks a{padding-top:5px; padding-bottom:3px;}
+}
+/* PRIMARY ACTIONS 44px on touch screens. Same look (the one button style,
+   12px, .16em); only the height grows, with the label centred. */
+@media (hover:none){
+  .inq, a.sol-btn, button.sol-btn, .mv-ar, main form button[type="submit"], .fourofour .backlinks a{min-height:44px; display:inline-flex; align-items:center; box-sizing:border-box;}
+  /* Contact, product mode: the "tell me when it is available" tick box and its
+     words are one label, the page's main action there; the label is the target */
+  main label.cnotify{min-height:44px;}
+}
+
+/* ONE BUTTON STYLE (Owen, 3 Nov 2026: "outline red with red text when
+   inactive and solid red white text when active. they need to look more like
+   buttons"). Replaces white on red with ink = active. Every button on the site:
+   12px, .16em, uppercase, a 1px border inside the old 8px 14px box (padding
+   7px 13px, so nothing reflows).
+     AT REST   paper ground, 1px --red-text border, --red-text text (5.6:1).
+     ACTIVE    solid --red, white text (4.8:1), border --red.
+   "Active" means two things:
+     ACTION buttons and button-links (INQUIRE, VIEW IN YOUR SPACE, RESET, SEND,
+       Solutions PDF / VIDEO, About, Materials, 404, CV): solid on hover,
+       keyboard focus and press.
+     TOGGLES (anything with aria-pressed, the LIGHT button, the contact topic
+       radios, the QR panel's .active): solid while ON; hover is a light red
+       tint (--red-text on it 4.9:1), never the full solid, so ON stays readable.
+   A new toggle gets aria-pressed and is covered. States switch, never animate
+   (transform and opacity only). The focus ring (:focus-visible, 2px ink, 2px
+   off) shows on both states. The mechanism frames carry the same rules in
+   their own <style> (projects/<id>/mechanism.html). */
+.inq, .mv-btn, .mv-sel, .mv-ar, a.sol-btn, button.sol-btn, main .cform button, fieldset.ctopic span, .fourofour .backlinks a, body .hv-btn{
+  box-sizing:border-box; font-family:var(--body); font-size:12px; font-weight:400; letter-spacing:.16em; line-height:normal; text-transform:uppercase; text-decoration:none;
+  color:var(--red-text); background-color:var(--paper); border:1px solid var(--red-text); border-radius:0; padding:7px 13px; cursor:pointer; opacity:1; transition:none;}
+.mv-sel{padding-right:29px;}
+/* solid: actions on hover / focus / press, toggles while on */
+.inq:hover, .inq:focus-visible, .inq:active,
+.mv-btn:not([aria-pressed]):not([data-act="power"]):hover, .mv-btn:not([aria-pressed]):not([data-act="power"]):focus-visible, .mv-btn:not([aria-pressed]):not([data-act="power"]):active,
+.mv-ar:hover, .mv-ar:focus-visible, .mv-ar:active, .mv-ar.active,
+a.sol-btn:hover, a.sol-btn:focus-visible, a.sol-btn:active, button.sol-btn:hover, button.sol-btn:focus-visible, button.sol-btn:active,
+main .cform button:not(:disabled):hover, main .cform button:not(:disabled):focus-visible, main .cform button:not(:disabled):active,
+.fourofour .backlinks a:hover, .fourofour .backlinks a:focus-visible, .fourofour .backlinks a:active,
+body .hv-btn:hover, body .hv-btn:focus-visible, body .hv-btn.active,
+.mv-btn.active, .mv-btn[aria-pressed="true"], fieldset.ctopic input:checked + span{
+  color:#fff; background-color:var(--red); border-color:var(--red); opacity:1;}
+/* toggles, hover while off: a tint */
+.mv-btn[aria-pressed]:not([aria-pressed="true"]):not(.active):hover, .mv-btn[data-act="power"]:not(.active):hover, .mv-sel:hover,
+fieldset.ctopic label:hover input:not(:checked) + span{background-color:#e8d7d2;}   /* --red at 8% on the paper */
+/* the focus ring for the topic chips sits on the span (the input is hidden) */
+fieldset.ctopic input:focus-visible + span{outline:2px solid var(--ink); outline-offset:2px;}
+/* disabled SEND (while sending): the outline, faded */
+main .cform button:disabled{opacity:.5; cursor:default;}
+
+/* CONTRAST (finding 10, Q29, fix g). Small red text uses --red-text (5.6:1).
+   About: the principle headings are red at clamp(19px,2.4vw,27px), large text
+   only from 24px up, so under 1000px wide they take the darker red. Solutions:
+   the row-name hover. (The About principle headings are darkened in
+   about.html by the copy session.) */
+.sol-row .sol-sum:hover .sol-name{color:var(--red-text);}
+
+/* HOME STRAP (Q15): the studio line under the header / up the left edge was
+   paper or ink at .5, then .8; full strength on its band since 3 Nov 2026.
+   (index.html's own .5 rule was dead under this one and is gone.) */
+body #home-line span{opacity:1;}   /* 1 since 3 Nov 2026: 9px text needs every bit of 4.5:1 */
+
+/* REDUCED MOTION, the rest (2026-11-03, finding 11 audit). Fades stay (they are
+   not motion); every slide, zoom and tilt goes. Listed one by one so nothing
+   else changes: the hover zooms on the hero and gallery photos, the model's
+   hover tilt, Process and detail's 8px rise, the lightbox scale and the menu
+   panel's 10px drop (each still fades), and the skip link's slide (a cut). */
+@media (prefers-reduced-motion:reduce){
+  .hero-main img, .hero-gallery .gthumb img{transition:none;}
+  .hero-main:hover img, .hero-gallery .gthumb:hover img{transform:translateZ(0);}
+  .cad-stage model-viewer{transition:opacity .35s ease;}
+  .cad-stage model-viewer:hover{transform:translate(-50%,-50%);}
+  .proc-reveal{transform:none; transition:opacity .5s ease;}
+  .lightbox img, .lightbox video{transform:none; transition:opacity .2s ease;}
+  #menu-overlay.menu-panel{transform:none; transition:opacity .18s ease, visibility 0s linear .18s;}
+  #menu-overlay.menu-panel.open{transition-delay:0s;}
+  .skip-link{transition:none;}
+}
+
+/* MECHANISM BESIDE ITS PARAGRAPH (F14, OMNI at 1920: a figure's head 1-3px off
+   the last line). 14px of clear space under the how-it-works paragraph whenever
+   a mechanism is drawn under it on the paired desktop row; the graphic keeps its
+   underlap, it just starts 14px lower. Every product with a mechanism. */
+@media (min-width:901px){
+  .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-text{padding-bottom:14px;}
+}
+
+/* SOLUTIONS, AN OPEN ROW (F13, Q13): the short summary hides while the row is
+   open, since the body under it says the same at length. CSS only; the
+   markup lives in tools/pages/solutions.body.html. */
+.sol-row.open .sol-summary{display:none;}

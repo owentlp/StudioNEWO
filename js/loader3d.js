@@ -272,11 +272,15 @@
      though everything after the first page was served from cache.
 
      "This page" is the path plus the ?p= project, so KART and NEB count
-     separately. It is kept in sessionStorage, not localStorage: coming back
-     tomorrow is a fresh visit and gets the animation again, and a stale flag
-     can never permanently suppress it. Every access is wrapped - storage
+     separately. It is kept in localStorage with a time stamp and expires after
+     24 hours (2 Nov 2026, site review Q33; it was sessionStorage, once per tab,
+     so a middle-click from the home cards replayed the whole sequence). Coming
+     back tomorrow is a fresh visit and gets the animation again, and a stale
+     flag can never permanently suppress it. Every access is wrapped - storage
      throws in a private window and can be disabled outright - and if it is
-     unavailable we simply treat the page as new, which is the old behaviour. */
+     unavailable we simply treat the page as new, which is the old behaviour.
+     index.html's preload snippet reads the same key the same way; keep the
+     two in step. */
   var REVISIT_HOLD_MS = 2000;
 
   function pageKey(){
@@ -284,11 +288,15 @@
     try { p = new URLSearchParams(location.search).get("p") || ""; } catch(e){}
     return "newo:seen:" + location.pathname + (p ? "?p=" + p : "");
   }
+  var SEEN_TTL_MS = 24 * 60 * 60 * 1000;
   function seenBefore(){
-    try { return sessionStorage.getItem(pageKey()) === "1"; } catch(e){ return false; }
+    try {
+      var t = parseInt(localStorage.getItem(pageKey()), 10);
+      return !!t && (Date.now() - t) < SEEN_TTL_MS;
+    } catch(e){ return false; }
   }
   function markSeen(){
-    try { sessionStorage.setItem(pageKey(), "1"); } catch(e){}
+    try { localStorage.setItem(pageKey(), String(Date.now())); } catch(e){}
   }
 
   /* Set at the kickoff site further down: on a revisit the 3D path is not

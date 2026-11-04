@@ -8,17 +8,40 @@
   function reveal(){ if(done) return; done = true; if(cap) clearTimeout(cap); document.body.classList.add("ready"); }
   // A page can take control of WHEN the loader lifts by setting
   // window.__DEFER_REVEAL = true before this script runs, then calling
-  // window.__revealPage() once its own assets are ready (project.html does this
-  // to wait for the hero image, hero video and 3D model so nothing pops in
-  // after the loader clears). A hard cap still fires either way, so the loader
+  // window.__revealPage() once its own assets are ready (project pages do this
+  // to wait for the hero photo and clip, fonts, mechanism and the 3D model's
+  // reserved space; since 3 Nov 2026 not the model itself, see js/project.js
+  // "MODEL LOAD"). A hard cap still fires either way, so the loader
   // can never get stuck if an asset stalls.
   window.__revealPage = reveal;
   var defer = window.__DEFER_REVEAL === true;
   if(!defer){
-    // default: reveal as soon as the document is parsed plus a short beat, so
-    // the loader does not sit there waiting on full-resolution images.
-    if(document.readyState !== "loading") setTimeout(reveal, 80);
-    else document.addEventListener("DOMContentLoaded", function(){ setTimeout(reveal, 80); });
+    /* default (3 Nov 2026, Owen: "everything else should be loaded ... I just
+       dont want any lag or things visibly loading in"): once the document is
+       parsed, wait for the fonts and for the photos in the first screen to be
+       downloaded and decoded (never the ones further down), at most 1.8 s,
+       then two frames so that first paint happens under the loader, then
+       reveal. It used to reveal 80 ms after parsing, so on a revisit (no logo
+       tumble to hide it) a photo or a font swap could land after the fade.
+       The 3D logo, when it shows, still holds for its full turn (loader3d.js). */
+    var gate = function(){
+      var waits = [];
+      if(document.fonts && document.fonts.ready) waits.push(document.fonts.ready.catch(function(){}));
+      var vh = window.innerHeight || 800;
+      Array.prototype.forEach.call(document.images, function(im){
+        if(im.closest && im.closest("#loader")) return;
+        var r = im.getBoundingClientRect();
+        if(!r.width || r.bottom <= 0 || r.top >= vh) return;
+        var d;
+        try { d = im.decode ? im.decode() : null; } catch(e){ d = null; }
+        if(d) waits.push(d.catch(function(){}));
+      });
+      Promise.race([Promise.all(waits), new Promise(function(res){ setTimeout(res, 1800); })]).then(function(){
+        requestAnimationFrame(function(){ requestAnimationFrame(reveal); });
+      });
+    };
+    if(document.readyState !== "loading") gate();
+    else document.addEventListener("DOMContentLoaded", gate);
     window.addEventListener("load", reveal);   // safety net
   }
   cap = setTimeout(reveal, defer ? 12000 : 2500);   // hard cap either way
@@ -126,7 +149,7 @@
    with the window. Paragraphs in proportional fonts are left alone.
    Alignment and type size are unchanged: only a max-width is set. */
 (function(){
-  var MIN_CHARS = 120, SHRINK = 0.15, monoCache = {};
+  var MIN_CHARS = 30, SHRINK = 0.15, monoCache = {};
   function charWidth(cs){
     var key = cs.font + "|" + cs.letterSpacing;
     if(key in monoCache) return monoCache[key];
@@ -171,6 +194,40 @@
     }
     return worst * 1000 + sum;                 // worst line first, then the total
   }
+  // the real gaps, measured from the rendered words (the simulation above cannot
+  // see the browser's hyphenation): mean and worst gap per line, in spaces,
+  // every line but the last (3 Nov 2026, exit test: mean gap under 2 spaces)
+  function realGaps(p, sp){
+    var words = [], tw = document.createTreeWalker(p, NodeFilter.SHOW_TEXT), n, rg = document.createRange();
+    while((n = tw.nextNode())){
+      var t = n.textContent, re = /\S+/g, m;
+      while((m = re.exec(t))){
+        rg.setStart(n, m.index); rg.setEnd(n, m.index + m[0].length);
+        var rs = rg.getClientRects();
+        for(var k = 0; k < rs.length; k++) if(rs[k].width > 0) words.push(rs[k]);
+      }
+    }
+    // a word belongs to a line when its middle falls inside that line's band
+    // (a smaller inline label sits a little higher but on the same line)
+    var lines = [];
+    words.forEach(function(r){
+      var mid = (r.top + r.bottom) / 2, L = null;
+      for(var i = 0; i < lines.length; i++) if(mid >= lines[i].t && mid <= lines[i].b){ L = lines[i]; break; }
+      if(!L){ L = { t: r.top, b: r.bottom, w: [] }; lines.push(L); }
+      L.w.push([r.left, r.right]);
+    });
+    lines.sort(function(a, b){ return a.t - b.t; });
+    var sum = 0, cnt = 0, worst = 0;
+    for(var i = 0; i < lines.length - 1; i++){
+      var W = lines[i].w.sort(function(a, b){ return a[0] - b[0]; });
+      for(var j = 1; j < W.length; j++){
+        var g = (W[j][0] - W[j - 1][1]) / sp;
+        if(g > 0.3){ sum += g; cnt++; if(g > worst) worst = g; }
+      }
+    }
+    return { mean: cnt ? sum / cnt : 1, worst: worst || 1 };
+  }
+  function realScore(r){ return (r.mean >= 1.9 ? 100 : 0) + r.worst * 10 + r.mean; }
   function fitOne(p){
     if(p.dataset.fit) p.style.maxWidth = "";
     var cs = getComputedStyle(p);
@@ -178,20 +235,34 @@
     var cw = charWidth(cs); if(!cw) return false;
     var text = p.textContent; if(text.length < MIN_CHARS) return false;
     var maxCols = Math.floor((p.clientWidth + 0.01) / cw); if(maxCols < 16) return false;
-    var toks = tokens(text), best = maxCols, bestScore = badness(toks, maxCols);
-    for(var c = maxCols - 1; c >= Math.ceil(maxCols * (1 - SHRINK)); c--){
-      var sc = badness(toks, c);
-      if(sc < bestScore - 0.5){ best = c; bestScore = sc; }
+    // never narrower than 31 characters (the measure floor), nor 15% under the column
+    var minCols = Math.max(Math.ceil(maxCols * (1 - SHRINK)), Math.min(maxCols, 31));
+    var toks = tokens(text), cands = [];
+    for(var c = maxCols; c >= minCols; c--) cands.push({ c: c, sim: badness(toks, c) });
+    // the simulation ranks the widths; the best few are then checked as rendered
+    var ranked = cands.slice().sort(function(a, b){ return a.sim - b.sim || b.c - a.c; });
+    var sim = ranked[0], best = sim.c;
+    var spW = cw;                                // a space is one character in a monospace
+    p.style.maxWidth = (sim.c * cw + 0.5).toFixed(1) + "px";
+    var r = realGaps(p, spW);
+    if(r.mean >= 1.9 || r.worst >= 3){
+      var bestScore = realScore(r), tries = ranked.slice(1, 6);
+      if(tries.every(function(t){ return t.c !== maxCols; })) tries.push(cands[0]);
+      for(var i = 0; i < tries.length; i++){
+        p.style.maxWidth = (tries[i].c * cw + 0.5).toFixed(1) + "px";
+        var sc = realScore(realGaps(p, spW));
+        if(sc < bestScore - 0.05){ bestScore = sc; best = tries[i].c; }
+      }
     }
     if(best < maxCols){ p.style.maxWidth = (best * cw + 0.5).toFixed(1) + "px"; p.dataset.fit = "1"; }
-    else { delete p.dataset.fit; }
+    else { p.style.maxWidth = ""; delete p.dataset.fit; }
     return true;
   }
   var busy = false;
   function fitAll(){
     if(busy) return; busy = true;
     var changed = false;
-    document.querySelectorAll(".desc, .info-panel-in, .lead").forEach(function(p){
+    document.querySelectorAll(".desc, .info-panel-in, .info-panel-in > *, .lead").forEach(function(p){
       var before = p.style.maxWidth;
       fitOne(p);
       if(p.style.maxWidth !== before) changed = true;

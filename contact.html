@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>CONTACT · STUDIO NEWO, industrial design, Toronto</title>
-<meta name="description" content="Contact Studio NEWO for project inquiries, collaborations, or consulting work.">
+<title>CONTACT · Products, custom pieces and services · STUDIO NEWO</title>
+<meta name="description" content="Ask Studio NEWO about a product or a custom piece, or about renders and drawings from your CAD. Toronto.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/contact.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/contact.html">
 <meta property="og:site_name" content="Studio NEWO">
-<meta property="og:title" content="Contact · Studio NEWO">
-<meta property="og:description" content="Contact Studio NEWO for project inquiries, collaborations, or consulting work.">
+<meta property="og:title" content="CONTACT · Products, custom pieces and services · STUDIO NEWO">
+<meta property="og:description" content="Ask Studio NEWO about a product or a custom piece, or about renders and drawings from your CAD. Toronto.">
 <meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Contact · Studio NEWO">
-<meta name="twitter:description" content="Contact Studio NEWO for project inquiries, collaborations, or consulting work.">
+<meta name="twitter:title" content="CONTACT · Products, custom pieces and services · STUDIO NEWO">
+<meta name="twitter:description" content="Ask Studio NEWO about a product or a custom piece, or about renders and drawings from your CAD. Toronto.">
 <meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=63">
+<link rel="stylesheet" href="css/style.css?v=68">
 <style>
   /* contact form: same editorial grammar as the rest of the site, no boxes,
      thin underline fields, tiny OCR-B labels, one red action. */
@@ -42,41 +42,45 @@
   .cfield input, .cfield textarea{
     font-family:var(--body); font-size:13px; color:var(--ink); background:transparent;
     border:0; border-bottom:1px solid rgba(20,20,20,.28); padding:7px 0; width:100%;
-    letter-spacing:.02em; transition:border-color .18s ease;
+    letter-spacing:.02em;
   }
   .cfield textarea{resize:vertical; min-height:96px; line-height:1.5;}
   .cfield input:focus, .cfield textarea:focus{outline:0; border-color:var(--red);}
+  .cfield input:focus-visible, .cfield textarea:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  /* the field the validation stopped on (aria-invalid is set by the script
+     and cleared on the next keystroke) */
+  .cfield input[aria-invalid="true"], .cfield textarea[aria-invalid="true"]{border-bottom:2px solid var(--red); padding-bottom:6px;}
   .cform-hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
-  /* the site's one button style: white on red, 12px, .16em (was 10px / .2em) */
-  .cform button{
-    justify-self:start; font-family:var(--body); font-size:12px; letter-spacing:.16em;
-    text-transform:uppercase; color:#fff; background:var(--red); border:0;
-    padding:8px 14px; cursor:pointer; transition:opacity .18s ease;
-  }
-  .cform button:hover{opacity:.85;}
-  .cform button:disabled{opacity:.5; cursor:default;}
+  /* the site's one button style (css/style.css, ONE BUTTON STYLE: outline at
+     rest, solid red on hover / focus / press); only the placement is here */
+  .cform button{justify-self:start;}
   .cform-status{font-size:10px; letter-spacing:.06em; line-height:1.5; min-height:1.2em; color:var(--ink);}
-  .cform-status.err{color:var(--red);}
+  /* errors stay ink (10px red on paper is 3.9:1, under AA) with a red mark in
+     front, so the colour still says "error" without carrying the words */
+  .cform-status.err{color:var(--ink);}
+  .cform-status.err::before{content:""; display:inline-block; width:7px; height:7px; background:var(--red); margin-right:8px; vertical-align:1px;}
+  .cform-privacy{font-size:10px; letter-spacing:.06em; line-height:1.6; color:var(--ink-soft); max-width:46ch; margin:4px 0 0;}
+  .cform-noscript{font-size:12px; line-height:1.6; margin:12px 0 0;}
+  .cform-noscript a{color:var(--ink);}
   /* the mailto fallback panel (hidden until a handoff has been attempted) */
   .cf-fallback{margin-top:26px; border-left:2px solid var(--red); padding:2px 0 2px 16px; max-width:56ch;}
   .cf-fb-lead{font-size:13px; letter-spacing:.06em; margin:0 0 10px;}
   .cf-fb-lead a{color:var(--ink); border-bottom:1px solid var(--red); text-decoration:none; padding-bottom:1px;}
   .cf-fb-text{font-family:var(--body); font-size:12px; line-height:1.6; white-space:pre-wrap;
     word-break:break-word; margin:0 0 12px; color:var(--ink-soft); max-height:210px; overflow:auto;}
-  .cf-fb-copy{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase;
-    color:#fff; background:var(--red); border:0; padding:8px 14px; cursor:pointer; transition:opacity .15s ease;}
-  .cf-fb-copy:hover{opacity:.82;}
 
   .contact-alt{margin-top:clamp(34px,6vh,60px); font-size:10px; letter-spacing:.1em; text-transform:uppercase; line-height:2;}
   .contact-alt a{color:var(--ink); text-decoration:none; border-bottom:1px solid var(--red); padding-bottom:1px;}
-  .contact-alt .sep{opacity:.4; margin:0 10px;}
+  .contact-alt .sep{opacity:.62; margin:0 10px;}   /* 4.8:1 (was .4, 2.5:1), 3 Nov 2026 */
+  /* phones: the two links get a 24px tap height (3 Nov 2026, review 18) */
+  @media (max-width:860px), (pointer:coarse){ .contact-alt a{display:inline-block; line-height:22px;} }
   .clead-more{max-width:60ch; margin:14px 0 6px; text-align:left;}
   .clead-more a{color:inherit;}
   .cnotify{display:flex; align-items:center; gap:10px; margin:4px 0 16px; font-size:13px; letter-spacing:.02em; cursor:pointer;}
   .cnotify[hidden]{display:none;}
   .cnotify input{width:16px; height:16px; accent-color:var(--red);}
   /* TOPIC (2026-10-26): what the message is about, as four chips in the site's
-     button style, red at rest and ink when chosen. Optional. It puts the topic
+     button style, outlined at rest and solid red when chosen. Optional. It puts the topic
      in the email subject and swaps the prompt in the message box, so a buyer,
      a commission and a client brief each get asked the right thing. */
   .ctopic{border:0; padding:0; margin:0; min-width:0;}
@@ -84,26 +88,29 @@
   .ctopic-row{display:flex; flex-wrap:wrap; gap:8px;}
   .ctopic label{position:relative; cursor:pointer;}
   .ctopic input{position:absolute; opacity:0; width:1px; height:1px; margin:0;}
-  .ctopic span{display:inline-block; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); padding:7px 12px; transition:opacity .15s ease;}
-  .ctopic label:hover span{opacity:.82;}
-  .ctopic input:checked + span{background:var(--ink);}
-  .ctopic input:focus-visible + span{outline:2px solid var(--ink); outline-offset:2px;}
+  .ctopic span{display:inline-block;}   /* look and states: css/style.css, ONE BUTTON STYLE */
   .cfield textarea::placeholder{color:var(--ink-soft); opacity:.7;}
   /* IMAGES (2026-10-27): optional sketches, photos or references. Thumbnails
      in a row under the button, each removable. */
   .cfiles-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px;}
-  .cfiles-note{font-size:10px; letter-spacing:.06em; color:var(--ink-soft);}
+  .cfiles-note{font-size:10px; letter-spacing:.06em; color:var(--ink-soft); line-height:1.6;}
+  .cfiles[hidden]{display:none;}
   .cfiles input[type=file]{position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;}
   .cf-thumbs{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px;}
   .cf-thumbs:empty{display:none;}
   .cf-thumbs li{position:relative; width:64px; height:64px; background:rgba(20,20,20,.06);}
   .cf-thumbs img{width:100%; height:100%; object-fit:cover; display:block;}
-  .cform .cf-thumbs button{position:absolute; top:0; right:0; padding:0; width:20px; height:20px; font-size:12px; letter-spacing:0; line-height:20px; text-align:center;}
-  .cprivacy{max-width:70ch; margin-top:clamp(50px,9vh,90px); font-size:12px; line-height:1.5; letter-spacing:.02em; opacity:.75;}
+  .cform .cf-thumbs button{position:absolute; top:0; right:0; padding:0; width:20px; height:20px; font-size:12px; letter-spacing:0; line-height:18px; text-align:center;}   /* border-box with the 1px button border: still 20 x 20 */
+  /* the rest of the privacy text, where the footer's Privacy link lands: lower
+     and smaller than the one line under the form */
+  .cprivacy{max-width:64ch; margin-top:clamp(50px,9vh,90px); font-size:11px; line-height:1.6; letter-spacing:.02em; opacity:.75; scroll-margin-top:96px;}
+  .cprivacy .lbl{display:block; font-size:10px; letter-spacing:.2em; text-transform:uppercase; margin-bottom:6px;}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#content">Skip to content</a>
+<!-- header landmark (2026-11-03, axe "region"): the three fixed marks sit in it; it has no box of its own -->
+<header>
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
@@ -113,6 +120,7 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
+</header>
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page wrap" id="content" tabindex="-1">
@@ -122,10 +130,13 @@
        engines and screen readers, and losing it would be a regression nobody
        can see. .vh is defined in css/style.css. -->
   <h1 class="vh">Contact</h1>
-  <p class="lead" id="clead">Ask about a product, a custom piece, or design work.</p>
+  <p class="lead" id="clead">Ask about a product, a custom piece or design work.</p>
   <p class="desc clead-more" id="cleadMore">Replies usually come within a few days. Services and prices are on the <a href="solutions.html#services">Solutions</a> page.</p>
 
-  <form class="cform" id="contactForm" novalidate>
+  <!-- action/method so the form still posts with JavaScript off (Formspree
+       then shows its own thank-you page); the script below preventDefaults
+       and sends by fetch, so with JavaScript on nothing changes. -->
+  <form class="cform" id="contactForm" action="https://formspree.io/f/xnpnbokn" method="POST" novalidate>
     <fieldset class="ctopic">
       <legend>About</legend>
       <div class="ctopic-row">
@@ -144,20 +155,24 @@
       <input id="cf-email" name="email" type="email" autocomplete="email" required>
     </div>
     <div class="cfield">
-      <label for="cf-message">Message</label>
-      <textarea id="cf-message" name="message" required placeholder="What you are making, your timeline and a rough budget."></textarea>
+      <label for="cf-message" id="cf-message-label">Message</label>
+      <textarea id="cf-message" name="message" required placeholder="What you are asking about, and anything that helps: a product, a size, a timeline, a budget."></textarea>
     </div>
-    <div class="cfield cfiles">
+    <!-- hidden for the A product topic (a buyer never needs it). Formspree's
+         free plan drops attachments, so the note says where they go if so. -->
+    <div class="cfield cfiles" id="cf-files-wrap">
       <label for="cf-files">Images (optional)</label>
-      <input id="cf-files" type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true">
+      <input id="cf-files" type="file" accept="image/*" multiple tabindex="-1">
       <div class="cfiles-row">
         <button type="button" id="cf-add">Add images</button>
-        <span class="cfiles-note" id="cf-files-note">Up to 5. Sketches, photos, references.</span>
+        <span class="cfiles-note" id="cf-files-note">Up to five: sketches, photos, references.</span>
       </div>
       <ul class="cf-thumbs" id="cf-thumbs"></ul>
     </div>
     <!-- shown only when the visitor arrived from a product's INQUIRE button
-         (contact.html?about=KART): one tick to hear when it can be bought -->
+         (contact.html?about=KART): one tick to hear when it can be bought. The
+         script moves it up under the lead line, above Name, in that mode, so
+         a buyer can register interest in three fields and no prose. -->
     <label class="cnotify" id="cf-notify-wrap" hidden>
       <input type="checkbox" name="notify_when_available" value="yes" id="cf-notify">
       <span>Tell me when <span id="cf-notify-name">this</span> is available to buy</span>
@@ -169,7 +184,9 @@
     </div>
     <button type="submit" id="cf-submit">Send message</button>
     <p class="cform-status" id="cf-status" role="status" aria-live="polite"></p>
+    <p class="cform-privacy">Privacy: this form is delivered by Formspree and goes only to Studio NEWO. No cookies, no advertising, nothing sold or shared.</p>
   </form>
+  <noscript><p class="cform-noscript">Without JavaScript the form posts to Formspree and returns its own confirmation page. Or write to <a href="mailto:owen@studionewo.com">owen@studionewo.com</a>.</p></noscript>
 
   <!-- Only ever shown after a mailto: handoff, which the browser gives no way
        of confirming. See showMailFallback() at the bottom of this file. -->
@@ -184,7 +201,7 @@
     <span class="sep">/</span>
     <a href="https://www.instagram.com/studio.newo" target="_blank" rel="noopener">Instagram</a>
   </p>
-  <p class="cprivacy" id="privacy">Privacy: this form is delivered by Formspree and goes only to Studio NEWO. The home page asks Open-Meteo for the current weather near the main city of your time zone so it can draw the sky. Page views are counted with GoatCounter, which records the page, the referring site and the screen size, not who you are. No cookies, no advertising, nothing sold or shared.</p>
+  <p class="cprivacy" id="privacy"><span class="lbl">Privacy</span>The home and project pages ask Open-Meteo for the current weather near the main city of your time zone so they can draw the sky. Page views are counted with GoatCounter, which records the page, the referring site and the screen size, not who you are. The video on the Solutions page plays from YouTube's no-cookie domain only when you press Video.</p>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -199,9 +216,9 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=27"></script>
-<script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=35"></script>
+<script src="js/projects-data.js?v=33"></script>
+<script src="js/main.js?v=7"></script>
+<script src="js/menu.js?v=42"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening
@@ -268,46 +285,121 @@
      the visitor does not have to say which product they mean. */
   var ABOUT = "";
   try { ABOUT = (new URLSearchParams(location.search).get("about") || "").replace(/[^\w .,&+-]/g, "").slice(0, 40); } catch(e){}
-  var isProduct = !!ABOUT && typeof PROJECTS !== "undefined" &&
-    Object.keys(PROJECTS).some(function(k){ return String(PROJECTS[k].title).toUpperCase() === ABOUT.toUpperCase(); });
-  if(isProduct && !form.message.value){ form.message.value = "Inquiry about " + ABOUT + ":\n\n"; }
-  if(ABOUT){
-    if(isProduct){
-      document.getElementById("cf-notify-name").textContent = ABOUT;
-      document.getElementById("cf-notify-wrap").hidden = false;
-      /* One contact page for everything. Arriving from a product's INQUIRE
-         button, the lead is about that product instead of asking a would-be
-         buyer for a project timeline and budget. */
-      var T = ABOUT.toUpperCase();
-      document.getElementById("clead").textContent = "Asking about " + T + "? Send a note about availability, price, or a custom version.";
-      document.getElementById("cleadMore").textContent = "Replies usually come within a few days.";
-    }
+  /* FINISH (2 Nov 2026): a product page with colour / material options sends
+     the chosen one as &finish=Walnut, so the inquiry names it. */
+  var FINISH = "";
+  try { FINISH = (new URLSearchParams(location.search).get("finish") || "").replace(/[^\w .,&+-]/g, "").slice(0, 40); } catch(e){}
+  /* PRODUCT. ?about=KART names a product (INQUIRE on a product page). A custom
+     request from a product page arrives as ?about=Custom&from=KART(&finish=..)
+     (3 Nov 2026), so the custom lead and the subject still say where it came
+     from. Only names in PROJECTS count; anything else is ignored. */
+  var FROM = "";
+  try { FROM = (new URLSearchParams(location.search).get("from") || "").replace(/[^\w .,&+-]/g, "").slice(0, 40); } catch(e){}
+  function productName(v){
+    if(!v || typeof PROJECTS === "undefined") return "";
+    var hit = Object.keys(PROJECTS).filter(function(k){ return String(PROJECTS[k].title).toUpperCase() === v.toUpperCase(); })[0];
+    return hit ? String(PROJECTS[hit].title).toUpperCase() : "";
   }
+  var isProduct = !!productName(ABOUT);
+  var PRODUCT = productName(ABOUT) || productName(FROM);
+  /* a finish counts only when that product offers an option of that name
+     (3 Nov 2026): ?about=HALO&finish=Brass, typed by hand, no longer prints
+     "Asking about HALO in brass?" when HALO has no finishes. The option's own
+     spelling is used. */
+  function finishName(prod, v){
+    if(!prod || !v) return "";
+    var key = Object.keys(PROJECTS).filter(function(k){ return String(PROJECTS[k].title).toUpperCase() === prod; })[0];
+    var opts = (key && PROJECTS[key].variants) || [];
+    var hit = opts.filter(function(o){ return o && (String(o.name || "").toLowerCase() === v.toLowerCase() || String(o.id || "").toLowerCase() === v.toLowerCase()); })[0];
+    return hit ? String(hit.name || hit.id) : "";
+  }
+  FINISH = finishName(PRODUCT, FINISH);
+  var PRODUCT_LABEL = PRODUCT + (FINISH ? " (" + FINISH + ")" : "");
+
   // subject line of the email Formspree sends (its _subject field)
   var subj = document.createElement("input");
   subj.type = "hidden"; subj.name = "_subject";
   form.appendChild(subj);
+  // the product (and finish) as its own field; sent only while a product topic is chosen
+  var prod = document.createElement("input");
+  prod.type = "hidden"; prod.name = "product"; prod.value = PRODUCT_LABEL; prod.disabled = true;
+  form.appendChild(prod);
+
+  /* PRODUCT MODE (2 Nov 2026, site review finding 2): the tick box sits under
+     the lead line, above Name, and Message is optional, so a buyer can register
+     interest in three fields and no prose. Since 3 Nov 2026 (finding 13) it is
+     on only while the topic is "A product" and a product is known: switching
+     topic puts the subject, the hidden field, the tick box and the required
+     message back the way the plain page has them. */
+  var notify = document.getElementById("cf-notify-wrap");
+  var notifyBox = document.getElementById("cf-notify");
+  var msgLabel = document.getElementById("cf-message-label");
+  var leadEl = document.getElementById("clead"), moreEl = document.getElementById("cleadMore");
+  var LEAD = leadEl.textContent, MORE_HTML = moreEl.innerHTML;
+  if(PRODUCT){
+    document.getElementById("cf-notify-name").textContent = PRODUCT;
+    form.insertBefore(notify, form.querySelector(".cfield"));
+  }
+  var productMode = false, tickMemo = false;
+  function setProductMode(on){
+    /* the tick is put away when the topic leaves A product and comes back
+       with it (3 Nov 2026, UX T7), so a round trip through the topics does
+       not lose it */
+    if(productMode && !on){ tickMemo = notifyBox.checked; notifyBox.checked = false; }
+    else if(!productMode && on){ notifyBox.checked = tickMemo; }
+    productMode = on;
+    notify.hidden = !on;
+    if(on) form.message.removeAttribute("required"); else form.message.setAttribute("required", "");
+    msgLabel.textContent = on ? "Message (optional)" : "Message";
+  }
 
   /* TOPIC. ?about= picks one: a product name -> A product, Consulting ->
-     Services, Custom -> Custom piece. Each topic has its own prompt. */
+     Services, Custom -> Custom piece. Each topic has its own prompt; "A
+     product" has a second one for when the product is already named. */
   var PROMPTS = {
     "Product": "Which product, and what you would like to know: price, availability, a finish.",
     "Custom piece": "What you have in mind: size, material, where it will live, timeline and a rough budget.",
     "Services": "What you are making, which service, your timeline and a rough budget.",
-    "Other": ""
+    "Other": "What it is about, and anything that helps."
   };
+  var PRODUCT_PROMPT = "What you would like to know: price, availability, a finish, a custom version.";
   var DEFAULT_PROMPT = form.message.getAttribute("placeholder") || "";
   function topic(){ var t = form.querySelector('input[name="topic"]:checked'); return t ? t.value : ""; }
   function syncTopic(){
     var t = topic();
-    form.message.setAttribute("placeholder", t ? PROMPTS[t] : DEFAULT_PROMPT);
-    subj.value = "Studio NEWO inquiry" + (t ? ": " + t : "") + (isProduct ? " (" + ABOUT + ")" : "");
+    var withProduct = !!PRODUCT && (t === "Product" || t === "Custom piece");
+    setProductMode(!!PRODUCT && t === "Product");
+    form.message.setAttribute("placeholder", productMode ? PRODUCT_PROMPT : (t ? PROMPTS[t] : DEFAULT_PROMPT));
+    subj.value = "Studio NEWO inquiry" + (t ? ": " + t : "") + (withProduct ? " (" + PRODUCT + (FINISH ? ", " + FINISH : "") + ")" : "");
+    prod.disabled = !withProduct;
+    /* One contact page for everything. A buyer from INQUIRE gets a lead about
+       that product; a custom request from a product page names it too. */
+    if(productMode){
+      leadEl.textContent = "Asking about " + PRODUCT + (FINISH ? " in " + FINISH : "") + "? Send a note about availability, price or a custom version.";
+      moreEl.textContent = "Replies usually come within a few days.";
+    } else if(withProduct){
+      leadEl.textContent = "Asking about a custom " + PRODUCT + (FINISH ? ", starting from " + FINISH : "") + "? Say what should change: size, material or finish.";
+      moreEl.textContent = "Replies usually come within a few days.";
+    } else if(t === "Services"){
+      /* a founder from Start a project (3 Nov 2026, UX 3): no pointer back
+         to the Solutions page they just came from */
+      leadEl.textContent = "Starting a project? A short note gets a quote.";
+      moreEl.textContent = "Replies usually come within a few days.";
+    } else if(t === "Custom piece"){
+      /* a custom piece with no product named, from Solutions, About or
+         Materials (3 Nov 2026, UX R2 item 4): its own lead, like Services */
+      leadEl.textContent = "A custom piece? Size, material, where it will live and a rough budget get a quote.";
+      moreEl.textContent = "Replies usually come within a few days.";
+    } else {
+      leadEl.textContent = LEAD;
+      moreEl.innerHTML = MORE_HTML;
+    }
+    /* a buyer never needs to attach sketches: the images control goes away
+       for the A product topic, and anything already picked is dropped */
+    var filesOff = (t === "Product");
+    filesWrap.hidden = filesOff;
+    if(filesOff && files.length){ clearFiles(); }
   }
-  var pick = isProduct ? "Product" : /^consult|^service/i.test(ABOUT) ? "Services" : /^custom/i.test(ABOUT) ? "Custom piece" : "";
-  if(pick){ var r = form.querySelector('input[name="topic"][value="' + pick + '"]'); if(r) r.checked = true; }
-  form.addEventListener("change", function(e){ if(e.target.name === "topic") syncTopic(); });
-  syncTopic();
-
   /* IMAGES. Picked files are shrunk in the browser (longest side 2000px,
      JPEG) so a phone photo goes up as about half a megabyte, not ten, then
      sent with the message as "attachment" fields. Formspree only accepts
@@ -316,6 +408,7 @@
      enquiry itself is never lost. */
   var MAX_FILES = 5, MAX_SIDE = 2000;
   var files = [];   // { name, blob, url }
+  var filesWrap = document.getElementById("cf-files-wrap");
   var fileIn = document.getElementById("cf-files");
   var thumbs = document.getElementById("cf-thumbs");
   var addBtn = document.getElementById("cf-add");
@@ -352,6 +445,9 @@
     addBtn.disabled = files.length >= MAX_FILES;
     noteEl.textContent = files.length ? files.length + " of " + MAX_FILES + " added." : NOTE;
   }
+  function clearFiles(){
+    files.forEach(function(f){ URL.revokeObjectURL(f.url); }); files = []; drawThumbs();
+  }
   addBtn.addEventListener("click", function(){ fileIn.click(); });
   fileIn.addEventListener("change", function(){
     var picked = Array.prototype.slice.call(fileIn.files || []).filter(function(f){ return /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name); });
@@ -366,14 +462,48 @@
     });
   });
 
+  // the topic comes last because syncTopic() also shows or hides the images block
+  var pick = isProduct ? "Product" : /^consult|^service/i.test(ABOUT) ? "Services" : /^custom/i.test(ABOUT) ? "Custom piece" : "";
+  if(pick){ var r = form.querySelector('input[name="topic"][value="' + pick + '"]'); if(r) r.checked = true; }
+  /* a status line belongs to the topic it was written for: after a waitlist
+     send, a Services form must not still say "You will hear once when KART
+     can be bought" (3 Nov 2026, UX R2 T11), so any topic change clears it */
+  form.addEventListener("change", function(e){ if(e.target.name === "topic"){ setStatus(""); syncTopic(); } });
+  syncTopic();
+
+  /* VALIDATION (2 Nov 2026): the first empty required field is marked
+     aria-invalid, gets the red rule and the focus, so the status line is not
+     the only thing that says something is wrong. Cleared on the next input. */
+  var REQUIRED = [form.name, form.email, form.message];
+  REQUIRED.forEach(function(el){ el.addEventListener("input", function(){ el.removeAttribute("aria-invalid"); el.removeAttribute("aria-describedby"); }); });
+  function fail(el, msg){
+    REQUIRED.forEach(function(x){ x.removeAttribute("aria-invalid"); });
+    REQUIRED.forEach(function(x){ x.removeAttribute("aria-describedby"); });
+    el.setAttribute("aria-invalid", "true");
+    el.setAttribute("aria-describedby", "cf-status");   // the error is read with the field
+    setStatus(msg, true);
+    try { el.focus({ preventScroll:false }); } catch(e){ el.focus(); }
+  }
+
   form.addEventListener("submit", function(e){
     e.preventDefault();
     if(form.querySelector('[name="_gotcha"]').value) return;   // bot caught
     var name = form.name.value.trim();
     var email = form.email.value.trim();
     var message = form.message.value.trim();
-    if(!name || !email || !message){ setStatus("Please fill in every field.", true); return; }
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setStatus("That email address looks off.", true); return; }
+    if(!name){ fail(form.name, "Please add your name."); return; }
+    if(!email){ fail(form.email, "Please add your email address."); return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ fail(form.email, "That email address looks off."); return; }
+    if(!message && !productMode){ fail(form.message, "Please add a message."); return; }
+    /* product mode: the message may be empty only when the box is ticked, so
+       an inquiry never arrives saying nothing (3 Nov 2026, UX 4) */
+    if(!message && productMode && !notifyBox.checked){ fail(form.message, "Tick the box or add a question."); return; }
+    REQUIRED.forEach(function(x){ x.removeAttribute("aria-invalid"); x.removeAttribute("aria-describedby"); });
+    var waitlist = productMode && notifyBox.checked;
+    /* product mode with the box left empty: the body still says what was asked */
+    if(!message && productMode){
+      message = "Inquiry about " + PRODUCT_LABEL + (waitlist ? ": tell me when it is available to buy." : ".");
+    }
 
     /* ---- NO HOSTED ENDPOINT: THE FALLBACK MUST NEVER FAIL SILENTLY ----
        This used to set window.location to a mailto: and say "Opening your mail
@@ -400,6 +530,7 @@
     setStatus("Sending...");
     function send(withFiles){
       var fd = new FormData(form);
+      fd.set("message", message);
       if(withFiles) files.forEach(function(f){ fd.append("attachment", f.blob, f.name); });
       else if(files.length) fd.set("message", message + "\n\n(" + files.length + " image" + (files.length > 1 ? "s" : "") + " could not be attached.)");
       return fetch(FORMSPREE_ENDPOINT, { method: "POST", headers: { "Accept": "application/json" }, body: fd });
@@ -411,11 +542,16 @@
       return res;
     }).then(function(res){
       if(res.ok){
+        var sentTopic = topic();
         form.reset();
-        files.forEach(function(f){ URL.revokeObjectURL(f.url); }); files = []; drawThumbs();
+        tickMemo = false;
+        clearFiles();
+        if(sentTopic){ var r2 = form.querySelector('input[name="topic"][value="' + sentTopic + '"]'); if(r2) r2.checked = true; }
         syncTopic();
+        /* WAITLIST (3 Nov 2026, Q12): a ticked box gets its own confirmation */
         setStatus(res.imagesDropped
           ? "Thanks. Your message is on its way, but the images could not be attached. Please email them to " + MAILTO + "."
+          : waitlist ? "Thanks. You will hear once when " + PRODUCT + " can be bought, and nothing else."
           : "Thanks. Your message is on its way.", !!res.imagesDropped);
       } else {
         setStatus("Something went wrong. Email " + MAILTO + " instead.", true);

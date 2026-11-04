@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>404 · STUDIO NEWO</title>
-<meta name="description" content="That page does not exist.">
+<meta name="description" content="This page does not exist.">
 <meta name="theme-color" content="#e9e7e2">
 <meta name="robots" content="noindex">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
@@ -26,20 +26,21 @@
      so relative paths would resolve against the wrong folder and the page would
      arrive unstyled with a broken logo. That is exactly what the old standalone
      version did from anywhere but the site root. -->
-<link rel="stylesheet" href="/css/style.css?v=63">
+<link rel="stylesheet" href="/css/style.css?v=68">
 <style>
   .fourofour{min-height:64vh; display:flex; flex-direction:column; justify-content:center;}
   .fourofour .code{font-family:var(--disp); font-style:italic; font-weight:400;
     font-size:clamp(96px,20vw,240px); line-height:.9; color:var(--red); margin:0;}
-  .fourofour .backlinks{margin-top:clamp(26px,5vh,46px); display:flex; flex-wrap:wrap; gap:10px 26px;}
-  .fourofour .backlinks a{font-size:11px; letter-spacing:.16em; text-transform:uppercase;
-    color:var(--ink); text-decoration:none; border-bottom:1px solid var(--red); padding-bottom:3px; transition:color .15s ease;}
-  .fourofour .backlinks a:hover{color:var(--red);}
+  /* the five ways out are buttons in the site's one style (css/style.css, ONE
+     BUTTON STYLE), 3 Nov 2026; they were 11px ink words over a red rule */
+  .fourofour .backlinks{margin-top:clamp(26px,5vh,46px); display:flex; flex-wrap:wrap; gap:8px;}
   .fourofour .path{margin-top:24px; font-size:10px; letter-spacing:.1em; color:var(--ink-soft); word-break:break-all;}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#content">Skip to content</a>
+<!-- header landmark (2026-11-03, axe "region"): the three fixed marks sit in it; it has no box of its own -->
+<header>
 <a class="site-home" href="/" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
@@ -49,7 +50,8 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
-<div id="menu-overlay"><a href="/solutions.html">SOLUTIONS</a><a href="/solutions.html#services">SERVICES</a><a href="/about.html">ABOUT</a><a href="/materials.html">MATERIALS</a><a href="/contact.html">CONTACT</a></div>
+</header>
+<div id="menu-overlay"><a href="/solutions.html">SOLUTIONS</a><a href="/solutions.html#services">SERVICES</a><a href="/materials.html">MATERIALS</a><a href="/about.html">ABOUT</a><a href="/contact.html">CONTACT</a></div>
 
 <main class="page wrap fourofour" id="content" tabindex="-1">
   <span class="eyebrow">Error</span>
@@ -60,10 +62,10 @@
   <hr>
   <p class="lead">This page does not exist. It may have been renamed, or the link that brought you here may be out of date.</p>
   <div class="backlinks">
-    <a href="/">Index</a>
+    <a href="/">Home</a>
     <a href="/solutions.html">Solutions</a>
-     <a href="/about.html">About</a>
     <a href="/materials.html">Materials</a>
+    <a href="/about.html">About</a>
     <a href="/contact.html">Contact</a>
   </div>
   <p class="path" id="badpath"></p>
@@ -81,9 +83,9 @@
 </footer>
 
 
-<script src="/js/projects-data.js?v=27"></script>
-<script src="/js/main.js?v=5"></script>
-<script src="/js/menu.js?v=35"></script>
+<script src="/js/projects-data.js?v=33"></script>
+<script src="/js/main.js?v=7"></script>
+<script src="/js/menu.js?v=42"></script>
 <script>
 /* Echo back the path that missed - handy when a 404 comes from a typo or a
    stale link, since you can see at a glance what was actually requested.

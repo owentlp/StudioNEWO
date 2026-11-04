@@ -30,13 +30,14 @@
      this frame past its column, so the buttons land on the margin itself. */
   .ui{display:flex;flex-direction:column;align-items:flex-start;padding:6px 0 0 9.574%;}
   .modes{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;margin:0 0 12px;}
-  /* Same block as INQUIRE / VIEW IN YOUR SPACE / the model controls: white on
-     red, 12px, .16em tracking. Red = available, ink = currently on. */
+  /* The site's one button style, as INQUIRE, VIEW IN YOUR SPACE and the model's
+     controls: 12px, .16em, outlined in red at rest, solid red with white text
+     for the mode that is on (Owen, 3 Nov 2026; was white on red, ink = on). */
   .modes button{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
-    color:#fff;background:var(--red);border:0;padding:8px 14px;cursor:pointer;border-radius:0;
-    transition:opacity .15s ease,background-color .15s ease;}
-  .modes button:hover{opacity:.82;}
-  .modes button[aria-pressed="true"]{background:var(--ink);opacity:1;}
+    color:#b5120f;background:var(--paper);border:1px solid #b5120f;padding:7px 13px;cursor:pointer;border-radius:0;
+    opacity:1;transition:none;}   /* the site's one button style (css/style.css, ONE BUTTON STYLE, 3 Nov 2026): outline in --red-text (#b5120f, 5.6:1) at rest, a 1px border inside the old 8px 14px box. Paper ground so the drawing never shows through the words */
+  .modes button[aria-pressed="true"]{color:#fff;background:var(--red);border-color:var(--red);}   /* the chosen mode: solid red, white 4.8:1 */
+  .modes button:not([aria-pressed="true"]):hover{background:#e8d7d2;}   /* a toggle: hover is a tint (--red at 8% on paper), never the solid */
   .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
   .meta{max-width:46ch;margin:0;font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;
     text-transform:uppercase;text-align:left;}
@@ -63,7 +64,7 @@
 <body>
   <div class="wrap">
     <div class="stage">
-      <canvas id="c" role="img" aria-label="Top-down section of FLOW: air drawn in through the perforated housing, through the crossflow turbine, and out of the slot as a flat curtain"></canvas>
+      <canvas id="c" role="img" aria-label="Top-down section of FLOW: air drawn in through the perforated housing, through the crossflow turbine and out of the slot as a flat curtain"></canvas>
     </div>
     <div class="ui">
       <div class="modes" id="modes" role="group" aria-label="Fan type">
@@ -105,7 +106,7 @@
   const descEl=document.getElementById('desc'), speedEl=document.getElementById('speed');
   const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const MODES={
-    cross:"Air is drawn in through the perforations, wraps around the turbine, and leaves the slot between the two plates as one flat, even curtain.",
+    cross:"Crossflow: one wide, even sheet of air, with no swirl to break it up.",
     axial:"A conventional axial fan throws a swirling cone of air that breaks up as it travels."
   };
   let mode='cross', scale=1;
@@ -164,7 +165,12 @@
     const slotHalf=(SR.x-SL.x)/2-4;
     for(let i=0;i<N;i++){
       const u=(i+0.5)/N;
-      const te=lerp(70,-62,u)*deg, al=lerp(28,-72,u)*deg;        // entry point, and where the air comes from
+      /* entries spread over about 160 degrees of the perforated body, from
+         just past the bottom round the right side to the upper right (was 70
+         to -62, one quadrant: the copy says the air comes in through the
+         perforations, so it should read as drawn in all round). The lowest
+         lane still wraps widest and leaves along the left plate. */
+      const te=lerp(100,-60,u)*deg, al=lerp(58,-72,u)*deg;       // entry point, and where the air comes from
       const de=dirOf(te);
       const pe={x:C.x+de.x*R,y:C.y+de.y*R};                       // through a perforation
       const p0={x:pe.x+Math.cos(al)*300,y:pe.y+Math.sin(al)*300};
@@ -225,7 +231,7 @@
       // suction side: drawn in toward the perforations on the right
       const ddx=C.x-p.x, ddy=C.y-p.y, dist=Math.hypot(ddx,ddy);
       const ang=Math.atan2(-ddy,-ddx);
-      if(dist>R && dist<R+300 && ang>-80*deg && ang<80*deg)
+      if(dist>R && dist<R+300 && ang>-78*deg && ang<112*deg)
         return {vx:ddx/dist, vy:ddy/dist, k:0.55*Math.min(1,R/dist*1.4), turb:0.06};
       return {vx:0,vy:0,k:0,turb:0};
     }
@@ -453,7 +459,7 @@
     [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
     descEl.textContent=MODES[mode];
     canvas.setAttribute('aria-label', mode==='cross'
-      ? 'Top-down section of FLOW: air drawn in through the perforated body, wrapping around the crossflow turbine, and out of the slot between two plates as a flat curtain'
+      ? 'Top-down section of FLOW: air drawn in through the perforated body, wrapping around the crossflow turbine and out of the slot between two plates as a flat curtain'
       : 'Top-down view of a conventional axial fan: a swirling cone of air that spreads and breaks up');
     seed(); wake();
   });
@@ -470,13 +476,22 @@
   setTimeout(postHeight,300);
   if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
 
-  // interaction hint, gone after the first real touch or drag
+  /* the interaction hint (Owen, 3 Nov 2026): every 3D model and every
+     mechanism says DRAG TO INTERACT (fine pointer) or TOUCH TO INTERACT
+     (touch), in the same place on each: the FIRST line of its own control
+     block (.ui here, .mv-bar under the 3D model), above the buttons, never on
+     the drawing or over text. It fades on the first real touch or drag and
+     stays gone. The inline style puts it in that flow (OMNI's .hint rule
+     pins it absolutely) at the 3D model hint's 9px, until the .hint rule
+     above carries both (docs/CLOUD_REPORT_2026-11-03_w4template.txt). */
   (function(){
     const h=document.createElement('div'); h.className='hint';
-    h.textContent=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)?'TOUCH TO HOLD THE RIBBON':'MOVE TO HOLD THE RIBBON';
-    document.querySelector('.ui').appendChild(h);
+    h.textContent=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)?'TOUCH TO INTERACT':'DRAG TO INTERACT';
+    h.style.position = 'static'; h.style.transform = 'none'; h.style.margin = '0 0 10px'; h.style.fontSize = '9px';
+    const ui=document.querySelector('.ui'); ui.insertBefore(h, ui.firstChild);
     const gone=()=>h.classList.add('gone');
     canvas.addEventListener('pointerdown',gone,{once:true});
+    canvas.addEventListener('touchstart',gone,{once:true,passive:true});
     canvas.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') gone(); },{once:true});
   })();
 })();

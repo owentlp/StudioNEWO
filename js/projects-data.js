@@ -13,7 +13,8 @@
                    this is the ONLY scatter section project.html renders. All
                    hand-positioned photos (fabrication steps AND finished/
                    aesthetic shots alike) belong in this one array.
-     v2images[]    closing V2 shots
+     (The V2 text has no images: the V2 section is not rendered, and its
+      v2-01 photos left the shipped site on 2 Nov 2026.)
 
    TWO RULES THAT CONTROL THE LOOK:
 
@@ -46,6 +47,48 @@
                     the hero photo after a small red square, e.g. "Prototype 01",
                     "V2 in development", "Made to order", "Small batch, spring".
                     Keep it factual and short. Leave "" to hide.
+        availability one honest commerce line shown under the status. Fixed
+                    vocabulary, pick one: "Not for sale yet. Ask to be told when
+                    it is." / "Made to order. Lead time on request." / "Made to
+                    order, about N weeks. CA$X." / "One-off, sold."
+        exhibited   where it was shown, e.g. "IDS Toronto, 2025". "" to hide.
+        price       shown in the spec row when set, e.g. "CA$640". "" to hide.
+        variants    colour / material / finish options (2026-11-02). [] for none;
+                    with two or more, a FINISH row of swatches appears under the
+                    material chips. Each option:
+                      { id:"walnut",            folder name, letters and dashes
+                        name:"Walnut",          shown beside the swatches
+                        swatch:"#5b3a29",       a hex colour, OR a small square
+                                                image in projects/<id>/variants/
+                                                e.g. "walnut-swatch.jpg"
+                        model:"Walnut",         optional: the KHR_materials_variants
+                                                name baked into the GLB (Blender:
+                                                one material per option); the 3D
+                                                model swaps to it. Omit if the GLB
+                                                has no variants.
+                        images:["hero.jpg", "gallery-02.jpg"]
+                                                optional: photos that change. Put
+                                                each under projects/<id>/variants/
+                                                <id>/ with the SAME filename as the
+                                                original; photos not listed stay as
+                                                the default, and a listed photo that
+                                                is missing falls back to it. Run
+                                                tools/make-image-variants.py after
+                                                adding them (sm/ md/ + sizes).
+                        alt:{"hero.jpg":"KART in walnut ..."}
+                                                optional (2026-11-03): alt text per
+                                                swapped photo, keyed by filename;
+                                                without it the default alt stays.
+                        materials:"Walnut, frosted glass, aluminum, electronics"
+                                                optional (2026-11-03): this option's
+                                                material line, same format as the
+                                                product's `materials`; the chips under
+                                                the hero switch to it. Without it the
+                                                product's line stays. }
+                    The FIRST option is the default and uses the original files
+                    (no folder needed). The choice goes into the INQUIRE link
+                    (contact.html?about=KART&finish=Walnut) and ?finish=walnut
+                    in a product address opens it in that finish.
         kind     what the product IS, in plain words ("flat-pack lounge chair").
                     Goes into the page title and search/share previews:
                     "NEB, flat-pack lounge chair · STUDIO NEWO". Re-run
@@ -80,7 +123,7 @@
           L  = Lighting      (KART is L01, HALO is L02, a separate product)
           A  = Accessories
           H  = Appliances    (FLOW, a desk fan; kept distinct from "A" above)
-          J  = Jewelry
+          J  = Jewellery
           AU = Audio         (OMNI; two letters since "A" was already taken twice)
           X  = Other / uncategorized
         The number identifies the PRODUCT LINE (01 = the first seating design
@@ -143,7 +186,7 @@
         Material switching: bake KHR_materials_variants into the GLB and a
         material dropdown appears automatically. Explode: bake a glTF animation
         whose name contains "explode" and an EXPLODE button appears. The
-        viewer now auto-rotates slowly at rest and pauses while you drag it.
+        viewer sits still at rest.
    ============================================================ */
 const PROJECTS = {
 
@@ -152,34 +195,36 @@ const PROJECTS = {
     title:     "KART",
     kind:      "presence-sensing table lamp",
     status:    "Prototype 01 / V2 in development",
+    availability: "Not for sale yet. Ask to be told when it is.",
+    exhibited: "",
     code:      "L01.1",
     date:      "2026",
     teaser:    "A light that responds to your presence.",
-    summary:   "The light switch has barely changed in over a century. KART replaces it with spatial awareness. The lamp tracks movement within a room, scaling its intensity as you approach, dimming as you walk away, and turning off when you leave.",
+    summary:   "The light switch has barely changed in over a century. KART replaces it with spatial awareness. The lamp tracks movement within a room, brightening as you approach, dimming as you walk away and turning off when you leave.",
     summaryMore:"",
     materials: "Cherry, frosted glass, aluminum, electronics",
-    lifecycle: "The base, shade, and chassis pull apart entirely. Components can be repaired, upgraded, or cleanly recycled.",
+    lifecycle: "The base, shade and chassis pull apart. Each can be repaired, upgraded or recycled on its own.",
     designTags:["Designed for disassembly", "Repairable"],
-    size:      "4 in dia x 8 in tall",
+    size:      "4 in dia x 9.5 in tall",
     price:     "",
-    parts:     ["Cherry base", "Frosted glass shade", "LED matrix", "Aluminum knob"],
+    variants:  [],
     /* ALT TEXT. What each photo actually shows, for screen readers and for
        image search - these photographs are the portfolio, and an empty alt
        tells both of them the image is decorative. Keyed by filename so the
        gallery and process arrays stay as they are. A file with no entry
        here falls back to the project title. */
     alt: {
-      "gallery-01.jpg": "The KART smart lamp unlit on a wooden cabinet beside a window, showing the frosted glass shade and turned cherry cap",
+      "gallery-01.jpg": "The KART lamp unlit on a wooden cabinet beside a window, showing the frosted glass shade and turned cherry cap",
       "gallery-02.jpg": "KART lit deep blue and seen from above, the turned cherry cap and the LED matrix's graded light across the frosted shade",
       "gallery-03.jpg": "KART lit warm orange against a dark wall, the addressable LED matrix visible as a pixel grid through the frosted glass",
       "gallery-04.jpg": "KART lit red beside a white brick wall, the LED matrix pixels legible through the glass diffuser",
-      "gallery-05.jpg": "Close detail of KART's frosted glass shade lit red, showing the LED matrix pixels and the seam at the aluminum base",
-      "hero.jpg": "KART presence-sensing LED table lamp lit warm amber in a dark room, its frosted glass cylinder glowing above a cherry and aluminum base",
+      "gallery-05.jpg": "Close detail of KART's frosted glass shade lit red, showing the LED matrix pixels and the seam at the cherry base",
+      "hero.jpg": "KART presence-sensing LED table lamp lit warm amber in a dark room, its frosted glass cylinder glowing above a cherry base",
       "scatter-01.jpg": "Close view of the addressable RGB LED matrix panel used in KART, individual LED packages on a flexible circuit board",
       "scatter-02.webp": "KART's breadboard prototype: microcontroller, millimetre-wave radar presence sensor and jumper wires on the workbench",
       "scatter-03.jpg": "Cherry hardwood grain, the material used for KART's turned cap and base",
       "scatter-04.webp": "KART's electronics laid out flat: the addressable LED matrix panel with its microcontroller, radar sensor module and power supply",
-      "scatter-05.webp": "KART separated into its three main parts: the frosted glass shade, the turned cherry cap, and the LED cylinder on its aluminum base",
+      "scatter-05.webp": "KART separated into its three main parts: the frosted glass shade, the turned cherry cap and the LED cylinder on its cherry base",
       "scatter-06.jpg": "KART lit low in a dark room, the lamp's ambient glow reflected across the floor"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg", "gallery-05.jpg"],
@@ -191,15 +236,9 @@ const PROJECTS = {
     modelV2:   "",
     mechanism: "mechanism.html",
     hiwVideo:  "",
-    howItWorks:"A hidden radar module tracks presence and proximity, translating your physical location into dynamic lighting on an LED matrix.",
-    howItWorksMore:"Many modern conveniences require pulling out a phone. KART deliberately avoids this. A single push-button dial allows for quick access to dimming and power, while also managing mode customization. Set it once, and let the lamp react to you. (A mobile interface is in development for those who prefer it, but the primary experience will always remain tactile.)",
+    howItWorks:"A radar module hidden inside the housing reads where you are. The firmware maps that position onto a 256-LED matrix behind the frosted glass, so the brightness and the lit column of the cylinder follow you.",
+    howItWorksMore:"Many modern conveniences require pulling out a phone. KART avoids this. One push-button dial covers dimming, power and the choice of mode. Set it once and let the lamp react to you. A phone interface is in development for those who prefer it; the dial stays the primary control.",
     components: [],
-    mechNotes: [
-      "Follow. A column of light tracks your position, brightening as you get closer.",
-      "Dim Away. Brightness fades the further you move from the lamp.",
-      "Dim Toward. Brightness fades as you approach, brightest from across the room.",
-      "Shadow. The full cylinder glows and a dark column follows you instead, widening as you approach."
-    ],
     // pinned to the Figma composition: LED macro bleeding OFF the left edge
     // (shift is vw past the window edge), breadboard cut-out lower right.
     // The two processText paragraphs land side by side under the LED photo.
@@ -210,9 +249,9 @@ const PROJECTS = {
         /* x/y are % positions of each label's top-left on the container. The
            photo is shifted right (see .comp-spread img in style.css) so the
            left labels sit in the gap, level with their part. */
-        { t:"LED Matrix",      x:46, y:8,  name:"WS2812B 16×16 panel", spec:"256 individually addressable RGB LEDs on a single data line, 5 V." },
-        { t:"mmWave Radar",    x:1,  y:23, name:"Ai-Thinker RD-03D", spec:"24 GHz mmWave radar. Tracks up to three people at once and senses through the non-conductive housing, so it stays fully hidden. UART output." },
-        { t:"Microcontroller", x:1,  y:49, name:"ESP32-S3 Mini", spec:"Dual-core MCU with Wi-Fi and Bluetooth. Runs the firmware: reads the radar and dial and drives the 256-LED matrix over a single data line." },
+        { t:"LED matrix",      x:46, y:8,  name:"WS2812B 16 x 16 panel", spec:"256 individually addressable RGB LEDs on a single data line, 5 V." },
+        { t:"mmWave radar",    x:1,  y:23, name:"Ai-Thinker RD-03D", spec:"24 GHz mmWave radar. Tracks up to three people at once. UART output." },
+        { t:"Microcontroller", x:1,  y:49, name:"ESP32-S3 Mini", spec:"Dual-core MCU with Wi-Fi and Bluetooth. Runs the firmware: reads the radar and the dial and drives the LED matrix." },
         { t:"Dial",            x:1,  y:74, name:"EC11 rotary encoder", spec:"Rotate to dim, push to switch power and modes. 20 detents per turn." }
       ] },
       { src:"scatter-03.jpg",  bleed:"right", span:4, ar:"3/4", mt:60, cap:"Cherry, laminated and cut" },
@@ -220,13 +259,12 @@ const PROJECTS = {
       { src:"scatter-06.jpg",  bleed:"right", span:6, ar:"3/2", mt:90, cap:"Lit", capOn:true }
     ],
     processNotes:[],
-    processText:"The aim was to leverage modern sensor technology to fundamentally improve how people interact with light: past the on/off switch, and without a smart-home system.",
-    processMore:"The design hinges on the RD-03D millimetre-wave radar. It can track up to three people simultaneously through non-conductive materials, allowing the sensor to be completely hidden. The hardest compromise was balancing the internal electronics with the exterior aesthetics. In the studio's process, form follows function, so the electronic chassis was built first. The final proportions were entirely dictated by the dimensions of the frosted glass shade available during prototyping.",
+    processText:"The aim was to use current sensor technology to change how people interact with light: past the on/off switch, and without a smart-home system.",
+    processMore:"The design hinges on the RD-03D millimetre-wave radar, which senses through the housing, so the form needed no window for it. The hardest compromise was fitting the electronics inside the form. Form follows function in the studio, so the electronic chassis was built first. The final proportions were set by the frosted glass shade available during prototyping.",
     processBottomMore:"",
     processVideo: "",
-    v2:        "The focus for V2 is to create a core which holds all necessary electronics. The core can then be dropped into different chassis.",
+    v2:        "V2 moves the electronics into one core that drops into different housings.",
     v2More:    "",
-    v2images:  [{ src:"v2-01.png", bleed:"left", span:7 }],
     v2Video:   ""
   },
 
@@ -235,17 +273,19 @@ const PROJECTS = {
     title:     "OMNI",
     kind:      "omnidirectional loudspeakers",
     status:    "Prototype 01",
+    availability: "Not for sale yet. Ask to be told when it is.",
+    exhibited: "",
     code:      "AU01.1",
     date:      "2025",
     teaser:    "A continuous acoustic field.",
-    summary:   "Listening at home has become more transient: people no longer sit in one \"sweet spot\" facing two speakers. OMNI is a pair of omnidirectional loudspeakers designed to scatter sound outward in 360 degrees, creating a continuous acoustic field that fills the room evenly.",
+    summary:   "Listening at home has become more transient: people no longer sit in one sweet spot facing two speakers. OMNI is a pair of omnidirectional loudspeakers built to fill the room evenly, wherever you stand.",
     summaryMore:"",
-    materials: "Cast aluminum, purpleheart, driver",
-    lifecycle: "The driver unscrews from the enclosure, allowing for easy servicing or future audio upgrades.",
+    materials: "Cast aluminum, machined aluminum, purpleheart, driver",
+    lifecycle: "The driver unscrews from the enclosure for servicing or a better driver later.",
     designTags:["Upgradable electronics"],
-    size:      "7 x 7 x 9 in each (pair)",
+    size:      "7.5 x 8.5 x 9 in each (pair)",
     price:     "",
-    parts:     ["Purpleheart enclosure", "Aluminum diffuser", "Aluminum standoffs", "Coaxial driver"],
+    variants:  [],
     /* ALT TEXT. What each photo actually shows, for screen readers and for
        image search - these photographs are the portfolio, and an empty alt
        tells both of them the image is decorative. Keyed by filename so the
@@ -272,10 +312,9 @@ const PROJECTS = {
     modelV2:   "",
     mechanism: "mechanism.html",
     hiwVideo:  "",
-    howItWorks:"A solid, hand-finished cast aluminum diffuser sits directly above a coaxial driver, dispersing sound horizontally in all directions.",
-    howItWorksMore:"The system pairs a 5.5-inch coaxial driver with a sand-cast aluminum diffuser. The enclosure is mitered from solid purpleheart wood, one of the densest hardwoods available, chosen for mass and stiffness so the cabinet itself stays quiet.",
+    howItWorks:"The coaxial driver fires straight up into a cast aluminum cone suspended above it. The cone turns the sound sideways and spreads it through 360 degrees.",
+    howItWorksMore:"The driver is a 5.5 in coaxial unit. The cone is sand-cast and hand-finished, and hangs from a purpleheart top plate on machined aluminum standoffs. The enclosure is mitred from solid purpleheart, one of the densest hardwoods, chosen for mass and stiffness so the cabinet itself stays quiet.",
     components: [],
-    mechNotes: [],
     process:   [
       /* 2026-10-02 image pass: scatter-04 (parts lying on a scrap pile) cut.
          Captions are not displayed; they are kept true to the image anyway. */
@@ -285,12 +324,11 @@ const PROJECTS = {
       { src:"scatter-02.jpg", bleed:"right", span:5, ar:"4/3", mt:40,  cap:"The mould, opened" }
     ],
     processNotes:[],
-    processText:"This project takes inspiration from a high-end omnidirectional speaker, the BeoLab 5. The goal was a similar acoustic geometry in raw, premium materials, but at a fraction of the cost through efficient fabrication.",
-    processMore:"Aesthetically, there were no compromises. The constraints of the materials, the casting process, and the intended acoustic outcome entirely dictated the form. Purpleheart and solid aluminum were chosen for their sonic and structural properties. Using a coaxial driver and calculating the exact dispersion angle for the aluminum cast, the speaker trades the traditional stereo sweet spot for an immersive, room-filling experience.",
+    processText:"The starting point was the Bang & Olufsen BeoLab 5 and its acoustic lens. The goal was the same geometry in raw materials, cast and machined in the studio, at a fraction of the cost.",
+    processMore:"The form was set by the materials, the casting process and the dispersion angle, not by styling. Purpleheart and aluminum were chosen for mass, stiffness and how they sound. The cone angle was calculated for the coaxial driver, so the pair gives up a fixed stereo image for sound in every direction.",
     processVideo: "",
-    v2:        "The current pair runs on inexpensive coaxial drivers and their stock crossover, chosen to prove the enclosure and diffuser before investing further. Next is higher-quality drivers matched to the diffuser's dispersion pattern, the part of the signal chain most likely limiting the sound right now.",
+    v2:        "The current pair runs inexpensive coaxial drivers and their stock crossover, enough to prove the enclosure and diffuser. Next is better drivers matched to the diffuser, the part of the chain most likely limiting the sound.",
     v2More:    "",
-    v2images:  [{ src:"v2-01.jpg", bleed:"left", span:7, ar:"3/2" }],
     v2Video:   ""
   },
 
@@ -299,17 +337,19 @@ const PROJECTS = {
     title:     "NEB",
     kind:      "flat-pack lounge chair",
     status:    "Prototype 01",
+    availability: "Not for sale yet. Ask to be told when it is.",
+    exhibited: "",
     code:      "S01.1",
     date:      "2024",
     teaser:    "A study in tension and flat-pack mechanics.",
-    summary:   "Flat-pack furniture usually implies cheap materials and a temporary lifespan. NEB intentionally pushes against that idea. It is a lounge chair that ships flat and assembles in minutes, relying entirely on tension mechanics and heavy-duty materials to create a rock-solid frame meant to last.",
+    summary:   "Flat-pack furniture usually means cheap materials and a short life. NEB pushes against that. It is a lounge chair that ships flat and assembles in minutes with a hex key.",
     summaryMore:"",
-    materials: "Birch plywood, hardwood dowels, foam, canvas",
-    lifecycle: "No glue anywhere in the frame. The chair unscrews back to flat panels and dowels, so any single part can be replaced on its own.",
+    materials: "Birch plywood, hardwood dowels, foam",
+    lifecycle: "The chair unscrews back to flat panels and dowels, so any single part can be replaced on its own.",
     designTags:[],
     size:      "24 x 24 x 24 in (assembled)",
     price:     "",
-    parts:     ["Side panel", "Seat", "Back"],
+    variants:  [],
     /* ALT TEXT. What each photo actually shows, for screen readers and for
        image search - these photographs are the portfolio, and an empty alt
        tells both of them the image is decorative. Keyed by filename so the
@@ -339,10 +379,9 @@ const PROJECTS = {
     modelV2:   "",
     mechanism: "",
     hiwVideo:  "",
-    howItWorks:"Two Baltic birch plywood side panels lock onto seven tapered hardwood dowels. Hex screws clamp the assembly under high tension, eliminating the need for glue or hidden brackets.",
-    howItWorksMore:"A low-back lounge chair, proportioned for a living room, patio or office. Built from flat planes and cylindrical dowels, it can be made in different material grades, so the same chair can be customized from mid to high end.",
+    howItWorks:"Two Baltic birch plywood side panels lock onto seven tapered hardwood dowels. Hex screws pull the panels onto the tapers and clamp the frame under tension, so it needs no glue and no hidden brackets.",
+    howItWorksMore:"A low-back lounge chair for a living room, patio or office. The same two panels and seven dowels can be cut in other plywood and hardwood grades, so one design covers a range of prices.",
     components: [],
-    mechNotes: [],
     process:   [
       { src:"scatter-01.jpg", col:"1 / 6",                     mt:0,   cap:"Parts, laid out" },
       /* scatter-02.jpg removed 2026-09-16: it was byte-identical to gallery-05.jpg
@@ -358,13 +397,12 @@ const PROJECTS = {
       { src:"scatter-08.jpg", bleed:"right", span:4, ar:"3/4", mt:40,  cap:"Plywood grain" }
     ],
     processNotes:[],
-    processText:"The primary engineering challenge was bridging the gap between flat-pack efficiency and timelessness. The solution was perfecting the mechanical tension across the dowels.",
-    processMore:"The structural frame relies on seven dowels, each precisely tapered from 1.25 inches down to 1 inch. Achieving this exact tolerance required multiple physical iterations on a table saw jig before moving to final CNC production. The resulting tension-clamped frame proves that high-quality, long-lasting furniture can still be flat-packed for efficient shipping and storage.",
+    processText:"The challenge was a flat-pack that does not feel like one. The answer was getting the tension across the dowels right.",
+    processMore:"The frame relies on seven dowels, each tapered from 1.25 in to 1 in. Getting that tolerance took several rounds on a table saw jig before the final parts were cut on the CNC. The tension-clamped frame shows a flat-pack chair can be built to last.",
     processBottomMore:"",
     processVideo: "",
-    v2:        "V1 proved the tension-clamped frame holds up. V2 replaces the multi-dowel field with three dowels and a canvas sling, cutting weight, cost, and assembly time.",
+    v2:        "V2 replaces the seven dowels with three and a canvas sling, cutting weight, cost and assembly time.",
     v2More:    "",
-    v2images:  [{ src:"v2-01.jpg", bleed:"left", span:7, ar:"3/2" }],
     v2Video:   ""
   },
 
@@ -373,32 +411,34 @@ const PROJECTS = {
     title:     "FLOW",
     kind:      "crossflow desk fan",
     status:    "Prototype 01",
+    availability: "Not for sale yet. Ask to be told when it is.",
+    exhibited: "IDS Toronto, 2025",
     code:      "H01.1",
     date:      "2025",
     teaser:    "Clean, quiet airflow in a continuous curtain.",
-    summary:   "Most desk fans are noisy, spinning plastic discs. Taking cues from industrial HVAC, FLOW uses tangential crossflow: it pulls air in along its full length and pushes it out as one steady, quiet curtain, while looking like an object you would want on your desk.",
+    summary:   "Most desk fans are noisy, spinning plastic discs. FLOW borrows the crossflow turbine from industrial HVAC and builds it into a steel cylinder you would want on your desk.",
     summaryMore:"",
     materials: "Sheet steel, PLA, rubber, reclaimed motor",
-    lifecycle: "Built around a reclaimed motor and off-cut sheet steel. The turbine is a single printed part, so a damaged one can be printed again.",
+    lifecycle: "Two of its main materials were found, not bought. The turbine is a single printed part, so a damaged one can be printed again.",
     designTags:["Designed for disassembly", "Built from reclaimed parts"],
-    size:      "4 in dia x 8 in tall (approx.)",
+    size:      "4 in dia x 8 in tall",
     price:     "",
-    parts:     ["Housing", "Turbine", "Motor"],
+    variants:  [],
     /* ALT TEXT. What each photo actually shows, for screen readers and for
        image search - these photographs are the portfolio, and an empty alt
        tells both of them the image is decorative. Keyed by filename so the
        gallery and process arrays stay as they are. A file with no entry
        here falls back to the project title. */
     alt: {
-      "gallery-01.jpg": "FLOW crossflow desk fan prototypes on a white plinth beside their spec card at a design show",
+      "gallery-01.jpg": "FLOW crossflow desk fan prototypes on a white plinth beside their spec card at IDS Toronto 2025",
       "gallery-02.jpg": "A single red FLOW crossflow desk fan photographed against a plain background",
       "gallery-03.jpg": "Three FLOW crossflow fans in a row, two in brushed steel and one painted red",
       "gallery-04.jpg": "Four FLOW fan bodies grouped together in brushed steel and painted red, seen from above",
       "hero.jpg": "The FLOW crossflow desk fan in red, a perforated steel cylinder with a folded side vane",
-      "scatter-01.jpg": "Steel offcuts and formed sheet on the workbench after rolling FLOW's fan bodies",
+      "scatter-01.jpg": "Steel off-cuts and formed sheet on the workbench after rolling FLOW's fan bodies",
       "scatter-02.jpg": "Flat steel blanks with a rule and layout tools, marked out before rolling",
       "scatter-03.jpg": "Reference: the Braun HL 70 desk fan from 1971, a yellow crossflow fan on a clear stand, the precedent FLOW takes its cues from",
-      "scatter-04.jpg": "FLOW's impeller printing on the bed of a 3D printer",
+      "scatter-04.jpg": "FLOW's turbine printing on the bed of a 3D printer",
       "scatter-05.jpg": "Cut steel discs and sheet stock for FLOW laid out on the bench, including a perforated end cap",
       "scatter-06.jpg": "FLOW's motor and wiring assembled inside a rolled steel fan body",
       "scatter-07.jpg": "Two steel sheets marked out with FLOW's perforation drilling pattern",
@@ -416,10 +456,9 @@ const PROJECTS = {
     modelV2:   "",
     mechanism: "mechanism.html",   // 2026-10-02: crossflow vs axial airflow, top-down section
     hiwVideo:  "",
-    howItWorks:"A custom crossflow turbine spans the housing, moving a high volume of air at a much lower RPM than a conventional fan, significantly reducing noise and motor strain.",
+    howItWorks:"A crossflow turbine runs the full height of the housing. Air is drawn in through the perforations, wraps around the turbine and leaves through the slot between the two plates as one flat curtain. A long turbine moves the same air at a lower speed than a small axial fan, so it is quieter.",
     howItWorksMore:"",
     components: [],
-    mechNotes: [],
     process:   [
       /* 2026-10-02, pass 2 (Owen: simplify). 9 -> 7. Cut scatter-02 (blanks,
          same story as the off-cuts) and scatter-10 (cluttered modelling desk).
@@ -433,15 +472,14 @@ const PROJECTS = {
       { src:"scatter-07.jpg", bleed:"right", span:7, ar:"4/3", mt:50,  cap:"Perforation pattern" },
       { src:"scatter-08.jpg", bleed:"left",  span:6, ar:"3/2", mt:90,  cap:"Rolled housings and turbine" },
       { src:"scatter-06.jpg", col:"9 / 13",                    mt:110, cap:"Reclaimed motor" },
-      { src:"scatter-12.jpg", bleed:"full", ar:"2/1", mt:90, cap:"Five colourways" }
+      { src:"scatter-12.jpg", bleed:"full", ar:"2/1", mt:90, cap:"Brushed steel and painted red" }
     ],
     processNotes:[],
     processText:"FLOW was developed under a strict material brief: source three reused or found materials within a 3 km radius of home. A reclaimed motor and off-cut sheet steel dictated the structural parameters.",
-    processMore:"The core design constraint was the crossflow turbine. Unlike an axial fan that requires a large circular housing, the crossflow layout allowed the fan to take the shape of a tall, minimal cylinder. The steel housing was manually cut, punched, formed, and TIG welded. Countless variations of the turbine blade were modelled and 3D printed to solve balancing issues, eventually moving to a single-piece, support-free print to achieve the precision needed for smooth performance.",
+    processMore:"The crossflow turbine set the form. An axial fan needs a wide round housing; a crossflow turbine lets the fan be a tall, narrow cylinder. The steel housing was cut, punched, formed and TIG welded by hand. Many turbine blades were modelled and printed to get the balance right, ending at a single-piece, support-free print that spins true.",
     processVideo: "",
-    v2:        "V2 moves to a purpose-built motor and turbine assembly. Once that core is solid, it becomes a shared platform, the same mechanism dropping into different housings without a redesign each time.",
+    v2:        "V2 moves to a purpose-built motor and turbine. Once that core is right, the same mechanism drops into different housings without a redesign.",
     v2More:    "",
-    v2images:  [{ src:"v2-01.jpg", bleed:"left", span:7, ar:"3/2" }],
     v2Video:   ""
   },
 
@@ -450,17 +488,19 @@ const PROJECTS = {
     title:     "HALO",
     kind:      "plasma lamp",
     status:    "Prototype 01",
+    availability: "Not for sale yet. Ask to be told when it is.",
+    exhibited: "",
     code:      "L02.1",
     date:      "2026",
     teaser:    "Noble gas, wirelessly ionized into light.",
-    summary:   "HALO explores gas discharge physics for residential lighting. A high-frequency electromagnetic field, driven into a sealed glass orb, ionizes the noble gas inside into a glowing plasma. It feels like no other lamp and gives off a magical, wireless light from a seemingly empty globe.",
+    summary:   "HALO explores gas discharge physics for residential lighting. A high-frequency field, driven into a sealed glass orb, ionizes the noble gas inside into a glowing plasma. No wire or electrode touches the orb: it is light from a seemingly empty globe, and it feels like no other lamp.",
     summaryMore:"",
     materials: "Borosilicate glass, hardwood, plasma circuit",
-    lifecycle: "The sealed orb has no wires or electrodes and simply lifts off its shelf. The electronics are housed separately in the wooden base.",
+    lifecycle: "The sealed orb lifts off its shelf. The electronics sit separately in the wooden base, so either can be replaced on its own.",
     designTags:[],
     size:      "8 x 4 x 4 in",
     price:     "",
-    parts:     ["Glass envelope", "Hardwood base", "Driver"],
+    variants:  [],
     /* ALT TEXT. What each photo actually shows, for screen readers and for
        image search - these photographs are the portfolio, and an empty alt
        tells both of them the image is decorative. Keyed by filename so the
@@ -473,7 +513,7 @@ const PROJECTS = {
       "gallery-04.jpg": "HALO lit in daylight: the glass orb on a cantilevered wooden shelf projecting from the ventilated hardwood base",
       "hero.jpg": "HALO wireless plasma lamp lit red-orange in darkness, a borosilicate glass orb of plasma resting in its hardwood cradle",
       "scatter-01.jpg": "A hand-wound copper resonator coil held beside HALO's high-frequency driver electronics on the workbench",
-      "scatter-03.jpg": "HALO's resonator coil energised on the bench, a ring of blue-white plasma forming above the windings"
+      "scatter-03.jpg": "HALO's resonator coil energized on the bench, a ring of blue-white plasma forming above the windings"
     },
     gallery:   ["hero.jpg", "gallery-01.jpg", "gallery-02.jpg", "gallery-03.jpg", "gallery-04.jpg"],
     heroVideo: "demo.mp4",
@@ -483,21 +523,19 @@ const PROJECTS = {
     modelV2:   "",
     mechanism: "",
     hiwVideo:  "",
-    howItWorks:"A shielded resonant inverter drives a high-frequency magnetic field into a glass sphere, exciting the low-pressure noble gas inside into a steady plasma glow.",
-    howItWorksMore:"The core of the light is a solid-state resonant inverter circuit concealed within the wooden base. When the high-frequency field intersects with the sealed gas inside the orb, it excites the atoms into a plasma state. By cantilevering the coil and hiding all the electronics, the technology driving the lamp disappears, leaving only the illusion of a wireless glowing orb.",
+    howItWorks:"A resonant inverter in the wooden base drives a coil cantilevered under the orb's shelf, and the low-pressure gas inside settles into a steady plasma glow.",
+    howItWorksMore:"With the coil and electronics out of sight, only the glowing orb is left.",
     components: [],
-    mechNotes: [],
     process:   [
       { src:"scatter-01.jpg", bleed:"right", span:7, ar:"3/2", mt:0,  cap:"Plasma toroid" },
       { src:"scatter-03.jpg", col:"1 / 7",            mt:80, cap:"Cove-mounted" }
     ],
     processNotes:[],
-    processText:"The concept originated from a high-voltage science demonstration of a tokamak fusion reactor. The objective was to adapt this highly volatile, complex plasma toroid generator into a stable, quiet residential light.",
-    processMore:"The primary engineering challenge was packaging and thermal management. The original off-the-shelf circuit board was visually cluttered and produced significant heat. The hardest compromise was ensuring the electronics were properly ventilated while completely hiding the induction coil to maintain the illusion of the floating orb. The circuit was consolidated and housed in a solid wood base with carefully engineered airflow routing.",
+    processText:"The concept originated from a high-voltage science demonstration of a tokamak fusion reactor. The objective was to adapt this volatile plasma toroid generator into a stable, quiet residential light.",
+    processMore:"The engineering challenge was packaging and heat. The off-the-shelf board was cluttered and ran hot. The compromise was ventilating the electronics without exposing the coil, so the orb reads as floating. The circuit was consolidated into a solid wood base with airflow routed through it.",
     processVideo: "",
-    v2:        "HALO proves a stable plasma discharge can be used as a residential light. Next is designing a custom PCB to consolidate the electronics and coil into a single plane. The high-frequency circuit interferes with everything near it, so shielding is the next necessary step. The base will be made from a solid block of aluminum, doubling as a Faraday cage around the oscillator.",
+    v2:        "Next is a custom PCB that puts the electronics and coil on one plane, and a base machined from a solid block of aluminum that doubles as a Faraday cage, because the high-frequency circuit interferes with everything near it.",
     v2More:    "",
-    v2images:  [{ src:"v2-01.jpg", bleed:"left", span:7, ar:"3/2" }],
     v2Video:   ""
   }
 

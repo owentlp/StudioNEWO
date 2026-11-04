@@ -10,11 +10,11 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/materials.html">
 <meta property="og:site_name" content="Studio NEWO">
-<meta property="og:title" content="Materials · Studio NEWO">
+<meta property="og:title" content="MATERIALS · STUDIO NEWO">
 <meta property="og:description" content="The materials in Studio NEWO products, each chosen for the full life of the object: lifespan, use and environmental impact.">
 <meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Materials · Studio NEWO">
+<meta name="twitter:title" content="MATERIALS · STUDIO NEWO">
 <meta name="twitter:description" content="The materials in Studio NEWO products, each chosen for the full life of the object: lifespan, use and environmental impact.">
 <meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=63">
+<link rel="stylesheet" href="css/style.css?v=68">
 <style>
   /* page-specific layout only (rebuilt 2026-10-08). One flat page: every
      material in use is visible on one scroll, no accordions. Each category is
@@ -43,8 +43,11 @@
   .matg{max-width:none; margin:0; padding:clamp(140px,17vh,210px) var(--mar) clamp(80px,12vh,140px);}
   .matg-intro{margin-bottom:clamp(70px,10vh,120px);}
   .matg-intro .lead{margin-top:14px; font-family:var(--body); font-style:normal; line-height:inherit;}
-  .matg-intro .desc{margin-top:var(--txt-gap); max-width:58ch;}
-  .matg .info-panel-in{max-width:none;}
+  .matg-intro .desc{margin-top:var(--txt-gap); max-width:var(--w-desc);}
+  /* 60ch (2 Nov 2026): the descriptions ran to 80 to 95 characters a line at
+     1920; every other justified block on the site is 32 to 60ch. */
+  .matg .info-panel-in{max-width:var(--w-desc);}
+  .matg .desc{max-width:var(--w-desc);}   /* 3 Nov 2026: the site measure (31 to 38 characters), was 60ch */
 
   .matcat{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); align-items:start;
     margin-top:clamp(76px,10vh,120px); scroll-margin-top:96px;}
@@ -56,10 +59,10 @@
   .matcat-head{display:flex; align-items:baseline; gap:clamp(14px,2vw,26px);}
   .matcat-head .cap.lbl{margin-bottom:0; flex:0 0 auto;}
   .matcat-head h2.cap{font-family:var(--body); font-style:normal; line-height:inherit; margin-top:0;}
-  .matcat-names{flex:1 1 auto; min-width:0; font-size:9px; letter-spacing:.03em; opacity:.55;}
-  .matcat-count{flex:0 0 auto; font-size:9px; letter-spacing:.1em; opacity:.55;}
-  .matcat-take{margin-top:var(--txt-gap); max-width:none;}
-  .mi-k{display:inline-block; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-right:7px;}
+  .matcat-names{flex:1 1 auto; min-width:0; font-size:10.5px; letter-spacing:.03em; opacity:.72;}   /* .55 was 3.8:1; .72 is about 5.5:1 (2026-11-03) */
+  .matcat-count{flex:0 0 auto; font-size:10.5px; letter-spacing:.1em; opacity:.72;}
+  .matcat-take{margin-top:var(--txt-gap); max-width:var(--w-desc);}
+  .mi-k{display:inline-block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--red-text); margin-right:7px;}   /* small red text: --red-text (5.6:1), 2026-11-03 */
   .mi-row{display:block;}
   .mi-row + .mi-row{margin-top:6px;}
 
@@ -71,11 +74,16 @@
   .matitem-media img{width:100%; height:100%; object-fit:cover; display:block;}
   .matitem-text{min-width:0;}
   .mi-name{display:block; font-family:var(--disp); font-style:italic; font-size:clamp(15px,1.5vw,19px); line-height:1.08; margin-bottom:4px;}
-  .matitem.is-for .mi-name{color:var(--red);}
-  .mi-in{display:block; font-size:9px; letter-spacing:.05em; margin-bottom:6px;}
+  .matitem.is-for .mi-name{color:var(--red-text);}
+  .mi-in{display:block; font-size:10.5px; letter-spacing:.05em; margin-bottom:6px;}
   .mi-in a{color:var(--ink); text-decoration:underline; text-decoration-color:rgba(20,20,20,.3); text-underline-offset:2px;}
-  .mi-in a:hover{color:var(--red); text-decoration-color:var(--red);}
-  .matitem-text .desc{max-width:100%;}
+  .mi-in a:hover{color:var(--red-text); text-decoration-color:var(--red-text);}
+  .matitem-text .desc{max-width:var(--w-desc);}
+  /* CLOSING BLOCK (2 Nov 2026, site review finding 2): the page was a dead end.
+     Same type as the intro lead, and the site's one button style (.inq). */
+  .matg-close{margin-top:clamp(76px,10vh,120px); max-width:none;}   /* the .lead inside caps itself in its own (22px) characters */
+  .matg-close .lead{margin:0; font-family:var(--body); font-style:normal; line-height:inherit;}
+  .matg-close .inq{margin-top:22px;}
 
   /* colour swatch fallback, shown when a photo is missing (img onerror) */
   .matcat-hero, .matitem-media{background:#dcd8d0;}
@@ -95,10 +103,16 @@
   @media (max-width:520px){
     .matitem{grid-template-columns:58px 1fr; column-gap:12px;}
   }
+  /* the category list is built by the script below; until then the empty
+     box holds a screen of height, so the closing lines and the footer do not
+     start in view and then jump down (3 Nov 2026: CLS 0.32 at 1440) */
+  #matg-cats:empty{min-height:100vh;}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#matg-content">Skip to content</a>
+<!-- header landmark (2026-11-03, axe "region"): the three fixed marks sit in it; it has no box of its own -->
+<header>
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
@@ -108,6 +122,7 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
+</header>
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page matg" id="matg-content" tabindex="-1">
@@ -120,6 +135,10 @@
     <p class="desc">Lifespan, use and environmental impact decide each one. Every product uses as few materials as it needs, which makes it simpler to build, repair and take apart, so it lasts longer.</p>
   </div>
   <div id="matg-cats"></div>
+  <div class="matg-close">
+    <p class="lead">Any studio product can be made to order in another material from this page, or in another size or finish.</p>
+    <a class="inq" href="contact.html?about=Custom">ASK ABOUT CUSTOM &rarr;</a>
+  </div>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -134,10 +153,10 @@
 </footer>
 
 
-<script src="js/materials-data.js?v=8"></script>
-<script src="js/projects-data.js?v=27"></script>
-<script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=35"></script>
+<script src="js/materials-data.js?v=11"></script>
+<script src="js/projects-data.js?v=33"></script>
+<script src="js/main.js?v=7"></script>
+<script src="js/menu.js?v=42"></script>
 <script>
 (function(){
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -207,10 +226,16 @@
 
     // category photos are served from materials/md and sm (1000x750 and
     // 600x450, tools/make-material-variants.py). Only the first is eager.
+    // The others carry their files in data-src / data-srcset until they come
+    // within about one screen (see DEFERRED HEROES below): Chrome's own
+    // loading="lazy" starts 1250 to 2500 px early, which pulled two more
+    // 250 KB md copies into a phone's first load (3 Nov 2026, perf R2 14).
+    // sizes is the measured slot: 97vw on phones (379 of 390), capped at 520.
+    var pre = catIndex === 0 ? '' : 'data-';
     var hero = '<figure class="matcat-hero '+esc(cat.swatch)+'">' +
-      (cat.image ? '<img src="materials/md/'+esc(cat.image)+'"' +
-        ' srcset="materials/sm/'+esc(cat.image)+' 600w, materials/md/'+esc(cat.image)+' 1000w"' +
-        ' sizes="(max-width:900px) min(92vw, 520px), 32vw"' +
+      (cat.image ? '<img '+pre+'src="materials/md/'+esc(cat.image)+'"' +
+        ' '+pre+'srcset="materials/sm/'+esc(cat.image)+' 600w, materials/md/'+esc(cat.image)+' 1000w"' +
+        ' sizes="(max-width:900px) min(97vw, 520px), 32vw"' +
         ' width="1000" height="750" alt="'+esc(cat.imageCaption || cat.label)+'"' +
         ' loading="'+(catIndex === 0 ? 'eager' : 'lazy')+'" decoding="async" onerror="this.remove()">' : '') +
       (cat.image && real(cat.imageCaption) ? '<figcaption class="cap matcat-cap">'+esc(cat.imageCaption)+'</figcaption>' : '') +
@@ -224,9 +249,9 @@
       var info = rows([["Origin", it.origin], ["Details", it.details], ["Properties", g.properties],
                        ["Best uses", g.bestUses], ["End of life", g.lifecycle]]);
       items.push('<div class="matitem" id="'+esc(it.slug)+'">' +
-        '<figure class="matitem-media '+esc(cat.swatch)+'"><img src="materials/th/'+esc(it.image)+'"' +
+        '<figure class="matitem-media '+esc(cat.swatch)+'">' + (real(it.image) ? '<img src="materials/th/'+esc(it.image)+'"' +
           ' data-orig="materials/'+esc(it.image)+'" alt="'+esc(it.name)+'" width="240" height="240"' +
-          ' loading="lazy" decoding="async" onerror="matThumbErr(this)"></figure>' +
+          ' loading="lazy" decoding="async" onerror="matThumbErr(this)">' : '') + '</figure>' +
         '<div class="matitem-text">' +
           '<span class="mi-name">'+esc(it.name)+'</span>' + usedIn +
           '<p class="desc">'+withInfo(it.copy, info)+'</p>' +
@@ -245,6 +270,20 @@
       '</div></section>';
   }).join("");
 
+  /* DEFERRED HEROES: hand each category photo its files once it is within
+     about one screen of the view. Without IntersectionObserver, at once. */
+  (function(){
+    var imgs = root.querySelectorAll(".matcat-hero img[data-src]");
+    function show(img){
+      img.setAttribute("srcset", img.getAttribute("data-srcset")); img.removeAttribute("data-srcset");
+      img.setAttribute("src", img.getAttribute("data-src")); img.removeAttribute("data-src");
+    }
+    if(!("IntersectionObserver" in window)){ Array.prototype.forEach.call(imgs, show); return; }
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ io.unobserve(e.target); show(e.target); } });
+    }, { rootMargin: "100% 0px" });
+    Array.prototype.forEach.call(imgs, function(img){ io.observe(img); });
+  })();
   // info icons: one delegated listener, same behaviour as the project pages
   root.addEventListener("click", function(e){
     var btn = e.target.closest(".info-btn");
@@ -254,6 +293,22 @@
     btn.classList.toggle("open", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     if(panel) panel.classList.toggle("open", open);
+  });
+  /* Escape closes the open info panel(s) and puts the focus back on the
+     button, so a keyboard user is never left inside a panel they cannot shut
+     (3 Nov 2026, UX R2). */
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Escape" && e.key !== "Esc") return;
+    var open = root.querySelectorAll(".info-btn.open");
+    if(!open.length) return;
+    var inside = null;
+    Array.prototype.forEach.call(open, function(btn){
+      var wrap = btn.parentElement, panel = wrap.querySelector(".info-panel");
+      if(wrap.contains(document.activeElement)) inside = btn;
+      btn.classList.remove("open"); btn.setAttribute("aria-expanded", "false");
+      if(panel) panel.classList.remove("open");
+    });
+    (inside || open[open.length - 1]).focus();
   });
 
   /* Arriving from a project page: materials.html?for=kart marks that
@@ -271,9 +326,20 @@
       }
     });
   }
+  /* ASK ABOUT CUSTOM names the product the visitor came from (3 Nov 2026,
+     UX T5): materials.html?for=kart sends contact.html?about=Custom&from=KART,
+     the same link the product page's own custom line uses. */
+  var P = (typeof PROJECTS !== "undefined") ? PROJECTS : {};
+  if(FOR && P[FOR] && real(P[FOR].title)){
+    var ask = document.querySelector('.matg-close a[href^="contact.html?about=Custom"]');
+    if(ask) ask.setAttribute("href", "contact.html?about=Custom&from=" + encodeURIComponent(P[FOR].title));
+  }
   var target = location.hash ? document.getElementById(location.hash.slice(1)) : firstHit;
   if(target){
-    setTimeout(function(){ target.scrollIntoView({block: location.hash ? "center" : "start"}); }, 350);
+    /* block:"start" either way (2 Nov 2026): "center" ignored the
+       scroll-margin-top on .matcat and .matitem, so the fixed logo landed on
+       the WOOD heading at 390 and on the intro at 1440. */
+    setTimeout(function(){ target.scrollIntoView({block: "start"}); }, 350);
   }
 })();
 </script>

@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SOLUTIONS · Renders, animation and drawings · STUDIO NEWO</title>
-<meta name="description" content="Product renders, animation, 3D web models and production drawings from your CAD at fixed prices, plus custom furniture and lighting. Studio NEWO, Toronto.">
+<meta name="description" content="Product renders, animation, 3D web models and production drawings from your CAD at a fixed price per job, plus custom furniture and lighting. Toronto.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/solutions.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/solutions.html">
 <meta property="og:site_name" content="Studio NEWO">
-<meta property="og:title" content="Solutions · Studio NEWO">
-<meta property="og:description" content="Product renders, animation, 3D web models and production drawings from your CAD at fixed prices, plus custom furniture and lighting. Studio NEWO, Toronto.">
+<meta property="og:title" content="SOLUTIONS · Renders, animation and drawings · STUDIO NEWO">
+<meta property="og:description" content="Product renders, animation, 3D web models and production drawings from your CAD at a fixed price per job, plus custom furniture and lighting. Toronto.">
 <meta property="og:image" content="https://studionewo.com/solutions/vacancy-to-value.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Solutions · Studio NEWO">
-<meta name="twitter:description" content="Product renders, animation, 3D web models and production drawings from your CAD at fixed prices, plus custom furniture and lighting. Studio NEWO, Toronto.">
+<meta name="twitter:title" content="SOLUTIONS · Renders, animation and drawings · STUDIO NEWO">
+<meta name="twitter:description" content="Product renders, animation, 3D web models and production drawings from your CAD at a fixed price per job, plus custom furniture and lighting. Toronto.">
 <meta name="twitter:image" content="https://studionewo.com/solutions/vacancy-to-value.jpg">
 <link rel="manifest" href="/site.webmanifest">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
@@ -32,13 +32,12 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=63">
+<link rel="stylesheet" href="css/style.css?v=68">
 <style>
   /* SOLUTIONS: one table, a row per solution. Closed rows read as an index
      (number, name, type, year, links); opening a row shows the cover image,
      the abstract and the buttons. Rendered from js/solutions-data.js. */
   .sol{max-width:1400px;}
-  .sol-intro{max-width:46ch;}
   /* jump to the prices: services sit under the selected work (Owen, 2 Oct),
      so a client arriving from the menu gets one button straight to them */
   .sol-jump{margin:16px 0 clamp(36px,7vh,80px);}
@@ -46,59 +45,116 @@
   .sol-head{padding:0 0 10px; border-bottom:1px solid rgba(20,20,20,.16);}
   .sol-head span{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
   .sol-row{border-bottom:1px solid rgba(20,20,20,.16);}
-  .sol-sum{width:100%; padding:18px 0 16px; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer;}
+  .sol-sum{width:100%; padding:18px 0 16px; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer; position:relative;}
+  /* the toggle is a real <button> around the name cell; its ::after stretches
+     over the whole row, so the row still opens anywhere it is clicked, while
+     the PDF link and the Video button sit beside it, not inside it (3 Nov
+     2026: axe nested-interactive). The links ride above the stretched area. */
+  .sol-tog{display:block; width:100%; padding:0; margin:0; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer;}
+  .sol-tog::after{content:""; position:absolute; inset:0;}
+  .sol-tog:focus-visible{outline:none;}
+  .sol-tog:focus-visible::after{outline:2px solid var(--ink); outline-offset:2px;}
+  .sol-sum .sol-links{position:relative; z-index:1;}
   .sol-idx{font-size:12px; letter-spacing:.12em;}
   .sol-name{font-family:var(--disp); font-style:italic; font-size:clamp(20px,2.3vw,30px); line-height:1.05; display:block;}
   .sol-what{display:block; margin-top:6px; font-size:12px; letter-spacing:.06em; line-height:1.35;}
+  /* the one-sentence summary from the data, in the closed row under the title
+     (2 Nov 2026: it was in the data and never rendered) */
+  .sol-summary{display:block; margin-top:8px; font-size:12px; line-height:1.5; letter-spacing:.02em; max-width:46ch; color:var(--ink-soft);}
   .sol-type, .sol-year{font-size:12px; letter-spacing:.14em; text-transform:uppercase;}
   .sol-links{display:flex; gap:8px; flex-wrap:wrap;}
-  .sol-btn{display:inline-block; font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red); border:0; padding:7px 12px; text-decoration:none; cursor:pointer; transition:opacity .15s ease;}
-  .sol-btn:hover{opacity:.82;}
+  .sol-btn{display:inline-block;}   /* look and states: css/style.css, ONE BUTTON STYLE */
   .sol-mark{justify-self:end; width:12px; height:12px; position:relative;}
   .sol-mark::before, .sol-mark::after{content:""; position:absolute; left:0; top:5px; width:12px; height:1.5px; background:var(--ink); transition:transform .25s ease;}
   .sol-mark::after{transform:rotate(90deg);}
   .sol-row.open .sol-mark::after{transform:rotate(0deg);}
-  .sol-sum:hover .sol-name{color:var(--red);}
-  .sol-body{display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s ease;}
+  .sol-sum:hover .sol-name{color:var(--red-text, var(--red));}
+  /* an open row shows the full abstract, so its one-line summary hides (Q13) */
+  .sol-row.open .sol-summary{display:none;}
+  /* 3 Nov 2026: the row opens in one step and its contents fade and settle in
+     (grid-template-rows animated the layout every frame; the site animates only
+     transform and opacity) */
+  .sol-body{display:grid; grid-template-rows:0fr;}
   .sol-row.open .sol-body{grid-template-rows:1fr;}
   .sol-body > div{overflow:hidden;}
+  .sol-in{opacity:0; transform:translateY(-8px); transition:opacity .32s ease, transform .4s cubic-bezier(.2,.8,.2,1);}
+  .sol-row.open .sol-in{opacity:1; transform:none;}
+  @media (prefers-reduced-motion:reduce){ .sol-in{transform:none; transition:opacity .32s ease;} .sol-mark::before, .sol-mark::after{transition:none;} }
   .sol-in{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); padding:6px 0 40px;}
   .sol-fig{grid-column:2 / 8; margin:0;}
   /* multiply so a photo shot on white sits on the paper like print */
   .sol-fig img{display:block; width:auto; max-width:100%; max-height:72vh; height:auto; mix-blend-mode:multiply;}
   .sol-txt{grid-column:9 / 13;}
-  .sol-txt .desc{max-width:none; text-align:left;}
-  .sol-intro{text-align:left;}
+  /* JUSTIFIED PROSE (Owen, 3 Nov 2026: the site rule, here too). The intro, the
+     abstracts, the service lines, the notes and the steps are justified on the
+     site measure (.desc: min(var(--w-desc), 37.5ch), last line left, hyphens on).
+     The closed-row summary, the labels, the table cells and the prices stay
+     ragged. Phones (600px and under) are ragged like every other .desc. */
+  .sol-txt .desc{max-width:min(var(--w-desc), 37.5ch);}
+  /* the open row's text had four columns (9 / 13): 22 to 31 characters a line,
+     too short to justify (word gaps up to 13 spaces at 1024). It takes five from
+     1440 (the picture moves one column left to keep the empty column between)
+     and six under 1440, beside a six-column picture. */
+  @media (min-width:861px){ .sol-fig{grid-column:1 / 7;} .sol-txt{grid-column:8 / 13;} }
+  @media (min-width:861px) and (max-width:1439px){ .sol-txt{grid-column:7 / 13;} }
   .sol-txt .cap{display:block; margin-top:14px;}
   .sol-txt .sol-links{margin-top:18px;}
   /* an open row shows its buttons inside the body, so the header copy hides.
      visibility (not display) keeps the header columns from shifting. */
   .sol-row.open .sol-sum .sol-links{visibility:hidden;}
+  /* ...and a CLOSED row hides its body from the tab order the same way, so
+     each PDF link is reachable exactly once: the summary copy while closed,
+     the body copy while open (2 Nov 2026, site review D12). The visibility
+     change waits for the collapse to finish, and is immediate on opening. */
+  .sol-body{visibility:hidden;}
+  .sol-row.open .sol-body{visibility:visible;}
   .svc{margin-top:clamp(70px,13vh,150px); scroll-margin-top:96px;}
   .svc-h{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(24px,3vw,38px); line-height:1.05; margin-bottom:14px;}
-  .svc-intro{max-width:56ch; text-align:left; margin-bottom:clamp(30px,5vh,56px);}
+  .svc-intro{margin-bottom:clamp(30px,5vh,56px);}
+  /* the proof, where the decision is made (2 Nov 2026): one line in the
+     table-head label style, above the intro */
+  .svc-proof{font-size:11px; letter-spacing:.16em; text-transform:uppercase; line-height:1.8; margin:0 0 18px; max-width:60ch; text-align:left;}
+  /* SAMPLES: what a client would get, as links in the chip/label style (not
+     buttons). Two today; a render set and a drawing sheet go in as two more
+     <a> lines when Owen makes them. */
+  .svc-samples{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 22px; margin:0 0 clamp(30px,5vh,56px);}
+  .svc-samples .svc-lbl{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
+  .svc-samples a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none;}
+  .svc-samples a:hover, .svc-samples a:focus-visible{color:var(--red-text, var(--red));}
+  .svc-samples .svc-samples-note{flex-basis:100%; font-size:12px; letter-spacing:.06em; color:var(--ink-soft);}
   .svc-head, .svc-row{display:grid; grid-template-columns:3.2em minmax(0,7fr) minmax(0,2fr) minmax(0,2fr); column-gap:var(--gut); align-items:baseline;}
   .svc-head{padding:0 0 10px; border-bottom:1px solid rgba(20,20,20,.16);}
   .svc-head span{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
   .svc-row{padding:16px 0 15px; border-bottom:1px solid rgba(20,20,20,.16);}
   .svc-name{font-family:var(--disp); font-style:italic; font-size:clamp(18px,1.9vw,24px); line-height:1.1; display:block;}
-  .svc-what{display:block; margin-top:6px; font-size:13px; line-height:1.45; max-width:62ch;}
+  .svc-what{display:block; margin-top:6px; font-size:13px; line-height:1.45; max-width:min(var(--w-desc), 37.5ch); text-align:justify; text-align-last:left; -webkit-hyphens:auto; hyphens:auto; hyphenate-limit-chars:5 3 2;}
+  @media (max-width:600px){ .svc-what{text-align:left; -webkit-hyphens:manual; hyphens:manual;} }
   .svc-time{font-size:12px; letter-spacing:.14em; text-transform:uppercase;}
   .svc-from{font-size:15px; letter-spacing:.02em; white-space:nowrap;}
   /* same first column as the service rows, so the notes line up with the service names */
   .svc-notes{display:grid; grid-template-columns:3.2em minmax(0,1fr) minmax(0,1fr); column-gap:var(--gut); row-gap:14px; margin-top:24px;}
-  .svc-notes .desc{max-width:none; text-align:left; font-size:13px;}
+  .svc-notes .desc{font-size:13px;}
   #svc-rates{grid-column:2;} #svc-terms{grid-column:3;}
-  .svc-cta{margin-top:26px;}
+  #svc-inputs{grid-column:2;} #svc-private{grid-column:3;}
+  /* HOW A JOB RUNS: four steps under the terms, in the terms' type */
+  #svc-steps{grid-column:2 / 4;}
+  .svc-notes .svc-lbl{display:block; font-size:11px; letter-spacing:.16em; text-transform:uppercase; margin-bottom:6px;}
+  .svc-cta{margin-top:26px; display:flex; flex-wrap:wrap; gap:8px;}
+  /* the same two buttons once more under SAMPLES (Q5), at every width since
+     3 Nov 2026 (UX R2 item 3): a desktop buyer landing on #services sees how
+     to start before the seven rows, not only after them */
+  .svc-cta-early{margin:0 0 clamp(30px,5vh,56px);}
+  #svc-steps .svc-step{display:block;}
   @media (max-width:860px){
     .svc-head{display:none;}
     .svc-row{grid-template-columns:2.4em minmax(0,1fr); row-gap:6px;}
     .svc-time, .svc-from{grid-column:2;}
     .svc-notes{grid-template-columns:2.4em minmax(0,1fr);}
-    #svc-rates, #svc-terms{grid-column:2;}
+    #svc-rates, #svc-terms, #svc-inputs, #svc-private, #svc-steps{grid-column:2;}
   }
   .sol-video{position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:#141311; padding:clamp(24px,6vw,80px);}
   .sol-video.open{display:flex;}
+  .sol-guard{position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;}
   .sol-video .frame{width:min(100%, calc((100vh - 120px) * 16 / 9)); aspect-ratio:16/9;}
   .sol-video iframe{width:100%; height:100%; border:0; display:block;}
   @media (max-width:860px){
@@ -116,6 +172,9 @@
 </head>
 <body>
 <a class="skip-link" href="#content">Skip to content</a>
+<!-- header landmark (2026-11-03, axe "region"): the three fixed marks sit in it; it has no box of its own.
+     make-simple-page.py copies this shell into solutions, jewelry and photography. -->
+<header>
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
@@ -125,35 +184,183 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
+</header>
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
+<!-- SERVICE PRICES FOR SEARCH (3 Nov 2026): the five priced rows of SERVICES in
+     js/solutions-data.js as schema.org Offers. tools/check-copy.py fails if a
+     name, description or price here drifts from the data file. -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "ProfessionalService",
+ "name": "Studio NEWO",
+ "url": "https://studionewo.com/solutions.html",
+ "address": {
+  "@type": "PostalAddress",
+  "addressLocality": "Toronto",
+  "addressCountry": "CA"
+ },
+ "areaServed": [
+  "CA",
+  "US"
+ ],
+ "hasOfferCatalog": {
+  "@type": "OfferCatalog",
+  "name": "Services and prices",
+  "itemListElement": [
+   {
+    "@type": "Offer",
+    "priceCurrency": "CAD",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Product renders",
+     "description": "Your CAD in, studio-lit stills out, one lighting setup and colour grade across the whole series. Three stills minimum, five for $600."
+    },
+    "priceSpecification": {
+     "@type": "UnitPriceSpecification",
+     "price": "150",
+     "priceCurrency": "CAD",
+     "referenceQuantity": {
+      "@type": "QuantitativeValue",
+      "value": 1,
+      "unitCode": "C62",
+      "unitText": "still"
+     }
+    },
+    "price": "150"
+   },
+   {
+    "@type": "Offer",
+    "priceCurrency": "CAD",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Animation",
+     "description": "A 10 to 20 second turntable or exploded-view clip. $350 when added to a render set."
+    },
+    "priceSpecification": {
+     "@type": "UnitPriceSpecification",
+     "price": "500",
+     "priceCurrency": "CAD",
+     "referenceQuantity": {
+      "@type": "QuantitativeValue",
+      "value": 1,
+      "unitCode": "C62",
+      "unitText": "clip"
+     }
+    },
+    "price": "500"
+   },
+   {
+    "@type": "Offer",
+    "priceCurrency": "CAD",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Launch bundle",
+     "description": "Five stills, one clip and a 3D model that runs on your product page, in the browser or in AR. Built for Kickstarter and product launches."
+    },
+    "price": "1500"
+   },
+   {
+    "@type": "Offer",
+    "priceCurrency": "CAD",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Drawing package",
+     "description": "Your 3D model in; PDF production drawings, DXF flat patterns and STEP files out. Three sheets minimum."
+    },
+    "priceSpecification": {
+     "@type": "UnitPriceSpecification",
+     "price": "100",
+     "priceCurrency": "CAD",
+     "referenceQuantity": {
+      "@type": "QuantitativeValue",
+      "value": 1,
+      "unitCode": "C62",
+      "unitText": "sheet"
+     }
+    },
+    "price": "100"
+   },
+   {
+    "@type": "Offer",
+    "priceCurrency": "CAD",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "CAD cleanup and DFM pass",
+     "description": "Messy or STEP-only parts rebuilt as clean SolidWorks, with draft, walls, bends, fasteners and inserts fixed for manufacture, and a bill of materials. Quoted as a fixed price after seeing the files, at $55 an hour."
+    },
+    "priceSpecification": {
+     "@type": "UnitPriceSpecification",
+     "price": "55",
+     "priceCurrency": "CAD",
+     "referenceQuantity": {
+      "@type": "QuantitativeValue",
+      "value": 1,
+      "unitCode": "HUR",
+      "unitText": "hour"
+     }
+    },
+    "price": "55"
+   }
+  ]
+ }
+}
+</script>
 <main class="page wrap sol" id="content" tabindex="-1">
   <h1 class="vh">Solutions</h1>
   <h2 class="svc-h" id="work">Selected work</h2>
   <p class="desc sol-intro">Proposals, research and prototypes outside the product line, each with the full document as a PDF.</p>
   <p class="sol-jump"><a class="sol-btn" href="#services">Services and prices &darr;</a></p>
   <div class="sol-head" aria-hidden="true"><span></span><span>Solution</span><span>Type</span><span>Year</span><span>Files</span><span></span></div>
-  <div class="sol-list" id="sol-list"></div>
-  <noscript><p class="desc">This list needs JavaScript. The documents are in the solutions folder: vacancy-to-value.pdf, sonic-touch.pdf, loots.pdf.</p></noscript>
+  <div class="sol-list" id="sol-list"><div class="sol-row" id="sonic-touch"><div class="sol-sum"><span class="sol-idx">[01]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-sonic-touch"><span class="sol-name">Sonic Touch</span><span class="sol-what">A multi-sensory music remote for people living with dementia</span><span class="sol-summary">A handheld cherry bowl that answers touch with sound, light and vibration, so residents can start an activity on their own.</span></button><span class="sol-type">Research + prototype</span><span class="sol-year">2025</span><span class="sol-links"><a class="sol-btn" href="solutions/sonic-touch.pdf" target="_blank" rel="noopener">PDF 1.7MB</a><button type="button" class="sol-btn" data-video="v3q0BAfEyOM">Video</button></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-sonic-touch"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/sonic-touch.jpg" srcset="solutions/sm/sonic-touch.jpg 640w, solutions/sonic-touch.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="Sonic Touch, a turned cherry bowl with orange, purple, yellow, pink and black felt touch patches, each framing a copper sensor"></figure><div class="sol-txt"><p class="desc">On Baycrest's Possibilities Floor, residents living with dementia rely on care staff to prompt almost every activity, which is tiring for staff and can feel infantilizing for residents. Sonic Touch is lathe-turned from cherry, with five felt touch zones framing copper sensors: four play notes and one changes the mode. A hand resting on any zone gets an instant response, so cause and effect is obvious and no fine motor control is needed. Built as a working prototype and tested with residents and staff.</p><span class="cap">With Finlay Brodylo and Noah McBriar</span><span class="sol-links"><a class="sol-btn" href="solutions/sonic-touch.pdf" target="_blank" rel="noopener">PDF 1.7MB</a><button type="button" class="sol-btn" data-video="v3q0BAfEyOM">Video</button></span></div></div></div></div></div>
+<div class="sol-row" id="loots"><div class="sol-sum"><span class="sol-idx">[02]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-loots"><span class="sol-name">LOOTS</span><span class="sol-what">A collapsible stool from dimensional lumber</span><span class="sol-summary">Two lumber sizes and five part types: a stool designed from the first cut to be taken apart.</span></button><span class="sol-type">Design for disassembly</span><span class="sol-year">2025</span><span class="sol-links"><a class="sol-btn" href="solutions/loots.pdf" target="_blank" rel="noopener">PDF 2.7MB</a></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-loots"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/loots.jpg" srcset="solutions/sm/loots.jpg 640w, solutions/loots.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="The LOOTS stool in stained lumber on display at the Design for Disassembly Exhibition"></figure><div class="sol-txt"><p class="desc">A stool built from 1x3 and 1x12 lumber with straight cuts only, so it can be made with basic tools. Screws are the only fasteners: it comes apart into a top and two sides for storage or transport, and every part unscrews back to its original cut length to be reused. Sturdy, light and easy to align using the other parts and a flat surface as the reference. Exhibited at the Design for Disassembly Exhibition, April 2025.</p><span class="sol-links"><a class="sol-btn" href="solutions/loots.pdf" target="_blank" rel="noopener">PDF 2.7MB</a></span></div></div></div></div></div>
+<div class="sol-row" id="vacancy-to-value"><div class="sol-sum"><span class="sol-idx">[03]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-vacancy-to-value"><span class="sol-name">Vacancy to Value</span><span class="sol-what">Non-fare revenue proposal for the TTC</span><span class="sol-summary">Turning the dead booths, payphone alcoves and empty storefronts inside TTC fare-paid zones into small, TTC-run utility retail.</span></button><span class="sol-type">Feasibility proposal</span><span class="sol-year">2026</span><span class="sol-links"><a class="sol-btn" href="solutions/vacancy-to-value.pdf" target="_blank" rel="noopener">PDF 3.1MB</a></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-vacancy-to-value"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/vacancy-to-value.jpg" srcset="solutions/sm/vacancy-to-value.jpg 640w, solutions/vacancy-to-value.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="A Toronto subway station concourse with an unused red fare booth beside the fare gates"></figure><div class="sol-txt"><p class="desc">Decommissioned booths and vacant retail sit dark across the subway network, and under CPTED (crime prevention through environmental design) empty space invites the conditions riders worry about most. Station retail earns the TTC about a quarter of a cent per ride, while its advertising per ride is already close to Hong Kong's MTR. This proposal pitches a three-phase feasibility study: a spatial audit of dormant footprints, a benchmark of owned versus leased station retail and a full-scale prototype of one module. One intervention, four returns: revenue, rider satisfaction, ridership and safety.</p><span class="sol-links"><a class="sol-btn" href="solutions/vacancy-to-value.pdf" target="_blank" rel="noopener">PDF 3.1MB</a></span></div></div></div></div></div></div>
+  <noscript><p class="desc">This list needs JavaScript. The documents are in the solutions folder: sonic-touch.pdf, loots.pdf, vacancy-to-value.pdf.</p></noscript>
 
   <!-- WORK WITH THE STUDIO: the consulting offer, under the proof
        (Owen, 2026-10-02: selected work first). Rows come
        from SERVICES in js/solutions-data.js. -->
   <section class="svc" id="services">
     <h2 class="svc-h">Work with the studio</h2>
-    <p class="desc svc-intro">Studio NEWO makes product renders, animations and production drawings from your CAD for designers, hardware startups and brands preparing a launch, and takes on custom furniture and lighting. The studio designs, builds and sells its own products, so every file comes from someone who knows how things get made. The 3D models on the product pages are samples of the work.</p>
+    <p class="svc-proof">Work exhibited at IDS Toronto and the Design for Disassembly Exhibition. A prototype tested with Baycrest.</p>
+    <p class="desc svc-intro">Studio NEWO makes product renders, animations, 3D web models and production drawings from your CAD, for designers, hardware startups, institutions and brands preparing a launch. It also takes on custom furniture and lighting, and design and prototyping from a brief. The studio designs and builds its own products, so every file comes from someone who knows how things get made.</p>
+    <!-- SAMPLES: one <a> per sample, labelled with the service it shows. Add a
+         render set and a drawing sheet as two more lines when they exist, and
+         drop the "on request" sentence. -->
+    <p class="svc-samples">
+      <span class="svc-lbl">Samples</span>
+      <a href="kart.html#model">Browser 3D model (Launch bundle) &rarr;</a>
+      <a href="omni.html#model">3D model with exploded view (Launch bundle) &rarr;</a>
+      <span class="svc-samples-note">Render and drawing samples on request.</span>
+    </p>
+    <p class="svc-cta svc-cta-early"><a class="sol-btn" href="contact.html?about=Consulting">Start a project &rarr;</a><a class="sol-btn" href="contact.html?about=Custom">Ask about a custom piece &rarr;</a></p>
     <div class="svc-head" aria-hidden="true"><span></span><span>Service</span><span>Turnaround</span><span>From (CA$)</span></div>
-    <div id="svc-list"></div>
+    <div id="svc-list"><div class="svc-row"><span class="sol-idx">[01]</span><span><span class="svc-name">Product renders</span><span class="svc-what">Your CAD in, studio-lit stills out, one lighting setup and colour grade across the whole series. Three stills minimum, five for $600.</span></span><span class="svc-time">2 to 3 weeks</span><span class="svc-from">$150 / still</span></div>
+<div class="svc-row"><span class="sol-idx">[02]</span><span><span class="svc-name">Animation</span><span class="svc-what">A 10 to 20 second turntable or exploded-view clip. $350 when added to a render set.</span></span><span class="svc-time">2 to 3 weeks</span><span class="svc-from">$500 / clip</span></div>
+<div class="svc-row"><span class="sol-idx">[03]</span><span><span class="svc-name">Launch bundle</span><span class="svc-what">Five stills, one clip and a 3D model that runs on your product page, in the browser or in AR. Built for Kickstarter and product launches.</span></span><span class="svc-time">2 to 3 weeks</span><span class="svc-from">$1,500</span></div>
+<div class="svc-row"><span class="sol-idx">[04]</span><span><span class="svc-name">Drawing package</span><span class="svc-what">Your 3D model in; PDF production drawings, DXF flat patterns and STEP files out. Three sheets minimum.</span></span><span class="svc-time">2 to 3 weeks</span><span class="svc-from">$100 / sheet</span></div>
+<div class="svc-row"><span class="sol-idx">[05]</span><span><span class="svc-name">CAD cleanup and DFM pass</span><span class="svc-what">Messy or STEP-only parts rebuilt as clean SolidWorks, with draft, walls, bends, fasteners and inserts fixed for manufacture, and a bill of materials. Quoted as a fixed price after seeing the files, at $55 an hour.</span></span><span class="svc-time">By scope</span><span class="svc-from">$55 / hour</span></div>
+<div class="svc-row"><span class="sol-idx">[06]</span><span><span class="svc-name">Custom piece</span><span class="svc-what">Custom versions of any studio product in another size, material or finish are made to order. So are furniture and lighting designed from scratch.</span></span><span class="svc-time">By scope</span><span class="svc-from">Quote</span></div>
+<div class="svc-row"><span class="sol-idx">[07]</span><span><span class="svc-name">Design and prototype</span><span class="svc-what">From a brief to a tested prototype: research, concept, CAD and a working model.</span></span><span class="svc-time">By scope</span><span class="svc-from">Quote</span></div></div>
     <div class="svc-notes">
-      <p class="desc" id="svc-rates"></p>
-      <p class="desc" id="svc-terms"></p>
+      <p class="desc" id="svc-rates">Prices are starting points, in Canadian dollars. US clients pay the same figures in US dollars. Every job gets a written scope and a fixed price before work starts. Drawings are not engineer-stamped.</p>
+      <p class="desc" id="svc-terms">Final files are released once the last invoice is paid. One job at a time, so each gets full attention.</p>
+      <p class="desc" id="svc-inputs">Send STEP, IGES, SolidWorks, Fusion or OBJ files. A messy model is fine: row 05 is for that.</p>
+      <p class="desc" id="svc-private">Client files stay private. Work is shown in the portfolio only with permission.</p>
+      <p class="desc" id="svc-steps"><span class="svc-lbl">How a job runs</span><span class="svc-step">1. A short call or email.</span><span class="svc-step">2. A one-page written quote within a few days.</span><span class="svc-step">3. A 50% deposit to start.</span><span class="svc-step">4. Two review rounds, then the balance and the final files.</span></p>
     </div>
-    <p class="svc-cta"><a class="sol-btn" href="contact.html?about=Consulting">Start a project &rarr;</a></p>
+    <p class="svc-cta"><a class="sol-btn" href="contact.html?about=Consulting">Start a project &rarr;</a><a class="sol-btn" href="contact.html?about=Custom">Ask about a custom piece &rarr;</a></p>
   </section>
 </main>
 <div class="sol-video" id="sol-video" role="dialog" aria-modal="true" aria-label="Video">
+  <!-- the two empty spans are focus guards (3 Nov 2026): Tab past the video
+       lands on the end guard and goes back to Close, Shift+Tab before Close
+       goes to the video, so focus never leaves the open dialog -->
+  <span class="sol-guard" tabindex="0"></span>
   <button class="lb-close" type="button">Close</button>
   <div class="frame"></div>
+  <span class="sol-guard" tabindex="0"></span>
 </div>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -169,15 +376,20 @@
 
 
 
-<script src="js/solutions-data.js?v=6"></script>
-<script src="js/projects-data.js?v=27"></script>
-<script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=35"></script>
+<script src="js/solutions-data.js?v=11"></script>
+<script src="js/projects-data.js?v=33"></script>
+<script src="js/main.js?v=7"></script>
+<script src="js/menu.js?v=42"></script>
 <script>
 (function(){
+  /* BAKED ROWS (3 Nov 2026, CLS): tools/make-simple-page.py writes the
+     service rows, the two notes and the Selected work rows into the HTML from
+     js/solutions-data.js, so the page no longer moves when this runs (CLS was
+     0.135 at 1440). The builders below run only if a list arrives empty (the
+     generator was not re-run): same markup either way. */
   (function(){
     var box = document.getElementById("svc-list");
-    if(!box || typeof SERVICES === "undefined") return;
+    if(!box || typeof SERVICES === "undefined" || box.children.length) return;
     function e(v){ return (v == null ? "" : String(v)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     box.innerHTML = SERVICES.map(function(v, i){
       return '<div class="svc-row"><span class="sol-idx">[' + ("0" + (i + 1)).slice(-2) + ']</span>' +
@@ -198,12 +410,13 @@
     if(s.video) h += '<button type="button" class="sol-btn" data-video="' + esc(s.video) + '">Video</button>';
     return '<span class="sol-links">' + h + '</span>';
   }
-  list.innerHTML = SOLUTIONS.map(function(s, i){
+  if(!list.children.length) list.innerHTML = SOLUTIONS.map(function(s, i){
     var n = ("0" + (i + 1)).slice(-2), bid = "sol-b-" + s.id;
     return '<div class="sol-row" id="' + esc(s.id) + '">' +
-      '<div class="sol-sum" role="button" tabindex="0" aria-expanded="false" aria-controls="' + bid + '">' +
+      '<div class="sol-sum">' +
         '<span class="sol-idx">[' + n + ']</span>' +
-        '<span><span class="sol-name">' + esc(s.title) + '</span><span class="sol-what">' + esc(s.what) + '</span></span>' +
+        '<button type="button" class="sol-tog" aria-expanded="false" aria-controls="' + bid + '"><span class="sol-name">' + esc(s.title) + '</span><span class="sol-what">' + esc(s.what) + '</span>' +
+          (s.summary ? '<span class="sol-summary">' + esc(s.summary) + '</span>' : '') + '</button>' +
         '<span class="sol-type">' + esc(s.type) + '</span>' +
         '<span class="sol-year">' + esc(s.year) + '</span>' +
         links(s) +
@@ -221,32 +434,45 @@
   function toggle(row, open){
     if(open == null) open = !row.classList.contains("open");
     row.classList.toggle("open", open);
-    row.querySelector(".sol-sum").setAttribute("aria-expanded", open ? "true" : "false");
+    row.querySelector(".sol-tog").setAttribute("aria-expanded", open ? "true" : "false");
   }
   list.addEventListener("click", function(e){
     if(e.target.closest("a, [data-video]")) return;      // buttons do their own thing
     var sum = e.target.closest(".sol-sum");
     if(sum) toggle(sum.parentNode);
   });
-  list.addEventListener("keydown", function(e){
-    var sum = e.target.closest && e.target.closest(".sol-sum");
-    if(sum && e.target === sum && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); toggle(sum.parentNode); }
-  });
+  // Enter and Space come free with the <button>: they fire the click above
 
   /* video: youtube-nocookie, built only when asked for, so the page loads no
      YouTube code and sets no cookies until someone presses VIDEO */
   var box = document.getElementById("sol-video"), frame = box.querySelector(".frame"), last = null;
+  var closeBtn = box.querySelector(".lb-close"), guards = box.querySelectorAll(".sol-guard");
+  /* FOCUS TRAP (3 Nov 2026, a11y A3): while the dialog is open everything
+     else on the page is inert, and the two guards inside the dialog bounce
+     Tab back to Close or to the video. Closing gives focus back to the
+     button that opened it. */
+  function setInert(on){
+    Array.prototype.forEach.call(document.body.children, function(el){
+      if(el === box || el.tagName === "SCRIPT") return;
+      if(on){ if(!el.inert){ el.inert = true; el.setAttribute("data-sol-inert", ""); } }
+      else if(el.hasAttribute("data-sol-inert")){ el.inert = false; el.removeAttribute("data-sol-inert"); }
+    });
+  }
+  guards[0].addEventListener("focus", function(){ var f = frame.querySelector("iframe"); (f || closeBtn).focus(); });
+  guards[1].addEventListener("focus", function(){ closeBtn.focus(); });
   function openVideo(id, from){
     last = from;
     frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0&modestbranding=1" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
     box.classList.add("open");
     document.documentElement.style.overflow = "hidden";
-    box.querySelector(".lb-close").focus();
+    setInert(true);
+    closeBtn.focus();
   }
   function closeVideo(){
     if(!box.classList.contains("open")) return;
     box.classList.remove("open"); frame.innerHTML = "";
     document.documentElement.style.overflow = "";
+    setInert(false);
     if(last) last.focus();
   }
   document.addEventListener("click", function(e){

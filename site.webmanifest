@@ -1,7 +1,7 @@
 {
   "name": "Studio NEWO",
   "short_name": "NEWO",
-  "description": "Industrial design practice in Toronto. Products built for repair, disassembly, and long life.",
+  "description": "Industrial design studio in Toronto. Products built to be opened, repaired and kept.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#e9e7e2",

@@ -71,17 +71,14 @@
   .ui{position:absolute;left:22%;bottom:8%;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;max-width:none;gap:12px;}
   .ui > *{pointer-events:auto;}
   .modes{display:flex;flex-wrap:wrap;gap:8px;margin:0;}
-  /* Same block as INQUIRE, VIEW IN YOUR SPACE and the model's own controls
-     (.inq / .mv-ar / .mv-btn in css/style.css): white on red, 12px, .16em
-     tracking, 8px/14px padding. They used to be quiet ink text that turned red
-     when active; as red blocks the ACTIVE state needs somewhere else to go, so
-     it inverts to ink. Red = available, ink = currently on. No text-shadow
-     halo any more - a solid block does not need one to sit on the canvas. */
+  /* The site's one button style, as INQUIRE, VIEW IN YOUR SPACE and the model's
+     controls: 12px, .16em, outlined in red at rest, solid red with white text
+     for the mode that is on (Owen, 3 Nov 2026; was white on red, ink = on). */
   .modes button{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
-    color:#fff;background:var(--red);border:0;padding:8px 14px;cursor:pointer;border-radius:0;
-    transition:opacity .15s ease,background-color .15s ease;}
-  .modes button:hover{color:#fff;opacity:.82;}
-  .modes button[aria-pressed="true"]{background:var(--ink);color:#fff;opacity:1;}
+    color:#b5120f;background:var(--paper);border:1px solid #b5120f;padding:7px 13px;cursor:pointer;border-radius:0;
+    opacity:1;transition:none;}   /* the site's one button style (css/style.css, ONE BUTTON STYLE, 3 Nov 2026): outline in --red-text (#b5120f, 5.6:1) at rest, a 1px border inside the old 8px 14px box. Paper ground so the drawing never shows through the words */
+  .modes button[aria-pressed="true"]{color:#fff;background:var(--red);border-color:var(--red);}   /* the chosen mode: solid red, white 4.8:1 */
+  .modes button:not([aria-pressed="true"]):hover{background:#e8d7d2;}   /* a toggle: hover is a tint (--red at 8% on paper), never the solid */
   .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
   .meta{margin:0;max-width:46ch;font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);line-height:1.5;text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);}
   .vol{display:flex;align-items:center;gap:12px;}
@@ -89,7 +86,7 @@
   .vol input{-webkit-appearance:none;appearance:none;width:150px;max-width:38vw;height:1px;background:var(--ink);cursor:pointer;}
   .vol input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;background:var(--red);border:0;cursor:pointer;}
   .vol input::-moz-range-thumb{width:12px;height:12px;background:var(--red);border:0;border-radius:0;cursor:pointer;}
-  @media (max-width:640px){ .ui{position:static;padding:12px 0 0;max-width:none;} }
+  @media (max-width:640px){ .ui{position:static;padding:12px 0 0;max-width:none;} .meta{font-size:13px;} }
 
   /* ---- TOUCH/DRAG HINT ----
      This graphic is interactive but gives no sign of it at rest, so people
@@ -232,7 +229,7 @@
     stereo:{ maxR:500, arc:[222,318],
       desc:"As a conventional pair, sound beams forward and the stereo image only holds in one sweet spot." },
     omni:{ maxR:410, arc:null,
-      desc:"The cast diffuser scatters each driver in every direction, reaching every listener evenly." }
+      desc:"Each speaker's sound spreads in even rings, so every seat in the room hears the same balance." }
   };
 
   let mode='omni', volume=55;   // opens on OMNI, the product's own mode (2026-10-27)
@@ -341,7 +338,14 @@
   window.addEventListener('resize', postHeight);
   if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
 
-  /* the interaction hint: fades on the first real touch/drag, then stays gone */
+  /* the interaction hint (Owen, 3 Nov 2026): every 3D model and every
+     mechanism says DRAG TO INTERACT (fine pointer) or TOUCH TO INTERACT
+     (touch), in the same place on each: the FIRST line of its own control
+     block (.ui here, .mv-bar under the 3D model), above the buttons, never on
+     the drawing or over text. It fades on the first real touch or drag and
+     stays gone. The inline style puts it in that flow (OMNI's .hint rule
+     pins it absolutely) at the 3D model hint's 9px, until the .hint rule
+     above carries both (docs/CLOUD_REPORT_2026-11-03_w4template.txt). */
   (function(){
     var stageEl = document.querySelector('.stage');
     if(!stageEl) return;
@@ -349,7 +353,9 @@
     h.className = 'hint';
     h.textContent = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
       ? 'TOUCH TO INTERACT' : 'DRAG TO INTERACT';
-    stageEl.appendChild(h);
+    h.style.position = 'static'; h.style.transform = 'none'; h.style.margin = '0 0 10px'; h.style.fontSize = '9px';
+    var ui = document.querySelector('.ui');
+    if(ui) ui.insertBefore(h, ui.firstChild); else stageEl.appendChild(h);
     function gone(){ h.classList.add('gone'); }
     stageEl.addEventListener('pointerdown', gone, { once:true });
     stageEl.addEventListener('touchstart',  gone, { once:true, passive:true });

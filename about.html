@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ABOUT · Owen Palmer, industrial designer · STUDIO NEWO</title>
-<meta name="description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: furniture and lighting, custom pieces, and product renders and drawings for brands.">
+<meta name="description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: products built in house, custom pieces to order, renders and drawings for brands.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/about.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/about.html">
 <meta property="og:site_name" content="Studio NEWO">
-<meta property="og:title" content="About · Studio NEWO">
-<meta property="og:description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: furniture and lighting, custom pieces, and product renders and drawings for brands.">
+<meta property="og:title" content="ABOUT · Owen Palmer, industrial designer · STUDIO NEWO">
+<meta property="og:description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: products built in house, custom pieces to order, renders and drawings for brands.">
 <meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="About · Studio NEWO">
-<meta name="twitter:description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: furniture and lighting, custom pieces, and product renders and drawings for brands.">
+<meta name="twitter:title" content="ABOUT · Owen Palmer, industrial designer · STUDIO NEWO">
+<meta name="twitter:description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: products built in house, custom pieces to order, renders and drawings for brands.">
 <meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=63">
+<link rel="stylesheet" href="css/style.css?v=68">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -66,13 +66,18 @@
      beside a photo but leaves these blocks stranded well short of their grid
      column. The column is the measure here, so release the cap and let the
      grid do the constraining. */
-  .ab-grid .desc, .principle .desc, .ab-route .desc{max-width:none;}
+  /* 3 Nov 2026 (measure exit test, 31 to 38 characters a line): the column is no
+     longer the measure. Every block keeps the site's --w-desc cap; where a
+     column would be narrower than 31 characters the layout stacks (below). */
+  .ab-grid .desc, .principle .desc, .ab-route .desc{max-width:var(--w-desc);}
 
   /* Principles: one sentence each since 2026-10-26, so they sit two by two on
      the 12 columns. The old stagger was built for four long paragraphs and left
      holes once they were short; four across made the justified lines gap. */
   .principles{margin-top:clamp(56px,10vh,120px); display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:clamp(30px,5vh,46px); align-items:start;}
   .principle{grid-column:span 6;}
+  /* the headings shrink under 24px below 1000px wide: there they take the small-text red (Q29, 3 Nov 2026) */
+  @media (max-width:1000px){ .principles .principle h2{color:var(--red-text, var(--red));} }
   /* .vh (visually hidden) moved to css/style.css - about and contact both use
      it now for their hidden <h1>. */
   /* red, matching the [NN] marks these headings replaced - the numbers carried
@@ -107,8 +112,19 @@
      instead of a seven-row list; the CV has the detail */
   .ab-tools{margin-top:clamp(30px,5vh,46px);}
   .ab-tools p{margin-top:10px; font-size:13px; line-height:1.9; letter-spacing:.1em; text-transform:uppercase;}
-  .ab-tools .sep{margin:0 3px; color:var(--ink-soft); opacity:.5;}
+  .ab-tools .sep{margin:0 3px; color:var(--ink-soft); opacity:.62;}   /* 4.8:1 (was .5, 3.3:1), 3 Nov 2026 */
 
+  /* 861 to 1279 wide a third of the grid is under 31 characters: the routes go
+     two across (the third under the first), the statement and the bio split
+     the row in half (3 Nov 2026, measure exit test) */
+  @media (min-width:861px) and (max-width:1279px){
+    .ab-route:nth-child(1){grid-column:1 / 7;}
+    .ab-route:nth-child(2){grid-column:7 / 13;}
+    .ab-route:nth-child(3){grid-column:1 / 7;}
+    .ab-statement{grid-column:1 / 7;}
+    .ab-who{grid-column:7 / 13; display:block;}   /* photo above the bio, so the bio has the whole half */
+    .ab-who .ab-photo{margin-bottom:14px;}
+  }
   @media (max-width:860px){
     .ab-fact:nth-child(1),.ab-fact:nth-child(2),.ab-fact:nth-child(3),
     .ab-route:nth-child(1),.ab-route:nth-child(2),.ab-route:nth-child(3){grid-column:1 / -1;}
@@ -121,6 +137,9 @@
 </head>
 <body>
 <a class="skip-link" href="#content">Skip to content</a>
+<!-- header landmark (2026-11-03, axe "region"): the three fixed marks sit in it; it has no box of its own.
+     make-simple-page.py copies this shell into solutions, jewelry and photography. -->
+<header>
 <a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
@@ -130,6 +149,7 @@
 <button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
+</header>
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page wrap" id="content" tabindex="-1">
@@ -144,11 +164,11 @@
        Cut to the essentials: who, what you can come here for, how the studio
        works, the short CV. The full CV stays a download. -->
   <div class="ab-grid">
-    <p class="desc ab-statement">Studio NEWO is an industrial design practice in Toronto, making furniture, lighting and objects from raw materials and current technology, built to be opened, repaired and kept. Working is the minimum. How a product feels, gets made, gets fixed and comes apart is the actual goal.</p>
+    <p class="desc ab-statement">Studio NEWO is an industrial design practice in Toronto, making lighting, furniture, audio and appliances from raw materials and current technology, built to be opened, repaired and kept. Working is the minimum. How a product feels, gets made, gets fixed and comes apart is the actual goal.</p>
     <div class="ab-who">
       <img class="ab-photo" src="about/owen-palmer.jpg" width="712" height="848" alt="Owen Palmer, industrial designer and founder of Studio NEWO" decoding="async">
       <span class="cap">Owen Palmer, designer</span>
-      <p class="desc">I came to industrial design from two years of mechanical engineering and two years building custom furniture and cabinetry, and I still think like an engineer, solving problems and rendering designs in my head before modelling them. Through Studio NEWO I design, build and sell my own products, and make renders, animations and drawings for other designers and brands.</p>
+      <p class="desc">I came to industrial design from two years of mechanical engineering and two years building custom furniture and cabinetry. I still think like an engineer: the problem gets solved and the design rendered in my head before I model it. Through Studio NEWO I design and build my own products, and make renders, animations and drawings for designers, startups, institutions and brands.</p>
     </div>
   </div>
 
@@ -156,17 +176,17 @@
   <div class="ab-routes">
     <div class="ab-route">
       <span class="cap">Products</span>
-      <p class="desc">Lighting, furniture, audio and appliances, designed and built in house. Ask about price or availability on any of them.</p>
+      <p class="desc">Lighting, furniture, audio and appliances, designed and built in house. None is for sale yet; ask to be told when one is.</p>
       <a class="inq" href="index.html">SEE THE PRODUCTS &rarr;</a>
     </div>
     <div class="ab-route">
       <span class="cap">Custom</span>
-      <p class="desc">Any studio product in another size, material or finish, or custom furniture and lighting designed and built to order.</p>
+      <p class="desc">Custom versions of any studio product in another size, material or finish are made to order. So are furniture and lighting designed from scratch.</p>
       <a class="inq" href="contact.html?about=Custom">ASK ABOUT CUSTOM &rarr;</a>
     </div>
     <div class="ab-route">
-      <span class="cap">For brands and designers</span>
-      <p class="desc">Product renders, animation, 3D web models and production drawings from your CAD, at fixed prices.</p>
+      <span class="cap">Studio services</span>
+      <p class="desc">For brands, startups and institutions: product renders, animation, 3D web models and production drawings from your CAD at a fixed price per job, and design and prototyping from a brief.</p>
       <a class="inq" href="solutions.html#services">SERVICES AND PRICES &rarr;</a>
     </div>
   </div>
@@ -181,7 +201,7 @@
     </div>
     <div class="principle">
       <h2>Constraint-driven form</h2>
-      <p class="desc">Form often follows the way a thing is made. The fabrication method, the material, and the hand using it set the boundaries.</p>
+      <p class="desc">Form often follows the way a thing is made. The fabrication method, the material and the hand using it set the boundaries.</p>
     </div>
     <div class="principle">
       <h2>Pragmatism and value</h2>
@@ -242,8 +262,8 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=27"></script>
-<script src="js/main.js?v=5"></script>
-<script src="js/menu.js?v=35"></script>
+<script src="js/projects-data.js?v=33"></script>
+<script src="js/main.js?v=7"></script>
+<script src="js/menu.js?v=42"></script>
 </body>
 </html>

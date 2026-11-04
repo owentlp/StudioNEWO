@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>STUDIO NEWO · Industrial design studio, Toronto</title>
-<meta name="description" content="Studio NEWO. Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta name="description" content="Industrial design studio in Toronto. Lighting, furniture, audio and appliances built to be opened, repaired and kept, plus renders and drawings for brands.">
 <meta name="theme-color" content="#e9e7e2">
 <link rel="canonical" href="https://studionewo.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/">
 <meta property="og:site_name" content="Studio NEWO">
-<meta property="og:title" content="Studio NEWO · Industrial design studio, Toronto">
-<meta property="og:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta property="og:title" content="STUDIO NEWO · Industrial design studio, Toronto">
+<meta property="og:description" content="Industrial design studio in Toronto. Lighting, furniture, audio and appliances built to be opened, repaired and kept, plus renders and drawings for brands.">
 <meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Studio NEWO · Industrial design studio, Toronto">
-<meta name="twitter:description" content="Industrial design practice in Toronto. Products built for repair, disassembly, and long life.">
+<meta name="twitter:title" content="STUDIO NEWO · Industrial design studio, Toronto">
+<meta name="twitter:description" content="Industrial design studio in Toronto. Lighting, furniture, audio and appliances built to be opened, repaired and kept, plus renders and drawings for brands.">
 <meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
 <link rel="manifest" href="/site.webmanifest">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
@@ -50,16 +50,12 @@
   try{
     var p = new URLSearchParams(location.search).get("p") || "";
     var k = "newo:seen:" + location.pathname + (p ? "?p=" + p : "");
-    if(sessionStorage.getItem(k) === "1") return;   // tumble is skipped here
-  }catch(e){}                                       // no storage: warm it, as before
-  function pre(href, as, cors){
-    var l = document.createElement("link");
-    l.rel = "preload"; l.href = href; l.as = as;
-    if(cors) l.crossOrigin = "";
-    document.head.appendChild(l);
-  }
-  pre("js/loader3d-core.js?v=2", "script");
-  pre("js/loader3d-mesh.js?v=1", "script");
+    // same key and 24 h rule as seenBefore() in js/loader3d.js
+    var t = parseInt(localStorage.getItem(k), 10);
+    if(t && (Date.now() - t) < 24 * 60 * 60 * 1000) return;   // tumble is skipped here
+  }catch(e){}                                       // no storage: treat it as a first view
+  /* 2026-11-03: the worker fetches loader3d-core/-mesh itself; a document preload
+     is not shared with a worker, so it only downloaded them twice. */
   /* 2026-10-26: a first view will show the 3D logo, so keep the flat one
      hidden from the very first paint (it used to show for a moment before
      js/loader3d.js arrived, then swap). loader3d.js removes this at once and
@@ -118,7 +114,7 @@
   if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
 })();
 </script>
-<link rel="stylesheet" href="css/style.css?v=63">
+<link rel="stylesheet" href="css/style.css?v=68">
 
 <style>
 /* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
@@ -142,22 +138,43 @@ body{font-family:var(--body); color:var(--ink); background:var(--paper); overflo
 
 
 /* header marks follow the sky: ink on a light sky, paper on a dark one */
-#home, #wordmark, #burger{transition:color .8s ease;}
 body[data-sky="dark"] #home, body[data-sky="dark"] #wordmark, body[data-sky="dark"] #burger{color:var(--paper);}
 body.bg-sky #soundToggle{display:none;}
 /* The only words on the page, kept out of the way: a small spine label hanging
-   under the logo, set vertically. Hidden (not removed) on phones, where the
-   cards fill the screen; it stays in the page for search engines and screen
-   readers. */
+   under the logo, set vertically. A <p>, not a second h1: the hidden h1 in
+   the body is the page's one heading (2 Nov 2026).
+   It never sits over a card. A lifted card's top is at H - max(320px, 44vh)
+   (--dock-rise), so 56vh on anything taller than 727px. The label is 316px
+   long from y=91 and ends at 407px; measured at 1440x900 a raised card's top
+   is y=504. The max-height is the guarantee: the label is cut (with an
+   ellipsis) 20px above the lowest a raised card can come, so there is nothing
+   for a card to reach, and the old rule that faded the label out whenever a
+   card lifted (which meant for most of a first visit) is gone. Windows under
+   765px tall hide it instead, as the 700px rule used to: there the cut would
+   bite into the words (at 765 a raised card's top is y=428). */
 #home-line{position:fixed; z-index:4; top:91px; left:34px; margin:0;
   font:inherit; font-weight:400; font-size:9px; letter-spacing:.2em; line-height:1; text-transform:uppercase; white-space:nowrap;
-  writing-mode:vertical-rl; color:var(--ink); pointer-events:none;}
-#home-line span{opacity:.5; transition:opacity .25s ease;}
-/* a raised card can reach the label on a short window: it steps aside rather
-   than sit over the photo (no text over images) */
-body:has(.dc:hover) #home-line span, body:has(.dc:focus-visible) #home-line span, body:has(.dc.dc-lift) #home-line span{opacity:0;}
-body[data-sky="dark"] #home-line{color:var(--paper);}
-@media (max-width:760px), (max-height:700px), (hover: none) and (max-width:1100px){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
+  writing-mode:vertical-rl; color:var(--ink); pointer-events:none;
+  max-height:min(56vh - 111px, 100vh - 431px); overflow:hidden; text-overflow:ellipsis;}
+.home-hdr{display:contents;}
+body[data-strap="paper"] #home-line{color:var(--paper);}
+/* BACKING (3 Nov 2026, a11y A5 / layout P4): 9px text over a moving sky cannot
+   hold 4.5:1 on colour alone: at the ink / paper crossover the best either can
+   do is about 4:1, and clouds, rain streaks and snow flakes pass right behind
+   the letters (a text-shadow halo was tried and measured 1.6:1 on snow). The
+   words sit on a translucent band in the opposite tone instead, the home card
+   titles' paper band in miniature; js/sky.js picks ink or paper. */
+#home-line{padding:3px; margin:-3px;}   /* room for the band inside the clip; the margin puts the words back where they were */
+#home-line span{background:rgba(233,231,226,.78); padding:2px 3px; -webkit-box-decoration-break:clone; box-decoration-break:clone;}
+body[data-strap="paper"] #home-line span{background:rgba(20,20,20,.74);}
+@media (max-height:764px){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
+/* PHONES AND TOUCH (the stacked-card layout below): the same words as a
+   one-line strap under the header, in the dock's top padding (the cards start
+   at 108px), scrolling with the page. Over sky, never over a card. */
+@media (max-width:760px), (hover: none) and (max-width:1100px){
+  #home-line{position:absolute; top:68px; left:22px; right:22px; width:auto; height:auto; max-height:none; clip-path:none;
+    writing-mode:horizontal-tb; overflow:hidden; text-overflow:ellipsis; font-size:9px; line-height:1.2; text-align:left;}
+}
 
 /* ---- header: real logo (left) · wordmark (centre) · hamburger (right); all the SAME height ---- */
 #home{position:fixed; z-index:5; top:24px; left:34px; display:block; width:45px; height:45px; color:var(--ink); cursor:pointer;}
@@ -267,7 +284,7 @@ body[data-sky="dark"] #home-line{color:var(--paper);}
    Do not add contain/will-change back here; both were tried and made it worse. */
 .dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1.015) translateZ(0); backface-visibility:hidden; transition:transform .5s cubic-bezier(.2,.8,.2,1);}
 .dc{backface-visibility:hidden;}
-.dc:hover .dc-media img, .dc:focus-visible .dc-media img, .dc.dc-lift .dc-media img{filter:saturate(1.05); transform:scale(1.096) translateZ(0);}
+.dc:hover .dc-media img, .dc:focus-visible .dc-media img, .dc.dc-lift .dc-media img{transform:scale(1.096) translateZ(0);}   /* 3 Nov 2026: no filter change on hover (one re-raster of a promoted photo per hover; the Windows stutter). saturate(.94) stays constant */
 /* title (+ date) is a paper band at the TOP of the card, ABOVE the photo (not
    over it), so the photo's top is never covered. It's what shows in the peeking
    sliver at rest, with the photo starting just beneath it. No catch-phrase/
@@ -303,6 +320,14 @@ body.ready .fade-in{opacity:1; transform:none;}
 body.ready.ld-pinned .fade-in{opacity:0; transform:translateY(6px);}
 body.ready .fade-in.d1{transition-delay:.05s;}
 body.ready .fade-in.d2{transition-delay:.2s;}
+/* REDUCED MOTION (3 Nov 2026, a11y A4): a card still rises on hover / focus,
+   because that is how its photo is shown, but it cuts there instead of sliding,
+   and the photo does not zoom. The cards and the strap come in on a fade only. */
+@media (prefers-reduced-motion:reduce){
+  .dc, .dc-media img{transition:none;}
+  .dc:hover .dc-media img, .dc:focus-visible .dc-media img, .dc.dc-lift .dc-media img{transform:scale(1.015) translateZ(0);}
+  .fade-in, body.ready.ld-pinned .fade-in{transform:none; transition:opacity 700ms ease;}
+}
 
 /* THE TEST IS HOVER, NOT WIDTH.
    The fan dock works by hovering a card to raise it. This block used to fire at
@@ -326,12 +351,23 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   /* scroll vertically only - never sideways. See the matching note in
      css/style.css: iOS needs the axis pinned explicitly or a stray wide child
      gives you a dead margin you can drag the page into. */
-  body{overflow-x:hidden; overflow-y:auto; max-width:100%;}
+  /* THE DOCUMENT SCROLLS, NOT THE BODY (2 Nov 2026, site review). body used to
+     carry overflow-y:auto while html kept overflow:hidden from the desktop rule
+     above, so body became its own scroll container inside a fixed-height
+     window: the browser chrome never collapsed, iOS tap-the-status-bar did
+     nothing and the fixed header marks passed over the card photos. html now
+     scrolls (overflow-x stays clipped, see css/style.css) and body is a plain
+     block that grows with the cards. */
+  html{overflow-x:hidden; overflow-y:auto;}
+  body{overflow:visible; max-width:100%; height:auto; min-height:100%;}
   /* 30px, matching --hdr in css/style.css at its own phone breakpoint, so the
      logo / wordmark / burger do not change size between the home page and
      every other page. 20px was also under the 24px minimum touch target. */
   #home{top:24px; left:22px; width:30px; height:30px;}
-  #burger{top:24px; right:22px; width:30px; height:30px;}
+  /* the burger's mark stays 30px at the same spot; its button is 44px (the
+     padding is the difference, the box pulled out by 7px), the one way to
+     the menu on a phone (3 Nov 2026) */
+  #burger{top:17px; right:15px; width:44px; height:44px; padding:7px;}
   #wordmark{top:24px; height:30px;}
   /* the background video plays on mobile now, so the sound toggle has
      something to control again. It sits above the scrolling dock. */
@@ -387,7 +423,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   "url": "https://studionewo.com/",
   "logo": "https://studionewo.com/logo/icon-512.png",
   "image": "https://studionewo.com/logo/og-card.jpg",
-  "description": "Industrial design practice in Toronto. Products built for repair, disassembly, and long life.",
+  "description": "Industrial design studio in Toronto. Lighting, furniture, audio and appliances built to be opened, repaired and kept, plus renders and drawings for brands.",
   "founder": { "@type": "Person", "name": "Owen Palmer" },
   "address": { "@type": "PostalAddress", "addressLocality": "Toronto", "addressCountry": "CA" },
   "sameAs": [ "https://www.instagram.com/studio.newo" ]
@@ -404,7 +440,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
      visually hidden with the same .vh technique about.html and contact.html
      already use - never display:none, which would hide it from assistive
      tech too. -->
-<h1 class="vh">Studio NEWO, industrial design practice in Toronto</h1>
+<h1 class="vh">Studio NEWO, industrial design studio in Toronto</h1>
 
 <!-- SKY (2026-10-01): the background is drawn for the visitor's local time and
      weather by js/sky.js. The video layers stay in the markup, unused, so the
@@ -413,7 +449,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 <div id="sky-clouds" aria-hidden="true"></div>
 <div id="sky-precip" aria-hidden="true"></div>
 <div id="sky-grain" aria-hidden="true"></div>
-<script src="js/sky.js?v=7"></script>
+<script src="js/sky.js?v=8"></script>
 <video class="bgvid" id="vidA" muted playsinline preload="none"></video>
 <video class="bgvid" id="vidB" muted playsinline preload="none"></video>
 
@@ -422,8 +458,11 @@ body.ready .fade-in.d2{transition-delay:.2s;}
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=17"></script>
+<script src="js/loader3d.js?v=18"></script>
 
+<!-- banner landmark (3 Nov 2026, axe "region"): display:contents, so the
+     marks keep their own fixed positions and nothing moves -->
+<header class="home-hdr">
 <a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
@@ -432,11 +471,12 @@ body.ready .fade-in.d2{transition-delay:.2s;}
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
 
-<h1 id="home-line" class="fade-in d2"><span>Industrial design studio, Toronto</span></h1>
+<p id="home-line" class="fade-in d2"><span>Industrial design studio, Toronto</span></p>
 
 <button id="burger" class="fade-in d1" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
+</header>
 
 <!-- easter egg: sound is off by default (the background videos stay muted),
      this is the only way to turn the ambient audio on. Deliberately unlabeled
@@ -456,7 +496,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 
 <div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<script src="js/projects-data.js?v=27"></script>
+<script src="js/projects-data.js?v=33"></script>
 <!-- main.js: the ?guides / "g" layout overlay, and the page reveal.
      __DEFER_REVEAL hands the WHEN to this page: the reveal at the bottom of
      the file waits for the card images and the sky, then calls
@@ -467,9 +507,9 @@ body.ready .fade-in.d2{transition-delay:.2s;}
    itself fails to arrive (GitHub Pages answered one request with a 503 during a
    deploy), the loading screen never cleared. This one lives in the page. */
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
-<script src="js/main.js?v=5"></script>
-<script src="js/image-sizes.js?v=3"></script>
-<script src="js/menu.js?v=35"></script>
+<script src="js/main.js?v=7"></script>
+<script src="js/image-sizes.js?v=6"></script>
+<script src="js/menu.js?v=42"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
@@ -515,14 +555,25 @@ const CLIP_PICK = (function(){
      plain full-size src is used, so a newly added image can never break this.
      The cards are the page's main content and sit in the viewport at rest, so
      they are NOT lazy-loaded - lazy would delay the one thing worth seeing. */
+  /* does this IMG_SIZES entry have the sm/ or md/ copy? Optional third element
+     ("sm", "md", "sm md", "") from tools/make-image-variants.py; without it, the
+     width rule (sm when w > 600, md when w > 1200). */
+  function hasTier(d, t){
+    return d.length > 2 ? (" " + d[2] + " ").indexOf(" " + t + " ") >= 0
+                        : d[0] > (t === "sm" ? 600 : 1200);
+  }
+  /* sizes (3 Nov 2026, measured): a stacked card is the window less 52px at every
+     phone and touch width (308 at 360, 338 at 390, 768 at 820, 972 at 1024); a fanned
+     desktop card is about 29vw (420 at 1440, 555 at 1920). Was 100vw / 27vw, which
+     sent the 1200px copy to a 390px phone at 1.75x where the 600px one covers it. */
   function cardSrc(key, file){
     var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[key]) ? IMG_SIZES[key][file] : null;
     if(!dims) return "";
     var w = dims[0], h = dims[1], b = "projects/"+key+"/", set = [];
-    if(w > 600)  set.push(b + "sm/" + file + " 600w");
-    if(w > 1200) set.push(b + "md/" + file + " 1200w");
+    if(hasTier(dims, "sm")) set.push(b + "sm/" + file + " 600w");
+    if(hasTier(dims, "md")) set.push(b + "md/" + file + " 1200w");
     set.push(b + file + " " + w + "w");
-    return (set.length > 1 ? ' srcset="'+set.join(", ")+'" sizes="(max-width:760px) 100vw, 27vw"' : '') +
+    return (set.length > 1 ? ' srcset="'+set.join(", ")+'" sizes="(max-width:760px) calc(100vw - 52px), (hover:none) and (max-width:1100px) calc(100vw - 52px), 30vw"' : '') +
            ' width="'+w+'" height="'+h+'"';
   }
 

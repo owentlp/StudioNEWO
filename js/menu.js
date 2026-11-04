@@ -46,7 +46,7 @@
     "AU": "Audio",
     "H":  "Appliances",
     "A":  "Accessories",
-    "J":  "Jewelry",
+    "J":  "Jewellery",
     "X":  "Other"
   };
   var UNCATEGORIZED = "Other";   // where a project with a missing/odd code goes
@@ -59,8 +59,8 @@
      at its URL). Jewelry and Photography switch on when their data lands. */
   var EXTRA_PAGES = [
     { href:"solutions.html",   label:"Solutions",   on:true  },
-    { href:"solutions.html#services", label:"Services", on:false },  // off 2 Oct (Owen): reached from About and the foot of Solutions
-    { href:"jewelry.html",     label:"Jewelry",     on:false },
+    { href:"solutions.html#services", label:"Services", on:true  },  // on 2 Nov (site review Q1): a client looking for "services" finds the word
+    { href:"jewelry.html",     label:"Jewellery",   on:false },
     { href:"photography.html", label:"Photography", on:false },
     { href:"materials.html",   label:"Materials",   on:true  },
     { href:"about.html",       label:"About",       on:true  },
@@ -122,23 +122,24 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=63",
-      "js/projects-data.js?v=27",
-      "js/image-sizes.js?v=3",
-      "js/main.js?v=5",
-      "js/menu.js?v=35",
-      "js/sky.js?v=7",
-      "js/loader3d.js?v=17",
+      "css/style.css?v=68",
+      "js/projects-data.js?v=33",
+      "js/image-sizes.js?v=6",
+      "js/main.js?v=7",
+      "js/menu.js?v=42",
+      "js/sky.js?v=8",
+      "js/loader3d.js?v=18",
       "js/loader3d-core.js?v=2",
       "js/loader3d-mesh.js?v=1",
       "js/loader3d.worker.js?v=6"
     ];
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
-    var MATERIALS_DATA = "js/materials-data.js?v=8";
+    var MATERIALS_DATA = "js/materials-data.js?v=11";
+    var PROJECT_JS = "js/project.js?v=5";   // the product page script (2026-11-03)
     var MV_LIB  = "js/vendor/model-viewer.min.js?v=2";
-    var MODEL_V = "?v=2";      // must match the model-viewer data-src in project.html
-    var MECH_V  = "?v=21";     // must match the mechanism iframe src in project.html
+    var MODEL_V = "?v=3";      // must match the model-viewer data-src in project.html
+    var MECH_V  = "?v=26";     // must match the mechanism iframe src in js/project.js
     var DWELL_MS = 400;
 
     function shell(){ SHELL.forEach(link); }
@@ -146,6 +147,7 @@
     function heavy(key, p){
       if(!p) return;
       link(MATERIALS_DATA);        // project pages resolve their material chips from it
+      link(PROJECT_JS);
       if(p.mechanism && /\.html?$/i.test(p.mechanism)) link("projects/"+key+"/"+p.mechanism+MECH_V);
       var glb = p.modelRender || p.model;
       if(glb){ link("projects/"+key+"/"+glb+MODEL_V); link(MV_LIB); }
@@ -250,8 +252,12 @@
        is to show the work, and with five projects across four categories the
        panel is short enough to open them all. On a PROJECT page the behaviour
        is unchanged: its own category opens and the others stay folded, so the
-       panel stays focused on where you are. */
-    var openAll = !openLabel;
+       panel stays focused on where you are.
+       2 Nov 2026 (site review Q2): every category is open on every page,
+       project pages included. With five products in four groups, a folded
+       group cost one more click to learn the other products exist. The heads
+       stay, and still fold on a click. */
+    var openAll = true;
 
     var html = '<nav class="menu-nav">';
 
@@ -334,10 +340,26 @@
       head.setAttribute("aria-expanded", open ? "true" : "false");
     });
 
-    function setMenu(open){
+    /* FOCUS IS NEVER LOST (2026-11-03, review 2 Nov (2) finding 7). The closed
+       panel is visibility:hidden, so a link inside it that still holds focus
+       is dropped by the browser and the next Tab starts again from the top of
+       the page. Whenever the panel closes with focus inside it (Escape, or a
+       link to a place on this same page), focus goes back to the burger that
+       opened it. Both burgers carry aria-expanded / aria-controls. */
+    var opener = null;
+    function burgers(){ return Array.prototype.slice.call(document.querySelectorAll("#burger, .foot-burger")); }
+    function setMenu(open, from){
+      var hadFocus = overlay.contains(document.activeElement);
       overlay.classList.toggle("open", open);
-      var b = document.getElementById("burger");
-      if(b) b.setAttribute("aria-expanded", open ? "true" : "false");
+      if(open && from) opener = from;
+      burgers().forEach(function(btn){
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.setAttribute("aria-controls", "menu-overlay");
+      });
+      if(!open && hadFocus){
+        var back = (opener && document.contains(opener)) ? opener : document.getElementById("burger");
+        if(back){ try { back.focus({ preventScroll:true }); } catch(e){ back.focus(); } }
+      }
     }
 
     // one delegated click listener handles the header burger, the footer
@@ -345,18 +367,34 @@
     // outside the panel.
     document.addEventListener("click", function(e){
       var toggle = e.target.closest("#burger, .foot-burger");
-      if(toggle){ e.preventDefault(); setMenu(!overlay.classList.contains("open")); return; }
+      if(toggle){ e.preventDefault(); setMenu(!overlay.classList.contains("open"), toggle); return; }
       if(!overlay.classList.contains("open")) return;
       if(e.target.closest(".menu-head")) return;                           // category toggle, panel stays open
-      if(e.target.closest("#menu-overlay a")){ setMenu(false); return; }   // followed a link
+      var link = e.target.closest("#menu-overlay a");
+      if(link){                                                            // followed a link
+        setMenu(false);
+        // a link to a place on THIS page (SERVICES from Solutions): focus goes
+        // to that place, where the reader now is, not back to the burger
+        if(link.hash && link.pathname === location.pathname && link.search === location.search && link.host === location.host){
+          var dest = document.getElementById(decodeURIComponent(link.hash.slice(1)));
+          if(dest) setTimeout(function(){
+            if(!dest.hasAttribute("tabindex") && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(dest.tagName)) dest.setAttribute("tabindex", "-1");
+            try { dest.focus({ preventScroll:true }); } catch(err){ dest.focus(); }
+          }, 0);
+        }
+        return;
+      }
       if(!e.target.closest("#menu-overlay")) setMenu(false);               // clicked outside
     });
     document.addEventListener("keydown", function(e){
-      if(e.key === "Escape") setMenu(false);
+      if(e.key === "Escape" && overlay.classList.contains("open")) setMenu(false);
     });
 
     var b = document.getElementById("burger");
-    if(b) b.setAttribute("aria-expanded", "false");
+    if(b){ b.setAttribute("aria-expanded", "false"); b.setAttribute("aria-controls", "menu-overlay"); }
+    // the footer burger is built late on some pages: label it once it exists
+    function labelFoot(){ burgers().forEach(function(btn){ if(!btn.hasAttribute("aria-expanded")){ btn.setAttribute("aria-expanded", overlay.classList.contains("open") ? "true" : "false"); btn.setAttribute("aria-controls", "menu-overlay"); } }); }
+    labelFoot(); window.addEventListener("load", labelFoot);
   }
 
   /* ---- FOOTER NOTE -----------------------------------------------------

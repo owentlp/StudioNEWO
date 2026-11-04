@@ -126,6 +126,12 @@
     }
     var k = KC[KC.length-1]; return { zen: k[1], hor: k[2], glow: k[3] };
   }
+  // WCAG relative luminance (linear light) and contrast ratio, for the home strap
+  function lin(v){ v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+  function rel(c){ return 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]); }
+  function wcag(a, b){ return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); }
+  var CL = null;
+  var INK_L = rel([20, 20, 20]), PAPER_L = rel([233, 231, 226]);   // --ink #141414, --paper #e9e7e2
   function lum(c){ return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255; }
   function grey(c, amt, level){ var l = lum(c) * 255 * level; return mix(c, [l, l, l * 1.02], amt); }
   function css(c, a){ return "rgba(" + (c[0]|0) + "," + (c[1]|0) + "," + (c[2]|0) + "," + (a == null ? 1 : a) + ")"; }
@@ -250,6 +256,22 @@
     var topL = lum(zen), dark = topL < 0.32;
     document.body.setAttribute("data-sky", dark ? "dark" : "light");
     paintClouds(P, zen, hor, cov, k, s.alt, clear);
+    // the home strap (9px text, needs 4.5:1) picks its own colour by WCAG
+    // contrast against the sky where it sits (the top 45% of the screen), not
+    // by the header's darkness threshold: in the minutes before sunset the
+    // header was still ink on mid blue at 2.5:1 (3 Nov 2026). The paper or
+    // ink halo in index.html carries the rest over clouds and at the crossover.
+    var inkC = 1e9, papC = 1e9;
+    [0, 0.2, 0.45].forEach(function(f){
+      var sky = mix(zen, hor, f), bgs = [sky];
+      // ...and the same sky under the densest cloud the texture can draw there
+      if(CL) bgs.push(mix(sky, mix(CL.lit, CL.shade, f), CL.a), mix(sky, CL.lit, CL.a));
+      bgs.forEach(function(c){
+        var bg = rel(c);
+        inkC = Math.min(inkC, wcag(bg, INK_L)); papC = Math.min(papC, wcag(bg, PAPER_L));
+      });
+    });
+    document.body.setAttribute("data-strap", papC > inkC ? "paper" : "ink");
     last = { s: s, cov: cov, k: k };
   }
 
@@ -281,6 +303,13 @@
        Removed 2026-10-02: a drawn-shapes version (Owen: the noise clouds are
        better). */
     if(cov < 0.06 && k === "clear") cov = 0.2;
+    // the cloud colours, kept for the home strap's ink / paper choice (draw())
+    (function(){
+      var d = Math.max(0, Math.min(1, (alt + 6) / 12)), mid = mix(zen, hor, 0.5);
+      var l = mix(mix(mix(zen, hor, 0.5), [118, 110, 104], 0.35), mix([250, 248, 244], [212, 214, 220], Math.min(1, cov * 0.9)), d);
+      if(alt > -4 && alt < 8) l = mix(l, hex("#e8b498"), 0.25 * clear + 0.08);
+      CL = { lit: l, shade: mix(l, mid, 0.45 + 0.3 * cov), a: (0.5 + 0.4 * cov) * (0.5 + 0.5 * d) * (cov > 0.85 ? 0.7 : 1) };
+    })();
     var key = [cov.toFixed(2), k, Math.round(alt / 2), Math.round(clear * 10)].join("|");
     if(key === cloudKey) return; cloudKey = key;
     if(!cloudTex) cloudTex = noiseTex(512, 160);
