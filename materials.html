@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=68">
+<link rel="stylesheet" href="css/style.css?v=69">
 <style>
   /* page-specific layout only (rebuilt 2026-10-08). One flat page: every
      material in use is visible on one scroll, no accordions. Each category is
@@ -40,7 +40,7 @@
      take, and its materials. The technical notes sit behind the same info icon
      the project pages use (logo/info.svg, .info-btn / .info-panel in
      css/style.css). Type is the shared .lead / .desc / .cap, nothing new. */
-  .matg{max-width:none; margin:0; padding:clamp(140px,17vh,210px) var(--mar) clamp(80px,12vh,140px);}
+  .matg{max-width:none; margin:0; padding:clamp(140px,17vh,210px) var(--tmar) clamp(80px,12vh,140px);}   /* --tmar: the site text margin (4 Nov 2026) */
   .matg-intro{margin-bottom:clamp(70px,10vh,120px);}
   .matg-intro .lead{margin-top:14px; font-family:var(--body); font-style:normal; line-height:inherit;}
   .matg-intro .desc{margin-top:var(--txt-gap); max-width:var(--w-desc);}
@@ -156,7 +156,7 @@
 <script src="js/materials-data.js?v=11"></script>
 <script src="js/projects-data.js?v=33"></script>
 <script src="js/main.js?v=7"></script>
-<script src="js/menu.js?v=42"></script>
+<script src="js/menu.js?v=44"></script>
 <script>
 (function(){
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }

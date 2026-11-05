@@ -943,7 +943,7 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=26" title="'+esc(p.title)+' mechanism, interactive diagram" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=27" title="'+esc(p.title)+' mechanism, interactive diagram" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="'+esc(p.title)+' mechanism diagram"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
@@ -1684,10 +1684,16 @@
         var w = perM * wide;
         var cx = sr.left + sr.width / 2, cy = sr.top + sr.height / 2;
         var top = cy - h / 2, left = cx - w / 2, right = cx + w / 2;
+        /* Which photos are "above" is judged from the slot's RESTING place
+           (cy minus the shift already applied), never from where an earlier
+           shift left it (5 Nov 2026). After a resize the old shift could put
+           the slot above the gallery, the gallery then no longer counted as
+           above, and the model jumped up to the hero photo. */
+        var cy0 = cy - old;
         var imgs = Array.prototype.slice.call(document.querySelectorAll("#content img"))
           .map(function(i){ return i.getBoundingClientRect(); })
-          .filter(function(b){ return b.height > 40 && b.bottom <= cy && b.right > left && b.left < right; });
-        if(!imgs.length) return;
+          .filter(function(b){ return b.height > 40 && b.bottom <= cy0 && b.right > left && b.left < right; });
+        if(!imgs.length){ stage.style.marginTop = ""; return; }   // nothing above: no stale shift (5 Nov 2026)
         var low = imgs.reduce(function(a, b){ return b.bottom > a.bottom ? b : a; });
         var want = low.bottom - OVERLAP_AIM * low.height;
         imgs.forEach(function(b){ want = Math.max(want, b.bottom - OVERLAP_MAX * b.height); });
@@ -2115,15 +2121,10 @@
       var hint = document.createElement("div");
       hint.className = "mv-hint";
       hint.textContent = coarse ? "TOUCH TO INTERACT" : "DRAG TO INTERACT";
-      /* 2026-11-02 (review Q7): the hint is the FIRST line of the control row
-         (.mv-bar) now, not printed on the render, so no text sits on the model
-         and it no longer doubles the mechanism's own hint on KART. .mv-bar is
-         .cad-stage's next sibling inside .cad-hiw-model, and "mv-live" goes on
-         .cad-stage, so the hide-when-live rule in css/style.css must key on
-         `.cad-stage.mv-live + .mv-bar .mv-hint`. Falls back to the stage if a
-         project ever has no bar. */
-      var bar = box.parentElement ? box.parentElement.querySelector(".mv-bar") : null;
-      if(bar) bar.insertBefore(hint, bar.firstChild); else box.appendChild(hint);
+      /* 4 Nov 2026 (Owen): the hint floats ON the model again, as a chip in
+         the stage, so it is plain the model can be turned and how. It fades
+         when the model is engaged (.cad-stage.mv-live .mv-hint). */
+      box.appendChild(hint);
 
       /* ---------- WHY TOUCH IS HANDLED SEPARATELY ----------
          The gate below works by flipping pointer-events from none to auto on
@@ -2382,6 +2383,19 @@
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     if(panel) panel.classList.toggle("open", open);
   });
+  /* the info text is a popup (4 Nov 2026): a click anywhere outside an open
+     one closes it, so it never sits over the page by accident */
+  function closeInfo(each){
+    content.querySelectorAll(".info-btn.open").forEach(function(btn){
+      var wrap = btn.parentElement, panel = wrap && wrap.querySelector(".info-panel");
+      btn.classList.remove("open"); btn.setAttribute("aria-expanded", "false");
+      if(panel) panel.classList.remove("open");
+      if(each) each(btn, wrap);
+    });
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest(".info-wrap")) closeInfo();
+  });
 
   // component-spread labels: click a label's info icon to open its spec panel;
   // opening one closes any other that's open so panels don't stack.
@@ -2459,12 +2473,7 @@
   document.addEventListener("keydown", function(e){
     if(e.key !== "Escape" && e.key !== "Esc") return;
     var back = null, act = document.activeElement;
-    content.querySelectorAll(".info-btn.open").forEach(function(btn){
-      var wrap = btn.parentElement, panel = wrap && wrap.querySelector(".info-panel");
-      btn.classList.remove("open"); btn.setAttribute("aria-expanded", "false");
-      if(panel) panel.classList.remove("open");
-      if(!back || (wrap && wrap.contains(act))) back = btn;
-    });
+    closeInfo(function(btn, wrap){ if(!back || (wrap && wrap.contains(act))) back = btn; });
     content.querySelectorAll(".comp-label.open").forEach(function(l){
       var ci = l.querySelector(".comp-info");
       l.classList.remove("open");
@@ -2477,6 +2486,12 @@
      takes keyboard focus (arrow keys turn the model), but the element is 130vw
      wide, so the site's :focus-visible ring was drawn off screen. The ring goes
      on the stage, the box the visitor sees, while the model has keyboard focus. */
+  /* keyboard or pointer, for the stage frame in css/style.css (4 Nov 2026) */
+  document.addEventListener("keydown", function(e){
+    var k = e.key || "";
+    if(k === "Tab" || k.indexOf("Arrow") === 0) document.documentElement.classList.add("kbd");
+  }, true);
+  document.addEventListener("pointerdown", function(){ document.documentElement.classList.remove("kbd"); }, true);
   (function stageRing(){
     var mv = document.getElementById("mv"), st = mv && mv.closest(".cad-stage");
     if(!st) return;
@@ -2984,7 +2999,7 @@
     var txt = cad && cad.querySelector(".hiw-text");
     if(!cad || !txt) return;
     var wide = window.matchMedia("(min-width:901px)");
-    var GAP = 14;          // breathing room between a photo and the text under it
+    var GAP = 16;          // breathing room between a photo and the text under it (4 px grid, 4 Nov 2026)
 
     function apply(){
       /* MEASURE FROM AN EXPLICIT ZERO, never by REMOVING the property.
@@ -3050,7 +3065,9 @@
       imgs.forEach(function(im){
         var r = im.getBoundingClientRect();
         // only photos that actually sit in this paragraph's horizontal band
-        if(r.right > t.left + 2 && r.left < t.right - 2) deepest = Math.max(deepest, r.bottom);
+        /* + 5% of its height: a gallery photo grows 10% about its centre on
+           hover (4 Nov 2026), so its bottom can come down by that much */
+        if(r.right > t.left + 2 && r.left < t.right - 2) deepest = Math.max(deepest, r.bottom + r.height * 0.05);
       });
       var pull = t.height;
       if(deepest > -Infinity){

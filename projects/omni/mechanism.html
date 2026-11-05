@@ -86,17 +86,17 @@
   .vol input{-webkit-appearance:none;appearance:none;width:150px;max-width:38vw;height:1px;background:var(--ink);cursor:pointer;}
   .vol input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;background:var(--red);border:0;cursor:pointer;}
   .vol input::-moz-range-thumb{width:12px;height:12px;background:var(--red);border:0;border-radius:0;cursor:pointer;}
-  @media (max-width:640px){ .ui{position:static;padding:12px 0 0;max-width:none;} .meta{font-size:13px;} }
+  @media (max-width:640px){ .ui{position:static;padding:12px 12px 0;max-width:none;} .meta{font-size:13px;} }   /* 12px: the site text margin on a phone (4 Nov 2026) */
 
-  /* ---- TOUCH/DRAG HINT ----
-     This graphic is interactive but gives no sign of it at rest, so people
-     scrolled straight past. A quiet mark, in the same voice as the mode
-     buttons, that disappears the first time anyone actually touches it and
-     never comes back. Wording follows the input device. */
-  .hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:3;
-    pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--ink);opacity:.62;white-space:nowrap;
-    text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);
+  /* FLOATING HINT (Owen, 4 Nov 2026): DRAG / TOUCH TO INTERACT floats ON the
+     drawing, centred on the canvas, as a small paper chip with an ink hairline,
+     so it is plain that the drawing can be played with and how. Not a button
+     (buttons are red). It fades on the first touch or drag and stays gone.
+     Same chip as .mv-hint on the 3D model (css/style.css). */
+  .hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
+    pointer-events:none;font-family:var(--mono);font-size:10px;line-height:1;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink);white-space:nowrap;
+    background:rgba(233,231,226,.92);border:1px solid rgba(20,20,20,.28);padding:8px 12px 7px;
     transition:opacity .3s ease;}
   .hint.gone{opacity:0;}
   @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
@@ -340,12 +340,8 @@
 
   /* the interaction hint (Owen, 3 Nov 2026): every 3D model and every
      mechanism says DRAG TO INTERACT (fine pointer) or TOUCH TO INTERACT
-     (touch), in the same place on each: the FIRST line of its own control
-     block (.ui here, .mv-bar under the 3D model), above the buttons, never on
-     the drawing or over text. It fades on the first real touch or drag and
-     stays gone. The inline style puts it in that flow (OMNI's .hint rule
-     pins it absolutely) at the 3D model hint's 9px, until the .hint rule
-     above carries both (docs/CLOUD_REPORT_2026-11-03_w4template.txt). */
+     (touch). Since 4 Nov 2026 it floats on the drawing as a chip (the .hint
+     rule above). It fades on the first real touch or drag and stays gone. */
   (function(){
     var stageEl = document.querySelector('.stage');
     if(!stageEl) return;
@@ -353,9 +349,14 @@
     h.className = 'hint';
     h.textContent = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
       ? 'TOUCH TO INTERACT' : 'DRAG TO INTERACT';
-    h.style.position = 'static'; h.style.transform = 'none'; h.style.margin = '0 0 10px'; h.style.fontSize = '9px';
-    var ui = document.querySelector('.ui');
-    if(ui) ui.insertBefore(h, ui.firstChild); else stageEl.appendChild(h);
+    stageEl.appendChild(h);
+    /* centred on the CANVAS, not the stage: on a phone the controls stack
+       under the canvas inside .stage, so 50% of the stage would land low. */
+    var cv = document.getElementById('c');
+    function place(){ if(cv) h.style.top = (cv.offsetTop + cv.offsetHeight / 2) + 'px'; }
+    place();
+    window.addEventListener('resize', place);
+    if(window.ResizeObserver && cv) new ResizeObserver(place).observe(cv);
     function gone(){ h.classList.add('gone'); }
     stageEl.addEventListener('pointerdown', gone, { once:true });
     stageEl.addEventListener('touchstart',  gone, { once:true, passive:true });

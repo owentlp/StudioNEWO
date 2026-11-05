@@ -87,7 +87,7 @@
     /* stacked under the graphic in one narrow column, where the rest of the
        page is left-aligned - the right-justification above belongs to the
        two-column desktop composition, not to this. */
-    .ui{position:static;padding:10px 6px 0;max-width:none;align-items:flex-start;}   /* 6px: the page's own gutter (--mar on a phone); the frame itself runs to the screen edge */
+    .ui{position:static;padding:10px 12px 0;max-width:none;align-items:flex-start;}   /* 12px: the site text margin on a phone (--tmar, 4 Nov 2026); the frame itself runs to the screen edge */
     .modes{gap:10px;margin:0 0 12px;justify-content:flex-start;}
     .meta{align-items:flex-start;text-align:left;}
     .modes button{font-size:12px;padding:8px 14px;cursor:pointer;}
@@ -96,24 +96,15 @@
     canvas{cursor:default;}
   }
 
-  /* ---- TOUCH/DRAG HINT ----
-     This graphic is interactive but gives no sign of it at rest, so people
-     scrolled straight past. A quiet mark, in the same voice as the mode
-     buttons, that disappears the first time anyone actually touches it and
-     never comes back. Wording follows the input device. */
-  /* IN FLOW, as the last item of .ui - not absolutely positioned.
-     Pinned to the stage (bottom-centre, and later bottom-left) it shared a band
-     with the controls, and the moment the mode buttons wrapped or the mode
-     description ran to two lines the two printed on top of each other. Measured
-     before this: every window from 901-1080px, and every phone width. As a flex
-     child of the same column the controls live in, it simply stacks under them
-     and cannot collide with anything - and it inherits .ui's alignment, so it
-     right-aligns with the caption on desktop and left-aligns on a phone, for
-     free. */
-  .hint{margin-top:10px;z-index:3;
-    pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--ink);opacity:.62;white-space:nowrap;
-    text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);
+  /* FLOATING HINT (Owen, 4 Nov 2026): DRAG / TOUCH TO INTERACT floats ON the
+     drawing, centred on the canvas, as a small paper chip with an ink hairline,
+     so it is plain that the drawing can be played with and how. Not a button
+     (buttons are red). It fades on the first touch or drag and stays gone.
+     Same chip as .mv-hint on the 3D model (css/style.css). */
+  .hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
+    pointer-events:none;font-family:var(--mono);font-size:10px;line-height:1;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink);white-space:nowrap;
+    background:rgba(233,231,226,.92);border:1px solid rgba(20,20,20,.28);padding:8px 12px 7px;
     transition:opacity .3s ease;}
   .hint.gone{opacity:0;}
   @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
@@ -125,10 +116,10 @@
       <canvas id="c" role="img" aria-label="Plan view of a room: the KART lamp, its radar cone and a person moving; the light follows the person"></canvas>
       <div class="ui">
         <div class="modes" id="modes" role="group" aria-label="Light mode">
-          <button data-mode="follow" aria-pressed="false">Lighthouse</button>
+          <button data-mode="follow" aria-pressed="true">Lighthouse</button>
           <button data-mode="shadow" aria-pressed="false">Shadow</button>
           <button data-mode="dimToward" aria-pressed="false">Dim Toward</button>
-          <button data-mode="dimAway" aria-pressed="true">Dim Away</button>
+          <button data-mode="dimAway" aria-pressed="false">Dim Away</button>
         </div>
         <div class="meta">
           <span class="desc" id="desc"></span>
@@ -196,7 +187,7 @@
     shadow:"The lamp fills the room and casts a dark column toward you, widening as you approach."
   };
 
-  let mode='dimAway';
+  let mode='follow';   // Lighthouse first (Owen, 4 Nov 2026)
   let cursor={x:250+BUF_X,y:330+BUF_TOP};
   let pointerOn=true;
   let pointerMoved=false;   // set by a pointer event, read and cleared once per frame
@@ -334,62 +325,20 @@
     // lamp
     const L=LED.lamp/2;
     ctx.fillStyle='#e9e7e2'; ctx.fillRect(lamp.x-L,lamp.y-L,2*L,2*L); ctx.strokeRect(lamp.x-L,lamp.y-L,2*L,2*L);
-    ledMatrix();
-    /* the radar: on the square's edge, facing the cone, so it no longer
-       covers the middle columns of the matrix (2026-11-03) */
-    const ca=CONE.center, cx=Math.cos(ca), cy=Math.sin(ca), e=L/Math.max(Math.abs(cx),Math.abs(cy));
-    ctx.beginPath(); ctx.arc(lamp.x+cx*e,lamp.y+cy*e,LED.dot0,0,Math.PI*2); ctx.fillStyle='#e2191b'; ctx.fill();
+    /* Owen, 4 Nov 2026: back to the original symbol, a plain square with the
+       red dot in its centre (the 2-3 Nov LED grid and edge dot read as
+       clutter). The dot is about 1.5x the original so it reads as "the lamp". */
+    ctx.beginPath(); ctx.arc(lamp.x,lamp.y,LED.dot0,0,Math.PI*2); ctx.fillStyle='#e2191b'; ctx.fill();
   }
 
-  /* THE LED MATRIX (2 Nov 2026, site review Q27). The copy names a 256-LED
-     matrix behind the frosted glass and the photos show a lit column on the
-     cylinder; the symbol was a bare square. A 6 x 12 grid of dots inside the
-     square, ink at rest. In the beam modes the dots on the side facing the
-     person light red (shadow: the side away from the person, since the dark
-     column faces them) and brighten with the beam value; in the dim modes
-     the whole grid brightens with the glow. Drawn only inside lineArt, so it
-     costs nothing on a frame that is not drawn anyway: 72 fillRects. */
-  /* 2026-11-03 (review 2026-11-02_2 finding 18 / F8): at phone width the
-     6 x 12 grid was 15 x 19 logical units, about 6 CSS px of 0.5 px dots,
-     under the red dot: a grey mesh. The symbol now sizes from the canvas's
-     CSS scale (ledLayout(), called from resize()): the lamp square is never
-     under 22 CSS px, the dots never under 1.6 CSS px nor closer than 2.8 CSS
-     px, and the grid keeps its 1 : 2 proportion with as many dots as fit
-     (6 x 12 where there is room, 3 x 6 on a phone). The radar dot moved to
-     the square's edge. */
-  const LED={lamp:24, cols:6, rows:12, dx:3, dy:1.75, sz:1.3, dot0:4.5};
+  /* THE LAMP SYMBOL'S SIZE: sized from the canvas's CSS scale (ledLayout(),
+     called from resize()) so it reads at phone width: the square never under
+     28 CSS px, the red dot 1.5x the original 4.5 units (Owen, 4 Nov 2026). */
+  const LED={lamp:24, dot0:6.75};
   function ledLayout(cssScale){
     const u=1/Math.max(cssScale,0.05);                 // logical units per CSS px
-    const lamp=Math.min(64,Math.max(24,28*u));   // 28 CSS px at least (22 until 3 Nov 2026): reads at 390
-    const pitch=Math.max(1.75,2.8*u);
-    const rows=Math.max(4,Math.min(12,Math.floor(0.8*lamp/pitch)));
-    const cols=Math.max(2,Math.min(6,Math.round(rows/2)));
-    LED.lamp=lamp; LED.rows=rows; LED.cols=cols;
-    LED.dy=Math.min(0.8*lamp/rows,Math.max(pitch,0.8*lamp/12));
-    LED.dx=Math.min(0.65*lamp/cols,LED.dy*1.9);
-    LED.sz=Math.min(0.75*Math.min(LED.dx,LED.dy),Math.max(1.3,1.6*u));
-    LED.dot0=Math.max(4.5,3.2*u);
-  }
-  function ledMatrix(){
-    const LED_COLS=LED.cols, LED_ROWS=LED.rows, LED_DX=LED.dx, LED_DY=LED.dy, LED_SZ=LED.sz;
-    const isDimMode=(mode==='dimAway'||mode==='dimToward');
-    const k=isDimMode?s.bright:s.beam;
-    const dir=(mode==='shadow')?s.ang+Math.PI:s.ang;
-    const cd=Math.cos(dir), sd=Math.sin(dir);
-    for(let r=0;r<LED_ROWS;r++){
-      const oy=(r-(LED_ROWS-1)/2)*LED_DY;
-      for(let c=0;c<LED_COLS;c++){
-        const ox=(c-(LED_COLS-1)/2)*LED_DX;
-        let f=k;
-        if(!isDimMode){
-          const m=Math.hypot(ox,oy)||1;
-          f=k*Math.max(0,(ox*cd+oy*sd)/m);          // facing side lights, far side stays dark
-        }
-        if(f<0.03){ ctx.fillStyle='rgba(20,20,20,0.28)'; }
-        else { ctx.fillStyle='rgba(226,25,27,'+(0.3+0.7*f).toFixed(3)+')'; }
-        ctx.fillRect(lamp.x+ox-LED_SZ/2,lamp.y+oy-LED_SZ/2,LED_SZ,LED_SZ);
-      }
-    }
+    LED.lamp=Math.min(64,Math.max(24,28*u));
+    LED.dot0=Math.max(6.75,4.8*u);
   }
 
   function drawPerson(detected){
@@ -520,12 +469,8 @@
 
   /* the interaction hint (Owen, 3 Nov 2026): every 3D model and every
      mechanism says DRAG TO INTERACT (fine pointer) or TOUCH TO INTERACT
-     (touch), in the same place on each: the FIRST line of its own control
-     block (.ui here, .mv-bar under the 3D model), above the buttons, never on
-     the drawing or over text. It fades on the first real touch or drag and
-     stays gone. The inline style puts it in that flow (OMNI's .hint rule
-     pins it absolutely) at the 3D model hint's 9px, until the .hint rule
-     above carries both (docs/CLOUD_REPORT_2026-11-03_w4template.txt). */
+     (touch). Since 4 Nov 2026 it floats on the drawing as a chip (the .hint
+     rule above). It fades on the first real touch or drag and stays gone. */
   (function(){
     var stageEl = document.querySelector('.stage');
     if(!stageEl) return;
@@ -533,9 +478,14 @@
     h.className = 'hint';
     h.textContent = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
       ? 'TOUCH TO INTERACT' : 'DRAG TO INTERACT';
-    h.style.position = 'static'; h.style.transform = 'none'; h.style.margin = '0 0 10px'; h.style.fontSize = '9px';
-    var ui = document.querySelector('.ui');
-    if(ui) ui.insertBefore(h, ui.firstChild); else stageEl.appendChild(h);
+    stageEl.appendChild(h);
+    /* centred on the CANVAS, not the stage: on a phone the controls stack
+       under the canvas inside .stage, so 50% of the stage would land low. */
+    var cv = document.getElementById('c');
+    function place(){ if(cv) h.style.top = (cv.offsetTop + cv.offsetHeight / 2) + 'px'; }
+    place();
+    window.addEventListener('resize', place);
+    if(window.ResizeObserver && cv) new ResizeObserver(place).observe(cv);
     function gone(){ h.classList.add('gone'); }
     stageEl.addEventListener('pointerdown', gone, { once:true });
     stageEl.addEventListener('touchstart',  gone, { once:true, passive:true });

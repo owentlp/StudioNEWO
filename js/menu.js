@@ -122,11 +122,11 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=68",
+      "css/style.css?v=69",
       "js/projects-data.js?v=33",
       "js/image-sizes.js?v=6",
       "js/main.js?v=7",
-      "js/menu.js?v=42",
+      "js/menu.js?v=44",
       "js/sky.js?v=8",
       "js/loader3d.js?v=18",
       "js/loader3d-core.js?v=2",
@@ -136,10 +136,10 @@
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
     var MATERIALS_DATA = "js/materials-data.js?v=11";
-    var PROJECT_JS = "js/project.js?v=5";   // the product page script (2026-11-03)
+    var PROJECT_JS = "js/project.js?v=7";   // the product page script (2026-11-03)
     var MV_LIB  = "js/vendor/model-viewer.min.js?v=2";
     var MODEL_V = "?v=3";      // must match the model-viewer data-src in project.html
-    var MECH_V  = "?v=26";     // must match the mechanism iframe src in js/project.js
+    var MECH_V  = "?v=27";     // must match the mechanism iframe src in js/project.js
     var DWELL_MS = 400;
 
     function shell(){ SHELL.forEach(link); }

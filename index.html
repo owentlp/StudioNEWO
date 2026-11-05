@@ -114,7 +114,7 @@
   if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
 })();
 </script>
-<link rel="stylesheet" href="css/style.css?v=68">
+<link rel="stylesheet" href="css/style.css?v=69">
 
 <style>
 /* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
@@ -157,16 +157,11 @@ body.bg-sky #soundToggle{display:none;}
   writing-mode:vertical-rl; color:var(--ink); pointer-events:none;
   max-height:min(56vh - 111px, 100vh - 431px); overflow:hidden; text-overflow:ellipsis;}
 .home-hdr{display:contents;}
-body[data-strap="paper"] #home-line{color:var(--paper);}
-/* BACKING (3 Nov 2026, a11y A5 / layout P4): 9px text over a moving sky cannot
-   hold 4.5:1 on colour alone: at the ink / paper crossover the best either can
-   do is about 4:1, and clouds, rain streaks and snow flakes pass right behind
-   the letters (a text-shadow halo was tried and measured 1.6:1 on snow). The
-   words sit on a translucent band in the opposite tone instead, the home card
-   titles' paper band in miniature; js/sky.js picks ink or paper. */
-#home-line{padding:3px; margin:-3px;}   /* room for the band inside the clip; the margin puts the words back where they were */
-#home-line span{background:rgba(233,231,226,.78); padding:2px 3px; -webkit-box-decoration-break:clone; box-decoration-break:clone;}
-body[data-strap="paper"] #home-line span{background:rgba(20,20,20,.74);}
+/* COLOUR (Owen, 4 Nov 2026): the same colour as the logo and wordmark, which
+   follow the sky (ink on a light sky, paper on a dark one), and no band
+   behind it. Replaces the 3 Nov translucent band (a11y A5): Owen preferred
+   the clean words. The span stays in the markup, unstyled. */
+body[data-sky="dark"] #home-line{color:var(--paper);}
 @media (max-height:764px){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
 /* PHONES AND TOUCH (the stacked-card layout below): the same words as a
    one-line strap under the header, in the dock's top padding (the cards start
@@ -509,7 +504,7 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
 <script src="js/main.js?v=7"></script>
 <script src="js/image-sizes.js?v=6"></script>
-<script src="js/menu.js?v=42"></script>
+<script src="js/menu.js?v=44"></script>
 <script>
 /* ==========================================================================
    BACKGROUND CLIPS - the one array on this page you hand-edit. One is
