@@ -12,7 +12,7 @@
     font-weight:400; font-style:normal; font-display:swap;
   }
   :root{
-    --paper:#e9e7e2;
+    --paper:#ffffff;
     --ink:#141414;
     --red:#e2191b;
     --mono:"OCR-B Local","OCR B","OCR-B",ui-monospace,"Courier New",monospace;
@@ -23,7 +23,7 @@
     font-family:var(--mono);-webkit-font-smoothing:antialiased;}
   .wrap{max-width:none;margin:0;padding:0;}
   .stage{position:relative;background:transparent;}
-  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:none;}
+  canvas{display:block;width:100%;height:auto;touch-action:pan-y;cursor:none;}
   /* the controls float OVER the canvas, moved to match Owen's 2026-07-11
      Figma screenshot: the mode buttons sit in a row left-of-centre (not a
      right-aligned column), with the mode description directly under them,
@@ -65,20 +65,20 @@
   .ui{position:absolute;left:auto;right:9.574%;top:80%;z-index:2;pointer-events:none;cursor:none;
     display:flex;flex-direction:column;align-items:flex-end;max-width:none;}
   .ui .modes button{pointer-events:auto;cursor:none;}
-  .modes{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:0 0 12px;}
+  .modes{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0 22px;margin:0 0 4px;}
   /* held near 10px to sit in step with the site's body copy (.desc is 10px),
      with a mild vw term so it still tracks the graphic a little across sizes. */
   /* The site's one button style, as INQUIRE, VIEW IN YOUR SPACE and the model's
      controls: 12px, .16em, outlined in red at rest, solid red with white text
      for the mode that is on (Owen, 3 Nov 2026; was white on red, ink = on). */
-  .modes button{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
-    color:#b5120f;background:var(--paper);border:1px solid #b5120f;padding:7px 13px;cursor:pointer;border-radius:0;
+  .modes button{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#b5120f;background:transparent;border:0;padding:7px 0;cursor:pointer;border-radius:0;
     opacity:1;transition:none;}   /* the site's one button style (css/style.css, ONE BUTTON STYLE, 3 Nov 2026): outline in --red-text (#b5120f, 5.6:1) at rest, a 1px border inside the old 8px 14px box. Paper ground so the drawing never shows through the words */
-  .modes button[aria-pressed="true"]{color:#fff;background:var(--red);border-color:var(--red);}   /* the chosen mode: solid red, white 4.8:1 */
-  .modes button:not([aria-pressed="true"]):hover{background:#e8d7d2;}   /* a toggle: hover is a tint (--red at 8% on paper), never the solid */
+  .modes button[aria-pressed="true"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:1.5px;text-underline-offset:4px;}   /* the chosen mode: ink with a red underline (text links, Owen 13 Nov 2026; css/style.css TEXT LINKS) */
+  @media (hover:hover){ .modes button:not([aria-pressed="true"]):hover{text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:1px;text-underline-offset:4px;} }   /* hover while off: the thin underline (mouse only, review 14 Nov C3) */
   .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
   .meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin:0;max-width:46ch;
-    font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-align:right;
+    font-size:10.5px;line-height:1.36;letter-spacing:0;color:var(--ink);text-align:justify;text-align-last:right;
     text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);}
   /* small windows: the canvas is too small to carry an overlay, so the
      controls drop into normal flow BELOW the graphic instead of stacking on
@@ -88,10 +88,10 @@
        page is left-aligned - the right-justification above belongs to the
        two-column desktop composition, not to this. */
     .ui{position:static;padding:10px 12px 0;max-width:none;align-items:flex-start;}   /* 12px: the site text margin on a phone (--tmar, 4 Nov 2026); the frame itself runs to the screen edge */
-    .modes{gap:10px;margin:0 0 12px;justify-content:flex-start;}
-    .meta{align-items:flex-start;text-align:left;}
-    .modes button{font-size:12px;padding:8px 14px;cursor:pointer;}
-    .meta{font-size:13px;}
+    .modes{gap:0 22px;margin:0 0 4px;justify-content:flex-start;}
+    .meta{align-items:flex-start;text-align:justify;text-align-last:left;}
+    .modes button{font-size:8.5px;padding:14px 0;cursor:pointer;}
+    .meta{font-size:11px;}
     .ui{cursor:auto;}
     canvas{cursor:default;}
   }
@@ -102,9 +102,9 @@
      (buttons are red). It fades on the first touch or drag and stays gone.
      Same chip as .mv-hint on the 3D model (css/style.css). */
   .hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
-    pointer-events:none;font-family:var(--mono);font-size:10px;line-height:1;letter-spacing:.18em;
+    pointer-events:none;font-family:var(--mono);font-size:8.5px;line-height:1;letter-spacing:.08em;
     text-transform:uppercase;color:var(--ink);white-space:nowrap;
-    background:rgba(233,231,226,.92);border:1px solid rgba(20,20,20,.28);padding:8px 12px 7px;
+    background:rgba(255,255,255,.92);border:1px solid rgba(20,20,20,.28);padding:8px 12px 7px;
     transition:opacity .3s ease;}
   .hint.gone{opacity:0;}
   @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
@@ -112,7 +112,7 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="stage">
+    <div class="stage" data-drag="yes">
       <canvas id="c" role="img" aria-label="Plan view of a room: the KART lamp, its radar cone and a person moving; the light follows the person"></canvas>
       <div class="ui">
         <div class="modes" id="modes" role="group" aria-label="Light mode">
@@ -122,7 +122,7 @@
           <button data-mode="dimAway" aria-pressed="false">Dim Away</button>
         </div>
         <div class="meta">
-          <span class="desc" id="desc"></span>
+          <span class="desc" id="desc" aria-live="polite"></span>
         </div>
       </div>
     </div>
@@ -165,6 +165,18 @@
   const W=ROOM_W+BUF_X*2, H=ROOM_H+BUF_TOP+BUF_BOT;
   const canvas=document.getElementById('c');
   const ctx=canvas.getContext('2d');
+
+  /* Review 14 Nov 2026 (B5): no line thinner than 1 css px. On a phone this
+     canvas shows at about 0.4x its logical size, so a 1.2 unit stroke landed at
+     0.5 px and the drawing faded out. Every lineWidth set here is raised to
+     1 css px when the canvas is shown smaller than its logical size. */
+  (function(){
+    const d=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,'lineWidth');
+    if(!d||!d.set) return;
+    Object.defineProperty(ctx,'lineWidth',{configurable:true,
+      get(){ return d.get.call(ctx); },
+      set(v){ const k=(canvas.clientWidth||W)/W; d.set.call(ctx, k<1 ? Math.max(v,1/k) : v); }});
+  })();
   const descEl=document.getElementById('desc');
   const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -236,15 +248,18 @@
   const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
   function smoothstep(e0,e1,x){const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
   function ease(c,t,tau,dt){return reduce?t:c+(t-c)*(1-Math.exp(-dt/tau));}
+  /* 14 Nov 2026 (the KART "crash"): angles are wrapped with arithmetic, never a while loop. A frame whose
+     timestamp came before the loop's restart gave a NEGATIVE dt, the ease then threw the angle to about 1e18,
+     where d-=2*PI changes nothing, and the while loop never ended: the whole tab froze. dt is also clamped to 0..0.05 s. */
+  function wrapPi(d){ d=(d+Math.PI)%(2*Math.PI); if(d<0) d+=2*Math.PI; return d-Math.PI; }
   // ease an angle along the shortest path (avoids a full spin at the +/-PI seam)
   function easeAngle(c,t,tau,dt){
-    if(reduce) return t;
-    let d=t-c; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
-    return c+d*(1-Math.exp(-dt/tau));
+    if(reduce || !isFinite(c)) return t;
+    return wrapPi(c+wrapPi(t-c)*(1-Math.exp(-dt/tau)));
   }
   function inRoom(p){return p.x>=ROOM.x&&p.x<=ROOM.x+ROOM.w&&p.y>=ROOM.y&&p.y<=ROOM.y+ROOM.h;}
   // angular presence, soft at the cone edges (wrap-safe)
-  function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return Math.abs(d);}
+  function angDiff(a,b){return Math.abs(wrapPi(a-b));}
   function coneFactor(ang){
     const off=angDiff(ang,CONE.center);
     return 1-smoothstep(CONE.half-CONE.edge,CONE.half+CONE.edge,off);
@@ -324,7 +339,7 @@
     ctx.beginPath(); ctx.moveTo(bed.x+8,bed.y+78); ctx.lineTo(bed.x+bed.w-8,bed.y+78); ctx.stroke();
     // lamp
     const L=LED.lamp/2;
-    ctx.fillStyle='#e9e7e2'; ctx.fillRect(lamp.x-L,lamp.y-L,2*L,2*L); ctx.strokeRect(lamp.x-L,lamp.y-L,2*L,2*L);
+    ctx.fillStyle='#ffffff'; ctx.fillRect(lamp.x-L,lamp.y-L,2*L,2*L); ctx.strokeRect(lamp.x-L,lamp.y-L,2*L,2*L);
     /* Owen, 4 Nov 2026: back to the original symbol, a plain square with the
        red dot in its centre (the 2-3 Nov LED grid and edge dot read as
        clutter). The dot is about 1.5x the original so it reads as "the lamp". */
@@ -343,7 +358,7 @@
 
   function drawPerson(detected){
     ctx.save(); ctx.translate(cursor.x,cursor.y);
-    ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle='#e9e7e2'; ctx.fill();
+    ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle='#ffffff'; ctx.fill();
     ctx.lineWidth=1.4; ctx.strokeStyle=detected?'#e2191b':'#141414'; ctx.stroke();
     ctx.beginPath(); ctx.arc(0,0,2.4,0,Math.PI*2); ctx.fillStyle=detected?'#e2191b':'#141414'; ctx.fill();
     ctx.restore();
@@ -379,7 +394,7 @@
 
   let lastT=performance.now();
   function frame(now){
-    const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+    const dt=Math.max(0,Math.min(0.05,(now-lastT)/1000)); lastT=now;
     if(!visible){ running=false; return; }
 
     const ang=Math.atan2(cursor.y-lamp.y,cursor.x-lamp.x);
@@ -467,33 +482,9 @@
   setTimeout(postHeight, 300);
   if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
 
-  /* the interaction hint (Owen, 3 Nov 2026): every 3D model and every
-     mechanism says DRAG TO INTERACT (fine pointer) or TOUCH TO INTERACT
-     (touch). Since 4 Nov 2026 it floats on the drawing as a chip (the .hint
-     rule above). It fades on the first real touch or drag and stays gone. */
-  (function(){
-    var stageEl = document.querySelector('.stage');
-    if(!stageEl) return;
-    var h = document.createElement('div');
-    h.className = 'hint';
-    h.textContent = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
-      ? 'TOUCH TO INTERACT' : 'DRAG TO INTERACT';
-    stageEl.appendChild(h);
-    /* centred on the CANVAS, not the stage: on a phone the controls stack
-       under the canvas inside .stage, so 50% of the stage would land low. */
-    var cv = document.getElementById('c');
-    function place(){ if(cv) h.style.top = (cv.offsetTop + cv.offsetHeight / 2) + 'px'; }
-    place();
-    window.addEventListener('resize', place);
-    if(window.ResizeObserver && cv) new ResizeObserver(place).observe(cv);
-    function gone(){ h.classList.add('gone'); }
-    stageEl.addEventListener('pointerdown', gone, { once:true });
-    stageEl.addEventListener('touchstart',  gone, { once:true, passive:true });
-    stageEl.addEventListener('pointermove', function(e){
-      if(e.pointerType === 'mouse') gone();
-    }, { once:true });
-  })();
+  /* the DRAG / TOUCH TO INTERACT label and tap to wake on touch: js/mech-touch.js (Owen, 14 Nov 2026) */
 })();
 </script>
+<script src="../../js/mech-touch.js?v=1"></script>
 </body>
 </html>

@@ -24,7 +24,7 @@
 var renderer = null, tumble = null, core = null;
 var canvas = null, dpr = 1, cssSize = 0;
 var pageReady = false, released = false, stopped = false;
-var turnCount = 0, phase = "settle", phaseElapsed = 0, lastTs = null;
+var turnCount = 0, phase = "settle", phaseElapsed = 0, lastTs = null, firstTs = 0;
 /* The tumble does not start until the main thread says the handoff from the
    flat SVG mark to this canvas has FINISHED fading. Before this existed the
    worker began its clock the instant it rendered its first frame, so the mark
@@ -115,8 +115,11 @@ function init(d){
 
 function frame(ts){
   if(stopped) return;
-  if(lastTs === null) lastTs = ts;
+  if(lastTs === null){ lastTs = ts; firstTs = ts; }
   var dt = Math.min(ts - lastTs, 100);   // clamped so a stall cannot jump the turn
+  // review 14 Nov D4: after 6 s, a throttled window (frames 250ms+ apart)
+  // runs on real time, so the release does not wait on a frame count
+  if(ts - lastTs > 250 && ts - firstTs > 6000) dt = ts - lastTs;
   lastTs = ts;
 
   // hold the settled first pose until the main thread has finished the fade.

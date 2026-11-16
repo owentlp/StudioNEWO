@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CONTACT · Products, custom pieces and services · STUDIO NEWO</title>
 <meta name="description" content="Ask Studio NEWO about a product or a custom piece, or about renders and drawings from your CAD. Toronto.">
-<meta name="theme-color" content="#e9e7e2">
+<meta name="theme-color" content="#ffffff">
 <link rel="canonical" href="https://studionewo.com/contact.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/contact.html">
@@ -32,17 +32,17 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=69">
+<link rel="stylesheet" href="css/style.css?v=79">
 <style>
   /* contact form: same editorial grammar as the rest of the site, no boxes,
      thin underline fields, tiny OCR-B labels, one red action. */
   .cform{margin-top:clamp(30px,5vh,56px); max-width:46ch; display:grid; gap:22px;}
   .cfield{display:grid; gap:6px;}
-  .cfield label{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink);}
+  .cfield label{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
   .cfield input, .cfield textarea{
-    font-family:var(--body); font-size:13px; color:var(--ink); background:transparent;
+    font-family:var(--body); font-size:var(--t-body); color:var(--ink); background:transparent;
     border:0; border-bottom:1px solid rgba(20,20,20,.28); padding:7px 0; width:100%;
-    letter-spacing:.02em;
+    letter-spacing:0;
   }
   .cfield textarea{resize:vertical; min-height:96px; line-height:1.5;}
   .cfield input:focus, .cfield textarea:focus{outline:0; border-color:var(--red);}
@@ -51,49 +51,50 @@
      and cleared on the next keystroke) */
   .cfield input[aria-invalid="true"], .cfield textarea[aria-invalid="true"]{border-bottom:2px solid var(--red); padding-bottom:6px;}
   .cform-hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
-  /* the site's one button style (css/style.css, ONE BUTTON STYLE: outline at
+  /* the site's one control look (css/style.css, TEXT LINKS; was: outline at
      rest, solid red on hover / focus / press); only the placement is here */
   .cform button{justify-self:start;}
-  .cform-status{font-size:10px; letter-spacing:.06em; line-height:1.5; min-height:1.2em; color:var(--ink);}
-  /* errors stay ink (10px red on paper is 3.9:1, under AA) with a red mark in
+  .cform-status{font-size:var(--t-body); letter-spacing:0; line-height:var(--lh-body); min-height:1.2em; color:var(--ink);}
+  /* errors stay ink with a red mark in
      front, so the colour still says "error" without carrying the words */
   .cform-status.err{color:var(--ink);}
   .cform-status.err::before{content:""; display:inline-block; width:7px; height:7px; background:var(--red); margin-right:8px; vertical-align:1px;}
-  .cform-privacy{font-size:10px; letter-spacing:.06em; line-height:1.6; color:var(--ink-soft); max-width:46ch; margin:4px 0 0;}
-  .cform-noscript{font-size:12px; line-height:1.6; margin:12px 0 0;}
+  .cform-privacy{font-size:var(--t-body); letter-spacing:0; line-height:var(--lh-body); color:var(--ink-soft); max-width:46ch; margin:4px 0 0;}
+  .cform-noscript{font-size:var(--t-body); line-height:var(--lh-body); margin:12px 0 0;}
   .cform-noscript a{color:var(--ink);}
   /* the mailto fallback panel (hidden until a handoff has been attempted) */
   .cf-fallback{margin-top:26px; border-left:2px solid var(--red); padding:2px 0 2px 16px; max-width:56ch;}
-  .cf-fb-lead{font-size:13px; letter-spacing:.06em; margin:0 0 10px;}
+  .cf-fb-lead{font-size:var(--t-body); letter-spacing:0; margin:0 0 10px;}
   .cf-fb-lead a{color:var(--ink); border-bottom:1px solid var(--red); text-decoration:none; padding-bottom:1px;}
-  .cf-fb-text{font-family:var(--body); font-size:12px; line-height:1.6; white-space:pre-wrap;
+  .cf-fb-text{font-family:var(--body); font-size:var(--t-body); line-height:var(--lh-body); white-space:pre-wrap;
     word-break:break-word; margin:0 0 12px; color:var(--ink-soft); max-height:210px; overflow:auto;}
 
-  .contact-alt{margin-top:clamp(34px,6vh,60px); font-size:10px; letter-spacing:.1em; text-transform:uppercase; line-height:2;}
-  .contact-alt a{color:var(--ink); text-decoration:none; border-bottom:1px solid var(--red); padding-bottom:1px;}
+  .contact-alt{margin-top:clamp(34px,6vh,60px); font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; line-height:2;}
+  .contact-alt a{color:var(--red-text); text-decoration:none;}   /* text-link look (was ink + red border = the ON state), review 14 Nov B2 */
+  .contact-alt a:hover, .contact-alt a:focus-visible, .contact-alt a:active{text-decoration:underline; text-decoration-color:var(--red); text-decoration-thickness:1px; text-underline-offset:4px;}
   .contact-alt .sep{opacity:.62; margin:0 10px;}   /* 4.8:1 (was .4, 2.5:1), 3 Nov 2026 */
   /* phones: the two links get a 24px tap height (3 Nov 2026, review 18) */
   @media (max-width:860px), (pointer:coarse){ .contact-alt a{display:inline-block; line-height:22px;} }
-  .clead-more{max-width:60ch; margin:14px 0 6px; text-align:left;}
+  .clead-more{max-width:46ch; margin:14px 0 6px; text-align:left;}
   .clead-more a{color:inherit;}
-  .cnotify{display:flex; align-items:center; gap:10px; margin:4px 0 16px; font-size:13px; letter-spacing:.02em; cursor:pointer;}
+  .cnotify{display:flex; align-items:center; gap:10px; margin:4px 0 16px; font-size:var(--t-body); letter-spacing:0; cursor:pointer;}
   .cnotify[hidden]{display:none;}
   .cnotify input{width:16px; height:16px; accent-color:var(--red);}
   /* TOPIC (2026-10-26): what the message is about, as four chips in the site's
-     button style, outlined at rest and solid red when chosen. Optional. It puts the topic
+     text-link look, red at rest and ink with a red underline when chosen. Optional. It puts the topic
      in the email subject and swaps the prompt in the message box, so a buyer,
      a commission and a client brief each get asked the right thing. */
   .ctopic{border:0; padding:0; margin:0; min-width:0;}
-  .ctopic legend{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); padding:0; margin-bottom:10px;}
-  .ctopic-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .ctopic legend{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2); padding:0; margin-bottom:10px;}
+  .ctopic-row{display:flex; flex-wrap:wrap; gap:0 22px;}
   .ctopic label{position:relative; cursor:pointer;}
   .ctopic input{position:absolute; opacity:0; width:1px; height:1px; margin:0;}
-  .ctopic span{display:inline-block;}   /* look and states: css/style.css, ONE BUTTON STYLE */
+  .ctopic span{display:inline-block;}   /* look and states: css/style.css, TEXT LINKS */
   .cfield textarea::placeholder{color:var(--ink-soft); opacity:.7;}
   /* IMAGES (2026-10-27): optional sketches, photos or references. Thumbnails
      in a row under the button, each removable. */
   .cfiles-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px;}
-  .cfiles-note{font-size:10px; letter-spacing:.06em; color:var(--ink-soft); line-height:1.6;}
+  .cfiles-note{font-size:var(--t-body); letter-spacing:0; color:var(--ink-soft); line-height:var(--lh-body);}
   .cfiles[hidden]{display:none;}
   .cfiles input[type=file]{position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;}
   .cf-thumbs{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px;}
@@ -103,8 +104,8 @@
   .cform .cf-thumbs button{position:absolute; top:0; right:0; padding:0; width:20px; height:20px; font-size:12px; letter-spacing:0; line-height:18px; text-align:center;}   /* border-box with the 1px button border: still 20 x 20 */
   /* the rest of the privacy text, where the footer's Privacy link lands: lower
      and smaller than the one line under the form */
-  .cprivacy{max-width:64ch; margin-top:clamp(50px,9vh,90px); font-size:11px; line-height:1.6; letter-spacing:.02em; opacity:.75; scroll-margin-top:96px;}
-  .cprivacy .lbl{display:block; font-size:10px; letter-spacing:.2em; text-transform:uppercase; margin-bottom:6px;}
+  .cprivacy{max-width:46ch; margin-top:clamp(50px,9vh,90px); font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0; opacity:.75; scroll-margin-top:96px;}
+  .cprivacy .lbl{display:block; font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -217,8 +218,8 @@
 
 
 <script src="js/projects-data.js?v=33"></script>
-<script src="js/main.js?v=7"></script>
-<script src="js/menu.js?v=44"></script>
+<script src="js/main.js?v=8"></script>
+<script src="js/menu.js?v=57"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening

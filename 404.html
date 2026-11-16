@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>404 · STUDIO NEWO</title>
 <meta name="description" content="This page does not exist.">
-<meta name="theme-color" content="#e9e7e2">
+<meta name="theme-color" content="#ffffff">
 <meta name="robots" content="noindex">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
      one Google uses, and Google wants a size that is a multiple of 48 and a URL
@@ -26,15 +26,15 @@
      so relative paths would resolve against the wrong folder and the page would
      arrive unstyled with a broken logo. That is exactly what the old standalone
      version did from anywhere but the site root. -->
-<link rel="stylesheet" href="/css/style.css?v=69">
+<link rel="stylesheet" href="/css/style.css?v=79">
 <style>
   .fourofour{min-height:64vh; display:flex; flex-direction:column; justify-content:center;}
   .fourofour .code{font-family:var(--disp); font-style:italic; font-weight:400;
-    font-size:clamp(96px,20vw,240px); line-height:.9; color:var(--red); margin:0;}
+    font-size:clamp(56px,8vw,124px); line-height:.9; color:var(--red); margin:0;}   /* level 1, the title size (13 Nov 2026; was clamp(96px,20vw,240px)) */
   /* the five ways out are buttons in the site's one style (css/style.css, ONE
      BUTTON STYLE), 3 Nov 2026; they were 11px ink words over a red rule */
-  .fourofour .backlinks{margin-top:clamp(26px,5vh,46px); display:flex; flex-wrap:wrap; gap:8px;}
-  .fourofour .path{margin-top:24px; font-size:10px; letter-spacing:.1em; color:var(--ink-soft); word-break:break-all;}
+  .fourofour .backlinks{margin-top:clamp(26px,5vh,46px); display:flex; flex-wrap:wrap; gap:0 22px;}
+  .fourofour .path{margin-top:24px; font-size:var(--t-body); letter-spacing:0; color:var(--ink-soft); word-break:break-all;}
 </style>
 </head>
 <body>
@@ -59,7 +59,6 @@
        .code already sets every type property it needs, and h1/h2/h3 in
        css/style.css only add the display face this rule overrides anyway. -->
   <h1 class="code">404</h1>
-  <hr>
   <p class="lead">This page does not exist. It may have been renamed, or the link that brought you here may be out of date.</p>
   <div class="backlinks">
     <a href="/">Home</a>
@@ -84,8 +83,8 @@
 
 
 <script src="/js/projects-data.js?v=33"></script>
-<script src="/js/main.js?v=7"></script>
-<script src="/js/menu.js?v=44"></script>
+<script src="/js/main.js?v=8"></script>
+<script src="/js/menu.js?v=57"></script>
 <script>
 /* Echo back the path that missed - handy when a 404 comes from a typo or a
    stale link, since you can see at a glance what was actually requested.

@@ -83,20 +83,20 @@
   OneEuro.prototype.reset = function(){ this.x = null; this.dx = 0; };
 
   var CSS =
-    '.hv{position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; background:var(--paper,#e9e7e2); color:var(--ink,#141414); opacity:0; transition:opacity .25s ease;}' +
+    '.hv{position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; background:var(--page,#ffffff); color:var(--ink,#141414); opacity:0; transition:opacity .25s ease;}' +
     '.hv.on{opacity:1;}' +
-    '.hv-strip{flex:0 0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:12px var(--mar,16px); background:var(--paper,#e9e7e2);}' +
+    '.hv-strip{flex:0 0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:12px var(--mar,16px); background:var(--page,#ffffff);}' +
     '.hv-strip[hidden]{display:none;}' +
-    '.hv-title{font-family:var(--disp); font-style:italic; font-size:22px; margin-right:auto;}' +
-    '.hv-msg{font-family:var(--body); font-size:12px; letter-spacing:.08em; text-transform:uppercase; margin:0 0 0 auto;}' +
+    '.hv-title{font-family:var(--disp); font-style:italic; font-size:var(--t-h2,22px); margin-right:auto;}' +
+    '.hv-msg{font-family:var(--body); font-size:var(--t-label,8.5px); letter-spacing:.08em; text-transform:uppercase; margin:0 0 0 auto;}' +
     '.hv-view{flex:1 1 auto; position:relative; min-height:0;}' +
     '.hv-view canvas{position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none;}' +
     '.hv-view canvas:active{cursor:grabbing;}' +
-    '.hv-btn{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--red,#e2191b); border:0; padding:8px 14px; cursor:pointer;}' +
+    '.hv-btn{font-family:var(--body); font-size:var(--t-label,8.5px); letter-spacing:var(--ls-label,.08em); text-transform:uppercase; color:#fff; background:var(--red,#e2191b); border:0; padding:8px 14px; cursor:pointer;}' +
     '.hv-btn.active{background:var(--ink,#141414);}' +
-    '.hv-lab{font-family:var(--body); font-size:12px; letter-spacing:.16em; text-transform:uppercase; display:flex; align-items:center; gap:8px;}' +
+    '.hv-lab{font-family:var(--body); font-size:var(--t-label,8.5px); letter-spacing:var(--ls-label,.08em); text-transform:uppercase; display:flex; align-items:center; gap:8px;}' +
     '.hv-lab input[type=range]{accent-color:var(--red,#e2191b); width:120px;}' +
-    '.hv-lab input[type=number]{font-family:var(--body); font-size:12px; width:64px; padding:6px; border:1px solid var(--ink,#141414); background:transparent; color:inherit;}' +
+    '.hv-lab input[type=number]{font-family:var(--body); font-size:var(--t-body,10.5px); width:64px; padding:6px; border:1px solid var(--ink,#141414); background:transparent; color:inherit;}' +
     '.hv-cam{width:96px; height:72px; display:block; background:var(--ink,#141414);}' +
     '.hv-cam[hidden]{display:none;}';
 
@@ -210,8 +210,8 @@
 
     var scene = new THREE.Scene();
     var INK = 0x141414;
-    scene.background = new THREE.Color(0xe9e7e2);
-    scene.fog = new THREE.Fog(0xe9e7e2, 500, 1800);   // haze with distance, toward paper
+    scene.background = new THREE.Color(0xffffff);   // the page colour (white since 13 Nov 2026)
+    scene.fog = new THREE.Fog(0xffffff, 500, 1800);   // haze with distance, toward the page colour
     var pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environmentIntensity = 0.6;

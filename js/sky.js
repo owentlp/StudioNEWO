@@ -8,14 +8,17 @@
       prompt, nothing stored). Unknown zone -> longitude from the UTC offset.
    2. Sun: standard solar position maths -> elevation + azimuth, every minute.
    3. Weather: one request to Open-Meteo (free, no key) for cloud cover and
-      weather code at those approximate coordinates, cached for 20 min.
+      weather code at those approximate coordinates, kept 15 min (the
+      service's own step) and refreshed while the page is open, so it feels
+      live without a request on every load (Owen, 16 Nov 2026, review Q14).
       If it fails, the sky is simply clear.
    4. Drawing: a small canvas (the gradient is smooth, so it is drawn at low
       resolution and scaled up by CSS). MINIMAL SINCE 2026-10-05 (Owen: no
       sun): no sun or moon discs, no glow spot. Time of day is the colour of
       the sky alone, with a low band of warmth along the horizon at dawn and
       dusk and a few faint, still stars at night. Weather is the procedural
-      cloud layer (drifts with a compositor-only transform), the grey of the
+      cloud layer (drifts by a small transform step once a second: Owen,
+      16 Nov 2026, review Q5, slower; was a 60 fps animation), the grey of the
       sky, and rain / snow layers.
    5. body[data-sky="dark"] is set when the sky is dark, so the header marks
       and the loading mark switch to paper colour (css/style.css, index.html).
@@ -62,6 +65,10 @@
     "Australia/Sydney":[-33.87,151.21],"Australia/Melbourne":[-37.81,144.96],"Pacific/Auckland":[-36.85,174.76]
   };
   function locate(){
+    /* a page may pin the sky to a place (14 Nov 2026: the home test's sky
+       windows show Toronto, the studio's sky, beside Toronto's weather) */
+    var at = window.NEWO_SKY_AT;
+    if(at && isFinite(at[0]) && isFinite(at[1])) return [+at[0], +at[1]];
     var lat = parseFloat(Q.get("lat")), lon = parseFloat(Q.get("lon"));
     if(isFinite(lat) && isFinite(lon)) return [lat, lon];
     var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch(e){}
@@ -186,7 +193,7 @@
     var f = Q.get("wx");
     if(f && FORCED[f]){ setNow(FORCED[f][0], FORCED[f][1]); if(last) draw(); return cb(); }
     var c = stored();
-    if(!force && c && Date.now() - c.at < 20 * 60000) return settle(c.cover, c.kind, cb);
+    if(!force && c && Date.now() - c.at < 15 * 60000) return settle(c.cover, c.kind, cb);
     var url = "https://api.open-meteo.com/v1/forecast?latitude=" + LOC[0].toFixed(2) + "&longitude=" + LOC[1].toFixed(2) +
               "&current=cloud_cover,weather_code&timezone=auto";
     var done = false, timer = setTimeout(function(){ if(!done){ done = true; cb(); } }, 4000);
@@ -367,8 +374,19 @@
   var rt; addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(function(){ if(cv.style.display !== "none"){ size(); draw(); } }, 200); });
   var TIMERS = [
     setInterval(function(){ if(!document.hidden) draw(); }, 60000),
-    setInterval(function(){ if(!document.hidden && !Q.get("wx")) getWeather(tick, true); }, 20 * 60000)
+    setInterval(function(){ if(!document.hidden && !Q.get("wx")) getWeather(tick, true); }, 15 * 60000)
   ];
+  /* CLOUD DRIFT (16 Nov 2026): one tile every 30 min, set from the clock once a
+     second (about 1px a step), so nothing redraws between steps. None on
+     phones, with reduced motion, or in a hidden tab. */
+  var DRIFT_S = 1800, NARROW = window.matchMedia ? matchMedia("(max-width:760px)") : { matches:false };
+  function driftStep(){
+    if(!clouds || RM || document.hidden || NARROW.matches) return;
+    var f = (Date.now() / 1000 % DRIFT_S) / DRIFT_S;
+    clouds.style.transform = "translateX(" + (-50 * f).toFixed(3) + "%)";
+  }
+  driftStep();
+  TIMERS.push(setInterval(driftStep, 1000));
   /* PROJECT PAGES: the sky lives inside #loader, so the loading screen holds
      the home page background. Once the loader has fully gone (body.ready, and
      loader3d.js has let go of its pin) the layers are hidden and the timers

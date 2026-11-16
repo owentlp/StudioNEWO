@@ -354,7 +354,7 @@
     canvas.style.transform = "translate(-50%, -50%)";
 
     var w;
-    try { w = new Worker(BASE + "loader3d.worker.js?v=6"); }
+    try { w = new Worker(BASE + "loader3d.worker.js?v=7"); }
     catch(e){ canvas.remove(); return false; }
 
     var handedOff;
@@ -584,7 +584,7 @@
     function applyTurn(seg, e){ tumble.apply(seg, e); }
     function easeInOutCubic(x){ return tumble.ease(x); }
 
-    var turnCount = 0, phase = "settle", phaseElapsed = 0, released = false;
+    var turnCount = 0, phase = "settle", phaseElapsed = 0, released = false, firstTs = 0;
     applyTurn(0, 0);   // start settled on the front face
 
     /* ---- the handoff from the flat mark to WebGL ----
@@ -617,8 +617,11 @@
     fbResting = function(){ return phase === "settle" || released; };
     function frame(ts){
       if(stopped) return;
-      if(lastTs === null) lastTs = ts;
+      if(lastTs === null){ lastTs = ts; firstTs = ts; }
       var dt = Math.min(ts - lastTs, 50);   // ms, clamped so a stalled tab can't jump the animation
+      // review 14 Nov D4: after 6 s, a throttled window (frames 250ms+ apart)
+      // runs on real time, so the release does not take 40 s at 1 frame a second
+      if(ts - lastTs > 250 && ts - firstTs > 6000) dt = ts - lastTs;
       lastTs = ts;
       if(!begun) dt = 0;                    // holding the first pose, not yet animating
       var moved = false;

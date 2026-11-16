@@ -14,7 +14,7 @@
     font-weight:400; font-style:normal; font-display:swap;
   }
   :root{
-    --paper:#e9e7e2;
+    --paper:#ffffff;
     --ink:#141414;
     --red:#e2191b;
     --mono:"OCR-B Local","OCR B","OCR-B",ui-monospace,"Courier New",monospace;
@@ -24,38 +24,38 @@
     font-family:var(--mono);-webkit-font-smoothing:antialiased;}
   .wrap{max-width:none;margin:0;padding:0;}
   .stage{position:relative;background:transparent;}
-  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:none;}
+  canvas{display:block;width:100%;height:auto;touch-action:pan-y;cursor:none;}
   /* Controls sit in flow UNDER the drawing, left-aligned on the page's left
      margin (Owen, 2026-10-03). The left padding is the 9.6% the page hangs
      this frame past its column, so the buttons land on the margin itself. */
   .ui{display:flex;flex-direction:column;align-items:flex-start;padding:6px 0 0 9.574%;}
-  .modes{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;margin:0 0 12px;}
+  .modes{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:0 22px;margin:0 0 4px;}
   /* The site's one button style, as INQUIRE, VIEW IN YOUR SPACE and the model's
      controls: 12px, .16em, outlined in red at rest, solid red with white text
      for the mode that is on (Owen, 3 Nov 2026; was white on red, ink = on). */
-  .modes button{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
-    color:#b5120f;background:var(--paper);border:1px solid #b5120f;padding:7px 13px;cursor:pointer;border-radius:0;
+  .modes button{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#b5120f;background:transparent;border:0;padding:7px 0;cursor:pointer;border-radius:0;
     opacity:1;transition:none;}   /* the site's one button style (css/style.css, ONE BUTTON STYLE, 3 Nov 2026): outline in --red-text (#b5120f, 5.6:1) at rest, a 1px border inside the old 8px 14px box. Paper ground so the drawing never shows through the words */
-  .modes button[aria-pressed="true"]{color:#fff;background:var(--red);border-color:var(--red);}   /* the chosen mode: solid red, white 4.8:1 */
-  .modes button:not([aria-pressed="true"]):hover{background:#e8d7d2;}   /* a toggle: hover is a tint (--red at 8% on paper), never the solid */
+  .modes button[aria-pressed="true"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:1.5px;text-underline-offset:4px;}   /* the chosen mode: ink with a red underline (text links, Owen 13 Nov 2026; css/style.css TEXT LINKS) */
+  @media (hover:hover){ .modes button:not([aria-pressed="true"]):hover{text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:1px;text-underline-offset:4px;} }   /* hover while off: the thin underline (mouse only, review 14 Nov C3) */
   .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
-  .meta{max-width:46ch;margin:0;font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;
-    text-transform:uppercase;text-align:left;}
+  .meta{max-width:46ch;margin:0;font-size:10.5px;line-height:1.36;letter-spacing:0;
+    text-align:justify;text-align-last:left;}
   /* speed: a drawn 1px rule with a red dot, like OMNI's volume and KART's dimmer */
-  .speed{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;}
+  .speed{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#5a5957;}
   .speed input{-webkit-appearance:none;appearance:none;width:140px;height:26px;margin:0;cursor:pointer;
     background:linear-gradient(var(--ink),var(--ink)) center/100% 1px no-repeat;}
   .speed input::-webkit-slider-runnable-track{height:26px;background:transparent;}
   .speed input::-moz-range-track{height:26px;background:transparent;}
   .speed input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:11px;height:11px;margin-top:7.5px;background:var(--red);border:0;border-radius:50%;}
   .speed input::-moz-range-thumb{width:11px;height:11px;background:var(--red);border:0;border-radius:50%;}
-  .hint{margin-top:10px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.62;
+  .hint{margin-top:10px;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.62;
     white-space:nowrap;transition:opacity .3s ease;}
   .hint.gone{opacity:0;}
   @media (max-width:640px){
     .ui{align-items:flex-start;padding:10px 0 0;}
-    .modes{justify-content:flex-start;gap:10px;}
-    .meta{text-align:left;font-size:13px;}
+    .modes{justify-content:flex-start;gap:0 22px;}
+    .meta{text-align:justify;text-align-last:left;font-size:11px;}
     canvas{cursor:default;}
   }
   @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
@@ -63,7 +63,7 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="stage">
+    <div class="stage" data-drag="yes" data-hint-in=".ui">
       <canvas id="c" role="img" aria-label="Top-down section of FLOW: air drawn in through the perforated housing, through the crossflow turbine and out of the slot as a flat curtain"></canvas>
     </div>
     <div class="ui">
@@ -71,7 +71,7 @@
         <button data-mode="cross" aria-pressed="true">Crossflow</button>
         <button data-mode="axial" aria-pressed="false">Axial</button>
       </div>
-      <p class="meta" id="desc"></p>
+      <p class="meta" id="desc" aria-live="polite"></p>
       <label class="speed">Speed <input id="speed" type="range" min="0" max="100" value="60" aria-label="Fan speed"></label>
     </div>
   </div>
@@ -103,6 +103,18 @@
   const TEXT_BAND=105;                          // top of frame under the page's paragraph
 
   const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+
+  /* Review 14 Nov 2026 (B5): no line thinner than 1 css px. On a phone this
+     canvas shows at about 0.4x its logical size, so a 1.2 unit stroke landed at
+     0.5 px and the drawing faded out. Every lineWidth set here is raised to
+     1 css px when the canvas is shown smaller than its logical size. */
+  (function(){
+    const d=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,'lineWidth');
+    if(!d||!d.set) return;
+    Object.defineProperty(ctx,'lineWidth',{configurable:true,
+      get(){ return d.get.call(ctx); },
+      set(v){ const k=(canvas.clientWidth||W)/W; d.set.call(ctx, k<1 ? Math.max(v,1/k) : v); }});
+  })();
   const descEl=document.getElementById('desc'), speedEl=document.getElementById('speed');
   const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const MODES={
@@ -265,7 +277,7 @@
     // perforations all round, with a plain band either side of the slot
     for(let a=SLOT_R+22*deg;a<=SLOT_L+Math.PI*2-22*deg+1e-6;a+=8.6*deg){
       ctx.beginPath(); ctx.arc(C.x+Math.cos(a)*R,C.y+Math.sin(a)*R,4.2,0,Math.PI*2);
-      ctx.fillStyle='#e9e7e2'; ctx.fill(); ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle='#ffffff'; ctx.fill(); ctx.lineWidth=1; ctx.stroke();
     }
   }
   function turbine(phi){
@@ -283,7 +295,7 @@
   }
   function hub(P){
     P=P||C; ctx.lineWidth=1; ctx.strokeStyle='#141414';
-    ctx.beginPath(); ctx.arc(P.x,P.y,13,0,Math.PI*2); ctx.fillStyle='#e9e7e2'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(P.x,P.y,13,0,Math.PI*2); ctx.fillStyle='#ffffff'; ctx.fill(); ctx.stroke();
     ctx.beginPath(); ctx.arc(P.x,P.y,4.5,0,Math.PI*2); ctx.fillStyle='#e2191b'; ctx.fill();
   }
   function axialFan(phi){
@@ -299,7 +311,7 @@
     for(let k=0;k<3;k++){
       const a=phi+k*2*Math.PI/3, y=CA.y+Math.sin(a)*RA*0.62, h=10+52*Math.abs(Math.cos(a));
       ctx.beginPath(); ctx.ellipse(CA.x,y,6+3*Math.abs(Math.sin(a)),h/2*0.9,0,0,Math.PI*2);
-      ctx.fillStyle=Math.cos(a)>0?'#e9e7e2':'rgba(233,231,226,0.6)'; ctx.fill(); ctx.stroke();
+      ctx.fillStyle=Math.cos(a)>0?'#ffffff':'rgba(255,255,255,0.6)'; ctx.fill(); ctx.stroke();
     }
     hub(CA);
   }
@@ -395,7 +407,8 @@
       } else {
         want=Math.PI*0.5+Math.sin(t*0.8+i*0.5)*0.25;              // hangs limp, drifting
       }
-      let d=want-ribAng[i]; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+      if(!isFinite(ribAng[i])) ribAng[i]=want;
+      let d=wrapPi(want-ribAng[i]);
       ribAng[i]+=d*(reduce?1:1-Math.exp(-dt/(0.05+0.25*(1-Math.min(1,strength)))));
       x+=Math.cos(ribAng[i])*RIB_L; y+=Math.sin(ribAng[i])*RIB_L;
       ctx.lineTo(x,y);
@@ -404,11 +417,15 @@
     ctx.beginPath(); ctx.arc(holder.x,holder.y,3.4,0,Math.PI*2); ctx.fillStyle='#141414'; ctx.fill();
   }
 
+  /* 14 Nov 2026 (the KART "crash"): angles are wrapped with arithmetic, never a while loop. A frame whose
+     timestamp came before the loop's restart gave a NEGATIVE dt, the ease then threw the angle to about 1e18,
+     where d-=2*PI changes nothing, and the while loop never ended: the whole tab froze. dt is also clamped to 0..0.05 s. */
+  function wrapPi(d){ d=(d+Math.PI)%(2*Math.PI); if(d<0) d+=2*Math.PI; return d-Math.PI; }
   /* ---------- LOOP: only while visible, like KART's ---------- */
   let phi=0, last=performance.now(), running=false, visible=true, clock=0;
   function speed(){ return (+speedEl.value)/100; }
   function frame(now){
-    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    const dt=Math.max(0,Math.min(0.05,(now-last)/1000)); last=now;
     if(!visible){ running=false; return; }
     const spd=speed();
     clock+=dt;
@@ -476,25 +493,9 @@
   setTimeout(postHeight,300);
   if(window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
 
-  /* the interaction hint (Owen, 3 Nov 2026): every 3D model and every
-     mechanism says DRAG TO INTERACT (fine pointer) or TOUCH TO INTERACT
-     (touch), in the same place on each: the FIRST line of its own control
-     block (.ui here, .mv-bar under the 3D model), above the buttons, never on
-     the drawing or over text. It fades on the first real touch or drag and
-     stays gone. The inline style puts it in that flow (OMNI's .hint rule
-     pins it absolutely) at the 3D model hint's 9px, until the .hint rule
-     above carries both (docs/CLOUD_REPORT_2026-11-03_w4template.txt). */
-  (function(){
-    const h=document.createElement('div'); h.className='hint';
-    h.textContent=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)?'TOUCH TO INTERACT':'DRAG TO INTERACT';
-    h.style.position = 'static'; h.style.transform = 'none'; h.style.margin = '0 0 10px'; h.style.fontSize = '9px';
-    const ui=document.querySelector('.ui'); ui.insertBefore(h, ui.firstChild);
-    const gone=()=>h.classList.add('gone');
-    canvas.addEventListener('pointerdown',gone,{once:true});
-    canvas.addEventListener('touchstart',gone,{once:true,passive:true});
-    canvas.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') gone(); },{once:true});
-  })();
+  /* the DRAG / TOUCH TO INTERACT label and tap to wake on touch: js/mech-touch.js (Owen, 14 Nov 2026) */
 })();
 </script>
+<script src="../../js/mech-touch.js?v=1"></script>
 </body>
 </html>

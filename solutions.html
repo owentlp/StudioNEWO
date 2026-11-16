@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SOLUTIONS · Renders, animation and drawings · STUDIO NEWO</title>
 <meta name="description" content="Product renders, animation, 3D web models and production drawings from your CAD at a fixed price per job, plus custom furniture and lighting. Toronto.">
-<meta name="theme-color" content="#e9e7e2">
+<meta name="theme-color" content="#ffffff">
 <link rel="canonical" href="https://studionewo.com/solutions.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/solutions.html">
@@ -32,19 +32,19 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=69">
+<link rel="stylesheet" href="css/style.css?v=79">
 <style>
   /* SOLUTIONS: one table, a row per solution. Closed rows read as an index
      (number, name, type, year, links); opening a row shows the cover image,
      the abstract and the buttons. Rendered from js/solutions-data.js. */
-  .sol{max-width:1400px;}
+  .sol{max-width:none;}   /* the same right edge as every page (review 14 Nov A6) */
   /* jump to the prices: services sit under the selected work (Owen, 2 Oct),
      so a client arriving from the menu gets one button straight to them */
   .sol-jump{margin:16px 0 clamp(36px,7vh,80px);}
   .sol-head, .sol-sum{display:grid; grid-template-columns:3.2em minmax(0,5fr) minmax(0,2fr) 4.5em minmax(0,2.4fr) 1.4em; column-gap:var(--gut); align-items:baseline;}
-  .sol-head{padding:0 0 10px; border-bottom:1px solid rgba(20,20,20,.16);}
-  .sol-head span{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
-  .sol-row{border-bottom:1px solid rgba(20,20,20,.16);}
+  .sol-head{padding:0 0 10px;}
+  .sol-head span{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+  .sol-row{}   /* rules removed, review 14 Nov A1 */
   .sol-sum{width:100%; padding:18px 0 16px; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer; position:relative;}
   /* the toggle is a real <button> around the name cell; its ::after stretches
      over the whole row, so the row still opens anywhere it is clicked, while
@@ -55,15 +55,15 @@
   .sol-tog:focus-visible{outline:none;}
   .sol-tog:focus-visible::after{outline:2px solid var(--ink); outline-offset:2px;}
   .sol-sum .sol-links{position:relative; z-index:1;}
-  .sol-idx{font-size:12px; letter-spacing:.12em;}
-  .sol-name{font-family:var(--disp); font-style:italic; font-size:clamp(20px,2.3vw,30px); line-height:1.05; display:block;}
-  .sol-what{display:block; margin-top:6px; font-size:12px; letter-spacing:.06em; line-height:1.35;}
+  .sol-idx{font-size:var(--t-label); letter-spacing:var(--ls-label); color:var(--ink-2);}
+  .sol-name{font-family:var(--disp); font-style:italic; font-size:var(--t-h2); line-height:1.05; display:block;}
+  .sol-what{display:block; margin-top:6px; font-size:var(--t-body); letter-spacing:0; line-height:var(--lh-body);}
   /* the one-sentence summary from the data, in the closed row under the title
      (2 Nov 2026: it was in the data and never rendered) */
-  .sol-summary{display:block; margin-top:8px; font-size:12px; line-height:1.5; letter-spacing:.02em; max-width:46ch; color:var(--ink-soft);}
-  .sol-type, .sol-year{font-size:12px; letter-spacing:.14em; text-transform:uppercase;}
-  .sol-links{display:flex; gap:8px; flex-wrap:wrap;}
-  .sol-btn{display:inline-block;}   /* look and states: css/style.css, ONE BUTTON STYLE */
+  .sol-summary{display:block; margin-top:8px; font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0; max-width:46ch; color:var(--ink-soft);}
+  .sol-type, .sol-year{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+  .sol-links{display:flex; gap:0 22px; flex-wrap:wrap;}
+  .sol-btn{display:inline-block;}   /* look and states: css/style.css, TEXT LINKS */
   .sol-mark{justify-self:end; width:12px; height:12px; position:relative;}
   .sol-mark::before, .sol-mark::after{content:""; position:absolute; left:0; top:5px; width:12px; height:1.5px; background:var(--ink); transition:transform .25s ease;}
   .sol-mark::after{transform:rotate(90deg);}
@@ -82,15 +82,15 @@
   @media (prefers-reduced-motion:reduce){ .sol-in{transform:none; transition:opacity .32s ease;} .sol-mark::before, .sol-mark::after{transition:none;} }
   .sol-in{display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); padding:6px 0 40px;}
   .sol-fig{grid-column:2 / 8; margin:0;}
-  /* multiply so a photo shot on white sits on the paper like print */
+  /* multiply: a photo shot on white melts into the page (white since 13 Nov 2026) */
   .sol-fig img{display:block; width:auto; max-width:100%; max-height:72vh; height:auto; mix-blend-mode:multiply;}
   .sol-txt{grid-column:9 / 13;}
   /* JUSTIFIED PROSE (Owen, 3 Nov 2026: the site rule, here too). The intro, the
      abstracts, the service lines, the notes and the steps are justified on the
-     site measure (.desc: min(var(--w-desc), 37.5ch), last line left, hyphens on).
+     site measure (.desc: min(var(--w-desc), 46ch), last line left, hyphens on).
      The closed-row summary, the labels, the table cells and the prices stay
      ragged. Phones (600px and under) are ragged like every other .desc. */
-  .sol-txt .desc{max-width:min(var(--w-desc), 37.5ch);}
+  .sol-txt .desc{max-width:min(var(--w-desc), 46ch);}
   /* the open row's text had four columns (9 / 13): 22 to 31 characters a line,
      too short to justify (word gaps up to 13 spaces at 1024). It takes five from
      1440 (the picture moves one column left to keep the empty column between)
@@ -98,6 +98,7 @@
   @media (min-width:861px){ .sol-fig{grid-column:1 / 7;} .sol-txt{grid-column:8 / 13;} }
   @media (min-width:861px) and (max-width:1439px){ .sol-txt{grid-column:7 / 13;} }
   .sol-txt .cap{display:block; margin-top:14px;}
+  .sol-txt .sol-credit{display:block; margin-top:14px; font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0; color:var(--ink-2);}   /* a sentence: level 3, not tracked capitals (review 14 Nov E15) */
   .sol-txt .sol-links{margin-top:18px;}
   /* an open row shows its buttons inside the body, so the header copy hides.
      visibility (not display) keeps the header columns from shifting. */
@@ -109,37 +110,37 @@
   .sol-body{visibility:hidden;}
   .sol-row.open .sol-body{visibility:visible;}
   .svc{margin-top:clamp(70px,13vh,150px); scroll-margin-top:96px;}
-  .svc-h{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(24px,3vw,38px); line-height:1.05; margin-bottom:14px;}
+  .svc-h{font-family:var(--disp); font-style:italic; font-weight:400; font-size:var(--t-h2); line-height:1.05; margin-bottom:14px;}
   .svc-intro{margin-bottom:clamp(30px,5vh,56px);}
-  /* the proof, where the decision is made (2 Nov 2026): one line in the
-     table-head label style, above the intro */
-  .svc-proof{font-size:11px; letter-spacing:.16em; text-transform:uppercase; line-height:1.8; margin:0 0 18px; max-width:60ch; text-align:left;}
+  /* the proof, where the decision is made (2 Nov 2026), above the intro.
+     13 Nov 2026: a sentence, so level 3 text in sentence case (was 11px tracked capitals) */
+  .svc-proof{font-size:var(--t-body); letter-spacing:0; line-height:var(--lh-body); margin:0 0 18px; max-width:min(var(--w-desc), 46ch); text-align:left;}
   /* SAMPLES: what a client would get, as links in the chip/label style (not
      buttons). Two today; a render set and a drawing sheet go in as two more
      <a> lines when Owen makes them. */
   .svc-samples{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 22px; margin:0 0 clamp(30px,5vh,56px);}
-  .svc-samples .svc-lbl{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
-  .svc-samples a{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none;}
+  .svc-samples .svc-lbl{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+  .svc-samples a{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink); text-decoration:none;}
   .svc-samples a:hover, .svc-samples a:focus-visible{color:var(--red-text, var(--red));}
-  .svc-samples .svc-samples-note{flex-basis:100%; font-size:12px; letter-spacing:.06em; color:var(--ink-soft);}
+  .svc-samples .svc-samples-note{flex-basis:100%; font-size:var(--t-body); letter-spacing:0; color:var(--ink-soft);}
   .svc-head, .svc-row{display:grid; grid-template-columns:3.2em minmax(0,7fr) minmax(0,2fr) minmax(0,2fr); column-gap:var(--gut); align-items:baseline;}
-  .svc-head{padding:0 0 10px; border-bottom:1px solid rgba(20,20,20,.16);}
-  .svc-head span{font-size:11px; letter-spacing:.16em; text-transform:uppercase;}
-  .svc-row{padding:16px 0 15px; border-bottom:1px solid rgba(20,20,20,.16);}
-  .svc-name{font-family:var(--disp); font-style:italic; font-size:clamp(18px,1.9vw,24px); line-height:1.1; display:block;}
-  .svc-what{display:block; margin-top:6px; font-size:13px; line-height:1.45; max-width:min(var(--w-desc), 37.5ch); text-align:justify; text-align-last:left; -webkit-hyphens:auto; hyphens:auto; hyphenate-limit-chars:5 3 2;}
+  .svc-head{padding:0 0 10px;}
+  .svc-head span{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+  .svc-row{padding:16px 0 15px;}
+  .svc-name{font-family:var(--disp); font-style:italic; font-size:var(--t-tag); line-height:1.1; display:block;}
+  .svc-what{display:block; margin-top:6px; font-size:var(--t-body); line-height:var(--lh-body); max-width:min(var(--w-desc), 46ch); text-align:justify; text-align-last:left; -webkit-hyphens:auto; hyphens:auto; hyphenate-limit-chars:5 3 2; letter-spacing:0;}
   @media (max-width:600px){ .svc-what{text-align:left; -webkit-hyphens:manual; hyphens:manual;} }
-  .svc-time{font-size:12px; letter-spacing:.14em; text-transform:uppercase;}
-  .svc-from{font-size:15px; letter-spacing:.02em; white-space:nowrap;}
+  .svc-time{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+  .svc-from{font-size:var(--t-body); letter-spacing:0; white-space:nowrap;}
   /* same first column as the service rows, so the notes line up with the service names */
   .svc-notes{display:grid; grid-template-columns:3.2em minmax(0,1fr) minmax(0,1fr); column-gap:var(--gut); row-gap:14px; margin-top:24px;}
-  .svc-notes .desc{font-size:13px;}
+  /* 13 Nov 2026: the notes are plain .desc (level 3); their own 13px is gone */
   #svc-rates{grid-column:2;} #svc-terms{grid-column:3;}
   #svc-inputs{grid-column:2;} #svc-private{grid-column:3;}
   /* HOW A JOB RUNS: four steps under the terms, in the terms' type */
   #svc-steps{grid-column:2 / 4;}
-  .svc-notes .svc-lbl{display:block; font-size:11px; letter-spacing:.16em; text-transform:uppercase; margin-bottom:6px;}
-  .svc-cta{margin-top:26px; display:flex; flex-wrap:wrap; gap:8px;}
+  .svc-notes .svc-lbl{display:block; font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; margin-bottom:6px; color:var(--ink-2);}
+  .svc-cta{margin-top:26px; display:flex; flex-wrap:wrap; gap:0 22px;}
   /* the same two buttons once more under SAMPLES (Q5), at every width since
      3 Nov 2026 (UX R2 item 3): a desktop buyer landing on #services sees how
      to start before the seven rows, not only after them */
@@ -313,9 +314,9 @@
   <p class="desc sol-intro">Proposals, research and prototypes outside the product line, each with the full document as a PDF.</p>
   <p class="sol-jump"><a class="sol-btn" href="#services">Services and prices &darr;</a></p>
   <div class="sol-head" aria-hidden="true"><span></span><span>Solution</span><span>Type</span><span>Year</span><span>Files</span><span></span></div>
-  <div class="sol-list" id="sol-list"><div class="sol-row" id="sonic-touch"><div class="sol-sum"><span class="sol-idx">[01]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-sonic-touch"><span class="sol-name">Sonic Touch</span><span class="sol-what">A multi-sensory music remote for people living with dementia</span><span class="sol-summary">A handheld cherry bowl that answers touch with sound, light and vibration, so residents can start an activity on their own.</span></button><span class="sol-type">Research + prototype</span><span class="sol-year">2025</span><span class="sol-links"><a class="sol-btn" href="solutions/sonic-touch.pdf" target="_blank" rel="noopener">PDF 1.7MB</a><button type="button" class="sol-btn" data-video="v3q0BAfEyOM">Video</button></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-sonic-touch"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/sonic-touch.jpg" srcset="solutions/sm/sonic-touch.jpg 640w, solutions/sonic-touch.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="Sonic Touch, a turned cherry bowl with orange, purple, yellow, pink and black felt touch patches, each framing a copper sensor"></figure><div class="sol-txt"><p class="desc">On Baycrest's Possibilities Floor, residents living with dementia rely on care staff to prompt almost every activity, which is tiring for staff and can feel infantilizing for residents. Sonic Touch is lathe-turned from cherry, with five felt touch zones framing copper sensors: four play notes and one changes the mode. A hand resting on any zone gets an instant response, so cause and effect is obvious and no fine motor control is needed. Built as a working prototype and tested with residents and staff.</p><span class="cap">With Finlay Brodylo and Noah McBriar</span><span class="sol-links"><a class="sol-btn" href="solutions/sonic-touch.pdf" target="_blank" rel="noopener">PDF 1.7MB</a><button type="button" class="sol-btn" data-video="v3q0BAfEyOM">Video</button></span></div></div></div></div></div>
-<div class="sol-row" id="loots"><div class="sol-sum"><span class="sol-idx">[02]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-loots"><span class="sol-name">LOOTS</span><span class="sol-what">A collapsible stool from dimensional lumber</span><span class="sol-summary">Two lumber sizes and five part types: a stool designed from the first cut to be taken apart.</span></button><span class="sol-type">Design for disassembly</span><span class="sol-year">2025</span><span class="sol-links"><a class="sol-btn" href="solutions/loots.pdf" target="_blank" rel="noopener">PDF 2.7MB</a></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-loots"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/loots.jpg" srcset="solutions/sm/loots.jpg 640w, solutions/loots.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="The LOOTS stool in stained lumber on display at the Design for Disassembly Exhibition"></figure><div class="sol-txt"><p class="desc">A stool built from 1x3 and 1x12 lumber with straight cuts only, so it can be made with basic tools. Screws are the only fasteners: it comes apart into a top and two sides for storage or transport, and every part unscrews back to its original cut length to be reused. Sturdy, light and easy to align using the other parts and a flat surface as the reference. Exhibited at the Design for Disassembly Exhibition, April 2025.</p><span class="sol-links"><a class="sol-btn" href="solutions/loots.pdf" target="_blank" rel="noopener">PDF 2.7MB</a></span></div></div></div></div></div>
-<div class="sol-row" id="vacancy-to-value"><div class="sol-sum"><span class="sol-idx">[03]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-vacancy-to-value"><span class="sol-name">Vacancy to Value</span><span class="sol-what">Non-fare revenue proposal for the TTC</span><span class="sol-summary">Turning the dead booths, payphone alcoves and empty storefronts inside TTC fare-paid zones into small, TTC-run utility retail.</span></button><span class="sol-type">Feasibility proposal</span><span class="sol-year">2026</span><span class="sol-links"><a class="sol-btn" href="solutions/vacancy-to-value.pdf" target="_blank" rel="noopener">PDF 3.1MB</a></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-vacancy-to-value"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/vacancy-to-value.jpg" srcset="solutions/sm/vacancy-to-value.jpg 640w, solutions/vacancy-to-value.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="A Toronto subway station concourse with an unused red fare booth beside the fare gates"></figure><div class="sol-txt"><p class="desc">Decommissioned booths and vacant retail sit dark across the subway network, and under CPTED (crime prevention through environmental design) empty space invites the conditions riders worry about most. Station retail earns the TTC about a quarter of a cent per ride, while its advertising per ride is already close to Hong Kong's MTR. This proposal pitches a three-phase feasibility study: a spatial audit of dormant footprints, a benchmark of owned versus leased station retail and a full-scale prototype of one module. One intervention, four returns: revenue, rider satisfaction, ridership and safety.</p><span class="sol-links"><a class="sol-btn" href="solutions/vacancy-to-value.pdf" target="_blank" rel="noopener">PDF 3.1MB</a></span></div></div></div></div></div></div>
+  <div class="sol-list" id="sol-list"><div class="sol-row" id="sonic-touch"><div class="sol-sum"><span class="sol-idx">[01]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-sonic-touch" aria-label="Sonic Touch, A multi-sensory music remote for people living with dementia"><span class="sol-name">Sonic Touch</span><span class="sol-what">A multi-sensory music remote for people living with dementia</span><span class="sol-summary">A handheld cherry bowl that answers touch with sound, light and vibration, so residents can start an activity on their own.</span></button><span class="sol-type">Research + prototype</span><span class="sol-year">2025</span><span class="sol-links"><a class="sol-btn" href="solutions/sonic-touch.pdf" target="_blank" rel="noopener">PDF 1.7MB</a><button type="button" class="sol-btn" data-video="v3q0BAfEyOM">Video</button></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-sonic-touch"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/sonic-touch.jpg" srcset="solutions/sm/sonic-touch.jpg 640w, solutions/sonic-touch.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="Sonic Touch, a turned cherry bowl with orange, purple, yellow, pink and black felt touch patches, each framing a copper sensor"></figure><div class="sol-txt"><p class="desc">On Baycrest's Possibilities Floor, residents living with dementia rely on care staff to prompt almost every activity, which is tiring for staff and can feel infantilizing for residents. Sonic Touch is lathe-turned from cherry, with five felt touch zones framing copper sensors: four play notes and one changes the mode. A hand resting on any zone gets an instant response, so cause and effect is obvious and no fine motor control is needed. Built as a working prototype and tested with residents and staff.</p><span class="sol-credit">With Finlay Brodylo and Noah McBriar.</span><span class="sol-links"><a class="sol-btn" href="solutions/sonic-touch.pdf" target="_blank" rel="noopener">PDF 1.7MB</a><button type="button" class="sol-btn" data-video="v3q0BAfEyOM">Video</button></span></div></div></div></div></div>
+<div class="sol-row" id="loots"><div class="sol-sum"><span class="sol-idx">[02]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-loots" aria-label="LOOTS, A collapsible stool from dimensional lumber"><span class="sol-name">LOOTS</span><span class="sol-what">A collapsible stool from dimensional lumber</span><span class="sol-summary">Two lumber sizes and five part types: a stool designed from the first cut to be taken apart.</span></button><span class="sol-type">Design for disassembly</span><span class="sol-year">2025</span><span class="sol-links"><a class="sol-btn" href="solutions/loots.pdf" target="_blank" rel="noopener">PDF 2.7MB</a></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-loots"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/loots.jpg" srcset="solutions/sm/loots.jpg 640w, solutions/loots.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="The LOOTS stool in stained lumber on display at the Design for Disassembly Exhibition"></figure><div class="sol-txt"><p class="desc">A stool built from 1x3 and 1x12 lumber with straight cuts only, so it can be made with basic tools. Screws are the only fasteners: it comes apart into a top and two sides for storage or transport, and every part unscrews back to its original cut length to be reused. Sturdy, light and easy to align using the other parts and a flat surface as the reference. Exhibited at the Design for Disassembly Exhibition, April 2025.</p><span class="sol-links"><a class="sol-btn" href="solutions/loots.pdf" target="_blank" rel="noopener">PDF 2.7MB</a></span></div></div></div></div></div>
+<div class="sol-row" id="vacancy-to-value"><div class="sol-sum"><span class="sol-idx">[03]</span><button type="button" class="sol-tog" aria-expanded="false" aria-controls="sol-b-vacancy-to-value" aria-label="Vacancy to Value, Non-fare revenue proposal for the TTC"><span class="sol-name">Vacancy to Value</span><span class="sol-what">Non-fare revenue proposal for the TTC</span><span class="sol-summary">Turning the dead booths, payphone alcoves and empty storefronts inside TTC fare-paid zones into small, TTC-run utility retail.</span></button><span class="sol-type">Feasibility proposal</span><span class="sol-year">2026</span><span class="sol-links"><a class="sol-btn" href="solutions/vacancy-to-value.pdf" target="_blank" rel="noopener">PDF 3.1MB</a></span><span class="sol-mark" aria-hidden="true"></span></div><div class="sol-body" id="sol-b-vacancy-to-value"><div><div class="sol-in"><figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/vacancy-to-value.jpg" srcset="solutions/sm/vacancy-to-value.jpg 640w, solutions/vacancy-to-value.jpg 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="A Toronto subway station concourse with an unused red fare booth beside the fare gates"></figure><div class="sol-txt"><p class="desc">Decommissioned booths and vacant retail sit dark across the subway network, and under CPTED (crime prevention through environmental design) empty space invites the conditions riders worry about most. Station retail earns the TTC about a quarter of a cent per ride, while its advertising per ride is already close to Hong Kong's MTR. This proposal pitches a three-phase feasibility study: a spatial audit of dormant footprints, a benchmark of owned versus leased station retail and a full-scale prototype of one module. One intervention, four returns: revenue, rider satisfaction, ridership and safety.</p><span class="sol-links"><a class="sol-btn" href="solutions/vacancy-to-value.pdf" target="_blank" rel="noopener">PDF 3.1MB</a></span></div></div></div></div></div></div>
   <noscript><p class="desc">This list needs JavaScript. The documents are in the solutions folder: sonic-touch.pdf, loots.pdf, vacancy-to-value.pdf.</p></noscript>
 
   <!-- WORK WITH THE STUDIO: the consulting offer, under the proof
@@ -378,8 +379,8 @@
 
 <script src="js/solutions-data.js?v=11"></script>
 <script src="js/projects-data.js?v=33"></script>
-<script src="js/main.js?v=7"></script>
-<script src="js/menu.js?v=44"></script>
+<script src="js/main.js?v=8"></script>
+<script src="js/menu.js?v=57"></script>
 <script>
 (function(){
   /* BAKED ROWS (3 Nov 2026, CLS): tools/make-simple-page.py writes the
@@ -415,7 +416,7 @@
     return '<div class="sol-row" id="' + esc(s.id) + '">' +
       '<div class="sol-sum">' +
         '<span class="sol-idx">[' + n + ']</span>' +
-        '<button type="button" class="sol-tog" aria-expanded="false" aria-controls="' + bid + '"><span class="sol-name">' + esc(s.title) + '</span><span class="sol-what">' + esc(s.what) + '</span>' +
+        '<button type="button" class="sol-tog" aria-expanded="false" aria-controls="' + bid + '" aria-label="' + esc(s.title + (s.what ? ', ' + s.what : '')) + '"><span class="sol-name">' + esc(s.title) + '</span><span class="sol-what">' + esc(s.what) + '</span>' +
           (s.summary ? '<span class="sol-summary">' + esc(s.summary) + '</span>' : '') + '</button>' +
         '<span class="sol-type">' + esc(s.type) + '</span>' +
         '<span class="sol-year">' + esc(s.year) + '</span>' +
@@ -425,7 +426,7 @@
       '<div class="sol-body" id="' + bid + '"><div><div class="sol-in">' +
         (s.image ? '<figure class="sol-fig"><img loading="lazy" decoding="async" src="solutions/sm/' + esc(s.image) + '" srcset="solutions/sm/' + esc(s.image) + ' 640w, solutions/' + esc(s.image) + ' 1400w" sizes="(max-width:860px) 92vw, 46vw" alt="' + esc(s.alt) + '"></figure>' : '') +
         '<div class="sol-txt"><p class="desc">' + esc(s.abstract || s.summary) + '</p>' +
-        (s.credits ? '<span class="cap">' + esc(s.credits) + '</span>' : '') +
+        (s.credits ? '<span class="sol-credit">' + esc(s.credits) + '.</span>' : '') +
         links(s) + '</div>' +
       '</div></div></div>' +
     '</div>';

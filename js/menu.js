@@ -122,24 +122,24 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=69",
+      "css/style.css?v=79",
       "js/projects-data.js?v=33",
       "js/image-sizes.js?v=6",
-      "js/main.js?v=7",
-      "js/menu.js?v=44",
-      "js/sky.js?v=8",
-      "js/loader3d.js?v=18",
+      "js/main.js?v=8",
+      "js/menu.js?v=57",
+      "js/sky.js?v=10",
+      "js/loader3d.js?v=19",
       "js/loader3d-core.js?v=2",
       "js/loader3d-mesh.js?v=1",
-      "js/loader3d.worker.js?v=6"
+      "js/loader3d.worker.js?v=7"
     ];
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
-    var MATERIALS_DATA = "js/materials-data.js?v=11";
-    var PROJECT_JS = "js/project.js?v=7";   // the product page script (2026-11-03)
+    var MATERIALS_DATA = "js/materials-data.js?v=12";
+    var PROJECT_JS = "js/project.js?v=18";   // the product page script (2026-11-03)
     var MV_LIB  = "js/vendor/model-viewer.min.js?v=2";
     var MODEL_V = "?v=3";      // must match the model-viewer data-src in project.html
-    var MECH_V  = "?v=27";     // must match the mechanism iframe src in js/project.js
+    var MECH_V  = "?v=32";     // must match the mechanism iframe src in js/project.js
     var DWELL_MS = 400;
 
     function shell(){ SHELL.forEach(link); }
@@ -355,7 +355,9 @@
       burgers().forEach(function(btn){
         btn.setAttribute("aria-expanded", open ? "true" : "false");
         btn.setAttribute("aria-controls", "menu-overlay");
+        btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");   // review 14 Nov E2
       });
+      document.documentElement.classList.toggle("menu-open", open);         // review 14 Nov C8: no page scroll under the panel on touch
       if(!open && hadFocus){
         var back = (opener && document.contains(opener)) ? opener : document.getElementById("burger");
         if(back){ try { back.focus({ preventScroll:true }); } catch(e){ back.focus(); } }
@@ -388,6 +390,14 @@
     });
     document.addEventListener("keydown", function(e){
       if(e.key === "Escape" && overlay.classList.contains("open")) setMenu(false);
+    });
+    /* Review 14 Nov 2026 (E2, WCAG 2.4.11): Tab out of the open panel closes it,
+       so focus never lands on a link hidden under the panel. The burgers count
+       as inside (they open and close it). */
+    document.addEventListener("focusin", function(e){
+      if(!overlay.classList.contains("open")) return;
+      if(overlay.contains(e.target) || (e.target.closest && e.target.closest("#burger, .foot-burger"))) return;
+      setMenu(false);
     });
 
     var b = document.getElementById("burger");

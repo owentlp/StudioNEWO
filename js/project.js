@@ -387,11 +387,8 @@
 
   var rnd = mulberry(seedFrom(id));
 
-  // give each project's body paragraphs a slightly different measure (35-38ch,
-  // stable per project via the same seed) so the page doesn't read as one
-  // rigid 32ch column repeated identically everywhere. Only the paragraph
-  // width varies, teaser/caption widths stay fixed so the hero still lines up.
-  document.getElementById("content").style.setProperty("--w-desc", (35 + (seedFrom(id+"-w") % 4)) + "ch");
+  // 13 Nov 2026: the body measure is the same on every product now (--w-desc,
+  // 46ch, css/style.css). It used to be varied here per product (35-38ch).
 
   // ---------- HERO (image bleeds left; text stuck to the right edge) ----------
   var gal = (p.gallery||["hero.jpg"]).filter(real);
@@ -500,28 +497,61 @@
       var slug = MAT_SLUGS[w.toLowerCase()];
       // ?for=<project> opens every material this project uses on the guide;
       // #slug then scrolls to the one that was clicked
-      return '<a href="materials.html?for='+encodeURIComponent(id)+(slug?'#'+slug:'')+'">'+esc(w.toUpperCase())+'</a>';
-    }).join('<span class="sep" aria-hidden="true">/</span>');
+      // 13 Nov 2026: written with a leading capital ("Frosted glass"); the
+      // stylesheet sets the chips as text links in capitals (.hero-chips a)
+      var word = esc(w.charAt(0).toUpperCase() + w.slice(1));
+      // review 14 Nov E14: a part that is not on the Material Guide (Electronics,
+      // Driver) is a plain label, not a link to the top of the guide
+      if(!slug) return '<span class="chip-plain">' + word + '</span>';
+      return '<a href="materials.html?for='+encodeURIComponent(id)+'#'+slug+'">'+word+'</a>';
+    }).join('<span class="sep" aria-hidden="true">/</span>&#8203;');
   }
-  /* CUSTOM LINE (2026-11-02, site review section 2): one sentence under the
-     chips on EVERY product, set in the chip row's own type, with a plain
-     underlined link to the contact page. Not a red button: the row keeps its
-     one button, INQUIRE. The two inline styles are the only styling it has
-     (no .hero-custom rule in css/style.css yet); move them there if wanted.
-     2026-11-03 (review 2026-11-02_2 finding 1, Q1): one wording for every
-     product (no "woods": FLOW has none), framed as a commission, and the link
-     names the product (&from=<CODE>) so the Contact page and the inquiry say
-     where it came from. The FINISH block below adds &finish=<name> to it
-     whenever a finish is chosen. The link has its own class,
-     .hero-custom-link, for the stylesheet to take over the inline style. */
-  var heroCustom =
-    '<p class="hero-custom">A custom one can be made to order now, in another size, material or finish. ' +
-      '<a class="hero-custom-link" href="contact.html?about=Custom&amp;from=' + encodeURIComponent(p.title) + '">ASK ABOUT CUSTOM &rarr;</a></p>';
-  var heroMatl =
-    '<div class="hero-materials">' +
-      '<span class="hero-chips">' + matChips(p.materials) + '</span>' +
-      heroCustom +
+  /* HERO SPEC LINE (Owen, 16 Nov 2026: "tightened and placed under the hero,
+     max 2 lines"; then "2 lines ... make the hero bigger"; replaces the 13 Nov
+     spec table in the text column). At most two lines under the photo (now 7
+     columns), the values only, in this order: YEAR, SIZE, STATUS, PRICE,
+     MATERIALS (each a text link to the Materials page), EXHIBITED (last, so
+     the materials can start on the first line), with
+     INQUIRE at the right end of the first line, just under the photo's bottom
+     right corner (review Q1). It is still a dl: the
+     labels (dt) are there for screen readers and hidden on screen. The FINISH
+     block further down adds a FINISH item (label shown) when a product has two
+     or more `variants`. A field that is "" or missing draws nothing (real()).
+     The availability and custom sentences left the hero (Owen, 16 Nov: "should
+     either be removed or placed somewhere else"): they close the page, see
+     AVAILABILITY NOTE below. Rules: css/style.css "HERO SPEC LINE". */
+  // the space after each item is where the line may break (the items
+  // themselves do not break, css/style.css HERO SPEC LINE)
+  function specRow(label, valueHtml, cls){
+    return '<div class="hs-row' + (cls ? ' ' + cls : '') + '"><dt>' + label + '</dt><dd>' + valueHtml + '</dd></div> ';
+  }
+  // a two-part value ("Prototype 01 / V2 in development") may break at its slash
+  function slashParts(v){
+    return String(v).split(/\s*\/\s*/).map(function(x){ return '<span class="nb">' + esc(x) + '</span>'; }).join('<span class="sep" aria-hidden="true">/</span>&#8203;');
+  }
+  var heroInfo =
+    '<div class="hero-info">' +
+      '<dl class="hero-spec">' +
+        (year ? specRow("YEAR", esc(year)) : '') +
+        (real(p.size) ? specRow("SIZE", esc(p.size)) : '') +
+        (real(p.status) ? specRow("STATUS", '<span class="st">' + slashParts(p.status) + '</span>') : '') +
+        (real(p.price) ? specRow("PRICE", '<span class="price">' + esc(p.price) + '</span>') : '') +
+        (real(p.materials) ? specRow("MATERIALS", '<span class="hero-chips">' + matChips(p.materials) + '</span>', "hs-mat") : '') +
+        (real(p.exhibited) ? specRow("EXHIBITED", 'Exhibited ' + esc(p.exhibited)) : '') +
+      '</dl>' +
+      '<a class="inq" href="contact.html?about=' + encodeURIComponent(p.title) + '">INQUIRE &rarr;</a>' +
     '</div>';
+  /* AVAILABILITY NOTE (16 Nov 2026): the availability sentence and the one
+     custom sentence for every product (2 and 3 Nov 2026), moved out of the
+     hero to the end of the page, after the 3D model and Process and detail.
+     Its link names the product (&from=<CODE>); the FINISH block adds
+     &finish=<name> to it and to INQUIRE whenever a finish is chosen. */
+  var availNote =
+    '<section class="pj-avail" aria-label="Availability">' +
+      (real(p.availability) ? '<p class="hero-av">' + esc(p.availability) + '</p>' : '') +
+      '<p class="hero-custom">A custom one can be made to order now, in another size, material or finish. ' +
+        '<a class="hero-custom-link" href="contact.html?about=Custom&amp;from=' + encodeURIComponent(p.title) + '">ASK ABOUT CUSTOM &rarr;</a></p>' +
+    '</section>';
 
   /* HERO BOX (2026-11-03, score round 2, 3D item 5): width/height alone give
      the box the default photo's shape only until a photo arrives; a FINISH
@@ -535,40 +565,27 @@
       '<figure class="hero-main">' +
         '<img src="'+img(heroSrc)+'"'+srcAttrs(heroSrc, HERO_SIZES)+heroBox+' alt="'+altFor(heroSrc)+'" fetchpriority="high" decoding="async" data-lb="0" tabindex="0" role="button">' +
       '</figure>' +
-      // specs + INQUIRE share one row directly under the image, the red
-      // INQUIRE block sitting at the row's right end (Figma: specs at the
-      // hero's left edge, inquire at its right edge, same baseline).
-      '<div class="hero-specs">' +
-        (year?'<span class="sp">'+esc(year)+'</span>':'') +
-        (real(p.size)?'<span class="sp">'+esc(p.size)+'</span>':'') +
-        (real(p.status)?'<span class="brk" aria-hidden="true"></span><span class="sp st">'+esc(p.status)+'</span>':'') +
-        // 2026-11-02 (review Q15): second line = price, when there is one,
-        // then the availability sentence; third line = where it was shown.
-        // All three are strings in js/projects-data.js (price, availability,
-        // exhibited); "" or missing hides the line, via real().
-        ((real(p.price) || real(p.availability)) ?
-          '<span class="brk" aria-hidden="true"></span>' +
-          (real(p.price)?'<span class="sp price">'+esc(p.price)+'</span>':'') +
-          (real(p.availability)?'<span class="sp av" style="white-space:normal">'+esc(p.availability)+'</span>':'') : '') +
-        (real(p.exhibited)?'<span class="brk" aria-hidden="true"></span><span class="sp ex" style="white-space:normal">Exhibited: '+esc(p.exhibited)+'</span>':'') +
-        '<a class="inq" href="contact.html?about=' + encodeURIComponent(p.title) + '">INQUIRE &rarr;</a>' +
-      '</div>' +
-      heroMatl +
-      // The aside fills the height of the hero image (align-self:stretch) and
-      // splits top/bottom: title + tagline stacked at the TOP, against the
-      // image's top-right; the summary paragraph + the demo video pinned to the
-      // BOTTOM, level with the image's bottom edge (paragraph left, video out
-      // at the right page margin).
+      /* HERO TEXT COLUMN (Owen, 14 Nov 2026; replaces the 13 Nov "one block at
+         the top" and the spec block under the photo). The aside fills the
+         photo's height (align-self:stretch):
+           top      title and tagline; the demo video, when there is one, at
+                    the top right beside them
+           bottom   the summary, its last line level with the photo's bottom
+                    edge.
+         Under the photo: the spec line with INQUIRE at its right end (16 Nov). */
       '<div class="hero-aside">' +
         '<div class="hero-aside-top">' +
-          '<h1 class="hero-title">'+esc(p.title)+'</h1>' +
-          (real(p.teaser)?'<p class="hero-tagline">'+esc(p.teaser)+'</p>':'') +
+          '<div class="hero-head">' +
+            '<h1 class="hero-title">'+esc(p.title)+'</h1>' +
+            (real(p.teaser)?'<p class="hero-tagline">'+esc(p.teaser)+'</p>':'') +
+          '</div>' +
+          (real(p.heroVideo)?'<div class="hero-vid">'+videoFig(p.heroVideo,"16/9")+'</div>':'') +
         '</div>' +
         '<div class="hero-aside-btm">' +
           (real(p.summary)?'<p class="desc">'+withInfo(esc(p.summary), p.summaryMore)+'</p>':'') +
-          (real(p.heroVideo)?'<div class="hero-vid">'+videoFig(p.heroVideo,"16/9")+'</div>':'') +
         '</div>' +
       '</div>' +
+      heroInfo +
     '</section>' +
     galleryBlock;
 
@@ -917,7 +934,7 @@
           // hidden until the model has loaded AND turned out to have a lamp in it
           // (an emissive material). A speaker does not get a LIGHT ON button.
           // On / off only (Owen, 2026-10-28: the brightness slider is gone).
-          '<button class="mv-btn" data-act="power" hidden>LIGHT ON</button>' +
+          '<button class="mv-btn" data-act="power" aria-pressed="true" hidden>LIGHT</button>' +
         '</div>' +
         /* VIEW IN YOUR SPACE (R1-Q1 default, 3 Nov 2026): the last group of the
            control row, under the stage, never on the render. It used to be a
@@ -943,7 +960,7 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=27" title="'+esc(p.title)+' mechanism, interactive diagram" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=32" title="'+esc(p.title)+' mechanism, interactive diagram" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="'+esc(p.title)+' mechanism diagram"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
@@ -963,7 +980,11 @@
   var graphicInner = mechEl + (real(p.hiwVideo) ? videoFig(p.hiwVideo,"16/9") : '');
   var mechHalf = (graphicInner || real(p.howItWorks)) ?
     '<div class="cad-hiw-mech">' +
-      (real(p.howItWorks)?'<div class="hiw-text"><p class="desc">'+withInfo(esc(p.howItWorks), p.howItWorksMore)+'</p></div>':'') +
+      // 13 Nov 2026 (Owen): howItWorks and howItWorksMore show together, two
+      // paragraphs in one justified block; no info icon here any more (the
+      // icon stays on the summary, withInfo(), and on the Materials page)
+      (real(p.howItWorks)?'<div class="hiw-text"><p class="desc">'+esc(p.howItWorks)+'</p>'+
+        (real(p.howItWorksMore)?'<p class="desc">'+esc(p.howItWorksMore)+'</p>':'')+'</div>':'') +
       (graphicInner ? '<div class="hiw-graphic'+(mechEl?' has-mech':'')+'">'+graphicInner+'</div>' : '') +
     '</div>' : '';
 
@@ -1034,9 +1055,35 @@
   // ---------- assemble: hero, CAD/graphic, the read-more button, then the
   // (revealed on click) process section. Material swatches, the component
   // spread, and V2 are retired. ----------
-  var sections = [hero, cad, readmore, processReveal].filter(Boolean);
+  var sections = [hero, cad, readmore, processReveal, availNote].filter(Boolean);
   var content = document.getElementById("content");
   content.innerHTML = sections.join('');
+  /* FIT THE HERO TEXT COLUMN (14 Nov 2026; 16 Nov the spec block left the
+     column for the line under the photo). Where the photo is too short for
+     title, tagline and summary, the column first closes its spacing
+     (.hero-tight), so it never pushes the gallery down. It watches the photo
+     and the window, never the column itself (that would loop). Stacked pages
+     (900px and under) are left alone. */
+  var fitHeroInfo = (function(){
+    var hero = content.querySelector(".hero"),
+        aside = hero && hero.querySelector(".hero-aside"),
+        fig = hero && hero.querySelector(".hero-main");
+    if(!aside || !fig) return function(){};
+    var MQ = window.matchMedia("(max-width:900px)"), queued = false;
+    function fit(){
+      queued = false;
+      hero.classList.remove("hero-tight");
+      if(MQ.matches) return;
+      if(aside.getBoundingClientRect().height > fig.getBoundingClientRect().height + 1) hero.classList.add("hero-tight");
+    }
+    function later(){ if(!queued){ queued = true; setTimeout(fit, 0); } }
+    function now(){ queued = false; fit(); }
+    if(window.ResizeObserver){ try { new ResizeObserver(now).observe(fig); } catch(e){} }
+    window.addEventListener("resize", now);
+    try { document.fonts && document.fonts.ready.then(later); } catch(e){}
+    later();
+    return later;
+  })();
   /* ---------- VARIANTS: colour, material and finish options (2026-11-02) ----------
      p.variants is a list of options for the product; see the header of
      js/projects-data.js for the fields. With two or more options a FINISH row
@@ -1060,10 +1107,10 @@
           AR shows the default finish (the AR files carry one finish, Q20).
      The first option is the default and uses the original files and the GLB's
      original materials unless it names a variant (Q19).
-     2026-11-03 order (review 2026-11-02_2 finding 6, UX 3.9): the row sits
-     INSIDE .hero-materials, between the chips and the custom line, and INQUIRE
-     moves to the end of the row (class .fin-inq), so it reads: chips, choose a
-     finish, INQUIRE, then the custom offer. Without variants nothing moves.
+     2026-11-13 order: FINISH is the last row of the hero spec table
+     (dl.hero-spec), under MATERIALS, so it reads: materials, choose a finish,
+     then the availability and custom sentences with INQUIRE. INQUIRE no
+     longer moves (it did from 3 to 13 Nov, class .fin-inq, gone).
      The selected swatch carries .fin-on (and aria-checked) so the stylesheet
      can draw it unlike the focus ring.
      Nothing here is keyed on a project: a product with no `variants` draws
@@ -1083,11 +1130,12 @@
     function warn(msg){ try { console.warn(msg); } catch(e){} }
 
     // ---- the row
+    /* 13 Nov 2026: the row is the last row of the hero spec table (dl.hero-spec):
+       <dt>FINISH</dt>, then the swatches (the radio group) and the chosen name
+       in the <dd>. */
     var row = document.createElement("div");
-    row.className = "hero-finish";
-    row.setAttribute("role", "radiogroup");
-    row.setAttribute("aria-label", "Finish");
-    row.innerHTML = '<span class="fin-label">FINISH</span>' +
+    row.className = "hs-row hero-finish";
+    row.innerHTML = '<dt>FINISH</dt><dd><span class="fin-sws" role="radiogroup" aria-label="Finish">' +
       vs.map(function(v){
         var sw = real(v.swatch) ? String(v.swatch) : "#888";
         /* an image swatch is an ABSOLUTE url: inside a custom property a
@@ -1097,20 +1145,13 @@
           "--sw:url(&quot;" + esc(new URL(base + "variants/" + encodeURIComponent(sw), location.href).href) + "&quot;)";
         return '<button type="button" class="fin-sw" role="radio" aria-checked="false" data-vid="' + esc(String(v.id)) + '" style="' + style + '" aria-label="' + esc(String(v.name || v.id)) + '" title="' + esc(String(v.name || v.id)) + '"></button>';
       }).join("") +
-      '<span class="fin-name" aria-live="polite"></span>';
-    var mats = content.querySelector(".hero-materials");
-    var custom = mats && mats.querySelector(".hero-custom");
-    var anchor = mats || content.querySelector(".hero-specs");
-    if(!anchor) return;
-    if(custom) custom.insertAdjacentElement("beforebegin", row);
-    else anchor.insertAdjacentElement("afterend", row);
-    // choose, then ask: INQUIRE follows the swatches (.hero-finish .fin-inq
-    // in css/style.css: same button, pushed to the row's end)
-    var inq = content.querySelector(".hero-specs a.inq");
-    if(inq){
-      inq.classList.add("fin-inq");
-      row.appendChild(inq);
-    }
+      '</span><span class="fin-name" aria-live="polite"></span></dd>';
+    var spec = content.querySelector(".hero-spec");
+    if(!spec) return;
+    spec.appendChild(row);
+    fitHeroInfo();   // the FINISH row makes the column taller
+    var mats = spec;   // the chips live in the table's MATERIALS row
+    // choose, then ask: INQUIRE ends the spec line
     /* ONE NOTE LINE under the row (score round 1, UX 1 and layout 4). Its
        line is RESERVED (visibility, not hidden/display), so a note appearing
        never moves the gallery. It says, in this order:
@@ -1127,7 +1168,7 @@
     arNote.setAttribute("aria-live", "polite");
     arNote.style.visibility = "hidden";
     arNote.textContent = "\u00a0";
-    row.insertAdjacentElement("afterend", arNote);
+    content.querySelector(".hero-info").appendChild(arNote);   // its own line at the end of the spec line
     var nameEl = row.querySelector(".fin-name");
     var btns = Array.prototype.slice.call(row.querySelectorAll(".fin-sw"));
 
@@ -1299,7 +1340,7 @@
         b.classList.toggle("fin-on", on);
         b.tabIndex = on ? 0 : -1;
       });
-      nameEl.textContent = String(v.name || v.id).toUpperCase();
+      nameEl.textContent = String(v.name || v.id);   // as written: a value in the spec table is level 3 text (13 Nov 2026)
       applyMaterials(v);
       applyImages(v); applyModel(v); applyLink(v); applyArNote();
       if(remember){ try { sessionStorage.setItem(KEY, String(v.id)); } catch(e){} applyUrl(v); }
@@ -1368,7 +1409,18 @@
         mechFrame.style.height = Math.ceil(d.height) + "px";
         mechFrame.style.minHeight = "0";
       }
+      if(d && d.type === "mechAwake") mechAwake = !!d.awake;
     });
+    /* TAP TO WAKE (Owen, 14 Nov 2026; the frame side is js/mech-touch.js): on
+       touch a mechanism wakes on a tap and goes back to sleep on a tap anywhere
+       outside it (a touch on this page is outside it by definition: the frame
+       has its own document) or once it has left the screen. */
+    var mechAwake = false;
+    function mechSleep(){ if(!mechAwake) return; mechAwake = false; try { mechFrame.contentWindow.postMessage({ type:"mechSleep" }, "*"); } catch(e){} }
+    document.addEventListener("pointerdown", function(e){ if(e.pointerType !== "mouse") mechSleep(); }, true);
+    if(window.IntersectionObserver){
+      new IntersectionObserver(function(en){ if(!en[0].isIntersecting) mechSleep(); }).observe(mechFrame);
+    }
 
     /* ---------- tell the mechanism when it is actually on screen ----------
        The mechanisms run requestAnimationFrame loops that repaint a large
@@ -1455,7 +1507,7 @@
       if(info){
         if(info.explode && exBtn) exBtn.hidden = false;
         if((info.lamp || p.modelLight === true) && pwrBtn){
-          pwrBtn.hidden = false; pwrBtn.classList.add("active"); pwrBtn.textContent = "LIGHT ON";
+          pwrBtn.hidden = false; pwrBtn.classList.add("active"); pwrBtn.setAttribute("aria-pressed", "true");
         }
         if(sel && info.variants.length > 1 && !(p.variants || []).length){
           sel.hidden = false;
@@ -1956,7 +2008,7 @@
             var q = qrcode(0, "M");
             q.addData(arLink());
             q.make();
-            qrImg.innerHTML = q.createImgTag(5, 0);
+            qrImg.innerHTML = q.createImgTag(5, 0, "QR code: opens this 3D model on your phone");   // alt text, review 14 Nov E1
           } catch(e){
             // no QR? fall back to the plain URL, still readable by eye
             qrImg.innerHTML = '<code class="mv-qr-url">' + esc(arLink()) + '</code>';
@@ -2046,7 +2098,7 @@
           };
           if(window.NEWO_HEADVIEW) return go();
           var hs = document.createElement("script");
-          hs.src = "js/headview.js?v=3";
+          hs.src = "js/headview.js?v=4";
           hs.onload = go;
           document.head.appendChild(hs);
         });
@@ -2178,22 +2230,54 @@
 
       /* TOUCH: the element has to be live BEFORE the finger lands (see above),
          so it stays live, and a touch that starts off the model is stopped in
-         the capture phase before model-viewer sees it. A vertical swipe still
-         scrolls (touch-action pan-y); a tap is handed to whatever is under the
-         model at that point, so the buttons and links there work. */
+         the capture phase before model-viewer sees it; a tap there is handed
+         to whatever is under the model at that point, so the buttons and links
+         work.
+         TAP TO WAKE (Owen, 16 Nov 2026, review Q16; the mechanisms' rule from
+         14 Nov, js/mech-touch.js). The model starts ASLEEP: the page scrolls
+         through it and no touch turns it. One short tap on the model wakes it:
+         every touch is then the model's (touch-action none) and the TOUCH TO
+         INTERACT label takes the chosen text-link look. It sleeps again on a
+         touch anywhere off the model or when it leaves the screen. */
       if(coarse){
         mv.style.pointerEvents = "auto";
-        var fade = function(){ box.classList.add("mv-live"); };
-        var offTap = null;
-        window.addEventListener("pointerdown", function(e){
-          offTap = null;
-          if(e.target !== mv) return;
-          if(onModel(e.clientX, e.clientY)){ fade(); mvDragging = true; return; }
-          e.stopPropagation();
-          offTap = { x:e.clientX, y:e.clientY };
-        }, true);
+        var awake = false, down = null, offTap = null;
+        var wake = function(on){
+          if(awake === on) return;
+          awake = on;
+          box.classList.toggle("mv-awake", on);
+          mv.setAttribute("touch-action", on ? "none" : "pan-y");
+        };
+        ["pointerdown", "pointermove", "pointerup"].forEach(function(type){
+          window.addEventListener(type, function(e){
+            if(e.pointerType === "mouse") return;
+            if(type === "pointerdown"){
+              offTap = null; down = null;
+              if(e.target !== mv){ wake(false); return; }
+              if(!onModel(e.clientX, e.clientY)){
+                wake(false); e.stopPropagation();
+                offTap = { x:e.clientX, y:e.clientY };
+                return;
+              }
+              if(awake){ mvDragging = true; return; }
+              down = { x:e.clientX, y:e.clientY, t:performance.now() };
+              e.stopImmediatePropagation();
+              return;
+            }
+            if(awake || e.target !== mv) return;
+            if(type === "pointerup" && down){
+              var dx = e.clientX - down.x, dy = e.clientY - down.y;
+              if(dx * dx + dy * dy < 144 && performance.now() - down.t < 700) wake(true);
+              down = null;
+            }
+            e.stopImmediatePropagation();
+          }, true);
+        });
         window.addEventListener("pointerup", function(){ mvDragging = false; }, true);
-        window.addEventListener("pointercancel", function(){ mvDragging = false; }, true);
+        window.addEventListener("pointercancel", function(){ mvDragging = false; down = null; }, true);
+        if(window.IntersectionObserver){
+          try { new IntersectionObserver(function(en){ if(!en[0].isIntersecting) wake(false); }).observe(box); } catch(e){}
+        }
         mv.addEventListener("click", function(e){
           if(!offTap) return;
           var t = offTap; offTap = null;
@@ -2283,12 +2367,11 @@
         if(emis.length){ emis.forEach(function(m,i){ var b=base[i]; try{ m.setEmissiveFactor([b[0]*v,b[1]*v,b[2]*v]); }catch(e){} }); }
         else { mv.exposure = 0.3 + 1.1*v; }   // fallback: dim the whole scene
       }
-      /* The label carries the state (LIGHT ON / LIGHT OFF), so the button has
-         no aria-pressed (score round 2, 3D item 7): with both, a screen reader
-         heard "LIGHT OFF, toggle button, not pressed", the state twice. The
-         changing label was kept over a fixed "LIGHT" + aria-pressed because it
-         is what a sighted visitor reads; .active (ink) stays the visual cue. */
-      function setPwr(on){ lampOn=on; pwrBtn.classList.toggle("active",on); pwrBtn.textContent = on?"LIGHT ON":"LIGHT OFF"; applyLamp(); }
+      /* A fixed "LIGHT" label with aria-pressed (Owen, 16 Nov 2026, review Q9;
+         was LIGHT ON / LIGHT OFF with no aria-pressed). On = the chosen look
+         (ink, red underline), off = a plain red text link; a screen reader
+         hears "LIGHT, toggle button, pressed" once. */
+      function setPwr(on){ lampOn=on; pwrBtn.classList.toggle("active",on); pwrBtn.setAttribute("aria-pressed", on ? "true" : "false"); applyLamp(); }
       // p.modelLight:true forces the switch on for a lamp whose emissive
       // material could not be read (it then dims the whole scene instead).
       var hasLamp = emis.length > 0 || p.modelLight === true;
@@ -2676,7 +2759,9 @@
            does and keeps the photo's own description after it. */
         if(!el.hasAttribute("aria-label")){
           var it = items[n] || {}, d = el.getAttribute("alt") || "";
-          el.setAttribute("aria-label", "Open " + (it.type === "video" ? "video" : "photo") + " " +
+          // the hero's clip is named for what it is (review 14 Nov E11)
+          var kind = it.type !== "video" ? "photo" : (el.closest && el.closest(".hero-vid") ? "demo video" : "video");
+          el.setAttribute("aria-label", "Open " + kind + " " +
             (n + 1) + " of " + items.length + (d ? ", " + d : ""));
         }
         el.addEventListener("click", function(e){
@@ -2695,6 +2780,18 @@
     lbNext.addEventListener("click", function(){ step(1); });
     lbClose.addEventListener("click", close);
     lb.addEventListener("click", function(e){ if(e.target === lb) close(); });
+    /* SWIPE (review 14 Nov 2026, C4): on touch, a sideways swipe steps through
+       the set and a swipe down closes, as the arrows and Escape do */
+    var sw = null;
+    lb.addEventListener("touchstart", function(e){
+      sw = (e.touches.length === 1) ? { x:e.touches[0].clientX, y:e.touches[0].clientY } : null;
+    }, { passive:true });
+    lb.addEventListener("touchend", function(e){
+      if(!sw || !lb.classList.contains("open")) return;
+      var t = e.changedTouches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y; sw = null;
+      if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5){ if(items.length > 1) step(dx < 0 ? 1 : -1); }
+      else if(dy > 80 && dy > Math.abs(dx) * 1.5) close();
+    }, { passive:true });
     document.addEventListener("keydown", function(e){
       if(!lb.classList.contains("open")) return;
       if(e.key === "Escape") close();
@@ -2888,6 +2985,9 @@
     // starts loading until scrolled near, so waiting on it would just burn
     // the timeout. Near the fold - the KART/OMNI row - it loads immediately.)
     if(mechF && mechF.getBoundingClientRect().top < window.innerHeight * 2){
+      // review 14 Nov D3: inside a frame (options-test) a lazy iframe this
+      // near never started, so the loader waited out its 8 s. Near: load now.
+      mechF.setAttribute("loading", "eager");
       // same already-fired guard as the video: a same-origin frame that has
       // finished loading will not fire load again
       var mechDone = false;
@@ -2938,7 +3038,11 @@
          most of the "6 seconds to load". */
       imgs.forEach(function(im){
         var r = im.getBoundingClientRect();
-        (r.width > 0 && r.top < fold ? near : far).push(im);
+        var isNear = r.width > 0 && r.top < fold;
+        // review 14 Nov D3: a lazy image this near may not have started (inside
+        // a frame it never does); start it, or decode() waits out the 6 s
+        if(isNear && im.loading === "lazy" && !im.complete) im.loading = "eager";
+        (isNear ? near : far).push(im);
       });
       function warm(list, ms){
         return Promise.all(list.map(function(im){
@@ -3024,7 +3128,7 @@
       if(!cols.length || !imgs.length) return;
 
       /* 1. KEEP THE PARAGRAPH INSIDE ITS OWN GALLERY COLUMN.
-         --w-desc is a fixed 32ch (~448px) but the gallery columns narrow with
+         (History, 15px type:) --w-desc was a fixed 32ch (~448px) but the gallery columns narrow with
          the window - 459px at 1920, 340 at 1440, 279 at 1180 - so from about
          1500px down the paragraph hung past its own column and into the next
          one. That next column is the TALL one, the only column that reaches
@@ -3037,16 +3141,33 @@
         var r = c.getBoundingClientRect();
         if(tl >= r.left - 2 && tl < r.right) own = r;
       });
-      if(own){
-        var cap = Math.max(200, Math.round(own.right - tl));
-        txt.style.maxWidth = cap + "px";
-        /* Justified text needs a measure to justify against. This paragraph is
-           set justified like every other .desc on the site, which reads well at
-           the full 32ch but opens ugly rivers of white space once the column
-           caps it to ~20ch. Flag it so the CSS can fall back to plain left
-           alignment when it has been squeezed. */
-        txt.classList.toggle("hiw-narrow", cap < 380);
+      /* 13 Nov 2026 (Owen: the note read stubby and was not justified). The
+         cap to its own column now applies ONLY when that column still holds a
+         full measure (MIN_CH characters or more, about 1560px wide and up):
+         the note then sits in the gap under its column, as before. In a
+         narrower column it keeps the site measure (46 characters, --w-desc)
+         and runs under the next column too; step 2 below then places it
+         clear of the deepest photo above ANY part of it, so it can never land
+         on one. It is never wider than the row it sits in. */
+      var MIN_CH = 38;
+      var probe = txt.querySelector(".desc");
+      var chW = 0;
+      if(probe){
+        var pcs = getComputedStyle(probe), cv = document.createElement("canvas").getContext("2d");
+        cv.font = pcs.fontSize + " " + pcs.fontFamily;
+        chW = cv.measureText("0").width + (parseFloat(pcs.letterSpacing) || 0);
       }
+      var tcs = getComputedStyle(txt);
+      var pad = (parseFloat(tcs.paddingLeft) || 0) + (parseFloat(tcs.paddingRight) || 0);
+      if(own && chW){
+        var cap = Math.round(own.right - tl);
+        if(cap - pad >= MIN_CH * chW && cap < txt.getBoundingClientRect().width) txt.style.maxWidth = cap + "px";
+      }
+      var room = Math.round(cad.getBoundingClientRect().right - tl);
+      if(room > 0 && txt.getBoundingClientRect().width > room) txt.style.maxWidth = room + "px";
+      /* Justified text needs a measure to justify against: under 30 characters
+         it opens rivers, so the CSS falls back to plain left alignment there. */
+      txt.classList.toggle("hiw-narrow", !!chW && (txt.getBoundingClientRect().width - pad) < 30 * chW);
 
       /* 2. Pull up by the paragraph's own height so its bottom lands on the
          gallery's bottom - but NEVER far enough to put its top over a photo
@@ -3326,11 +3447,20 @@
             });
           });
         } catch(e){ try { console.warn("gateFirstDraw: texture walk failed:", e); } catch(e2){} tex = []; }
+        /* KART "CRASH" (14 Nov 2026): this used to upload ONE texture per
+           animation frame. Chrome gives a window that sits behind other
+           windows 1 frame a second, and a background tab none, so the 22
+           KART textures took 11 s to forever; past the 30 s cap below the
+           model then drew ungated, and that one draw blocked the tab for
+           4.7 s (measured in Owen's Chrome). Timers keep running in both
+           cases, so the upload now runs on setTimeout, as many textures as
+           fit in 6 ms per slice. */
         (function upload(){
-          if(tex.length){
+          var t0 = performance.now();
+          while(tex.length && performance.now() - t0 < 6){
             try { three.initTexture(tex.shift()); } catch(e){}
-            return requestAnimationFrame(upload);
           }
+          if(tex.length) return setTimeout(upload, 0);
           state = 2;
           ready();
           try { scene.queueRender(); } catch(e){}
@@ -3351,10 +3481,19 @@
     mvEl.addEventListener("load", prepare);
     // nothing asks for a frame once the loader has gone, so nudge one.
     // Capped at 30 s: past that the gate opens whatever state it is in.
-    var nudgeT0 = performance.now();
+    /* 14 Nov 2026: the 30 s count only runs while the tab is visible. A tab
+       left in the background used to hit the cap and then pay the whole
+       ungated first draw (seconds) the moment it came back. */
+    var waitedVisible = 0, lastNudge = performance.now();
     (function nudge(){
-      if(state === 2 && loaderGone()){ try { scene.queueRender(); } catch(e){} return; }
-      if(performance.now() - nudgeT0 > 30000){
+      var now = performance.now();
+      if(!document.hidden) waitedVisible += Math.min(now - lastNudge, 1000);
+      lastNudge = now;
+      // review 14 Nov D1: start the loader's 700ms clock on every tick, not only
+      // once prepared, so a model prepared after the reveal draws at once
+      var gone = loaderGone();
+      if(state === 2 && gone){ try { scene.queueRender(); } catch(e){} return; }
+      if(waitedVisible > 30000){
         try { console.warn("gateFirstDraw: gave up waiting (state " + state + "), model draws ungated"); } catch(e){}
         state = 2; ready();
         try { scene.queueRender(); } catch(e){}

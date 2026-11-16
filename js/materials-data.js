@@ -50,12 +50,12 @@ const MATERIAL_CATEGORIES = [
     groups: [
       {
         label: "Hardwood",
-        properties: "Dense, slow-growing. High impact resistance.",
+        properties: "Slow-growing, medium to very high density. Hard-wearing.",
         bestUses:   "Load-bearing frames, wear surfaces, acoustic enclosures.",
         lifecycle:  "",
         items: [
           { name:"Purpleheart", slug:"purpleheart", used:true, image:"purpleheart.jpg", usedIn:[{id:"omni",title:"OMNI"}], aliases:[],
-            copy:"Among the densest hardwoods, and stiff. Oxidizes to deep purple with UV exposure. Mass and stiffness suit speaker enclosures." },
+            copy:"Among the densest hardwoods, and stiff. A fresh cut turns deep purple as it oxidizes; UV slowly browns it. Mass and stiffness suit speaker enclosures." },
           { name:"Cherry", slug:"cherry", used:true, image:"cherry.jpg", usedIn:[{id:"kart",title:"KART"}], aliases:[],
             copy:"Medium density, uniform grain. Darkens with UV exposure. High machinability." },
           { name:"Walnut", slug:"walnut", used:false, image:"walnut.jpg", usedIn:[], aliases:[],
@@ -171,7 +171,7 @@ const MATERIAL_CATEGORIES = [
         lifecycle:  "",
         items: [
           { name:"Frosted glass", slug:"frosted-glass", used:true, image:"frosted-glass.jpg", usedIn:[{id:"kart",title:"KART"}], aliases:["frosted"],
-            copy:"Acid-etched or sandblasted. Diffuses light output to eliminate LED hot spots." }
+            copy:"Acid-etched or sandblasted. Diffuses light output to soften LED hot spots." }
         ]
       },
       {
@@ -226,7 +226,7 @@ const MATERIAL_CATEGORIES = [
     label: "SOFT GOODS", slug: "soft-goods", swatch: "soft", image: "cat-soft.jpg", imageCaption: "Wound thread",
     take: "Cushions and covers wear faster than the frame around them, so they are made to come off for cleaning or replacement.",
     intro: {
-      properties: "Woven or extruded fibres. Requires tension or a skeletal frame for structure.",
+      properties: "Woven fibres and foams. Fabrics need tension or a frame for structure.",
       finishes:   "",
       lifecycle:  "Natural fibres decompose. Synthetics shed microplastics and are difficult to recycle."
     },

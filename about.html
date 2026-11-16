@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ABOUT · Owen Palmer, industrial designer · STUDIO NEWO</title>
 <meta name="description" content="Owen Palmer and Studio NEWO, industrial design in Toronto: products built in house, custom pieces to order, renders and drawings for brands.">
-<meta name="theme-color" content="#e9e7e2">
+<meta name="theme-color" content="#ffffff">
 <link rel="canonical" href="https://studionewo.com/about.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/about.html">
@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=69">
+<link rel="stylesheet" href="css/style.css?v=79">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -82,7 +82,7 @@
      it now for their hidden <h1>. */
   /* red, matching the [NN] marks these headings replaced - the numbers carried
      the only red on the page and it went with them, so the titles take it on. */
-  .principle h2{font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(19px,2.4vw,27px); line-height:1.05; margin-bottom:10px; color:var(--red);}
+  .principle h2{font-family:var(--disp); font-style:italic; font-weight:400; font-size:var(--t-h2); line-height:1.05; margin-bottom:10px; color:var(--red);}
 
   .ab-photo{display:block; width:clamp(110px,11vw,150px); height:auto; margin-bottom:14px;}
   .ab-facts{margin-top:clamp(56px,10vh,120px); display:grid; grid-template-columns:repeat(12,1fr); column-gap:var(--gut); row-gap:clamp(30px,5vh,46px); align-items:start;}
@@ -90,11 +90,11 @@
   .ab-fact:nth-child(2){grid-column:5 / 9;}
   .ab-fact:nth-child(3){grid-column:9 / 13;}
   .ab-fact ul{list-style:none; margin-top:10px;}
-  .ab-fact li{font-size:13px; line-height:1.45; letter-spacing:-.004em; padding:9px 0 10px; border-top:1px solid rgba(20,20,20,.16);}
+  .ab-fact li{font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0; padding:9px 0 10px;}   /* rule removed, review 14 Nov A1 */
   /* each fact: what (ink), where and when (small caps), then one line of detail */
   .ab-fact .af-t, .ab-fact .af-m, .ab-fact .af-d{display:block;}
-  .ab-fact .af-m{margin-top:3px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;}
-  .ab-fact .af-d{margin-top:5px; color:var(--ink-soft);}
+  .ab-fact .af-m{margin-top:3px; font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+  .ab-fact .af-d{margin-top:5px; color:var(--ink-soft); max-width:min(var(--w-desc),46ch);}   /* 46ch, review 14 Nov C6 */
   .ab-fact .cap2{display:block; margin-top:clamp(26px,4vh,38px);}
   /* ROUTES (2026-10-26): what a visitor can do here, one column each, on the
      same 4 / 4 / 4 split as the facts below. Replaced the Freelance paragraph,
@@ -105,13 +105,14 @@
   .ab-route:nth-child(2){grid-column:5 / 9;}
   .ab-route:nth-child(3){grid-column:9 / 13;}
   .ab-route .desc{margin:10px 0 16px;}
-  .ab-cta{margin-top:clamp(30px,5vh,46px); display:flex; flex-wrap:wrap; gap:8px;}
+  .ab-cta{margin-top:clamp(30px,5vh,46px); display:flex; flex-wrap:wrap; gap:0 22px;}   /* 22px between text links (13 Nov 2026) */
   .ab-cta .inq{margin-top:0;}
   .ab-route .inq{margin-top:auto;}
-  /* tools: one line in the project pages' material-chip idiom (.hero-materials)
+  /* 13 Nov 2026: level 3 text, as written (was 13px tracked capitals).
+     tools: one line in the project pages' material-chip idiom (.hero-chips)
      instead of a seven-row list; the CV has the detail */
   .ab-tools{margin-top:clamp(30px,5vh,46px);}
-  .ab-tools p{margin-top:10px; font-size:13px; line-height:1.9; letter-spacing:.1em; text-transform:uppercase;}
+  .ab-tools p{margin-top:10px; font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0;}
   .ab-tools .sep{margin:0 3px; color:var(--ink-soft); opacity:.62;}   /* 4.8:1 (was .5, 3.3:1), 3 Nov 2026 */
 
   /* 861 to 1279 wide a third of the grid is under 31 characters: the routes go
@@ -175,17 +176,17 @@
   <!-- ROUTES: the three reasons to be here, each with its one next step -->
   <div class="ab-routes">
     <div class="ab-route">
-      <span class="cap">Products</span>
+      <span class="cap" role="heading" aria-level="2">Products</span>
       <p class="desc">Lighting, furniture, audio and appliances, designed and built in house. None is for sale yet; ask to be told when one is.</p>
       <a class="inq" href="index.html">SEE THE PRODUCTS &rarr;</a>
     </div>
     <div class="ab-route">
-      <span class="cap">Custom</span>
+      <span class="cap" role="heading" aria-level="2">Custom</span>
       <p class="desc">Custom versions of any studio product in another size, material or finish are made to order. So are furniture and lighting designed from scratch.</p>
       <a class="inq" href="contact.html?about=Custom">ASK ABOUT CUSTOM &rarr;</a>
     </div>
     <div class="ab-route">
-      <span class="cap">Studio services</span>
+      <span class="cap" role="heading" aria-level="2">Studio services</span>
       <p class="desc">For brands, startups and institutions: product renders, animation, 3D web models and production drawings from your CAD at a fixed price per job, and design and prototyping from a brief.</p>
       <a class="inq" href="solutions.html#services">SERVICES AND PRICES &rarr;</a>
     </div>
@@ -218,14 +219,14 @@
        about/ has the phone number and personal email removed on purpose. -->
   <div class="ab-facts">
     <div class="ab-fact">
-      <span class="cap">Experience</span>
+      <span class="cap" role="heading" aria-level="2">Experience</span>
       <ul>
         <li><span class="af-t">Founder and designer, Studio NEWO</span><span class="af-m">Toronto, 2024 to present</span></li>
         <li><span class="af-t">Project assistant, Wood by Design</span><span class="af-m">Peterborough, 2024 to 2026</span><span class="af-d">Led assembly, finishing and installation of custom furniture and cabinetry. Prepared CAD files for CNC cutting.</span></li>
       </ul>
     </div>
     <div class="ab-fact">
-      <span class="cap">Exhibited and awards</span>
+      <span class="cap" role="heading" aria-level="2">Exhibited and awards</span>
       <ul>
         <li><span class="af-t">FLOW, IDS Toronto</span><span class="af-m">2025</span></li>
         <li><span class="af-t">LOOTS, Design for Disassembly Exhibition</span><span class="af-m">2025</span></li>
@@ -233,7 +234,7 @@
       </ul>
     </div>
     <div class="ab-fact">
-      <span class="cap">Education</span>
+      <span class="cap" role="heading" aria-level="2">Education</span>
       <ul>
         <li><span class="af-t">Industrial Design, OCAD University</span><span class="af-m">Toronto, 2024 to 2027</span></li>
         <li><span class="af-t">Mechanical Engineering, University of Ottawa</span><span class="af-m">2021 to 2023</span></li>
@@ -241,7 +242,7 @@
     </div>
   </div>
   <div class="ab-tools">
-    <span class="cap">Tools</span>
+    <span class="cap" role="heading" aria-level="2">Tools</span>
     <p>SolidWorks&nbsp;<span class="sep">/</span> Onshape&nbsp;<span class="sep">/</span> Blender&nbsp;<span class="sep">/</span> KeyShot&nbsp;<span class="sep">/</span> CNC&nbsp;<span class="sep">/</span> Laser&nbsp;<span class="sep">/</span> 3D&nbsp;printing&nbsp;<span class="sep">/</span> Welding&nbsp;<span class="sep">/</span> Lathe&nbsp;<span class="sep">/</span> Mill&nbsp;<span class="sep">/</span> ESP32&nbsp;<span class="sep">/</span> C++&nbsp;<span class="sep">/</span> Three.js&nbsp;<span class="sep">/</span> AR</p>
   </div>
   <p class="ab-cta">
@@ -263,7 +264,7 @@
 
 
 <script src="js/projects-data.js?v=33"></script>
-<script src="js/main.js?v=7"></script>
-<script src="js/menu.js?v=44"></script>
+<script src="js/main.js?v=8"></script>
+<script src="js/menu.js?v=57"></script>
 </body>
 </html>

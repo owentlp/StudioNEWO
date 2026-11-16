@@ -4,8 +4,8 @@
   "description": "Industrial design studio in Toronto. Products built to be opened, repaired and kept.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e9e7e2",
-  "theme_color": "#e9e7e2",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     { "src": "/logo/favicon-48.png",  "sizes": "48x48",   "type": "image/png" },
     { "src": "/logo/favicon-96.png",  "sizes": "96x96",   "type": "image/png" },

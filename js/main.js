@@ -147,7 +147,17 @@
    a time, and keeps the one whose WORST line has the smallest gap per space
    (ties go to the wider width). Re-run on resize, since the best width changes
    with the window. Paragraphs in proportional fonts are left alone.
-   Alignment and type size are unchanged: only a max-width is set. */
+   Alignment and type size are unchanged: only a max-width is set.
+   RETUNED 13 Nov 2026 (type reset: body 10.5px, measure 46 characters). At 46
+   characters nearly every paragraph sets cleanly at the full measure, so the
+   search now runs ONLY on a paragraph that fails the 3 Nov exit test as
+   rendered at full width (mean gap 1.9 spaces or more, or a gap of 3 or
+   more): measured 13 Nov, that is 4 paragraphs on the whole site (one on
+   About, three on Materials) where it used to narrow about 70. Everything
+   else keeps the full measure, so blocks line up. The floor is 38 characters
+   (was 31). A paragraph that shares its block with another paragraph (the
+   two-paragraph note under a project gallery) is never narrowed, so the two
+   keep one width. */
 (function(){
   var MIN_CHARS = 30, SHRINK = 0.15, monoCache = {};
   function charWidth(cs){
@@ -235,8 +245,14 @@
     var cw = charWidth(cs); if(!cw) return false;
     var text = p.textContent; if(text.length < MIN_CHARS) return false;
     var maxCols = Math.floor((p.clientWidth + 0.01) / cw); if(maxCols < 16) return false;
-    // never narrower than 31 characters (the measure floor), nor 15% under the column
-    var minCols = Math.max(Math.ceil(maxCols * (1 - SHRINK)), Math.min(maxCols, 31));
+    // one of several paragraphs in a block: keep the block's one width
+    var sib = p.parentElement ? p.parentElement.children : [];
+    for(var q = 0; q < sib.length; q++) if(sib[q] !== p && sib[q].tagName === p.tagName && sib[q].className === p.className){ delete p.dataset.fit; return false; }
+    // sets cleanly at the full measure (the 3 Nov exit test): leave it alone
+    var full = realGaps(p, cw);
+    if(full.mean < 1.9 && full.worst < 3){ delete p.dataset.fit; return false; }
+    // never narrower than 38 characters (the measure floor), nor 15% under the column
+    var minCols = Math.max(Math.ceil(maxCols * (1 - SHRINK)), Math.min(maxCols, 38));
     var toks = tokens(text), cands = [];
     for(var c = maxCols; c >= minCols; c--) cands.push({ c: c, sim: badness(toks, c) });
     // the simulation ranks the widths; the best few are then checked as rendered

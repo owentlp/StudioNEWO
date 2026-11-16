@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MATERIALS · STUDIO NEWO</title>
 <meta name="description" content="The materials in Studio NEWO products, each chosen for the full life of the object: lifespan, use and environmental impact.">
-<meta name="theme-color" content="#e9e7e2">
+<meta name="theme-color" content="#ffffff">
 <link rel="canonical" href="https://studionewo.com/materials.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/materials.html">
@@ -32,7 +32,7 @@
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=69">
+<link rel="stylesheet" href="css/style.css?v=79">
 <style>
   /* page-specific layout only (rebuilt 2026-10-08). One flat page: every
      material in use is visible on one scroll, no accordions. Each category is
@@ -59,10 +59,10 @@
   .matcat-head{display:flex; align-items:baseline; gap:clamp(14px,2vw,26px);}
   .matcat-head .cap.lbl{margin-bottom:0; flex:0 0 auto;}
   .matcat-head h2.cap{font-family:var(--body); font-style:normal; line-height:inherit; margin-top:0;}
-  .matcat-names{flex:1 1 auto; min-width:0; font-size:10.5px; letter-spacing:.03em; opacity:.72;}   /* .55 was 3.8:1; .72 is about 5.5:1 (2026-11-03) */
-  .matcat-count{flex:0 0 auto; font-size:10.5px; letter-spacing:.1em; opacity:.72;}
+  .matcat-names{flex:1 1 auto; min-width:0; font-size:var(--t-body); letter-spacing:0; opacity:.72;}   /* .55 was 3.8:1; .72 is about 5.5:1 (2026-11-03) */
+  .matcat-count{flex:0 0 auto; font-size:var(--t-label); letter-spacing:var(--ls-label); color:var(--ink-2);}   /* level 4 colour, review 14 Nov B8 */
   .matcat-take{margin-top:var(--txt-gap); max-width:var(--w-desc);}
-  .mi-k{display:inline-block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--red-text); margin-right:7px;}   /* small red text: --red-text (5.6:1), 2026-11-03 */
+  .mi-k{display:inline-block; font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--red-text); margin-right:7px;}   /* small red text: --red-text (5.6:1), 2026-11-03 */
   .mi-row{display:block;}
   .mi-row + .mi-row{margin-top:6px;}
 
@@ -73,15 +73,15 @@
   .matitem-media{aspect-ratio:1/1; overflow:hidden; margin:0;}
   .matitem-media img{width:100%; height:100%; object-fit:cover; display:block;}
   .matitem-text{min-width:0;}
-  .mi-name{display:block; font-family:var(--disp); font-style:italic; font-size:clamp(15px,1.5vw,19px); line-height:1.08; margin-bottom:4px;}
+  .mi-name{display:block; font-family:var(--disp); font-style:italic; font-size:var(--t-tag); line-height:1.08; margin-bottom:4px;}
   .matitem.is-for .mi-name{color:var(--red-text);}
-  .mi-in{display:block; font-size:10.5px; letter-spacing:.05em; margin-bottom:6px;}
+  .mi-in{display:block; font-size:var(--t-body); letter-spacing:0; margin-bottom:6px;}
   .mi-in a{color:var(--ink); text-decoration:underline; text-decoration-color:rgba(20,20,20,.3); text-underline-offset:2px;}
   .mi-in a:hover{color:var(--red-text); text-decoration-color:var(--red-text);}
   .matitem-text .desc{max-width:var(--w-desc);}
   /* CLOSING BLOCK (2 Nov 2026, site review finding 2): the page was a dead end.
-     Same type as the intro lead, and the site's one button style (.inq). */
-  .matg-close{margin-top:clamp(76px,10vh,120px); max-width:none;}   /* the .lead inside caps itself in its own (22px) characters */
+     Same type as the intro lead, and the site's one text-link look (.inq). */
+  .matg-close{margin-top:clamp(76px,10vh,120px); max-width:none;}   /* the .lead inside caps itself in its own (15px) characters */
   .matg-close .lead{margin:0; font-family:var(--body); font-style:normal; line-height:inherit;}
   .matg-close .inq{margin-top:22px;}
 
@@ -153,10 +153,10 @@
 </footer>
 
 
-<script src="js/materials-data.js?v=11"></script>
+<script src="js/materials-data.js?v=12"></script>
 <script src="js/projects-data.js?v=33"></script>
-<script src="js/main.js?v=7"></script>
-<script src="js/menu.js?v=44"></script>
+<script src="js/main.js?v=8"></script>
+<script src="js/menu.js?v=57"></script>
 <script>
 (function(){
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -203,11 +203,11 @@
       return '<span class="mi-row"><span class="mi-k">'+esc(r[0])+'</span>'+esc(r[1])+'</span>';
     }).join("");
   }
-  function withInfo(text, rowHtml){
+  function withInfo(text, rowHtml, name){   // name: whose notes (review 14 Nov E12)
     if(!rowHtml) return esc(text);
     return esc(text) +
       '<span class="info-wrap">' +
-        '<button type="button" class="info-btn" aria-expanded="false" aria-label="Technical notes">'+INFO_ICON+'</button>' +
+        '<button type="button" class="info-btn" aria-expanded="false" aria-label="Technical notes'+(name ? ', '+esc(name) : '')+'">'+INFO_ICON+'</button>' +
         '<span class="info-panel"><span class="info-panel-in">'+rowHtml+'</span></span>' +
       '</span>';
   }
@@ -250,11 +250,11 @@
                        ["Best uses", g.bestUses], ["End of life", g.lifecycle]]);
       items.push('<div class="matitem" id="'+esc(it.slug)+'">' +
         '<figure class="matitem-media '+esc(cat.swatch)+'">' + (real(it.image) ? '<img src="materials/th/'+esc(it.image)+'"' +
-          ' data-orig="materials/'+esc(it.image)+'" alt="'+esc(it.name)+'" width="240" height="240"' +
+          ' data-orig="materials/'+esc(it.image)+'" alt="" width="240" height="240"' +
           ' loading="lazy" decoding="async" onerror="matThumbErr(this)">' : '') + '</figure>' +
         '<div class="matitem-text">' +
-          '<span class="mi-name">'+esc(it.name)+'</span>' + usedIn +
-          '<p class="desc">'+withInfo(it.copy, info)+'</p>' +
+          '<span class="mi-name" role="heading" aria-level="3">'+esc(it.name)+'</span>' + usedIn +
+          '<p class="desc">'+withInfo(it.copy, info, it.name)+'</p>' +
         '</div></div>');
     }); });
 
@@ -265,7 +265,7 @@
           '<span class="matcat-names">'+esc(groupNames)+'</span>' +
           '<span class="matcat-count">'+total+' IN USE</span>' +
         '</div>' +
-        (real(cat.take) || catInfo ? '<p class="desc matcat-take">'+withInfo(cat.take || "", catInfo)+'</p>' : '') +
+        (real(cat.take) || catInfo ? '<p class="desc matcat-take">'+withInfo(cat.take || "", catInfo, cat.label.charAt(0) + cat.label.slice(1).toLowerCase())+'</p>' : '') +
         '<div class="matlist">'+items.join("")+'</div>' +
       '</div></section>';
   }).join("");
