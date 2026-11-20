@@ -66,7 +66,7 @@
        generator, so the baked tag and this one name the same file. */
     var heroDims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][heroFile] : null;
     var heroImg = ORIGIN + "/" + base + ((heroDims && hasTier(heroDims, "md")) ? "md/" : "") + heroFile;
-    var summary = real(p.summary) ? p.summary : (real(p.teaser) ? p.teaser : ("Studio NEWO project: " + p.title + "."));
+    var summary = real(p.summary) ? plain(p.summary) : (real(p.teaser) ? p.teaser : ("Studio NEWO project: " + p.title + "."));
     /* share title and description: the SAME formulas as tools/make-project-pages.py
        (title + kind; a short description cut at 160 characters), so a JS-aware
        crawler and a link scraper see one thing. */
@@ -100,7 +100,7 @@
       "publisher": { "@type": "Organization", "name": "Studio NEWO", "url": ORIGIN + "/" }
     };
     if(real(p.date)) ld.dateCreated = p.date;
-    if(real(p.summary)) ld.description = p.summary;
+    if(real(p.summary)) ld.description = plain(p.summary);
     /* kart/halo/omni/neb/flow.html carry this in their HTML already
        (tools/make-project-pages.py, same fields), so it exists without JS;
        only the bare template gets it from here */
@@ -130,8 +130,12 @@
      Dimensions come from js/image-sizes.js; if an image has no entry there
      (a new file added before the script was re-run) this quietly emits a plain
      src with no srcset, so the page still works, just without the saving. */
-  var GAL_SIZES  = "(max-width:760px) 50vw, 25vw";
-  var HERO_SIZES = "(max-width:760px) 100vw, 58vw";
+  var GAL_SIZES  = "(max-width:760px) 58vw, 25vw";
+  /* The hero photo is 7 of 12 columns over 900 wide (57vw measured), 6 with a demo video (.hero.has-vid,
+     49vw), and the full width at 900 and under. Until the 16 Nov review (S7) this said 58vw for every
+     product and from 761, so KART and HALO could fetch a larger hero than they show and a tablet a
+     smaller one. Keep in step with HERO_SIZES in tools/make-project-pages.py. */
+  function heroSizes(vid){ return "(max-width:900px) 100vw, " + (vid ? "49vw" : "58vw"); }
   /* Scatter cells span between 2 and 12 of the 12 columns, and the span is
      known at build time, so each figure can declare its own real width instead
      of sharing one pessimistic guess. Below 600px the scatter collapses to two
@@ -162,6 +166,18 @@
   // so it's not a security issue, but a stray & or < in a caption would have
   // silently broken the markup around it.
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  /* KEY WORDS (Owen, 19 Nov 2026: "marked block"). The copy marks its key words with two asterisks each
+     side, **like this** (each product's copy.txt, carried into js/projects-data.js). em() turns a marked
+     run into <span class="em">; a full stop right after it joins the block. plain() takes the marks off
+     for anything that is not body text (descriptions for search and sharing). The block itself is drawn
+     further down: search "THE MARKED BLOCK". */
+  function plain(s){ return (s==null?"":String(s)).replace(/\*\*/g, ""); }
+  function em(s){
+    return esc(s).replace(/\*\*([^*]+)\*\*([.!?])?/g, function(m, words, stop){ return '<span class="em">' + words + (stop || "") + '</span>'; }).replace(/\*\*/g, "");
+  }
+  /* SECTION HEADINGS (Owen, 19 Nov 2026): every section heading is set exactly as the tagline under the
+     title (css/style.css "SECTION HEADINGS"). */
+  function secH(words){ return '<h2 class="sec-h">' + esc(words) + '</h2>'; }
   function isCut(src){ return /\.png$/i.test(src||""); }
 
   /* ALT TEXT, by filename, from the `alt` map in js/projects-data.js.
@@ -377,7 +393,7 @@
     var startCol = m ? +m[1] : 1;
     var sideCls = startCol >= 6 ? " side-right" : "";
     var tagsHtml = dTags.length ? '<div class="matl-tags">'+esc(dTags.map(function(t){ return t.toUpperCase(); }).join("   /   "))+'</div>' : '';
-    var lifeHtml = real(lifecycle) ? '<p class="desc'+sideCls+'">'+esc(lifecycle)+'</p>' : '';
+    var lifeHtml = real(lifecycle) ? '<p class="desc'+sideCls+'">'+em(lifecycle)+'</p>' : '';
     if(!tagsHtml && !lifeHtml) return '';
     return '<div class="cell proc-note matl-note" style="grid-column:'+col+';margin-top:'+mt+'px;">' +
       tagsHtml + lifeHtml +
@@ -449,7 +465,7 @@
 
      Column count is capped at the number of thumbs, so three photos make three
      full-width columns rather than three quarters of the page. */
-  function buildColumns(files, colCount){
+  function buildColumns(files, colCount, weights){
     var cols = [], heights = [];
     for(var c = 0; c < colCount; c++){ cols.push([]); heights.push(0); }
     files.forEach(function(entry){
@@ -460,13 +476,19 @@
       var shortest = 0;
       for(var c = 1; c < colCount; c++){ if(heights[c] < heights[shortest]) shortest = c; }
       cols[shortest].push(entry);
-      heights[shortest] += ratio;
+      heights[shortest] += ratio * (weights ? weights[shortest] : 1);   // a wider column's photo is taller
     });
     return cols;
   }
   var galFiles = gal.slice(1).map(function(g, i){ return { file:g, lb:galOffset + i }; });
+  /* PHONE (Owen, 16 Nov (e): "perfectly balanced, no asymmetry or variation
+     ... it should match the pc version"): the two phone columns are 7 and 5
+     wide (css/style.css .gcols.g75), so the photos differ in size and the
+     columns end at different heights, like the four desktop columns do. */
+  var GAL_PHONE_W = [7, 5];
   function galleryHTML(colCount){
-    return buildColumns(galFiles, colCount).map(function(col){
+    var w = (galMQ.matches && colCount === 2) ? GAL_PHONE_W : null;
+    return buildColumns(galFiles, colCount, w).map(function(col){
       return '<div class="gcol">' + col.map(function(e){
         return '<div class="gthumb">' +
                  '<img src="'+img(e.file)+'"'+srcAttrs(e.file, GAL_SIZES)+
@@ -480,7 +502,7 @@
   function galColCount(){ return Math.min(galMQ.matches ? 2 : 4, galFiles.length) || 1; }
   var galleryBlock = (galFiles.length || real(p.galleryVideo)) ?
     '<div class="hero-gallery" id="heroGallery">' +
-      '<div class="gcols">' + galleryHTML(galColCount()) + '</div>' +
+      '<div class="gcols' + (galMQ.matches ? ' g75' : '') + '">' + galleryHTML(galColCount()) + '</div>' +
       (real(p.galleryVideo)?'<div class="gallery-vid">'+videoFig(p.galleryVideo,"16/9")+'</div>':'') +
     '</div>' : '';
 
@@ -513,7 +535,11 @@
      MATERIALS (each a text link to the Materials page), EXHIBITED (last, so
      the materials can start on the first line), with
      INQUIRE at the right end of the first line, just under the photo's bottom
-     right corner (review Q1). It is still a dl: the
+     right corner (review Q1). 16 Nov (e), Owen: "move the materials to the
+     second line"; 16 Nov evening (review D1): "status on line 2 is better".
+     Line 1 is YEAR, SIZE, PRICE at the left and INQUIRE at the right; line 2
+     starts with MATERIALS (.hs-mat), then EXHIBITED and FINISH, with STATUS
+     (.hs-st) at its right end, under INQUIRE. It is still a dl: the
      labels (dt) are there for screen readers and hidden on screen. The FINISH
      block further down adds a FINISH item (label shown) when a product has two
      or more `variants`. A field that is "" or missing draws nothing (real()).
@@ -534,7 +560,7 @@
       '<dl class="hero-spec">' +
         (year ? specRow("YEAR", esc(year)) : '') +
         (real(p.size) ? specRow("SIZE", esc(p.size)) : '') +
-        (real(p.status) ? specRow("STATUS", '<span class="st">' + slashParts(p.status) + '</span>') : '') +
+        (real(p.status) ? specRow("STATUS", '<span class="st">' + slashParts(p.status) + '</span>', "hs-st") : '') +
         (real(p.price) ? specRow("PRICE", '<span class="price">' + esc(p.price) + '</span>') : '') +
         (real(p.materials) ? specRow("MATERIALS", '<span class="hero-chips">' + matChips(p.materials) + '</span>', "hs-mat") : '') +
         (real(p.exhibited) ? specRow("EXHIBITED", 'Exhibited ' + esc(p.exhibited)) : '') +
@@ -543,11 +569,12 @@
     '</div>';
   /* AVAILABILITY NOTE (16 Nov 2026): the availability sentence and the one
      custom sentence for every product (2 and 3 Nov 2026), moved out of the
-     hero to the end of the page, after the 3D model and Process and detail.
+     hero to the end of the page, after the 3D model and Process (since 19 Nov
+     2026 under its own heading, "Availability", before the next project).
      Its link names the product (&from=<CODE>); the FINISH block adds
      &finish=<name> to it and to INQUIRE whenever a finish is chosen. */
   var availNote =
-    '<section class="pj-avail" aria-label="Availability">' +
+    '<section class="pj-avail" aria-label="Availability">' + secH("Availability") +
       (real(p.availability) ? '<p class="hero-av">' + esc(p.availability) + '</p>' : '') +
       '<p class="hero-custom">A custom one can be made to order now, in another size, material or finish. ' +
         '<a class="hero-custom-link" href="contact.html?about=Custom&amp;from=' + encodeURIComponent(p.title) + '">ASK ABOUT CUSTOM &rarr;</a></p>' +
@@ -561,17 +588,19 @@
   var heroDims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][heroSrc] : null;
   var heroBox = heroDims ? ' style="aspect-ratio:' + heroDims[0] + ' / ' + heroDims[1] + '"' : '';
   var hero =
-    '<section class="hero">' +
+    '<section class="hero' + (real(p.heroVideo) ? ' has-vid' : '') + '">' +
       '<figure class="hero-main">' +
-        '<img src="'+img(heroSrc)+'"'+srcAttrs(heroSrc, HERO_SIZES)+heroBox+' alt="'+altFor(heroSrc)+'" fetchpriority="high" decoding="async" data-lb="0" tabindex="0" role="button">' +
+        '<img src="'+img(heroSrc)+'"'+srcAttrs(heroSrc, heroSizes(real(p.heroVideo)))+heroBox+' alt="'+altFor(heroSrc)+'" fetchpriority="high" decoding="async" data-lb="0" tabindex="0" role="button">' +
       '</figure>' +
       /* HERO TEXT COLUMN (Owen, 14 Nov 2026; replaces the 13 Nov "one block at
          the top" and the spec block under the photo). The aside fills the
          photo's height (align-self:stretch):
-           top      title and tagline; the demo video, when there is one, at
-                    the top right beside them
+           top      title and tagline
            bottom   the summary, its last line level with the photo's bottom
-                    edge.
+                    edge; beside it at the right the demo video, when there is
+                    one, its bottom edge on the photo's bottom edge (Owen,
+                    16 Nov (e); .hero.has-vid makes the photo 6 columns so the
+                    two fit side by side).
          Under the photo: the spec line with INQUIRE at its right end (16 Nov). */
       '<div class="hero-aside">' +
         '<div class="hero-aside-top">' +
@@ -579,10 +608,10 @@
             '<h1 class="hero-title">'+esc(p.title)+'</h1>' +
             (real(p.teaser)?'<p class="hero-tagline">'+esc(p.teaser)+'</p>':'') +
           '</div>' +
-          (real(p.heroVideo)?'<div class="hero-vid">'+videoFig(p.heroVideo,"16/9")+'</div>':'') +
         '</div>' +
         '<div class="hero-aside-btm">' +
-          (real(p.summary)?'<p class="desc">'+withInfo(esc(p.summary), p.summaryMore)+'</p>':'') +
+          (real(p.summary)?'<p class="desc">'+withInfo(em(p.summary), p.summaryMore)+'</p>':'') +
+          (real(p.heroVideo)?'<div class="hero-vid">'+videoFig(p.heroVideo,"16/9")+'</div>':'') +
         '</div>' +
       '</div>' +
       heroInfo +
@@ -960,7 +989,7 @@
   var mechFile = p.mechanism || "";
   var mechEl = real(mechFile)
     ? (/\.html?$/i.test(mechFile)
-        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=32" title="'+esc(p.title)+' mechanism, interactive diagram" loading="lazy" scrolling="no"></iframe>'
+        ? '<iframe id="mechFrame" class="mech-frame" src="'+img(mechFile)+'?v=37" title="'+esc(p.title)+' mechanism, interactive diagram" loading="lazy" scrolling="no"></iframe>'
         : '<figure class="fig cut"><img src="'+img(mechFile)+'" alt="'+esc(p.title)+' mechanism diagram"></figure>')
     : '';
   // p.mechNotes (a numbered list under the intro) isn't part of the Figma
@@ -983,8 +1012,9 @@
       // 13 Nov 2026 (Owen): howItWorks and howItWorksMore show together, two
       // paragraphs in one justified block; no info icon here any more (the
       // icon stays on the summary, withInfo(), and on the Materials page)
-      (real(p.howItWorks)?'<div class="hiw-text"><p class="desc">'+esc(p.howItWorks)+'</p>'+
-        (real(p.howItWorksMore)?'<p class="desc">'+esc(p.howItWorksMore)+'</p>':'')+'</div>':'') +
+      // 19 Nov 2026 (Owen): the note has its heading, "How it works", in the tagline's style
+      (real(p.howItWorks)?'<div class="hiw-text">'+secH("How it works")+'<p class="desc">'+em(p.howItWorks)+'</p>'+
+        (real(p.howItWorksMore)?'<p class="desc">'+em(p.howItWorksMore)+'</p>':'')+'</div>':'') +
       (graphicInner ? '<div class="hiw-graphic'+(mechEl?' has-mech':'')+'">'+graphicInner+'</div>' : '') +
     '</div>' : '';
 
@@ -1015,12 +1045,17 @@
   // as its own block lower in the scatter. Both are archive-only content.
   // 4 columns, not 3 (2026-10-02): at 3 the justified text opened wide word
   // gaps. Checked on all five projects: no cell overlaps, same section height.
-  var procTextTop = real(p.processText) ?
-    '<div class="cell proc-note" style="grid-column:7 / 11;margin-top:0;">' +
-      '<p class="desc">'+esc(p.processText)+'</p></div>' : '';
+  /* 19 Nov 2026 (Owen's picks): the section's one title, "Process", stands at the head of the first
+     note, in the heading style (a section with photos and no first note still gets the title, in a cell
+     of its own). The second note starts on the photos' left edge (it started on column 2, where no
+     image starts) and is set against the photo on its right: .note-right puts its right edge on the
+     column edge beside that photo; the text stays justified. */
+  var procTextTop = (real(p.processText) || procImgs.length || real(p.processVideo) || real(p.processMore)) ?
+    '<div class="cell proc-note" style="grid-column:7 / 11;margin-top:0;">' + secH("Process") +
+      (real(p.processText) ? '<p class="desc">'+em(p.processText)+'</p>' : '') + '</div>' : '';
   var procTextBottom = real(p.processMore) ?
-    '<div class="cell proc-note" style="grid-column:2 / 6;">' +
-      '<p class="desc">'+esc(p.processMore)+'</p></div>' : '';
+    '<div class="cell proc-note note-right" style="grid-column:1 / 7;">' +
+      '<p class="desc">'+em(p.processMore)+'</p></div>' : '';
   var procCells = (procTextTop ? [procTextTop] : []).concat(procImgCells).concat(procTextBottom ? [procTextBottom] : []);
   // designTags: short, provable claims (Designed for disassembly, Repairable,
   // Open source, etc), shown as small red tags, plus the one-line lifecycle/
@@ -1031,7 +1066,7 @@
   // project, this is a claim, not a mood board.
   // designTags are no longer shown (not part of the current copy); only the
   // one-line lifecycle note rides in the process scatter, archive pages only.
-  var matlCell = matlNoteCell([], p.lifecycle, (gVar % 2 === 0) ? "2 / 8" : "6 / 12", 0);
+  var matlCell = matlNoteCell([], p.lifecycle, (gVar % 2 === 0) ? "1 / 7" : "7 / 13", 0);   /* 19 Nov 2026: on a photo edge (was 2 / 8 and 6 / 12, where no image starts) */
   if(matlCell) procCells.push(matlCell);
   if(procVidCell) procCells.push(procVidCell);
   var process = (procImgCells.length || procVidCell || procTextTop || procTextBottom) ?
@@ -1043,19 +1078,48 @@
   // CAD/graphic) shows first; this button reveals the fuller process /
   // portfolio section below it, on the same page. Hidden entirely if a
   // project has no process content to reveal. ----------
+  /* 19 Nov 2026 (Owen's final picks): the section is titled "Process" and is OPEN from the start; the
+     "Process and detail" button and its row are gone. Its heading is the visible one at the head of
+     the first note (procTextTop above). */
   var hasMore = !!process;
-  var readmore = hasMore ?
-    '<div class="readmore" id="readmoreWrap">' +
-      '<button type="button" class="read-more-link" id="readMoreBtn" aria-expanded="false" aria-controls="procReveal">Process and detail</button>' +
-    '</div>' : '';
-  // the visually hidden h2 gives screen readers a heading for the section
-  // (the page's only other heading is the h1 product name)
-  var processReveal = hasMore ? '<div class="proc-reveal" id="procReveal" hidden><h2 class="vh">Process and detail</h2>' + process + '</div>' : '';
+  var processReveal = hasMore ? '<div class="proc-reveal" id="procReveal">' + process + '</div>' : '';
+
+  /* NEXT PROJECT (Owen, 19 Nov 2026, A4: "next only", at one third of the mock's height, with the link
+     to all projects). The last block in <main>: the project after this one in PROJECT_ORDER
+     (js/projects-data.js), round again from the last to the first. Photo, name, kind, year and a text
+     link; the whole tile is the link. Data only, nothing per product. */
+  var ALL_PROJECTS = "all-projects.html";
+  var nextFoot = (function(){
+    var order = (typeof PROJECT_ORDER !== "undefined" && PROJECT_ORDER.length) ? PROJECT_ORDER.filter(function(k){ return PROJECTS[k]; }) : Object.keys(PROJECTS);
+    var i = order.indexOf(id);
+    if(order.length < 2) return '';
+    var nid = order[(i + 1) % order.length], q = PROJECTS[nid];
+    if(!q || nid === id) return '';
+    var d = "projects/" + nid + "/", file = (q.gallery && real(q.gallery[0])) ? q.gallery[0] : "hero.jpg";
+    var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[nid]) ? IMG_SIZES[nid][file] : null;
+    var set = [];
+    if(dims && hasTier(dims, "sm")) set.push(d + "sm/" + file + " 600w");
+    if(dims && hasTier(dims, "md")) set.push(d + "md/" + file + " 1200w");
+    var src = (dims && hasTier(dims, "sm")) ? d + "sm/" + file : d + file;
+    var alt = (q.alt && q.alt[file]) || q.title;
+    return '<nav class="pj-next" aria-label="More projects">' +
+      '<div class="pj-next-head">' + secH("Next project") + '<a class="pj-next-all" href="' + ALL_PROJECTS + '">All projects</a></div>' +
+      '<a class="pj-next-t" href="' + nid + '.html">' +
+        '<span class="pj-next-im"><img src="' + src + '"' + (set.length ? ' srcset="' + set.join(", ") + '" sizes="(max-width:900px) 33vw, 17vw"' : '') +
+          ' alt="' + esc(alt) + '" loading="lazy" decoding="async"></span>' +
+        '<span class="pj-next-cap"><span class="pj-next-n">' + esc(q.title) + '</span>' +
+          (real(q.kind) ? '<span class="pj-next-k">' + esc(q.kind) + '</span>' : '') +
+          (real(q.date) ? '<span class="pj-next-y">' + esc(q.date) + '</span>' : '') +
+          '<span class="pj-next-go">View project</span></span>' +
+      '</a></nav>';
+  })();
 
   // ---------- assemble: hero, CAD/graphic, the read-more button, then the
   // (revealed on click) process section. Material swatches, the component
   // spread, and V2 are retired. ----------
-  var sections = [hero, cad, readmore, processReveal, availNote].filter(Boolean);
+  /* 19 Nov 2026: with Process open the order is fixed: hero, model and diagram, Process, the
+     availability note, the next project. (The 16 Nov end row, .pj-end, is gone.) */
+  var sections = [hero, cad, processReveal, availNote, nextFoot].filter(Boolean);
   var content = document.getElementById("content");
   content.innerHTML = sections.join('');
   /* FIT THE HERO TEXT COLUMN (14 Nov 2026; 16 Nov the spec block left the
@@ -1073,8 +1137,37 @@
     function fit(){
       queued = false;
       hero.classList.remove("hero-tight");
+      fitSpec();
       if(MQ.matches) return;
       if(aside.getBoundingClientRect().height > fig.getBoundingClientRect().height + 1) hero.classList.add("hero-tight");
+    }
+    /* FIT THE SPEC LINE (Owen, 16 Nov 2026, late: "none of the text under the
+       hero should extend past the hero image. if you need to reduce the font
+       size that is on"; css/style.css SPEC LINE, INSIDE THE PHOTO'S WIDTH).
+       The spec line is exactly as wide as the photo, INQUIRE at its corner.
+       Where line 2 (MATERIALS ... STATUS) is too long for that, one measured
+       step: the whole spec line is set smaller, the largest of SPEC_SIZES at
+       which the list is two lines; if the floor (7.5px) is still too long,
+       STATUS goes to a third line (.spec-wrap). Never per product. */
+    var SPEC_SIZES = [8.5, 8.25, 8, 7.75, 7.5];
+    function fitSpec(){
+      var info = hero.querySelector(".hero-info"), dl = info && info.querySelector(".hero-spec");
+      if(!dl) return;
+      info.classList.remove("spec-wrap");
+      info.style.removeProperty("--spec-fs");
+      if(MQ.matches) return;
+      function lines(){
+        var top = dl.getBoundingClientRect().top, low = 0;
+        Array.prototype.forEach.call(dl.querySelectorAll(".hs-row"), function(r){
+          Array.prototype.forEach.call(r.getClientRects(), function(c){ if(c.bottom - top > low) low = c.bottom - top; });
+        });
+        return low;
+      }
+      for(var k = 0; k < SPEC_SIZES.length; k++){
+        if(k) info.style.setProperty("--spec-fs", SPEC_SIZES[k] + "px");
+        if(lines() <= 44) return;   // two 20px lines (a FINISH row's swatches may stand a little proud)
+      }
+      info.classList.add("spec-wrap");
     }
     function later(){ if(!queued){ queued = true; setTimeout(fit, 0); } }
     function now(){ queued = false; fit(); }
@@ -2165,7 +2258,7 @@
     // straight through it, so hovering the model never hijacks the scroll. A
     // click inside the compact .cad-stage box "engages" it (pointer-events:auto)
     // so you can rotate + wheel-zoom; a click anywhere outside disengages it,
-    // handing scrolling back. A small hint shows until it's engaged.
+    // handing scrolling back. A plain label under the model says so until then.
     (function(){
       var box = mv.parentElement;   // .cad-stage (the compact slot)
       var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
@@ -2173,10 +2266,15 @@
       var hint = document.createElement("div");
       hint.className = "mv-hint";
       hint.textContent = coarse ? "TOUCH TO INTERACT" : "DRAG TO INTERACT";
-      /* 4 Nov 2026 (Owen): the hint floats ON the model again, as a chip in
-         the stage, so it is plain the model can be turned and how. It fades
-         when the model is engaged (.cad-stage.mv-live .mv-hint). */
-      box.appendChild(hint);
+      /* 16 Nov 2026 (Owen: "3d model hint should work the same as mechanism";
+         replaces the 4 Nov chip on the model). Plain label text in the flow,
+         on its own line at the head of the control row under the model, never
+         on the model and never a box or a button (css/style.css .mv-hint).
+         Mouse: it fades the first time the model is hovered or pressed.
+         Touch: it stays, and takes the chosen text-link look while awake. */
+      var hintBar = box.parentElement ? box.parentElement.querySelector(".mv-bar") : null;
+      if(hintBar) hintBar.insertBefore(hint, hintBar.firstChild);
+      else box.parentNode.insertBefore(hint, box.nextSibling);
 
       /* ---------- WHY TOUCH IS HANDLED SEPARATELY ----------
          The gate below works by flipping pointer-events from none to auto on
@@ -2246,6 +2344,7 @@
           if(awake === on) return;
           awake = on;
           box.classList.toggle("mv-awake", on);
+          hint.classList.toggle("on", on);
           mv.setAttribute("touch-action", on ? "none" : "pan-y");
         };
         ["pointerdown", "pointermove", "pointerup"].forEach(function(type){
@@ -2297,6 +2396,7 @@
       function setLive(on){
         if(live === on) return;
         live = on;
+        if(on) hint.classList.add("gone");
         mv.style.pointerEvents = on ? "auto" : "none";
       }
       window.addEventListener("pointermove", function(e){
@@ -2524,7 +2624,26 @@
         if(!ir.width || !ir.height) return;
         if(!mask) build();
         if(!mask) return;
-        var sr = sp.getBoundingClientRect();
+        /* THE GUTTER HOLDS ITS LABELS (16 Nov (e), Owen on his phone: "component
+           diagram labels overlap with images"). The names beside the photo
+           keep their type size while the gutter shrinks with the column, and a
+           phone set to larger text makes them wider still. So the photo gives
+           way: if any gutter label would reach the photo, --spread-img is
+           lowered until the widest one fits with 8px to spare (never under
+           30%). A label at fraction f of a gutter g wide and w wide needs
+           g >= (w + 8) / (1 - f). General: nothing authored per label. */
+        sp.style.removeProperty("--spread-img");
+        var sr = sp.getBoundingClientRect(), needG = 0;
+        Array.prototype.forEach.call(sp.querySelectorAll(".comp-label.in-gut"), function(l){
+          var f = parseFloat(l.style.getPropertyValue("--f")) || 0;
+          var w = (l.querySelector(".comp-info") || l).getBoundingClientRect().width;
+          if(f < .9) needG = Math.max(needG, (w + 8) / (1 - f));
+        });
+        if(sr.width && needG > ir.left - sr.left + .5){
+          var pct = Math.max(30, Math.floor((1 - needG / sr.width) * 100));
+          sp.style.setProperty("--spread-img", pct + "%");
+          ir = im.getBoundingClientRect(); sr = sp.getBoundingClientRect();
+        }
         Array.prototype.forEach.call(sp.querySelectorAll(".comp-label.on-img"), function(l){
           if(l.dataset.top) l.style.top = l.dataset.top;     // authored place first
           var b = (l.querySelector(".comp-info") || l).getBoundingClientRect(), PAD = 2;
@@ -2586,35 +2705,178 @@
     mv.addEventListener("blur", function(){ st.style.outline = ""; st.style.outlineOffset = ""; });
   })();
 
-  // read more: reveal the process / portfolio section, then retire the button
-  var readMoreBtn = document.getElementById("readMoreBtn");
-  if(readMoreBtn){
-    readMoreBtn.addEventListener("click", function(e){
-      var wrap = document.getElementById("procReveal");
-      if(wrap){ wrap.hidden = false; requestAnimationFrame(function(){ wrap.classList.add("open"); }); }
-      readMoreBtn.setAttribute("aria-expanded", "true");
-      var rm = document.getElementById("readmoreWrap");
-      var h = wrap && wrap.querySelector("h2");
-      /* the button that had focus is gone: hand focus to the section it
-         opened (its heading), or keyboard focus falls back to <body> and the
-         next Tab starts again from the top of the page (score round 1, 3D 5).
-         2026-11-03 (score round 2, 3D item 6): that heading is visually
-         hidden, so a sighted KEYBOARD user saw focus vanish. From the keyboard
-         (a click with detail 0) the heading now takes the button's place,
-         same words, same type, same slot, so nothing moves and the focus ring
-         has something to sit on. Inline colour: it is not a link, so it does
-         not take the button's red hover. A mouse click is unchanged: the
-         button goes, the heading stays for screen readers only. */
-      if(h && rm && e && e.detail === 0){
-        h.classList.remove("vh");
-        h.className = "read-more-link proc-head";
-        h.style.color = "var(--ink)"; h.style.cursor = "default"; h.style.margin = "0"; h.style.fontWeight = "normal";
-        readMoreBtn.hidden = true; readMoreBtn.style.display = "none";
-        rm.appendChild(h);
-      } else if(rm) rm.style.display = "none";
-      if(h){ h.setAttribute("tabindex", "-1"); try { h.focus({ preventScroll:true }); } catch(err){ h.focus(); } }
+  /* (19 Nov 2026) Process is open from the start, so the "read more" click that revealed it is gone. */
+
+  /* THE MARKED BLOCK (Owen, 19 Nov 2026: the block is exactly one line tall, stacked blocks meet with no
+     overlap and no gap, the full stop is inside). The key words are the .em spans made by em() from the
+     **marks** in the copy. A CSS background cannot do it: OCR B's own box is 17px tall on a 14.28px
+     line, so a background ran 1.4px into the lines above and below. The block is drawn as bands BEHIND
+     the words, in a layer inside the paragraph (.em-bands, css/style.css "KEY WORDS"), one band per
+     marked line:
+     - a band runs from the top of its line to the top of the next line; each edge is worked out once
+       and used by both neighbours, so two stacked bands share it exactly;
+     - on a screen scaled 125% or 150% that shared edge can fall between two screen pixels and show as
+       a grey hairline, so where two bands touch a 2px bridge is drawn across the join, inside both;
+     - pieces of one phrase on the same line are joined into one band;
+     - no padding: a band ends on its first and last letter, so no word moves.
+     The words turn to the page colour only once the bands are drawn (.em-on), so with no script the
+     copy reads as plain text. Colours are the tokens (--ink band, --page words): right in both themes.
+     Redrawn whenever a paragraph rewraps (its size changes, the window changes, the fonts arrive). */
+  (function keyWords(){
+    var hosts = [];
+    Array.prototype.forEach.call(content.querySelectorAll(".em"), function(sp){
+      var par = sp.closest("p") || sp.parentElement;
+      if(hosts.indexOf(par) < 0){ hosts.push(par); par.classList.add("em-host"); }
     });
-  }
+    if(!hosts.length) return;
+    function box(l, t, w, h){ return '<i style="left:' + l.toFixed(4) + 'px;top:' + t.toFixed(4) + 'px;width:' + w.toFixed(4) + 'px;height:' + h.toFixed(4) + 'px"></i>'; }
+    function draw(){
+      hosts.forEach(function(par){
+        if(!par.isConnected) return;
+        var pr = par.getBoundingClientRect(); if(pr.height < 1) return;
+        var lh = parseFloat(getComputedStyle(par).lineHeight) || 14.28, c0 = null, lines = {}, centre = {};
+        Array.prototype.forEach.call(par.querySelectorAll(".em"), function(sp){
+          Array.prototype.forEach.call(sp.getClientRects(), function(r){
+            if(r.width < 0.5) return;
+            var c = (r.top + r.bottom) / 2 - pr.top; if(c0 === null) c0 = c;
+            var k = Math.round((c - c0) / lh);
+            if(centre[k] === undefined) centre[k] = c;                 /* the real centre of this line, as laid out */
+            (lines[k] = lines[k] || []).push({ l:r.left - pr.left, r:r.right - pr.left });
+          });
+        });
+        function edge(k){ return (centre[k] !== undefined ? centre[k] : centre[k - 1] + lh) - lh / 2; }   /* top of line k = bottom of line k-1 */
+        var html = "", ks = Object.keys(lines).map(Number).sort(function(a, b){ return a - b; });
+        ks.forEach(function(k){                                         /* pieces that touch on one line become one band */
+          var segs = lines[k].sort(function(a, b){ return a.l - b.l; }), out = [];
+          segs.forEach(function(g){ var last = out[out.length - 1]; if(last && g.l - last.r < 0.75) last.r = Math.max(last.r, g.r); else out.push({ l:g.l, r:g.r }); });
+          lines[k] = out;
+          out.forEach(function(g){ html += box(g.l, edge(k), g.r - g.l, edge(k + 1) - edge(k)); });
+        });
+        ks.forEach(function(k){                                         /* the bridge across each join */
+          if(!lines[k + 1]) return;
+          lines[k].forEach(function(a){ lines[k + 1].forEach(function(b){
+            var l = Math.max(a.l, b.l), r = Math.min(a.r, b.r);
+            if(r - l > 0.5) html += box(l, edge(k + 1) - 1, r - l, 2);
+          }); });
+        });
+        var layer = par.querySelector(":scope > .em-bands");
+        if(!layer){ layer = document.createElement("span"); layer.className = "em-bands"; layer.setAttribute("aria-hidden", "true"); par.insertBefore(layer, par.firstChild); }
+        if(layer.getAttribute("data-k") !== html){ layer.setAttribute("data-k", html); layer.innerHTML = html; }
+        par.classList.add("em-on");
+      });
+    }
+    var queued = false;
+    function later(){ if(queued) return; queued = true; requestAnimationFrame(function(){ queued = false; draw(); }); }
+    draw();
+    if(window.ResizeObserver){ var ro = new ResizeObserver(later); hosts.forEach(function(h){ ro.observe(h); }); }
+    var rt; window.addEventListener("resize", function(){ later(); clearTimeout(rt); rt = setTimeout(draw, 450); }, { passive:true });
+    window.addEventListener("load", later);
+    try { document.fonts && document.fonts.ready.then(function(){ later(); setTimeout(draw, 300); }); } catch(e){}
+  })();
+
+  /* A HEADING'S FIRST LETTER ON THE EDGE (Owen, 19 Nov 2026: "How it works" sat slightly left of the
+     photo above it). GOST B italic leans, so the ink of a first letter does not start where its box
+     starts. The distance from the box to the ink is read from the font and taken off: the ink itself
+     starts on the image or column edge. Every .sec-h, every product. */
+  (function headingEdge(){
+    var hs = content.querySelectorAll(".sec-h");
+    if(!hs.length) return;
+    var cv = document.createElement("canvas").getContext("2d");
+    function run(){
+      Array.prototype.forEach.call(hs, function(h){
+        var c = getComputedStyle(h); cv.font = c.fontStyle + " " + c.fontWeight + " " + c.fontSize + " " + c.fontFamily;
+        var off = cv.measureText(h.textContent.charAt(0)).actualBoundingBoxLeft || 0;     /* + = the ink starts left of the box */
+        h.style.marginLeft = off.toFixed(2) + "px";
+      });
+    }
+    run();
+    var t; window.addEventListener("resize", function(){ clearTimeout(t); t = setTimeout(run, 200); }, { passive:true });
+    try { document.fonts && document.fonts.ready.then(run); } catch(e){}
+  })();
+
+  /* THE GAP ABOVE PROCESS (Owen, 19 Nov 2026: Process "starts below the mechanism text", with a smaller
+     gap above it). The gap is measured from the last thing SEEN in the model and diagram section, not
+     from its box: a diagram's frame keeps an empty strip under its drawing and labels (about 110px on
+     KART at 1440), so 72px under the frame looked like 180. --proc-up is that empty strip; css/style.css
+     ("PROJECT LAYOUT", gaps) takes it off the 72px above Process, or above the availability note on a
+     page with no Process. What counts as seen: the 3D model's control row, the note, a clip, and inside
+     a diagram's frame its words and controls, the box of an SVG drawing, and the drawn part of its canvas (read
+     from the canvas itself). A diagram moves, so the lowest point seen in a frame is REMEMBERED, as a
+     share of the frame's height, until the frame changes width: a moving drawing can only ever push
+     Process down, never pull it up over itself, and Process does not shift with every frame of it. A
+     frame that cannot be read counts whole. Over 900 wide only; stacked pages keep their plain gaps. General: nothing is
+     authored per product or per diagram. */
+  (function procGap(){
+    var cad = content.querySelector(".cad-hiw");
+    if(!cad) return;
+    var wide = window.matchMedia("(min-width:901px)"), root = document.documentElement, last = -1;
+    function canvasLow(cv){
+      var r = cv.getBoundingClientRect(); if(r.width < 2 || r.height < 2 || !cv.width || !cv.height) return -Infinity;
+      try {
+        var W = Math.min(cv.width, 240), H = Math.max(1, Math.min(600, Math.round(W * cv.height / cv.width)));
+        var c = document.createElement("canvas"); c.width = W; c.height = H;
+        var g = c.getContext("2d", { willReadFrequently:true }); g.drawImage(cv, 0, 0, W, H);
+        var d = g.getImageData(0, 0, W, H).data, share = 0;
+        scan: for(var y = H - 1; y >= 0; y--) for(var x = 0; x < W; x++) if(d[(y * W + x) * 4 + 3] > 6){ share = (y + 1) / H; break scan; }
+        return share ? r.top + share * r.height : -Infinity;
+      } catch(e){ return r.bottom; }
+    }
+    function frameLow(fr){                       /* the lowest thing seen inside a diagram's frame, in page px */
+      var fb = fr.getBoundingClientRect();
+      try {
+        var fd = fr.contentDocument, fw = fd.defaultView, k = fb.height / (fd.documentElement.clientHeight || fb.height), low = -Infinity;
+        Array.prototype.forEach.call(fd.body.querySelectorAll("*"), function(e){
+          var tag = String(e.tagName).toUpperCase();
+          var own = Array.prototype.some.call(e.childNodes, function(x){ return x.nodeType === 3 && x.nodeValue.trim(); });
+          /* an SVG drawing counts by its own box, not shape by shape: its shapes may move (OMNI's rings
+             grow), and Process must not shift while a visitor watches them */
+          var shape = /^(SVG|IMG|VIDEO)$/.test(tag);
+          if(!own && !shape && tag !== "CANVAS" && !/^(BUTTON|INPUT|SELECT)$/.test(tag)) return;
+          if(e.closest && e.closest("defs, clipPath, mask, symbol, script, style")) return;
+          /* a label that is still fading in (opacity 0) counts: leaving it out made the strip too tall
+             and pulled Process up over the diagram's words on a slow first load */
+          var c = fw.getComputedStyle(e); if(c.display === "none") return;
+          var b = tag === "CANVAS" ? canvasLow(e) : (function(){ var r = e.getBoundingClientRect(); return (r.width > 1 || r.height > 1) ? r.bottom : -Infinity; })();
+          if(b > low) low = b;
+        });
+        if(low === -Infinity) return fb.bottom;
+        /* remembered as a share of the frame, for this width of frame. Nothing is remembered while the
+           frame or the page is still loading: a half-laid-out frame can put a label anywhere for a moment. */
+        var ih = fd.documentElement.clientHeight || fb.height, wKey = Math.round(fb.width), now = Math.min(1, low / ih);
+        if(fd.readyState !== "complete" || !document.body.classList.contains("ready") || ih < 40){ fr.__low = 0; return Math.min(fb.bottom, fb.top + now * fb.height); }
+        if(fr.__lowW !== wKey){ fr.__lowW = wKey; fr.__low = 0; }
+        fr.__low = Math.max(fr.__low || 0, now);
+        return fb.top + fr.__low * fb.height;
+      } catch(e){ return fb.bottom; }
+    }
+    function measure(){
+      var v = 0;
+      if(wide.matches){
+        var seen = -Infinity;
+        Array.prototype.forEach.call(cad.querySelectorAll(".mv-bar, .hiw-text, .hiw-graphic video, .hiw-graphic img, .mv-failed-note"), function(e){
+          if(e.getClientRects().length) seen = Math.max(seen, e.getBoundingClientRect().bottom);
+        });
+        Array.prototype.forEach.call(cad.querySelectorAll("iframe.mech-frame"), function(fr){ seen = Math.max(seen, frameLow(fr)); });
+        if(seen > -Infinity) v = Math.max(0, Math.round(cad.getBoundingClientRect().bottom - seen));
+      }
+      if(v !== last){ last = v; root.style.setProperty("--proc-up", v + "px"); }
+    }
+    measure();
+    var rt; window.addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(measure, 420); }, { passive:true });
+    if(window.ResizeObserver) new ResizeObserver(measure).observe(cad);
+    Array.prototype.forEach.call(cad.querySelectorAll("iframe.mech-frame"), function(fr){
+      function hook(){
+        setTimeout(measure, 400);
+        /* a diagram redraws when it is used: measure again after each touch of it */
+        try { ["pointerup", "change", "click"].forEach(function(ev){ fr.contentDocument.addEventListener(ev, function(){ setTimeout(measure, 300); setTimeout(measure, 1200); }, true); }); } catch(e){}
+      }
+      fr.addEventListener("load", hook); hook();
+    });
+    /* a diagram draws itself a little after the page, later still behind a slow loading screen: keep
+       measuring for the first 30 seconds */
+    var n = 0, iv = setInterval(function(){ measure(); if(++n > 30) clearInterval(iv); }, 1000);
+    try { document.fonts && document.fonts.ready.then(function(){ setTimeout(measure, 300); }); } catch(e){}
+  })();
 
   // assigned by the lightbox block below, called by the gallery when it
   // re-deals its columns and the thumb elements are replaced.
@@ -2661,7 +2923,30 @@
       lbCount.textContent = (cur+1<10?"0":"")+(cur+1) + " / " + (items.length<10?"0":"")+items.length;
       lbPrev.disabled = items.length < 2;
       lbNext.disabled = items.length < 2;
+      placeArrows();
     }
+    /* ARROWS INSIDE THE PICTURE (Owen, 16 Nov (e): "should match other arrows
+       on links and should be inside of the image, not touching the edge").
+       The two arrows are the site's link arrows (css/style.css LIGHTBOX). They
+       sit inside the photo or clip on show, LB_IN px in from its left and
+       right edges, at half its height. Placed from the picture's own box, so
+       it holds for any shape of photo; re-placed when the picture loads and
+       when the window changes. Until a picture has a size they keep the
+       stylesheet's place. */
+    function placeArrows(){
+      var el = lbVid.hidden ? lbImg : lbVid, r = el.getBoundingClientRect();
+      /* the picture's box without the .98 scale it fades in from */
+      var w = el.offsetWidth, h = el.offsetHeight;
+      if(!w || !h){ lbPrev.style.left = lbNext.style.right = lbPrev.style.top = lbNext.style.top = ""; return; }
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var IN = window.innerWidth <= 640 ? 12 : 20;
+      lbPrev.style.left = Math.round(cx - w / 2 + IN) + "px";
+      lbNext.style.right = Math.round(window.innerWidth - (cx + w / 2) + IN) + "px";
+      lbPrev.style.top = lbNext.style.top = Math.round(cy) + "px";
+    }
+    lbImg.addEventListener("load", placeArrows);
+    lbVid.addEventListener("loadedmetadata", placeArrows);
+    window.addEventListener("resize", function(){ if(lb.classList.contains("open")) placeArrows(); });
     /* SCROLL LOCK. `document.body.style.overflow = "hidden"` did nothing here:
        the scrolling element on this page is <html>, not <body>, so the page
        carried on scrolling behind the open lightbox (measured: one wheel
@@ -2718,7 +3003,72 @@
       else if(e.shiftKey && a === first){ e.preventDefault(); last.focus(); }
     }
 
-    function open(i){
+    /* THE PHOTO GROWS OUT OF ITS TILE (Owen, 19 Nov 2026, A6: "photo grows good"). Opening a photo from
+       the hero or a gallery tile: a copy of that tile's picture (.lb-fly, css/style.css LIGHTBOX) flies
+       from the tile to the place the viewer's picture takes, while the dark ground fades in; when it
+       lands the viewer's own picture (the full file) takes over in the same place. Closing: the
+       picture flies back to its tile, if that tile is on screen; otherwise the viewer fades as before.
+       Transform only (one translate and one even scale), the fade is the ground's opacity. Reduced
+       motion, videos, and a tile whose picture has not arrived: no flight, the plain fade. Stepping
+       with the arrows is unchanged. */
+    var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches:false };
+    var FLY_MS = 500, fly = null, flyEnd = null, flyTimer = 0;
+    function drawn(el){                       /* the picture's own rectangle inside its box (the hero is object-fit:contain) */
+      var r = el.getBoundingClientRect(), nw = el.naturalWidth, nh = el.naturalHeight;
+      if(!nw || !nh || r.width < 2 || r.height < 2) return null;
+      var k = Math.min(r.width / nw, r.height / nh), w = nw * k, h = nh * k;
+      return { left:r.left + (r.width - w) / 2, top:r.top + (r.height - h) / 2, width:w, height:h };
+    }
+    function viewerBox(ar){                   /* where the viewer's picture stands; the lightbox must be open (display) */
+      if(lbImg.complete && lbImg.naturalWidth && lbImg.offsetWidth){
+        var r = lbImg.getBoundingClientRect(), w = lbImg.offsetWidth, h = lbImg.offsetHeight;   /* its box without the .98 scale it fades in from */
+        return { left:r.left + r.width / 2 - w / 2, top:r.top + r.height / 2 - h / 2, width:w, height:h };
+      }
+      /* the full file has not arrived: the same sum the stylesheet does (contain, inside the padding,
+         never larger than the file) */
+      var cs = getComputedStyle(lb), b = lb.getBoundingClientRect();
+      var bw = b.width - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0),
+          bh = b.height - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+      var it = items[cur] || {}, file = String(it.src || "").split("/").pop();
+      var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[id]) ? IMG_SIZES[id][file] : null;
+      var w2 = Math.min(bw, bh * ar);
+      if(dims && dims[0] && !(it.md && window.innerWidth <= 760)) w2 = Math.min(w2, dims[0]);
+      return { left:b.left + (b.width - w2) / 2, top:b.top + (b.height - w2 / ar) / 2, width:w2, height:w2 / ar };
+    }
+    function makeFly(src, at){
+      var f = src.cloneNode(false);
+      ["id", "data-lb", "tabindex", "role", "aria-label", "loading", "fetchpriority", "hidden"].forEach(function(a){ f.removeAttribute(a); });
+      f.alt = ""; f.setAttribute("aria-hidden", "true"); f.className = "lb-fly";
+      f.style.cssText = "left:" + at.left + "px;top:" + at.top + "px;width:" + at.width + "px;height:" + at.height + "px;";
+      document.body.appendChild(f);
+      return f;
+    }
+    function flyTo(f, from, to){ var k = to.width / from.width; f.getBoundingClientRect(); f.style.transform = "translate(" + (to.left - from.left) + "px," + (to.top - from.top) + "px) scale(" + k + ")"; }
+    function endFly(now){ clearTimeout(flyTimer); var e = flyEnd; flyEnd = null; if(e) e(now); }   /* now: land at once (a step, a close, a second open) */
+    function growFrom(el){
+      var a = drawn(el); if(!a) return false;
+      var b = viewerBox(a.width / a.height); if(!(b.width > 1)) return false;
+      var f = fly = makeFly(el, a);
+      el.style.visibility = "hidden";
+      flyTo(f, a, b);
+      var landed = false;
+      function land(){
+        if(landed) return; landed = true;
+        el.style.visibility = "";
+        lb.classList.add("lb-now"); lb.classList.add("imgshow"); placeArrows();
+        lbImg.getBoundingClientRect();
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.remove(); if(fly === f) fly = null; lb.classList.remove("lb-now"); }); });
+      }
+      flyEnd = function(now){
+        /* the viewer's own picture takes over once it is in; until then the flown copy stays */
+        if(now || lbImg.hidden || (lbImg.complete && lbImg.naturalWidth)) land();
+        else { lbImg.addEventListener("load", land, { once:true }); lbImg.addEventListener("error", land, { once:true }); setTimeout(land, 4000); }
+      };
+      flyTimer = setTimeout(endFly, FLY_MS + 40);
+      return true;
+    }
+    function open(i, from){
+      endFly(true);
       cur = ((i % items.length) + items.length) % items.length;
       lastFocus = document.activeElement;
       render();
@@ -2726,10 +3076,28 @@
       lb.setAttribute("aria-hidden", "false");
       lockScroll();
       document.addEventListener("keydown", trapKeys, true);
-      requestAnimationFrame(function(){ lb.classList.add("show"); lb.classList.add("imgshow"); });
+      var grows = !RM.matches && from && from.tagName === "IMG" && (items[cur] || {}).type !== "video" && growFrom(from);
+      requestAnimationFrame(function(){ lb.classList.add("show"); if(!grows) lb.classList.add("imgshow"); placeArrows(); });
       lbClose.focus();
     }
     function close(){
+      endFly(true);
+      /* fly back to the tile, when the picture on show has a tile on screen */
+      var back = null;
+      if(!RM.matches && !lbImg.hidden && lbImg.complete && lbImg.naturalWidth && lb.classList.contains("imgshow")){
+        var tile = content.querySelector('img[data-lb="' + cur + '"]'), to = tile && drawn(tile), r = lbImg.getBoundingClientRect();
+        if(to && r.width > 1 && to.top < window.innerHeight && to.top + to.height > 0 && to.left < window.innerWidth && to.left + to.width > 0)
+          back = { tile:tile, to:to, from:{ left:r.left, top:r.top, width:r.width, height:r.height } };
+      }
+      var focusBack = function(){ if(lastFocus && lastFocus.focus) lastFocus.focus(); };
+      if(back){
+        var f = fly = makeFly(lbImg, back.from);
+        back.tile.style.visibility = "hidden";
+        lb.classList.add("lb-now"); lb.classList.remove("imgshow");
+        flyTo(f, back.from, back.to);
+        flyEnd = function(){ back.tile.style.visibility = ""; f.remove(); if(fly === f) fly = null; lb.classList.remove("lb-now"); focusBack(); };
+        flyTimer = setTimeout(endFly, FLY_MS + 40);
+      }
       lb.classList.remove("show"); lb.classList.remove("imgshow");
       lb.setAttribute("aria-hidden", "true");
       document.removeEventListener("keydown", trapKeys, true);
@@ -2737,9 +3105,10 @@
       // never leave a video playing behind a closed overlay
       lbVid.pause(); lbVid.removeAttribute("src");
       setTimeout(function(){ lb.classList.remove("open"); }, 220);
-      if(lastFocus && lastFocus.focus) lastFocus.focus();
+      if(!back) focusBack();
     }
     function step(d){
+      endFly(true);
       lb.classList.remove("imgshow");
       cur = ((cur + d) % items.length + items.length) % items.length;
       setTimeout(function(){ render(); lb.classList.add("imgshow"); }, 120);
@@ -2766,12 +3135,12 @@
         }
         el.addEventListener("click", function(e){
           e.preventDefault();
-          open(n);
+          open(n, el);
         });
         el.addEventListener("keydown", function(e){
           if(e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
           e.preventDefault();
-          open(n);
+          open(n, el);
         });
       });
     };
@@ -2818,6 +3187,7 @@
       var n = galColCount();
       if(n === current) return;
       current = n;
+      cols.classList.toggle("g75", galMQ.matches);
       cols.innerHTML = galleryHTML(n);
       bindLightbox(cols);          // the thumbs are new nodes, rewire them
     }
@@ -3103,7 +3473,7 @@
     var txt = cad && cad.querySelector(".hiw-text");
     if(!cad || !txt) return;
     var wide = window.matchMedia("(min-width:901px)");
-    var GAP = 16;          // breathing room between a photo and the text under it (4 px grid, 4 Nov 2026)
+    var GAP = 40;          // 19 Nov 2026 (Owen, one spacing scale): the note stands 40px (--s2) under the photo above it. Was 16px + 5% of that photo.
 
     function apply(){
       /* MEASURE FROM AN EXPLICIT ZERO, never by REMOVING the property.
@@ -3186,20 +3556,15 @@
       imgs.forEach(function(im){
         var r = im.getBoundingClientRect();
         // only photos that actually sit in this paragraph's horizontal band
-        /* + 5% of its height: a gallery photo grows 10% about its centre on
-           hover (4 Nov 2026), so its bottom can come down by that much */
-        if(r.right > t.left + 2 && r.left < t.right - 2) deepest = Math.max(deepest, r.bottom + r.height * 0.05);
+        /* 19 Nov 2026: the photo's own bottom edge. (It was + 5% of its height, for the 10% a gallery
+           photo grows on hover; the 40px gap now covers that: 5% of the tallest gallery photo is under 30px.) */
+        if(r.right > t.left + 2 && r.left < t.right - 2) deepest = Math.max(deepest, r.bottom);
       });
       var pull = t.height;
-      if(deepest > -Infinity){
-        /* No Math.max(0, ...) here. Clamping at zero meant that when the
-           paragraph already sat too close to the photo above it, the best this
-           could do was pull nothing - it could not push the row back DOWN to
-           restore the gap. A negative pull is a positive margin, which is
-           exactly the right answer in that case. */
-        var headroom = t.top - (deepest + GAP);
-        if(headroom < pull) pull = headroom;
-      }
+      /* 19 Nov 2026 (Owen, one spacing scale): under a photo the note stands exactly GAP below it, at
+         every width (it used to be pulled up by its own height and only stopped by the photo). */
+      if(deepest > -Infinity) pull = t.top - (deepest + GAP);
+      /* (a negative pull is a positive margin: the row is pushed DOWN when it sat too close) */
       cad.style.setProperty("--hiw-pull", (-Math.round(pull)) + "px");
     }
     apply();

@@ -6,9 +6,9 @@
 
   This is project.html with one project's real title, description, canonical
   URL and social-preview tags baked into the <head>, and that project's id on
-  <body data-project>. Everything below the </head> is identical to the
-  template. See make-project-pages.py for why this is a file on disk rather
-  than something the script works out at runtime.
+  <body data-project>, and a plain-HTML copy of the page's words in <main>
+  for search engines (js/project.js replaces it). See make-project-pages.py
+  for why this is a file on disk rather than something worked out at runtime.
 -->
 
 <html lang="en">
@@ -17,7 +17,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>OMNI, omnidirectional loudspeakers · STUDIO NEWO</title>
 <meta name="description" content="OMNI: omnidirectional loudspeakers by Studio NEWO, Toronto. A continuous acoustic field.">
+<meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
+<!-- light by day, dark only at night for a dark system setting: js/theme.js -->
+<script src="js/theme.js?v=1"></script>
 <link rel="canonical" href="https://studionewo.com/omni.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://studionewo.com/omni.html">
@@ -29,7 +32,7 @@
 <meta name="twitter:title" content="OMNI, omnidirectional loudspeakers · STUDIO NEWO">
 <meta name="twitter:description" content="OMNI: omnidirectional loudspeakers by Studio NEWO, Toronto. A continuous acoustic field.">
 <meta name="twitter:image" content="https://studionewo.com/projects/omni/md/hero.jpg">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CreativeWork", "name": "OMNI", "url": "https://studionewo.com/omni.html", "image": "https://studionewo.com/projects/omni/md/hero.jpg", "creator": {"@type": "Person", "name": "Owen Palmer"}, "publisher": {"@type": "Organization", "name": "Studio NEWO", "url": "https://studionewo.com/"}, "dateCreated": "2025", "description": "Listening at home has become more transient: people no longer sit in one sweet spot facing two speakers. OMNI is a pair of omnidirectional loudspeakers built to fill the room evenly, wherever you stand."}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CreativeWork", "name": "OMNI", "url": "https://studionewo.com/omni.html", "image": "https://studionewo.com/projects/omni/md/hero.jpg", "creator": {"@type": "Person", "name": "Owen Palmer"}, "publisher": {"@type": "Organization", "name": "Studio NEWO", "url": "https://studionewo.com/"}, "dateCreated": "2025", "description": "Listening at home has become more transient: people no longer sit in one sweet spot facing two speakers. OMNI is a pair of omnidirectional loudspeakers built to fill the room evenly, wherever you stand.", "material": ["Cast aluminum", "Machined aluminum", "Purpleheart", "Driver"], "size": "7.5 x 8.5 x 9 in each (pair)", "genre": "omnidirectional loudspeakers", "about": {"@type": "Thing", "name": "Audio"}}</script>
 <link rel="manifest" href="/site.webmanifest">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
      one Google uses, and Google wants a size that is a multiple of 48 and a URL
@@ -38,14 +41,14 @@
      icons: the same mark drawn full bleed, with frames for 125% and 150%
      display scaling. Regenerate all of them with tools/make-icons.py. -->
 <link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
-<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
-<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
-<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico?v=4" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=4" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=4" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=2" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" as="image" href="projects/omni/hero.jpg" imagesrcset="projects/omni/sm/hero.jpg 600w, projects/omni/md/hero.jpg 1200w, projects/omni/hero.jpg 2400w" imagesizes="(max-width:760px) 100vw, 58vw" fetchpriority="high">
+<link rel="preload" as="image" href="projects/omni/hero.jpg" imagesrcset="projects/omni/sm/hero.jpg 600w, projects/omni/md/hero.jpg 1200w, projects/omni/hero.jpg 2400w" imagesizes="(max-width:900px) 100vw, 58vw" fetchpriority="high">
 <!-- warm the loader's dependencies from the first byte of HTML, but ONLY on a
      page this session has not shown the tumble on yet. The 3D logo tumble runs
      in a worker that needs three.js and the STL, and preloading them from the
@@ -104,42 +107,19 @@
      js/vendor/model-viewer.min.js?v=2 (4.2.2, see js/vendor/README.txt) with
      the Draco decoder beside it in js/vendor/draco/. MV_SRC in the script
      below names the file; bump its ?v= when the vendored copy changes. -->
-<script>
-/* LOADING SCREEN BACKGROUND (2026-10-07).
-   1. Coming from a paper page (anything but home) the loader is paper with the
-      ink mark (html.ld-paper, css/style.css). From home, or a fresh visit, it
-      keeps the sky. Either way the loader fades out, so paper to home and home
-      to paper both cross-fade.
-   2. Until js/sky.js has drawn, the #sky box shows its CSS gradient. That was a
-      fixed day blue, which flashed at night. It now uses the last sky colours
-      js/sky.js saved, or a night guess from the clock on a first visit. */
-(function(){
-  var h = document.documentElement;
-  try { var r = document.referrer ? new URL(document.referrer) : null;
-    if(r && r.origin === location.origin && !/\/(index\.html)?$/.test(r.pathname)) h.classList.add("ld-paper"); } catch(e){}
-  var c = null; try { c = JSON.parse(localStorage.getItem("newo-sky-c") || "null"); } catch(e){}
-  if(!c){ var hr = new Date().getHours(); if(hr < 6 || hr >= 20) c = ["rgb(10,13,24)", "rgb(26,30,44)"]; }
-  if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
-})();
-</script>
-<link rel="stylesheet" href="css/style.css?v=79">
+<link rel="stylesheet" href="css/style.css?v=88">
 </head>
 <body class="proj-body" data-project="omni">
 <a class="skip-link" href="#content">Skip to content</a>
 
-<!-- the loader holds the home page sky (js/sky.js): same time of day, same
-     weather, then it fades away with the logo. See css/style.css SKY. -->
-<div id="loader" class="ld-sky" aria-hidden="true">
-  <canvas id="sky" aria-hidden="true"></canvas>
-  <div id="sky-clouds" aria-hidden="true"></div>
-  <div id="sky-precip" aria-hidden="true"></div>
-  <div id="sky-grain" aria-hidden="true"></div>
+<!-- the loader is the page colour with the logo in the page's ink (Owen, 19 Nov
+     2026: no sky or weather on the loading screen); it fades away with the logo. -->
+<div id="loader" aria-hidden="true">
   <div class="ld-mark">
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/sky.js?v=10"></script>
-<script src="js/loader3d.js?v=19"></script>
+<script src="js/loader3d.js?v=20"></script>
 
 <!-- the header landmark (score round 1, a11y): a plain, unstyled wrapper.
      Its children keep their own fixed / absolute positions, so nothing moves. -->
@@ -155,9 +135,28 @@
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
 </header>
-<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+<div id="menu-overlay"><a href="all-projects.html">ALL PROJECTS</a><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<main class="page proj" id="content" tabindex="-1"><!-- filled from data --></main>
+<main class="page proj" id="content" tabindex="-1">
+<!-- STATIC COPY (tools/make-project-pages.py, 16 Nov 2026): the same words as plain HTML, for search engines
+     and link previews that do not run scripts. js/project.js replaces everything in <main> when it runs. -->
+<section class="hero" data-static>
+<figure class="hero-main"><img src="projects/omni/hero.jpg" srcset="projects/omni/sm/hero.jpg 600w, projects/omni/md/hero.jpg 1200w, projects/omni/hero.jpg 2400w" sizes="(max-width:900px) 100vw, 58vw" width="2400" height="1800" style="aspect-ratio:2400 / 1800" alt="The OMNI omnidirectional speaker: a solid purpleheart cabinet with a floating top plate on machined aluminum standoffs" fetchpriority="high" decoding="async"></figure>
+<div class="hero-aside"><div class="hero-aside-top"><div class="hero-head">
+<h1 class="hero-title">OMNI</h1>
+<p class="hero-tagline">A continuous acoustic field.</p>
+</div></div>
+<div class="hero-aside-btm"><p class="desc">Listening at home has become more transient: people no longer sit in one sweet spot facing two speakers. OMNI is a pair of omnidirectional loudspeakers built to fill the room evenly, wherever you stand.</p></div>
+</div>
+<div class="hero-info"><dl class="hero-spec">
+<div class="hs-row"><dt>YEAR</dt><dd>2025</dd></div>
+<div class="hs-row"><dt>SIZE</dt><dd>7.5 x 8.5 x 9 in each (pair)</dd></div>
+<div class="hs-row"><dt>STATUS</dt><dd>Prototype 01</dd></div>
+<div class="hs-row"><dt>MATERIALS</dt><dd><a href="materials.html?for=omni#cast-aluminum">Cast aluminum</a> / <a href="materials.html?for=omni#machined-aluminum">Machined aluminum</a> / <a href="materials.html?for=omni#purpleheart">Purpleheart</a> / Driver</dd></div>
+</dl></div>
+</section>
+<section data-static><div class="hiw-text"><p class="desc">The coaxial driver fires straight up into a cast aluminum cone suspended above it. The cone turns the sound sideways and spreads it through 360 degrees.</p><p class="desc">The driver is a 5.5 in coaxial unit. The cone is sand-cast and hand-finished, and hangs from a purpleheart top plate on machined aluminum standoffs. The enclosure is mitred from solid purpleheart, one of the densest hardwoods, chosen for mass and stiffness so the cabinet itself stays quiet.</p></div></section>
+</main>
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo" aria-hidden="true">
   <button class="lb-close" id="lbClose" aria-label="Close">CLOSE &times;</button>
@@ -174,7 +173,7 @@
   <span class="lb-count" id="lbCount"></span>
 </div>
 
-<script src="js/projects-data.js?v=33"></script>
+<script src="js/projects-data.js?v=34"></script>
 <script src="js/materials-data.js?v=12"></script>
 <!-- intrinsic dimensions of the hero + gallery photos, so their boxes are
      reserved before the files land (no reflow) and srcset can be emitted -->
@@ -188,9 +187,9 @@
    itself fails to arrive (GitHub Pages answered one request with a 503 during a
    deploy), the loading screen never cleared. This one lives in the page. */
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
-<script src="js/main.js?v=8"></script>
-<script src="js/menu.js?v=57"></script>
+<script src="js/main.js?v=9"></script>
+<script src="js/menu.js?v=69"></script>
 <!-- the page script lives in js/project.js (moved out 2026-11-03 so it caches across the five products) -->
-<script src="js/project.js?v=18"></script>
+<script src="js/project.js?v=26"></script>
 </body>
 </html>

@@ -2,51 +2,67 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://studionewo.com/</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src 02e928fca2ad -->
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://studionewo.com/about.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src e12ef12f2c62 -->
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://studionewo.com/solutions.html</loc>
+    <lastmod>2026-11-16</lastmod> <!-- src ff8774ef3ce2 -->
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://studionewo.com/all-projects.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src d742f07a9943 -->
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://studionewo.com/materials.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src db91c152426e -->
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://studionewo.com/contact.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src e95de312ac3f -->
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://studionewo.com/kart.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src db42c646172a -->
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://studionewo.com/halo.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src 3db0d01a20ed -->
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://studionewo.com/omni.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src 0580f40c1003 -->
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://studionewo.com/flow.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src 8af3b222e40a -->
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://studionewo.com/neb.html</loc>
+    <lastmod>2026-11-19</lastmod> <!-- src 1c978bfc55a9 -->
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>

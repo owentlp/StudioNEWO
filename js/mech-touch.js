@@ -7,13 +7,19 @@
                        no DRAG / TOUCH TO INTERACT label and no drag; on touch
                        the page scrolls straight through it ("no need for a
                        drag to interact with omni graphic", Owen 14 Nov)
-     data-hint-in=".ui"  optional: the label sits first in that element, in the
-                       text flow, instead of floating on the drawing
+     data-hint-in=".ui"  where the label sits: first in that element, in the
+                       text flow beside the caption (last with
+                       data-hint-pos="last"). Without it the label goes in the
+                       flow straight after the stage.
+
+   The label is plain 8.5px text and is never on the drawing, never a box and
+   never a button (Owen, 13 and 16 Nov 2026: "it doesnt need to be a button, i
+   want it to be a tap on the mechanism graphic to wake it").
 
    Mouse: the label fades on the first drag, as before.
    Touch ("tap to wake", Owen 14 Nov): the drawing starts ASLEEP. The page
-   scrolls through it and touches do not reach it; the label stays. One tap on
-   the drawing wakes it: then it takes drags and touches, and the label takes
+   scrolls through it and touches do not reach it; the label stays. One tap
+   anywhere on the drawing wakes it: then it takes drags and touches, and the label takes
    the chosen text-link look (ink, red underline; no box, no outline). It
    sleeps again when it scrolls out of view (the parent's mechVisible message)
    or on a tap anywhere outside it (the parent's mechSleep message, sent by
@@ -28,17 +34,12 @@
   h.className = "hint";
   h.textContent = coarse ? "TOUCH TO INTERACT" : "DRAG TO INTERACT";
   var inSel = stage.getAttribute("data-hint-in"), host = inSel && document.querySelector(inSel);
-  if(host){
-    h.style.position = "static"; h.style.transform = "none"; h.style.margin = "0 0 10px"; h.style.fontSize = "8.5px";
-    host.insertBefore(h, host.firstChild);
-  } else {
-    stage.appendChild(h);
-    // centred on the drawing, not the stage: on a phone the controls stack under it
-    var place = function(){ if(cv) h.style.top = (cv.offsetTop + cv.offsetHeight / 2) + "px"; };
-    place();
-    window.addEventListener("resize", place);
-    if(window.ResizeObserver && cv) new ResizeObserver(place).observe(cv);
-  }
+  var last = stage.getAttribute("data-hint-pos") === "last";
+  // position, transform and size come from each frame's own .hint rule (review 16 Nov 2026, S9);
+  // only the margin is set here, because it depends on where the label was put
+  h.style.margin = last ? "0" : "0 0 10px";
+  if(host) host.insertBefore(h, last ? null : host.firstChild);
+  else stage.parentNode.insertBefore(h, stage.nextSibling);
 
   if(!coarse){
     var gone = function(){ h.classList.add("gone"); };

@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>OMNI · sound dispersion</title>
+<script>/* DARK MODE (19 Nov 2026): follow the page's ?theme test switch if it set one; else the system */
+(function(){ try { var t = parent.document.documentElement.getAttribute("data-theme"); if(t) document.documentElement.setAttribute("data-theme", t); } catch(e){} })();</script>
 <style>
   /* OCR-B, loaded relative to projects/omni/ so the iframe is self-contained,
      matching the KART mechanism. */
@@ -75,31 +77,22 @@
      controls: 12px, .16em, outlined in red at rest, solid red with white text
      for the mode that is on (Owen, 3 Nov 2026; was white on red, ink = on). */
   .modes button{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;
-    color:#b5120f;background:transparent;border:0;padding:7px 0;cursor:pointer;border-radius:0;
+    color:var(--red-text);background:transparent;border:0;padding:7px 0;cursor:pointer;border-radius:0;
     opacity:1;transition:none;}   /* the site's one button style (css/style.css, ONE BUTTON STYLE, 3 Nov 2026): outline in --red-text (#b5120f, 5.6:1) at rest, a 1px border inside the old 8px 14px box. Paper ground so the drawing never shows through the words */
   .modes button[aria-pressed="true"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:1.5px;text-underline-offset:4px;}   /* the chosen mode: ink with a red underline (text links, Owen 13 Nov 2026; css/style.css TEXT LINKS) */
   @media (hover:hover){ .modes button:not([aria-pressed="true"]):hover{text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:1px;text-underline-offset:4px;} }   /* hover while off: the thin underline (mouse only, review 14 Nov C3) */
   .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
   .meta{margin:0;max-width:46ch;text-align:justify;text-align-last:left;font-size:10.5px;letter-spacing:0;color:var(--ink);line-height:1.36;text-shadow:0 0 5px var(--paper),0 0 5px var(--paper),0 0 5px var(--paper);}
   .vol{display:flex;align-items:center;gap:12px;}
-  .vol-label{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#5a5957;text-shadow:0 0 5px var(--paper),0 0 5px var(--paper);}
+  .vol-label{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);text-shadow:0 0 5px var(--paper),0 0 5px var(--paper);}
   .vol input{-webkit-appearance:none;appearance:none;width:150px;max-width:38vw;height:1px;background:var(--ink);cursor:pointer;}
   .vol input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;background:var(--red);border:0;cursor:pointer;}
   .vol input::-moz-range-thumb{width:12px;height:12px;background:var(--red);border:0;border-radius:0;cursor:pointer;}
   @media (max-width:640px){ .ui{position:static;padding:12px 12px 0;max-width:none;} .meta{font-size:11px;} }   /* 12px: the site text margin on a phone (4 Nov 2026) */
-
-  /* FLOATING HINT (Owen, 4 Nov 2026): DRAG / TOUCH TO INTERACT floats ON the
-     drawing, centred on the canvas, as a small paper chip with an ink hairline,
-     so it is plain that the drawing can be played with and how. Not a button
-     (buttons are red). It fades on the first touch or drag and stays gone.
-     Same chip as .mv-hint on the 3D model (css/style.css). */
-  .hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
-    pointer-events:none;font-family:var(--mono);font-size:8.5px;line-height:1;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--ink);white-space:nowrap;
-    background:rgba(255,255,255,.92);border:1px solid rgba(20,20,20,.28);padding:8px 12px 7px;
-    transition:opacity .3s ease;}
-  .hint.gone{opacity:0;}
-  @media (prefers-reduced-motion:reduce){ .hint{transition:none;} }
+  /* DARK MODE (19 Nov 2026): the same colours, switched by theme. Colours only. */
+  :root{ color-scheme:light dark; --paper:light-dark(#ffffff,#131312); --ink:light-dark(#141414,#e9e7e2); --red-text:light-dark(#b5120f,#ff5a4f); --ink-2:light-dark(#5a5957,#a5a39e); }
+  svg.layer[fill="#141414"], svg [fill="#141414"]{ fill:var(--ink); }
+  :root[data-theme="light"]{ color-scheme:light; } :root[data-theme="dark"]{ color-scheme:dark; }
 </style>
 </head>
 <body>
@@ -201,11 +194,11 @@
       </div>
       <div class="ui">
         <div class="modes" id="modes" role="group" aria-label="Dispersion mode">
-          <button data-mode="stereo" aria-pressed="false">Stereo</button>
           <button data-mode="omni" aria-pressed="true">Omni</button>
+          <button data-mode="stereo" aria-pressed="false">Stereo</button>
         </div>
         <div class="meta"><span id="desc" aria-live="polite"></span></div>
-        <div class="vol"><span class="vol-label">Volume</span><input id="vol" type="range" min="0" max="100" value="55" aria-label="Volume"></div>
+        <div class="vol"><span class="vol-label">Volume</span><input id="vol" type="range" min="0" max="100" value="90" aria-label="Volume"></div>
       </div>
     </div>
   </div>
@@ -232,7 +225,7 @@
       desc:"Each speaker's sound spreads in even rings, so every seat in the room hears the same balance." }
   };
 
-  let mode='omni', volume=55;   // opens on OMNI, the product's own mode (2026-10-27)
+  let mode='omni', volume=90;   // opens on OMNI, the product's own mode (2026-10-27), at 90% volume (Owen, 16 Nov 2026)
   // last seeded far in the past so the first wavefront appears at once (the
   // iframe's clock starts at 0, so [0,0] would sit empty for one full interval)
   let waves=[], last=[-1e7,-1e7], pool=[];
@@ -243,6 +236,17 @@
     // (the gap-before-read-more bug). .wrap ignores the absolute .ui overlay.
     var wrap=document.querySelector('.wrap');
     var h = wrap ? Math.ceil(wrap.getBoundingClientRect().height) : document.body.scrollHeight;
+    // Narrow frame (640 and under): the controls are in the flow under the art, and
+    // the stage's bottom buffer (20.752% of the width, there for the waves) then
+    // lies empty under them: 82px at 390, 126px at 601 (review 16 Nov 2026, M2).
+    // Report down to the lower of the controls and the waves, so nothing drawn is
+    // cut and nothing empty is counted. The drawing itself is not touched.
+    var ui = document.querySelector('.ui'), wv = document.querySelector('.scene .waves');
+    if(wrap && ui && getComputedStyle(ui).position === 'static'){
+      var top = wrap.getBoundingClientRect().top;
+      var low = Math.max(ui.getBoundingClientRect().bottom, wv ? wv.getBoundingClientRect().bottom : 0);
+      h = Math.min(h, Math.ceil(low - top));
+    }
     if(window.parent!==window) window.parent.postMessage({type:'mechHeight', height:h}, '*');
   }
 
@@ -341,6 +345,6 @@
   /* the DRAG / TOUCH TO INTERACT label and tap to wake on touch: js/mech-touch.js (Owen, 14 Nov 2026) */
 })();
 </script>
-<script src="../../js/mech-touch.js?v=1"></script>
+<script src="../../js/mech-touch.js?v=3"></script>
 </body>
 </html>

@@ -35,6 +35,8 @@
    so the menu never ends up empty.
    Toggled by #burger (and the footer .foot-burger on project pages).
    ============================================================ */
+/* THEME: js/theme.js (in every page's <head>) picks light or dark and holds the
+   ?theme= test switch (19 Nov 2026; it used to live here). */
 (function(){
 
   // Letter prefix of the `code` field -> the word shown in the menu.
@@ -58,6 +60,7 @@
      out of the menu while it has no content yet (the page itself still exists
      at its URL). Jewelry and Photography switch on when their data lands. */
   var EXTRA_PAGES = [
+    { href:"all-projects.html", label:"All projects", on:true },   // 19 Nov 2026 (Owen, A4 final: "All projects may also be linked from the home page and the menu")
     { href:"solutions.html",   label:"Solutions",   on:true  },
     { href:"solutions.html#services", label:"Services", on:true  },  // on 2 Nov (site review Q1): a client looking for "services" finds the word
     { href:"jewelry.html",     label:"Jewellery",   on:false },
@@ -122,24 +125,24 @@
        on it, so the three files every page actually needs were the ones not
        being warmed. */
     var SHELL = [
-      "css/style.css?v=79",
-      "js/projects-data.js?v=33",
+      "css/style.css?v=88",
+      "js/projects-data.js?v=34",
       "js/image-sizes.js?v=6",
-      "js/main.js?v=8",
-      "js/menu.js?v=57",
-      "js/sky.js?v=10",
-      "js/loader3d.js?v=19",
+      "js/main.js?v=9",
+      "js/menu.js?v=69",
+      "js/theme.js?v=1",
+      "js/loader3d.js?v=20",
       "js/loader3d-core.js?v=2",
-      "js/loader3d-mesh.js?v=1",
+      "js/loader3d-mesh.js?v=2",
       "js/loader3d.worker.js?v=7"
     ];
     /* only materials.html and project.html load this one, so it is warmed with
        the page that needs it rather than on every hover anywhere. */
     var MATERIALS_DATA = "js/materials-data.js?v=12";
-    var PROJECT_JS = "js/project.js?v=18";   // the product page script (2026-11-03)
+    var PROJECT_JS = "js/project.js?v=26";   // the product page script (2026-11-03)
     var MV_LIB  = "js/vendor/model-viewer.min.js?v=2";
     var MODEL_V = "?v=3";      // must match the model-viewer data-src in project.html
-    var MECH_V  = "?v=32";     // must match the mechanism iframe src in js/project.js
+    var MECH_V  = "?v=37";     // must match the mechanism iframe src in js/project.js
     var DWELL_MS = 400;
 
     function shell(){ SHELL.forEach(link); }
@@ -319,7 +322,7 @@
       var m = href.match(/^([a-z0-9_-]+)\.html$/i);
       if(m && Object.prototype.hasOwnProperty.call(projects(), m[1])){
         NEWO_WARM.project(a, m[1]);
-      } else if(/^(materials|about|contact|solutions|jewelry|photography)\.html/.test(href)){
+      } else if(/^(materials|about|contact|solutions|all-projects|jewelry|photography)\.html/.test(href)){
         NEWO_WARM.page(href);
       }
     });
@@ -459,4 +462,127 @@
 
   if(document.readyState !== "loading") init();
   else document.addEventListener("DOMContentLoaded", init);
+})();
+
+/* ============================================================
+   THE LOGO ON SCREEN: EVEN JOINS (Owen's pick, 13 Nov 2026, option 3 "Even
+   join, light" of docs/LOGO_OPTIONS_2026-11-13.html; built 16 Nov 2026).
+
+   The mark is a square with its inscribed circle knocked out, so at the middle
+   of each side the ink thins to nothing. Drawn small, the browser's smoothing
+   broke the outline there, by a different amount on each side (measured 16 Nov:
+   1 to 10 screen pixels missing, and at 125% and 150% display scaling the
+   45px mark is 56.25 and 67.5 screen pixels wide, so its outer edges went
+   soft as well).
+
+   The rule Owen picked: the circle is drawn a hairline smaller, by a different
+   amount at each size, so the middle of each side is the same light grey
+   (about 20% ink) at every size; and the mark sits on whole screen pixels, so
+   all four sides come out alike and the outer edges stay sharp. At 45px the
+   circle is 99.4% of the square, at 90px 99.7%; the bigger the mark, the
+   nearer the true squared circle. The master files and the paths written in
+   the pages stay the exact squared circle: this only changes how the mark is
+   drawn on a screen, and with JavaScript off the exact mark shows. The page
+   scripts that copy the header mark into the footer copy it as it is; fit()
+   then gives the copy its own drawing.
+
+   It covers the header logo, the footer logo and the flat loading mark. Not
+   the wordmark or the burger (no thin joins).
+   EVERYWHERE ELSE (Owen, 16 Nov 2026: "I want the updated logo with connected
+   sides to be applied everywhere, tab icons and the site"): the tab and app
+   icons follow the same rule in tools/make-icons.py (logo/favicon.svg carries
+   its 16px value); the 3D loading logo is built with its three bores a
+   hairline narrower by tools/bake-logo-mesh.py; the share card
+   (logo/og-card.jpg) and the CV marks (tools/cv/cv.html) are drawn the same way.
+   ============================================================ */
+(function(){
+  "use strict";
+  var VB = 280.89, TARGET = 0.2, SEL = ".site-home svg, .foot-home svg, #loader svg.ld-logo";
+  var cache = {};
+  /* ink in the screen pixel at the middle of a side, for a circle of radius R
+     (in screen pixels) in a square N pixels wide */
+  function joinInk(N, R){
+    var odd = N % 2, s = 0, n = 32;
+    for(var k = 0; k < n; k++){
+      var u = odd ? -0.5 + (k + 0.5) / n : (k + 0.5) / n;
+      var t = N / 2 - Math.sqrt(Math.max(0, R * R - u * u));
+      s += t < 0 ? 0 : t > 1 ? 1 : t;
+    }
+    return s / n;
+  }
+  /* the circle, as a share of the square, that gives TARGET at N pixels */
+  function ratio(N){
+    if(cache[N]) return cache[N];
+    var lo = 0.8, hi = 1;
+    for(var i = 0; i < 30; i++){ var m = (lo + hi) / 2; if(joinInk(N, m * N / 2) < TARGET) hi = m; else lo = m; }
+    return (cache[N] = (lo + hi) / 2);
+  }
+  /* HOW IT IS DRAWN. Not as one path with the circle as a hole: Chrome draws
+     that thin join wrongly at some scales (measured 16 Nov: a solid line at 2x,
+     nothing on two sides at 1.5x). An ink square under a mask with the circle
+     in it is drawn right at every scale (exactly 20% on all four sides at 1x,
+     1.25x, 2x and 3x). It is still a knock-out: whatever is behind the mark
+     shows through the circle, and the ink is currentColor.
+     THE BOX is a whole number of CSS pixels (a size such as 45.33px cannot be
+     held exactly and the mark came out a pixel short at 1.5x); the mark is
+     drawn in its top left corner at exactly N screen pixels by the viewBox. */
+  var uid = 0;
+  function build(svg, N, boxDev){
+    var c = VB / 2, R = (ratio(N) * c).toFixed(3), id = "nl-mask-" + (++uid);
+    var side = (VB * boxDev / N).toFixed(4);
+    svg.setAttribute("viewBox", "0 0 " + side + " " + side);
+    svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
+    svg.style.overflow = "visible";
+    svg.innerHTML =
+      '<defs><mask id="' + id + '" maskUnits="userSpaceOnUse" x="0" y="0" width="' + VB + '" height="' + VB + '">' +
+        '<rect width="' + VB + '" height="' + VB + '" fill="#fff"/><circle cx="' + c + '" cy="' + c + '" r="' + R + '" fill="#000"/></mask></defs>' +
+      '<rect width="' + VB + '" height="' + VB + '" fill="currentColor" mask="url(#' + id + ')"/>';
+  }
+  function isMark(svg){
+    return svg.getAttribute("data-newo-mark") === "1" || svg.getAttribute("viewBox") === "0 0 " + VB + " " + VB;
+  }
+  function fitOne(svg){
+    if(!svg || !isMark(svg)) return;
+    var box = svg.parentElement; if(!box) return;
+    var dpr = window.devicePixelRatio || 1;
+    var css = box.clientWidth || box.getBoundingClientRect().width;
+    if(!css) return;
+    svg.setAttribute("data-newo-mark", "1");
+    // 1. the mark is a whole number of screen pixels wide, in a box a whole number of CSS pixels wide
+    var N = Math.max(8, Math.round(css * dpr));
+    var boxCss = Math.ceil(N / dpr - 0.001), key = N + "/" + boxCss + "/" + dpr;
+    // 2. the circle for this size (svg.__nl is lost on a copy, so the footer's copy is built again with its own mask)
+    if(svg.__nl !== key){
+      svg.style.width = boxCss + "px"; svg.style.height = boxCss + "px";
+      build(svg, N, boxCss * dpr);
+      svg.__nl = key;
+    }
+    /* 3. whole screen pixels: nothing to do. The browser already places an
+       SVG's box on whole screen pixels when it paints it; with the box a whole
+       number of pixels wide (1) the mark lands exactly on the grid. A nudge
+       added here was applied on top of the browser's own and put the footer
+       mark part-way across a pixel (measured 16 Nov 2026).
+       17 Nov 2026 (evening review, M2: "footer logo loses two joins at 125,
+       150, 175 percent"): that is only seen with EMULATED scaling (a test
+       browser's deviceScaleFactor), which draws the footer mark one pixel
+       short (56 x 55). With real display scaling (Chromium started with
+       --force-device-scale-factor, which is what Windows at 125 or 150
+       percent is) header and footer show all four joins, 18 to 31 percent
+       ink, on about, kart, contact and solutions at 100, 125, 150, 175 and
+       200 percent (40 of 40). A layout nudge to whole device pixels was
+       tried and changed neither result, so it is not here. Measure the logo
+       with real scaling only. */
+    if(svg.style.transform) svg.style.transform = "";
+  }
+  function fit(){
+    Array.prototype.forEach.call(document.querySelectorAll(SEL), fitOne);
+  }
+  var t = 0;
+  function later(){ clearTimeout(t); t = setTimeout(fit, 120); }
+  fit();
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", fit);
+  window.addEventListener("load", function(){ fit(); setTimeout(fit, 600); });
+  window.addEventListener("resize", later, { passive:true });
+  window.addEventListener("pageshow", fit);
+  window.NEWO_LOGO = { fit: fit, ratio: ratio };
 })();

@@ -43,6 +43,11 @@
         idx   : true                        (show the [NN] index number)
 
    TEXT FIELDS
+        KEY WORDS (19 Nov 2026)  two asterisks each side of the words to mark, **like this**,
+                    in summary, howItWorks, howItWorksMore, processText, processMore and
+                    lifecycle. The page sets them as a marked block (js/project.js "KEY WORDS");
+                    a full stop right after the closing asterisks joins the block by itself.
+                    The words come from each product's copy.txt, marked the same way.
         status   where the product is right now, shown in the spec line under
                     the hero photo after a small red square, e.g. "Prototype 01",
                     "V2 in development", "Made to order", "Small batch, spring".
@@ -200,10 +205,10 @@ const PROJECTS = {
     code:      "L01.1",
     date:      "2026",
     teaser:    "A light that responds to your presence.",
-    summary:   "The light switch has barely changed in over a century. KART replaces it with spatial awareness. The lamp tracks movement within a room, brightening as you approach, dimming as you walk away and turning off when you leave.",
+    summary:   "The light switch has barely changed in over a century. **KART replaces it with spatial awareness**. The lamp tracks movement within a room, brightening as you approach, dimming as you walk away and turning off when you leave.",
     summaryMore:"",
     materials: "Cherry, frosted glass, aluminum, electronics",
-    lifecycle: "The base, shade and chassis pull apart. Each can be repaired, upgraded or recycled on its own.",
+    lifecycle: "The base, shade and chassis pull apart. Each can be **repaired, upgraded or recycled** on its own.",
     designTags:["Designed for disassembly", "Repairable"],
     size:      "4 in dia x 9.5 in tall",
     price:     "",
@@ -236,8 +241,8 @@ const PROJECTS = {
     modelV2:   "",
     mechanism: "mechanism.html",
     hiwVideo:  "",
-    howItWorks:"A radar module hidden inside the housing reads where you are. The firmware maps that position onto a 256-LED matrix behind the frosted glass, so the brightness and the lit column of the cylinder follow you.",
-    howItWorksMore:"Many modern conveniences require pulling out a phone. KART avoids this. One push-button dial covers dimming, power and the choice of mode. Set it once and let the lamp react to you. A phone interface is in development for those who prefer it; the dial stays the primary control.",
+    howItWorks:"A radar module hidden inside the housing **reads where you are**. The firmware maps that position onto a 256-LED matrix behind the frosted glass, so **the brightness and the lit column of the cylinder follow you**.",
+    howItWorksMore:"Many modern conveniences require pulling out a phone. KART avoids this. **One push-button dial covers dimming, power and the choice of mode**. Set it once and let the lamp react to you. A phone interface is in development for those who prefer it; the dial stays the primary control.",
     components: [],
     // pinned to the Figma composition: LED macro bleeding OFF the left edge
     // (shift is vw past the window edge), breadboard cut-out lower right.
@@ -259,8 +264,8 @@ const PROJECTS = {
       { src:"scatter-06.jpg",  bleed:"right", span:6, ar:"3/2", mt:90, cap:"Lit", capOn:true }
     ],
     processNotes:[],
-    processText:"The aim was to use current sensor technology to change how people interact with light: past the on/off switch, and without a smart-home system.",
-    processMore:"The design hinges on the RD-03D millimetre-wave radar, which senses through the housing, so the form needed no window for it. The hardest compromise was fitting the electronics inside the form. Form follows function in the studio, so the electronic chassis was built first. The final proportions were set by the frosted glass shade available during prototyping.",
+    processText:"The aim was to use current sensor technology to change how people interact with light: **past the on/off switch, and without a smart-home system**.",
+    processMore:"The design hinges on the RD-03D millimetre-wave radar, which **senses through the housing**, so the form needed no window for it. The hardest compromise was fitting the electronics inside the form. Form follows function in the studio, so **the electronic chassis was built first**. The final proportions were set by the frosted glass shade available during prototyping.",
     processBottomMore:"",
     processVideo: "",
     v2:        "V2 moves the electronics into one core that drops into different housings.",
@@ -540,3 +545,7 @@ const PROJECTS = {
   }
 
 };
+
+/* THE ORDER OF THE PROJECTS (19 Nov 2026): the home page's order. The foot of a project page shows the
+   one after it, round again from the last to the first (js/project.js "NEXT PROJECT"). */
+const PROJECT_ORDER = ["kart", "neb", "omni", "halo", "flow"];

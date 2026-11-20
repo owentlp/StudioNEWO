@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CONTACT · Products, custom pieces and services · STUDIO NEWO</title>
 <meta name="description" content="Ask Studio NEWO about a product or a custom piece, or about renders and drawings from your CAD. Toronto.">
+<meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
+<!-- light by day, dark only at night for a dark system setting: js/theme.js -->
+<script src="js/theme.js?v=1"></script>
 <link rel="canonical" href="https://studionewo.com/contact.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/contact.html">
@@ -25,14 +28,14 @@
      icons: the same mark drawn full bleed, with frames for 125% and 150%
      display scaling. Regenerate all of them with tools/make-icons.py. -->
 <link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
-<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
-<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
-<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico?v=4" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=4" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=4" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=2" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=79">
+<link rel="stylesheet" href="css/style.css?v=88">
 <style>
   /* contact form: same editorial grammar as the rest of the site, no boxes,
      thin underline fields, tiny OCR-B labels, one red action. */
@@ -41,7 +44,7 @@
   .cfield label{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
   .cfield input, .cfield textarea{
     font-family:var(--body); font-size:var(--t-body); color:var(--ink); background:transparent;
-    border:0; border-bottom:1px solid rgba(20,20,20,.28); padding:7px 0; width:100%;
+    border:0; border-bottom:1px solid light-dark(rgba(20,20,20,.28),rgba(233,231,226,.36)); padding:7px 0; width:100%;
     letter-spacing:0;
   }
   .cfield textarea{resize:vertical; min-height:96px; line-height:1.5;}
@@ -99,13 +102,39 @@
   .cfiles input[type=file]{position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;}
   .cf-thumbs{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px;}
   .cf-thumbs:empty{display:none;}
-  .cf-thumbs li{position:relative; width:64px; height:64px; background:rgba(20,20,20,.06);}
+  .cf-thumbs li{position:relative; width:64px; height:64px; background:light-dark(rgba(20,20,20,.06),rgba(233,231,226,.08));}
   .cf-thumbs img{width:100%; height:100%; object-fit:cover; display:block;}
   .cform .cf-thumbs button{position:absolute; top:0; right:0; padding:0; width:20px; height:20px; font-size:12px; letter-spacing:0; line-height:18px; text-align:center;}   /* border-box with the 1px button border: still 20 x 20 */
   /* the rest of the privacy text, where the footer's Privacy link lands: lower
      and smaller than the one line under the form */
   .cprivacy{max-width:46ch; margin-top:clamp(50px,9vh,90px); font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0; opacity:.75; scroll-margin-top:96px;}
   .cprivacy .lbl{display:block; font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; margin-bottom:6px;}
+
+  /* ACROSS THE GRID, 601 AND WIDER (from 768 until the 16 Nov review, S2: a small tablet upright got the phone page) (Owen, 16 Nov 2026: "make the contact page
+     take up more width on pc and tablet, it looks formatted for phone"). The
+     page was one 46 character column at the left at every width. Now, on the
+     site's 12 columns: the words at the left (lead, reply time, email and
+     Instagram, privacy), the form at the right on six columns, Name and Email
+     side by side. Same type, same fields, same controls; nothing added. Under
+     601 the page is the single column it was. The order in the markup (lead,
+     form, links, privacy) is unchanged, so reading and tab order are too. */
+  @media (min-width:601px){
+    .ct{display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); column-gap:var(--gut); grid-template-rows:auto auto auto 1fr; align-items:start;}
+    .ct > *{grid-column:1 / 6;}
+    .ct > #clead{grid-row:1;}
+    .ct > #cleadMore{grid-row:2;}
+    .ct > .contact-alt{grid-row:3;}
+    .ct > .cprivacy{grid-row:4;}
+    .ct > .cmain{grid-column:7 / 13; grid-row:1 / span 4;}
+    .ct .cform{margin-top:0; max-width:none; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:var(--gut);}
+    .ct .cform > *{grid-column:1 / -1;}
+    .ct .cform > .cf-half{grid-column:auto;}
+  }
+  /* 601 to 1099: the words need six columns to hold a line of the lead */
+  @media (min-width:601px) and (max-width:1099px){
+    .ct > *{grid-column:1 / 7;}
+    .ct > .cmain{grid-column:7 / 13;}
+  }
 </style>
 </head>
 <body>
@@ -122,9 +151,9 @@
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
 </header>
-<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+<div id="menu-overlay"><a href="all-projects.html">ALL PROJECTS</a><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<main class="page wrap" id="content" tabindex="-1">
+<main class="page wrap ct" id="content" tabindex="-1">
   <!-- Header removed by request, same as the info page: the menu already says
        CONTACT and the lead line below says what the page is for. The <h1> is
        kept but visually hidden - the page still needs one heading for search
@@ -137,6 +166,8 @@
   <!-- action/method so the form still posts with JavaScript off (Formspree
        then shows its own thank-you page); the script below preventDefaults
        and sends by fetch, so with JavaScript on nothing changes. -->
+  <!-- .cmain: the form and what belongs to it, the right-hand columns from 601 wide -->
+  <div class="cmain">
   <form class="cform" id="contactForm" action="https://formspree.io/f/xnpnbokn" method="POST" novalidate>
     <fieldset class="ctopic">
       <legend>About</legend>
@@ -147,11 +178,11 @@
         <label><input type="radio" name="topic" value="Other"><span>Other</span></label>
       </div>
     </fieldset>
-    <div class="cfield">
+    <div class="cfield cf-half">
       <label for="cf-name">Name</label>
       <input id="cf-name" name="name" type="text" autocomplete="name" required>
     </div>
-    <div class="cfield">
+    <div class="cfield cf-half">
       <label for="cf-email">Email</label>
       <input id="cf-email" name="email" type="email" autocomplete="email" required>
     </div>
@@ -196,13 +227,14 @@
     <pre class="cf-fb-text"></pre>
     <button type="button" class="cf-fb-copy">Copy message</button>
   </div>
+  </div>
 
   <p class="contact-alt">
     <a href="mailto:owen@studionewo.com">owen@studionewo.com</a>
     <span class="sep">/</span>
     <a href="https://www.instagram.com/studio.newo" target="_blank" rel="noopener">Instagram</a>
   </p>
-  <p class="cprivacy" id="privacy"><span class="lbl">Privacy</span>The home and project pages ask Open-Meteo for the current weather near the main city of your time zone so they can draw the sky. Page views are counted with GoatCounter, which records the page, the referring site and the screen size, not who you are. The video on the Solutions page plays from YouTube's no-cookie domain only when you press Video.</p>
+  <p class="cprivacy" id="privacy"><span class="lbl">Privacy</span>Page views are counted with GoatCounter, which records the page, the referring site and the screen size, not who you are. The Sonic Touch video on the Solutions and All projects pages plays from YouTube's no-cookie domain only when you press Video.</p>
 </main>
 <!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
      right. Project pages have carried one for a while; these pages just
@@ -217,9 +249,9 @@
 </footer>
 
 
-<script src="js/projects-data.js?v=33"></script>
-<script src="js/main.js?v=8"></script>
-<script src="js/menu.js?v=57"></script>
+<script src="js/projects-data.js?v=34"></script>
+<script src="js/main.js?v=9"></script>
+<script src="js/menu.js?v=69"></script>
 <script>
 /* Contact form. Posts to Formspree (no server needed) via fetch, so the page
    never reloads. Until a real endpoint is set below, it falls back to opening

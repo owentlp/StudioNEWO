@@ -43,16 +43,17 @@
   font-style:italic; size-adjust:97.2%; ascent-override:91.5%; descent-override:21.1%; line-gap-override:0%;
 }
 :root{
-  --ink:#141414;
+  color-scheme:light;               /* DARK MODE (19 Nov 2026): every colour token below is light-dark(light, dark). Light unless js/theme.js sets html[data-theme="dark"] (dark system setting AND after dark, never 08:00 to 18:00). See DARK MODE near the end. */
+  --ink:light-dark(#141414,#e9e7e2);
   /* deliberately the SAME value as --ink: hierarchy on this site comes from
      size and spacing, not from greying text down. Kept as its own token so
      the places that mean "secondary" still say so, and so one edit here can
      bring a softer tone back if it is ever wanted. */
   --ink-soft:var(--ink);
-  --page:#ffffff;                 /* the page colour on every page (Owen, 13 Nov 2026) */
+  --page:light-dark(#ffffff,#131312);                 /* the page colour on every page (Owen, 13 Nov 2026) */
   --paper:#e9e7e2;                /* NOT a site colour since 13 Nov 2026: paper stays on the public drawings only. Kept because the current home page (index.html, sky and cards) still reads it until the new home page is picked. */
   --red:#e2191b;
-  --red-text:#b5120f;             /* darker red for red TEXT under 18px (6.9:1 on the white page); buttons, rules and the big italics keep --red (4.8:1 on white) */
+  --red-text:light-dark(#b5120f,#ff5a4f);             /* darker red for red TEXT under 18px (6.9:1 on the white page); buttons, rules and the big italics keep --red (4.8:1 on white) */
   --red-on-dark:#ff5a4f;          /* red TEXT on the dark lightbox box (#141311): about 6:1. --red there is 3.9:1 */
   --disp:"GOST B","GOST B fallback",Georgia,serif;
   --body:"OCR B","OCR B fallback","Courier New",monospace;
@@ -75,6 +76,10 @@
                          11px on a phone; lead paragraphs 15px (--t-lead)
      4 LABEL    OCR B    8.5px capitals, .08em tracking, --ink-2: labels of one to three words (--t-label, --ls-label).
                          Buttons are 8.5px too for now (their redesign is a later task).
+                         The one exception (Owen, 16 Nov 2026, late: "if you need to reduce the font size
+                         that is on"): the spec line under a project's hero photo may be set smaller, all of
+                         it together, down to 7.5px, where it would otherwise run past the photo (--spec-fs,
+                         SPEC LINE, INSIDE THE PHOTO'S WIDTH). Nowhere else.
      WHY THE NUMBERS ARE SMALL: fonts/ocr-b.otf has an advance of 0.865 em, against 0.60 for a normal
      monospace, so OCR B reads 44% bigger than its number. The old 15px body read like 21.6px and held
      only 21 to 36 characters a line; 10.5px reads like 15px. Sentences are never set in tracked
@@ -274,7 +279,7 @@ body.hdr-hidden .site-home, body.hdr-hidden #burger{transform:translateY(calc(-1
   .menu-cat-list{transform:none; transition:opacity .24s ease;}
 }
 
-.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid rgba(20,20,20,.16); padding-top:15px; margin-top:9px;}
+.menu-links{display:flex; flex-direction:column; gap:7px; border-top:1px solid light-dark(rgba(20,20,20,.16),rgba(233,231,226,.22)); padding-top:15px; margin-top:9px;}
 .menu-links a{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink); text-decoration:none; padding:6px 0;}   /* padding: 32px rows to tap; colour switches on hover, not animated */
 .menu-links a:hover, .menu-links a:focus-visible{color:var(--red-text);}
 
@@ -344,12 +349,20 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 /* plain `inline`, not inline-block: the collapsed panel must not be able to
    inflate this wrapper's shrink-to-fit width before it's ever opened. */
 .info-wrap{position:relative; display:inline;}
-/* The MARK stays 15px - that is the size it is meant to read at, printed in
-   the run of text. The BUTTON is 26px with the difference as padding, so the
-   tap target clears the 24px minimum on a phone without the icon growing or
-   the line it sits on getting taller (the negative margins cancel the extra
-   box back out of the inline flow). */
-.info-btn{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; padding:5.5px; margin-left:1px; margin-top:-5.5px; margin-bottom:-5.5px; background:none; border:0; color:var(--ink-soft); cursor:pointer; vertical-align:baseline; transition:opacity .15s ease;}
+/* THE MARK IS 10px AND STANDS ON THE BASELINE (Owen, 16 Nov 2026: "info icons
+   sit too high, they touch the characters above them ... level with the
+   bottom of the period it is beside"). It was 15px, taller than the 14.3px
+   line pitch of the body text, so with its foot on the baseline its head
+   reached into the line above. At 10px (about the height of a capital) its
+   bottom edge is level with the bottom of the full stop beside it and it
+   clears the descenders above by 2px. The mark's bottom edge IS the button's
+   baseline (an inline-flex box takes its first item's), so no offset is used.
+   The BUTTON is 26px with the difference as padding, so the tap target
+   clears the 24px minimum without the line it sits on getting taller (the
+   negative margins take the extra box back out of the inline flow; left and
+   right keep the mark 6.5px from the full stop and take no more room on the
+   line than the mark itself, so it is not pushed to a line of its own). */
+.info-btn{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; padding:8px; margin:-8px -8px -8px -1.5px; background:none; border:0; color:var(--ink-soft); cursor:pointer; vertical-align:baseline; transition:opacity .15s ease;}
 /* Owen's info.svg is a solid black icon, not a tintable outline, so hover/
    open feedback is opacity rather than the red-on-hover other buttons use. */
 .info-btn img{width:100%; height:100%; display:block; object-fit:contain;}
@@ -377,7 +390,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .proj .desc:has(.info-wrap){position:relative;}
 .proj .info-wrap{position:static;}
 .proj .info-panel{position:absolute; left:0; right:0; top:calc(100% + 8px); z-index:30; width:auto;}
-.proj .info-panel-in{margin-top:0; max-width:none; background:var(--page); border:1px solid rgba(20,20,20,.16);
+.proj .info-panel-in{margin-top:0; max-width:none; background:var(--page); border:1px solid light-dark(rgba(20,20,20,.16),rgba(233,231,226,.22));
   padding:12px 16px; box-shadow:0 8px 30px rgba(0,0,0,.12); text-align:left;}
 .proj .hero-aside:has(.info-panel.open){z-index:30;}   /* under the menu (40), over the model and mechanism */
 
@@ -429,7 +442,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .comp-name{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; white-space:nowrap; text-shadow:0 0 4px var(--page),0 0 4px var(--page),0 0 4px var(--page);}
 .comp-info img{width:clamp(8px,1.3cqw,12px); height:auto; display:block; flex:0 0 auto;}
 .comp-info:hover .comp-name,.comp-label.open .comp-name{color:var(--red-text);}
-.comp-panel{position:absolute; left:0; top:calc(100% + 8px); width:max-content; max-width:min(260px,60vw); background:var(--page); border:1px solid rgba(20,20,20,.16); padding:12px 16px; display:none; z-index:5; box-shadow:0 8px 30px rgba(0,0,0,.12);}
+.comp-panel{position:absolute; left:0; top:calc(100% + 8px); width:max-content; max-width:min(260px,60vw); background:var(--page); border:1px solid light-dark(rgba(20,20,20,.16),rgba(233,231,226,.22)); padding:12px 16px; display:none; z-index:5; box-shadow:0 8px 30px rgba(0,0,0,.12);}
 .comp-label.open .comp-panel{display:block;}
 .comp-panel-name{display:block; font-family:var(--disp); font-style:italic; font-size:var(--t-tag); line-height:1.1; margin-bottom:6px; color:var(--ink);}
 .comp-panel-spec{display:block; font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0; color:var(--ink-soft);}
@@ -493,7 +506,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 
 
 /* frameless figures + aspect ratios */
-.fig{position:relative; overflow:hidden; background:#00000008;}
+.fig{position:relative; overflow:hidden; background:light-dark(#00000008,#ffffff0a);}
 .fig>img,.fig.vid>video{width:100%; height:100%; object-fit:cover; display:block;}
 .fig.cut{overflow:visible; background:none;}
 .fig.cut>img{width:100%; height:auto; object-fit:contain;}
@@ -539,7 +552,7 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   font-size:var(--t-label); letter-spacing:var(--ls-label); line-height:20px; text-transform:uppercase; color:var(--ink-2);}
 .hero-spec{display:block; margin:0; word-spacing:10px;}   /* the space between items: about 16px */
 .hero-spec dd{word-spacing:0;}
-@media (min-width:901px) and (max-width:1100px){ .hero-spec{word-spacing:3px;} .hero-spec::before{width:82px;} .hero-chips .sep, .hero-spec .st .sep{margin:0 2px;} }   /* narrow: about 10px between items, so two lines still hold every product */
+@media (min-width:901px) and (max-width:1100px){ .hero-spec{word-spacing:3px;} .hero-info{--inq-w:82px;} .hero-chips .sep, .hero-spec .st .sep{margin:0 2px;} }   /* narrow: about 10px between items, so two lines still hold every product */
 .hero-spec::before{content:""; float:right; width:var(--inq-w, 88px); height:20px;}   /* room for INQUIRE (72px wide) and 16px on the first line */
 .hs-row{display:inline;}
 .hero-spec .nb{white-space:nowrap;}
@@ -603,11 +616,12 @@ figcaption.cap{margin-top:6px; max-width:100%;}
 .hero-aside-btm .desc{flex:0 1 auto; min-width:0; max-width:min(var(--w-desc), 46ch); margin:0;}
 /* INQUIRE: see HERO INQUIRE at the end of this file (16 Nov 2026, under the
    photo's bottom right corner) */
-/* the demo video: top right of the column, beside the title, 20vw (pure vw,
-   no px cap, so it holds its size across zoom); it gives way to the title
-   when the column is narrow */
-.hero-aside-top .hero-vid{flex:0 1 20vw; min-width:0; max-width:20vw;}
-.hero-aside-top .hero-vid .fig{margin:0; width:100%;}
+/* the demo video: bottom right of the column, beside the summary, its bottom
+   edge on the photo's bottom edge (Owen, 16 Nov (e); it was top right from
+   14 Nov). 18vw, pure vw so it holds its size across zoom. See HERO VIDEO at
+   the end of this file. */
+.hero-aside-btm .hero-vid{flex:0 1 18vw; min-width:0; max-width:20vw;}
+.hero-aside-btm .hero-vid .fig{margin:0; width:100%;}
 /* the hero description now inherits the shared .desc justify + left-last-line
    default (it was overriding text-align to plain left before, which meant
    this specific paragraph wasn't actually justified at all - a leftover
@@ -811,20 +825,19 @@ figcaption.cap{margin-top:6px; max-width:100%;}
   pointer-events:none;   /* enabled only over the slot box, in project.html */
 }
 .cad-stage model-viewer:hover{transform:translate(-50%,-50%) rotate(-2deg) scale(.97);}
-/* click-to-interact cue: shown until the model is engaged, then fades.
-   4 Nov 2026 (Owen): floats ON the model, centred low in the slot box, as a
-   paper chip with an ink hairline (the mechanisms' .hint is the same chip).
-   Above the model-viewer, ignores pointer input, fades once engaged. */
-.mv-hint{position:absolute; left:50%; bottom:12%; transform:translateX(-50%); z-index:3; margin:0;
-  font-family:var(--body); font-size:var(--t-label); line-height:1; letter-spacing:var(--ls-label); text-transform:uppercase;
-  color:var(--ink); background:rgba(255,255,255,.92); border:1px solid rgba(20,20,20,.28); padding:8px 12px 7px;
-  pointer-events:none; opacity:1; transition:opacity .3s ease; white-space:nowrap;}
+/* DRAG / TOUCH TO INTERACT on the 3D model (Owen, 16 Nov 2026: "3d model hint
+   should work the same as mechanism"; replaces the 4 Nov chip on the model).
+   The same label as the mechanisms' (.hint in the frames, js/mech-touch.js):
+   plain level 4 text in the flow, on its own line at the head of the control
+   row, never on the model, never a box or a button. Mouse: it fades the first
+   time the model is hovered or pressed (.gone). Touch: it stays, and takes the
+   chosen text-link look while the model is awake (.on). */
+.mv-hint{flex:0 0 100%; margin:0 0 10px; font-family:var(--body); font-size:var(--t-label); line-height:1.36; letter-spacing:var(--ls-label); text-transform:uppercase;
+  color:var(--ink); opacity:.62; white-space:nowrap; pointer-events:none; transition:opacity .3s ease;}
+.mv-hint.gone{opacity:0;}
+.mv-hint.on{opacity:1; text-decoration:underline; text-decoration-color:var(--red); text-decoration-thickness:1.5px; text-underline-offset:4px;}
+@media (prefers-reduced-motion:reduce){ .mv-hint{transition:none;} }
 .cad-stage.mv-framed model-viewer{opacity:1;}
-/* mv-live is set on .cad-stage (js/project.js), the hint's own parent */
-.cad-stage.mv-live .mv-hint{opacity:0;}
-/* touch, tap to wake (16 Nov 2026): awake, the label stays in the chosen
-   text-link look (ink, red underline), like the mechanisms' */
-.cad-stage.mv-awake .mv-hint{opacity:1; color:var(--ink); text-decoration:underline; text-decoration-color:var(--red); text-decoration-thickness:1.5px; text-underline-offset:4px;}
 /* OFF-SCREEN: stop the model costing the compositor anything while you are
    reading somewhere else on the page. The element is 130vw x five --model-slot
    rows - about 6.5 megapixels - and even with nothing being redrawn (auto-rotate
@@ -896,7 +909,7 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
    down the page. z-index clears the flooding <model-viewer> and .mv-bar. */
 .mv-qr{position:absolute; top:100%; left:var(--mar); margin-top:12px; z-index:7;
   display:flex; align-items:center; gap:16px; padding:12px; width:max-content; max-width:min(360px,80vw);
-  background:var(--page); border:1px solid rgba(20,20,20,.16); box-shadow:0 6px 26px rgba(0,0,0,.14);}
+  background:var(--page); border:1px solid light-dark(rgba(20,20,20,.16),rgba(233,231,226,.22)); box-shadow:0 6px 26px rgba(0,0,0,.14);}
 .mv-qr[hidden]{display:none;}
 .mv-qr-img{flex:0 0 auto; width:112px; height:112px; display:grid; place-items:center;}
 /* the library emits a plain <img> of the code - keep its pixels crisp rather
@@ -1054,7 +1067,7 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
   .hero-tagline{max-width:none;}
   .hero-aside-btm{display:block; margin:0;}   /* stacked: summary, then INQUIRE under it */
   .hero-aside-btm .desc{margin-left:0; text-align:justify; text-align-last:left; max-width:min(var(--w-desc), 46ch);}   /* 3 Nov 2026: the site measure in one column too (was none: 54-63 characters at 820) */
-  .hero-aside-top .hero-vid{width:min(100%,360px); max-width:none; margin:0;}
+  .hero-aside-btm .hero-vid{width:min(100%,360px); max-width:none; margin:0;}
   .hero-gallery{grid-row:auto;}
   /* model + mechanism stack back to one column on small screens - side by
      side doesn't work once each half is narrower than the model/graphic
@@ -1178,6 +1191,12 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
 }
 .lightbox video[hidden], .lightbox img[hidden]{display:none;}
 .lightbox.imgshow img, .lightbox.imgshow video{opacity:1; transform:none;}
+/* THE PHOTO GROWS OUT OF ITS TILE (Owen, 19 Nov 2026; js/project.js, same heading). .lb-fly is a copy of the
+   tile's picture, fixed over the page, flown by one transform (translate + even scale) to where the viewer's
+   picture stands, and back on close. .lb-now: the viewer's own picture takes over (or leaves) at once, no fade. */
+.lb-fly{position:fixed; z-index:302; display:block; margin:0; padding:0; max-width:none; max-height:none; object-fit:cover; transform-origin:0 0; pointer-events:none; -webkit-user-select:none; user-select:none; transition:transform .5s cubic-bezier(.2,.8,.2,1);}
+.lightbox.lb-now img{transition:none;}
+@media (prefers-reduced-motion:reduce){ .lb-fly{transition:none;} }
 /* any inline video that is part of the lightbox set reads as openable */
 .fig.vid[data-lb]{cursor:zoom-in;}
 .fig.vid[data-lb] video{pointer-events:none;}   /* let the click reach the figure */
@@ -1187,15 +1206,25 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
   transition:opacity .15s ease;
 }
 .lb-close:hover,.lb-prev:hover,.lb-next:hover{color:var(--red-on-dark);}   /* --red was 3.88:1 on the #141311 box at 9px (axe, FLOW lightbox) */
-/* tap targets: CLOSE about 90x40 (the word stays where it was), arrows 44x60 */
+/* tap targets: CLOSE about 90x40 (the word stays where it was), arrows 44x44.
+   ARROWS (Owen, 16 Nov (e): "should match other arrows on links and should be
+   inside of the image, not touching the edge"): the same glyph, face, size and
+   red as the arrow in INQUIRE and the other text links (level 4, 8.5px), a
+   thin underline on hover, focus and press. js/project.js (placeArrows) puts
+   them inside the picture, 20px in from its left and right edges (12px on a
+   phone), at half its height; the left / right below are only the place they
+   hold before a picture has a size. The glyph sits at the inner end of its
+   44px tap box, so the box never reaches past the picture's edge. */
 .lb-close{top:10px; right:14px; padding:12px; font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase;}
-.lb-prev,.lb-next{top:50%; transform:translateY(-50%); width:44px; height:60px; padding:0; display:flex; align-items:center; justify-content:center; font-size:22px; line-height:1;}
-.lb-prev{left:6px;}
-.lb-next{right:6px;}
+.lb-prev,.lb-next{top:50%; transform:translateY(-50%); width:44px; height:44px; padding:0; display:flex; align-items:center; font-size:var(--t-label); letter-spacing:var(--ls-label); line-height:1; color:var(--red-on-dark);}
+.lb-prev{left:clamp(44px,calc(6vw + 20px),100px); justify-content:flex-start;}
+.lb-next{right:clamp(44px,calc(6vw + 20px),100px); justify-content:flex-end;}
+.lb-prev:hover,.lb-next:hover,.lb-prev:focus-visible,.lb-next:focus-visible,.lb-prev:active,.lb-next:active{text-decoration:underline; text-decoration-color:var(--red-on-dark); text-decoration-thickness:1px; text-underline-offset:4px;}
+.lb-prev:focus-visible,.lb-next:focus-visible{outline:2px solid #eceae5; outline-offset:2px;}
 .lb-prev[disabled],.lb-next[disabled]{opacity:.25; cursor:default;}
 .lb-count{position:fixed; z-index:301; bottom:22px; left:50%; transform:translateX(-50%); font-size:var(--t-label); letter-spacing:var(--ls-label); color:#eceae5; opacity:.65;}
 @media (max-width:640px){
-  .lb-prev{left:2px;} .lb-next{right:2px;}
+  .lb-prev{left:28px;} .lb-next{right:28px;}
   .lightbox{padding:16px;}
 }
 
@@ -1228,7 +1257,7 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
 .wire .fig, .wire .hero-main, .wire .gthumb, .wire .cad-stage, .wire .hiw-graphic{
   position:relative;
   background:repeating-linear-gradient(45deg,#dedbd3,#dedbd3 11px,#d5d2c9 11px,#d5d2c9 22px) !important;
-  outline:1px solid rgba(20,20,20,.5); outline-offset:-1px;
+  outline:1px solid light-dark(rgba(20,20,20,.5),rgba(233,231,226,.5)); outline-offset:-1px;
 }
 .wire .hero-main{ aspect-ratio:4/3; }        /* the hero photo has no fixed box */
 .wire .hero-main > img{ height:100%; }
@@ -1240,7 +1269,7 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
 .wire .cad-stage::after, .wire .hiw-graphic::after{
   content:"IMAGE"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-family:var(--body); font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase;
-  color:rgba(20,20,20,.55); text-align:center; pointer-events:none; padding:6px;
+  color:light-dark(rgba(20,20,20,.55),rgba(233,231,226,.55)); text-align:center; pointer-events:none; padding:6px;
 }
 .wire .hero-main::after{ content:"HERO IMAGE"; }
 .wire .gthumb::after{ content:"GALLERY"; }
@@ -1252,7 +1281,7 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
 /* text blocks: keep the real copy, outline each block so its bounds show */
 .wire .hero-title, .wire .teaser, .wire .desc, .wire .hero-info,
 .wire .proc-note, .wire .matl-note, .wire .hiw-text, .wire figcaption{
-  outline:1px dashed rgba(20,20,20,.32); outline-offset:3px;
+  outline:1px dashed light-dark(rgba(20,20,20,.32),rgba(233,231,226,.36)); outline-offset:3px;
 }
 
 
@@ -1275,8 +1304,9 @@ html.kbd .cad-stage:has(model-viewer:focus-within)::before{content:""; position:
   .hero-aside-top{display:contents;}
   .hero-head{grid-column:1 / 13; order:-1;}   /* name and tagline above the photo */
   .hero-info{grid-column:1 / 13; order:1;}     /* then the spec line, INQUIRE at its end */
-  .hero-aside-btm{grid-column:1 / 13; order:2;}   /* then the summary and INQUIRE */
-  .hero-aside-top .hero-vid{grid-column:1 / 13; order:3;}   /* the demo video last */
+  .hero-aside-btm{display:contents;}
+  .hero-aside-btm .desc{grid-column:1 / 13; order:2;}   /* then the summary */
+  .hero-aside-btm .hero-vid{grid-column:1 / 13; order:3;}   /* the demo video last */
   .hero-title{margin-bottom:0;}
 }
 /* PROCESS NOTES UNDER 1300px (3 Nov 2026, measure exit test): the two Read more
@@ -1311,7 +1341,7 @@ body > .site-foot:not([data-autofoot]){padding:0 var(--mar-edge) 44px; --fe:var(
 .foot-note{position:absolute; top:0; height:var(--hdr); line-height:var(--hdr); white-space:nowrap; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink);}
 .foot-note.fn-l{left:calc(25% + var(--fe) / 2 - var(--hdr) * .75); transform:translateX(-50%);}
 .foot-note.fn-r{right:calc(25% + var(--fe) / 2 - var(--hdr) * .75); transform:translateX(50%);}
-.foot-note a{color:inherit; text-decoration:none; border-bottom:1px solid rgba(20,20,20,.35); padding-bottom:2px;}
+.foot-note a{color:inherit; text-decoration:none; border-bottom:1px solid light-dark(rgba(20,20,20,.35),rgba(233,231,226,.4)); padding-bottom:2px;}
 .foot-note a:hover{color:var(--red-text); border-color:var(--red-text);}
 /* bigger tap area without moving the underline */
 .foot-note a{position:relative;}
@@ -1324,7 +1354,7 @@ body > .site-foot:not([data-autofoot]){padding:0 var(--mar-edge) 44px; --fe:var(
   .foot-note{top:calc(var(--hdr) + 5px); height:22px; line-height:22px; font-size:10px;}
   /* 24px tall links to tap; the underline is drawn by text-decoration here so
      it stays against the letters instead of at the foot of the taller box */
-  .foot-note a{display:inline-block; line-height:24px; vertical-align:top; border-bottom:0; padding-bottom:0; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; text-decoration-color:rgba(20,20,20,.35);}
+  .foot-note a{display:inline-block; line-height:24px; vertical-align:top; border-bottom:0; padding-bottom:0; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; text-decoration-color:light-dark(rgba(20,20,20,.35),rgba(233,231,226,.4));}
   .foot-note a:hover{text-decoration-color:var(--red-text);}
 }
 /* phones (same point --hdr drops to 30px): left and right edges */
@@ -1344,7 +1374,7 @@ body > .site-foot:not([data-autofoot]){padding:0 var(--mar-edge) 44px; --fe:var(
    flow by the negative margins). The material chips get their tap area from
    .hero-chips a::after at every input. */
 @media (hover:none){
-  .info-btn{width:34px; height:34px; padding:9.5px; margin:-9.5px -4px -9.5px -3px;}
+  .info-btn{width:34px; height:34px; padding:12px; margin:-12px -12px -12px -5.5px;}   /* the mark stays 10px, 6.5px from the full stop */
 }
 
 /* ---------- SKY (js/sky.js) ----------
@@ -1387,17 +1417,9 @@ body > .site-foot:not([data-autofoot]){padding:0 var(--mar-edge) 44px; --fe:var(
 /* paper-like grain over the sky so it reads as printed, not a flat screen gradient */
 #sky-grain{position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.09;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");}
-/* LOADING SCREEN = THE SKY (2026-10-02, shared 2026-10-05). #loader.ld-sky is
-   transparent, so the logo turns over the live sky from the first frame
-   instead of a paper sheet (which at night was a white flash into a dark
-   page). On a dark sky the ink mark is inverted to paper. js/sky.js runs
-   right after the sky markup, before loader3d.js, so data-sky exists by then. */
-#loader.ld-sky{background:transparent;}
-body[data-sky="dark"] #loader.ld-sky .ld-mark{filter:invert(1);}
-/* arriving from a paper page: paper loader, ink mark (head script, 2026-10-07) */
-html.ld-paper #loader.ld-sky{background:var(--page);}
-html.ld-paper #loader #sky, html.ld-paper #loader #sky-clouds, html.ld-paper #loader #sky-precip, html.ld-paper #loader #sky-grain{display:none;}
-html.ld-paper body[data-sky] #loader.ld-sky .ld-mark{filter:none;}
+/* LOADING SCREEN (Owen, 19 Nov 2026: no sky or weather on it): the page colour
+   with the mark in the page's ink, #loader in LOADER above. The sky layers above
+   stay only for home-test.html?v=e (parked). */
 
 /* ---------- FINISH ROW: colour / material / finish options (2026-11-02) ----------
    Drawn by project.html under the material chips when a product's `variants`
@@ -1603,7 +1625,7 @@ body #home-line span{opacity:1;}   /* 1 since 3 Nov 2026: 9px text needs every b
   --u:4px;
   --tmar:var(--mar-edge);   /* the logo / menu / footer line at every width */
   --tin:calc(var(--tmar) - var(--mar));
-  --ink-2:#5a5957;   /* secondary text and every level 4 label: 7.0:1 on the white page, AA at any size */
+  --ink-2:light-dark(#5a5957,#a5a39e);   /* secondary text and every level 4 label: 7.0:1 on the white page, AA at any size */
 }
 .mv-bar{padding-left:var(--tmar); padding-right:var(--tmar);}
 @media (max-width:900px){
@@ -1631,7 +1653,6 @@ body #home-line span{opacity:1;}   /* 1 since 3 Nov 2026: 9px text needs every b
   .hero-aside{display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto auto 1fr auto; gap:0;}   /* the two 24px steps are margins: a row gap would add a third */
   .hero-aside-top{display:contents;}
   .hero-aside .hero-head{grid-column:1; grid-row:1;}
-  .hero-aside-top .hero-vid{grid-column:2; grid-row:1 / 4; align-self:start; width:20vw; max-width:20vw; margin-left:24px;}
   .hero-aside-btm{grid-column:1 / -1; grid-row:4; margin-top:24px;}
   .hero-title{margin-top:-.08em;}
   /* A4: the tight step keeps at least 16px (one line is 14.3px) */
@@ -1643,7 +1664,7 @@ body #home-line span{opacity:1;}   /* 1 since 3 Nov 2026: 9px text needs every b
    reaches up over INQUIRE on touch tablets (768 to 900) while it loads */
 .hero a, .hero .hero-vid{position:relative; z-index:2;}
 /* A11: the phone demo video runs the full width, like the photo */
-@media (max-width:600px){ .hero-aside-top .hero-vid{width:100%;} }
+@media (max-width:600px){ .hero-aside-btm .hero-vid{width:100%;} }
 /* C3: on touch, a tapped control does not keep its hover look (an OFF toggle
    looked chosen), and a tapped photo does not stay grown */
 @media (hover:none){
@@ -1683,4 +1704,267 @@ body:has(> main.wrap) > main.wrap{flex:1 0 auto;}
   .hero-main{grid-column:1 / 8;}
   .hero-aside{grid-column:8 / 13;}
 }
+
+/* ============================================================
+   OWEN'S CORRECTIONS, 16 NOV 2026 (e)  (docs/HANDOFF.txt 2026-11-16 e)
+   ============================================================ */
+/* HERO VIDEO (Owen: "I want the video bottom aligned with the bottom of the
+   hero and summary ... Then shrink the hero enough to fit the video beside
+   it"). A product with a demo video (.hero.has-vid, set by js/project.js from
+   `heroVideo`, never per product) has the photo on 6 columns and the text on
+   6, so the summary and the video sit side by side at the foot of the text
+   column: the summary's last baseline and the video's bottom edge both on the
+   photo's bottom edge (the row is aligned on last baselines; a video's is its
+   bottom edge). The video is 18vw; the summary takes what is left, at most
+   46 characters. A product without a video keeps the photo on 7 columns. */
+@media (min-width:901px){
+  .hero.has-vid .hero-main, .hero.has-vid .hero-info{grid-column:1 / 7;}
+  .hero.has-vid .hero-aside{grid-column:7 / 13;}
+  .hero.has-vid .hero-aside-btm .desc{flex:1 1 0;}
+  .hero-aside-btm .hero-vid{width:18vw; margin-left:auto;}
 }
+/* SPEC LINE, INSIDE THE PHOTO'S WIDTH (Owen, 16 Nov (e): "move the materials
+   to the second line"; 16 Nov evening, review D1: "status on line 2 is
+   better"; 16 Nov late: "none of the text under the hero should extend past
+   the hero image. if you need to reduce the font size that is on").
+   Line 1: YEAR, SIZE, PRICE at the left and INQUIRE at the right, ending just
+   below the photo's bottom right corner at every width over 900.
+   Line 2: MATERIALS first, then EXHIBITED and FINISH; STATUS at the right end
+   of the line, under INQUIRE (a right float that clears the float keeping
+   INQUIRE's place, so it starts on line 2). The line break is an empty block
+   before the materials.
+   .hero-info is always exactly as wide as the photo and nothing in it runs
+   past its right edge. Where line 2 is too long for the photo, js/project.js
+   (FIT THE SPEC LINE) fits it in one measured step:
+     1. the whole spec line, both lines and INQUIRE together, is set smaller
+        (--spec-fs: 8.5, 8.25, 8, 7.75, then the floor 7.5px), the largest
+        size at which the list is two lines;
+     2. if it is still too long at 7.5px, STATUS goes to a third line, still
+        at the right end (.spec-wrap). The break is between values, never
+        inside one except at a slash.
+   Before the script runs, and without it, the list simply wraps inside the
+   box. Stacked pages (900 and under): 8.5px, line 1 YEAR, SIZE and INQUIRE;
+   line 2 STATUS; line 3 MATERIALS and the rest. Never per product. */
+.hs-row.hs-st{float:right; clear:right; margin:0 0 0 16px;}
+.hs-row.hs-mat::before{content:""; display:block; height:0;}
+@media (min-width:901px){
+  .hero-info{font-size:var(--spec-fs, var(--t-label));}
+  .hero-info > .inq, .hero-info .hero-chips a{font-size:inherit;}
+  .hero-spec::after{content:""; display:block; clear:both;}   /* the box ends under STATUS, so the gallery is 40px under the last line */
+  .hero-info.spec-wrap .hero-spec::before{height:40px;}   /* INQUIRE's place reaches down line 2, so STATUS clears to line 3 */
+}
+@media (max-width:900px){
+  .hs-row.hs-st{float:none; clear:none; margin:0;}
+  .hs-row.hs-st::before{content:""; display:block; height:0;}
+}
+/* INQUIRE on touch is a 44px tap box (PRIMARY ACTIONS above). It hung down
+   from the top of line 1, so the word dropped to between lines 1 and 2 and
+   met the first material (Owen on his phone: "inquire overlaps cherry"). The
+   box is now centred on line 1, and the place kept for it is two lines tall,
+   so nothing on line 2 comes under the tap box either. */
+@media (hover:none){
+  .hero-info > .inq{top:-12px;}
+  .hero-spec::before{height:32px;}
+}
+/* touch and wider than 900: STATUS clears that 32px float, so it is pulled
+   back up onto line 2 (it is not a link; nothing pressable is under the box) */
+@media (hover:none) and (min-width:901px){ .hs-row.hs-st{margin-top:-12px;} }
+@media (hover:none) and (min-width:901px){ .hero-info.spec-wrap .hs-row.hs-st{margin-top:0;} }
+/* END ROW (Owen: "less gap between read more. make not for sale yet text
+   bottom same as read more (ensure there is enough space between 3d model and
+   that paragraph and allow for that to set the height of the read more").
+   .pj-end holds the availability note at the left and Process and detail in
+   the middle, last baselines level. The note is the taller of the two, so its
+   top is the row's top: 56px under the 3D model row (the model's control bar
+   is the last thing in its column), and the button's height on the page
+   follows from the note. Once Process and detail is open the note moves to
+   the end of the page (js/project.js), where it keeps the block spacing. */
+.pj-end{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); column-gap:var(--gut); align-items:last baseline; margin-top:56px; position:relative; z-index:2;}
+/* a mechanism with no 3D model beside it (FLOW) crops 5% of its width off its
+   bottom (.solo-mech above); the row gives that back, so the note keeps 56px */
+@media (min-width:901px){ .cad-hiw.solo-mech:has(.hiw-graphic.has-mech) + .pj-end{margin-top:calc(56px + clamp(28px,3.3vw,45px));} }
+/* 601 to 900 (review 16 Nov, M1): the stacked mechanism cropped 48px (FLOW 6%) off its bottom and nothing gave
+   it back, so the note began 8px under the frame (9px under KART's caption, 22px under FLOW's Speed control).
+   No crop here, as on a phone: the note keeps the desktop's 56px from the frame's own bottom edge. */
+@media (min-width:601px) and (max-width:900px){
+  .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech, .cad-hiw.solo-mech .cad-hiw-mech .hiw-graphic.has-mech{margin-bottom:0;}
+}
+.pj-end .pj-avail{grid-column:1; margin:0; padding:0 var(--tin); max-width:calc(46ch + 2 * var(--tin));}
+.pj-end .readmore{grid-column:2; margin:0; padding:0;}
+.pj-end .read-more-link{padding-top:0;}
+.pj-avail{margin-top:72px;}
+/* PHONE SPACING, ONE SCALE (Owen: "spacing is wonky and feels too tight in
+   some places and too spaced out in others"). 600 and under, three steps:
+     16px  inside a group (name, tagline, spec line, photo, summary)
+     40px  between blocks (summary, video, gallery, 3D controls, text, graphic,
+           Process and detail, availability, each process row)
+     72px  above the footer
+   The 3D model keeps its own overlap with the photo above it (js/project.js
+   OVERLAP WITH THE PHOTOS ABOVE) and the mechanisms keep their cropped top. */
+@media (max-width:600px){
+  .hero-aside-btm .hero-vid{margin-top:24px;}                 /* 16 row gap + 24 = 40 */
+  .cad-hiw-model{margin-bottom:40px;}
+  .hiw-text:last-child{margin-bottom:0;}
+  .cad-hiw:not(.solo-mech) .cad-hiw-mech .hiw-graphic.has-mech, .cad-hiw.solo-mech .cad-hiw-mech .hiw-graphic.has-mech{margin-bottom:0;}
+  .pj-end{display:flex; flex-direction:column; align-items:stretch; row-gap:40px; margin-top:40px;}
+  .pj-end .readmore{order:-1; display:flex; justify-content:center;}
+  .pj-end .pj-avail{max-width:none;}
+  .pj-avail{margin-top:40px;}
+  .proc{margin-top:40px;}
+  .scatter{row-gap:40px;}
+  .site-foot{margin-top:72px;}
+}
+/* PHONE GALLERY (Owen: "perfectly balanced, no asymmetry or variation which
+   needs to change. it should match the pc version"): the two columns are 7 and
+   5 wide, not equal, so the photos differ in size and the columns end at
+   different heights. js/project.js deals the photos with the same weights. */
+.hero-gallery .gcols.g75 .gcol:first-child{flex-grow:7;}
+.hero-gallery .gcols.g75 .gcol:nth-child(2){flex-grow:5;}
+
+/* ============================================================
+   PROJECT LAYOUT (Owen's picks of 19 Nov 2026, built from the test pages mock-emphasis.html,
+   mock-foot.html and mock-depth.html; docs/SITE_REVIEW_2026-11-18.txt "FINAL PICKS").
+   One block, after the rules it adjusts, so every 19 Nov value is in one place. Project pages only
+   (body.proj-body); nothing here is per product. Type is untouched: OCR B body, justified, 10.5px.
+   Colours are the tokens, so both themes follow.
+
+   INDEX
+   1 spacing scale     the three steps every gap comes from
+   2 page gutter       photos and text share the logo's line
+   3 key words         the marked block (bands drawn by js/project.js "THE MARKED BLOCK")
+   4 section headings  the tagline's own style
+   5 body width        32 characters, no hyphenation
+   6 alignment         every text block starts on an image or column edge
+   7 gaps              each gap on the scale; Process open
+   8 next project      the foot of the page
+   ============================================================ */
+
+/* ---- 1 SPACING SCALE (Owen: gaps "must be consistent and related"): 16 inside a group, 40 between
+        blocks, 72 between sections and above the footer. The column gutter and the gap between two
+        photos are the first step too (were clamp(12px,1.4vw,22px) and 12px). ---- */
+:root{ --s1:16px; --s2:40px; --s3:72px; --w-body:32ch; }
+
+/* ---- 2 PAGE GUTTER (Owen: "no text anywhere is closer to the page edge than the outside face of the
+        logo or the menu icon"). That face is --mar-edge (20px at 1440, 16.5 at 1180, 11 on a phone).
+        The photos stood at half of it (--mar) and the text 10px inside them. Here the page margin
+        itself is the logo's line: photos and text share one edge, so text starts on a photo's edge AND
+        nothing stands outside the logo. Process photos that bleed to the page edge still bleed; they
+        carry no text. ---- */
+body.proj-body{ --gut:var(--s1); --gallery-gap:var(--s1); --mar:var(--mar-edge); --tmar:var(--mar-edge); --tin:0px; }
+/* a diagram's own labels end at the right edge of its frame, which ran to the page edge: the frame's
+   column stops on the gutter. Nothing inside a diagram is changed. */
+@media (min-width:901px){ .cad-hiw:not(.solo-mech) .cad-hiw-mech{padding-right:var(--mar-edge);} }
+
+/* ---- 3 KEY WORDS: the marked block. The bands are drawn behind the words by the script, each
+        exactly one line tall; the words take the page colour once the bands are there (.em-on). ---- */
+.em-host{position:relative; isolation:isolate;}
+.em-bands{position:absolute; left:0; top:0; width:0; height:0; z-index:-1; pointer-events:none;}
+.em-bands i{position:absolute; background:var(--ink);}
+.em-host.em-on .em{color:var(--page);}
+
+/* ---- 4 SECTION HEADINGS (Owen: "they must match the tagline under the title"): How it works,
+        Process, Availability, Next project. The declarations are .hero-tagline's own (HERO section);
+        change the two together. ---- */
+.sec-h{font-family:var(--disp); font-style:italic; font-weight:400; font-size:var(--t-tag); line-height:1.2;   /* tracking: the page's own, inherited, as the tagline's is */
+  color:var(--ink); display:block; margin:0 0 var(--s1); padding:0; max-width:none; text-align:left; text-transform:none;}
+
+/* ---- 5 BODY WIDTH (Owen: "body width 32 characters, no hyphens"): the summary beside the hero and
+        the note under the gallery. Over 900 wide only; a phone column is about 38 characters and stays
+        full width. Process text keeps the site measure (46). ---- */
+@media (min-width:901px){
+  .hero-aside-btm .desc{max-width:var(--w-body);}
+  .cad-hiw-mech .hiw-text{font-size:var(--t-body); max-width:var(--w-body);}
+  .cad-hiw-mech .hiw-text .desc{max-width:var(--w-body);}
+}
+/* no hyphenation: a word breaks only at a hyphen it already has (push-button, smart-home) */
+body.proj-body .desc, body.proj-body .pj-avail p{-webkit-hyphens:manual; hyphens:manual;}
+
+/* ---- 6 ALIGNMENT (Owen: "text lines up with an image edge"). With the gutter above, --tin is 0, so
+        the hero text, spec line and Process notes already start on a photo or column edge. ---- */
+.pj-avail{padding-left:0; padding-right:0; max-width:46ch;}
+@media (min-width:901px){
+  /* the note under the gallery starts on the edge of the gallery photo above it (was 10px inside).
+     A page with no 3D model (.solo-mech) holds the note inside the page margin already. Where a 3D
+     model failed to load, the note's row runs from the page edge, so there it keeps the margin. */
+  .cad-hiw-mech .hiw-text{padding-left:0; padding-right:0;}
+  .cad-hiw.mv-failed:not(.solo-mech) .cad-hiw-mech .hiw-text, .cad-hiw:not(.solo-mech):has(> .cad-hiw-model.mv-failed) .cad-hiw-mech .hiw-text{padding-left:var(--mar); padding-right:var(--mar); max-width:calc(var(--w-body) + 2 * var(--mar));}
+  body.proj-body .mv-bar{padding-right:0;}      /* the 3D model's controls end on the photo column's right edge */
+  /* the second Process note has its photo on its right: its right edge stands on the column edge one
+     gutter from that photo (Owen: "right aligned and set against its image"). Still justified. */
+  .scatter .cell.proc-note.note-right > .desc{margin-left:auto;}
+}
+/* 900 and under (pre-push review, 19 Nov 2026): a page with no 3D model (.solo-mech: HALO, NEB, FLOW)
+   already holds the note inside the page margin, so the phone rule's --tmar padding doubled it (22px at
+   390, 11px in from the photo above). Same edge as KART and OMNI now: the gallery photo's left edge. */
+@media (max-width:900px){
+  body.proj-body .cad-hiw.solo-mech .cad-hiw-mech .hiw-text{padding-left:0; padding-right:0;}
+}
+/* a note on column 1 starts on the photos' left edge, at every width; only photos bleed to the page edge */
+.scatter .cell.proc-note[style*="grid-column:1 /"]{margin-left:0;}
+
+/* ---- 7 GAPS, each on the scale (old value beside it). Process is open from the start, with no
+        entrance motion; the gap above it is measured from the last thing seen (--proc-up, js/project.js
+        "THE GAP ABOVE PROCESS"). ---- */
+.hiw-text .desc + .desc{margin-top:var(--s1);}     /* was .68em (7px) */
+.pj-avail p + p{margin-top:var(--s1);}             /* was 8px */
+.matl-note{display:flex; flex-direction:column; align-items:flex-start; gap:var(--s1);}   /* note to its link: was 12px + the link's leading */
+.matl-note .desc{margin-bottom:0;}
+.hero-aside-btm{gap:var(--s1);}                    /* least gap, summary to video: was 24px */
+.proc-reveal{opacity:1; transform:none; transition:none;}
+@media (min-width:901px){
+  .scatter, .scatter.big{row-gap:var(--s2);}       /* was 64px (84px on a long page) */
+  .proc{margin-top:calc(var(--s3) - var(--proc-up, 0px));}                     /* was 125px by the boxes, about 225px as seen at 1440 */
+  .cad-hiw + .pj-avail{margin-top:calc(var(--s3) - var(--proc-up, 0px));}     /* a page with no Process */
+  #procReveal{position:relative; z-index:4;}       /* above a diagram's empty strip, so its first photo and note can be pressed */
+  .pj-avail{margin-top:var(--s3);}
+  body.proj-body .site-foot{margin-top:var(--s3);} /* was 112px */
+}
+
+/* ---- 8 NEXT PROJECT (Owen, A4: "next only, at one third of the height", with the link to all
+        projects). After the availability note, before the footer. Photo on 2 of the 12 columns (4 on a
+        phone), 4:3; beside it the name (heading level), kind (body), year and link (labels), the last
+        line on the photo's bottom edge. The whole tile is one link. No motion. ---- */
+.pj-next{display:block; margin:var(--s3) 0 0; padding:0; position:relative; z-index:4;}
+.pj-next-head{display:flex; align-items:baseline; justify-content:space-between; gap:var(--gut); margin:0 0 var(--s1);}
+.pj-next-head .sec-h{margin-bottom:0;}
+.pj-next-all, .pj-next-go{font-family:var(--body); font-style:normal; font-size:var(--t-label); line-height:1.6; letter-spacing:var(--ls-label); text-transform:uppercase;
+  color:var(--red-text); text-decoration:none; white-space:nowrap; padding:2px 0;}
+.pj-next-all:hover, .pj-next-all:focus-visible, .pj-next-all:active, .pj-next-t:hover .pj-next-go, .pj-next-t:focus-visible .pj-next-go{
+  text-decoration:underline; text-decoration-color:var(--red); text-decoration-thickness:1px; text-underline-offset:4px;}
+.pj-next-all:focus-visible, .pj-next-t:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+.pj-next-t{display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); column-gap:var(--gut); align-items:end; min-width:0; color:var(--ink); text-decoration:none;}
+.pj-next-im{grid-column:1 / 3; display:block; aspect-ratio:4 / 3; overflow:hidden;}
+.pj-next-im img{display:block; width:100%; height:100%; object-fit:cover;}
+.pj-next-cap{grid-column:3 / 13; display:flex; flex-direction:column; align-items:flex-start; gap:var(--s1); margin:0; min-width:0;}
+.pj-next-n{font-family:var(--disp); font-style:italic; font-weight:400; font-size:var(--t-tag); line-height:1;}
+.pj-next-k{font-family:var(--body); font-size:var(--t-body); line-height:var(--lh-body); color:var(--ink);}
+.pj-next-k::first-letter{text-transform:uppercase;}
+.pj-next-y{font-family:var(--body); font-size:var(--t-label); line-height:1; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+.pj-next-go{margin-bottom:-3px;}                 /* the link's last line on the photo's bottom edge */
+@media (max-width:900px){
+  .pj-next{margin-top:var(--s2);}
+  .pj-next-im{grid-column:1 / 5;}
+  .pj-next-cap{grid-column:5 / 13; gap:8px;}     /* half a step: four lines beside a small photo */
+  .pj-next-go{margin-bottom:0;}
+}
+
+/* ============================================================
+   DARK MODE (19 Nov 2026, Owen: "make that standard for all pages going forward")
+   Dark only at night (Owen, 19 Nov 2026: "dark mode should only activate when
+   viewing after dark and if preference is set to dark mode. should always be
+   white during working hours"). js/theme.js, in every page's <head>, sets
+   html[data-theme] to light or dark; with JavaScript off the page is light.
+   Colours are the tokens at the top of this file, each written
+   light-dark(light, dark), so most of the site follows on its own. The rules
+   below are the few things a token cannot do. Fixed exceptions: public
+   drawings stay on paper, the QR code stays dark on white, the lightbox is its
+   own ground.
+   ============================================================ */
+:root[data-theme="light"]{color-scheme:light;}
+:root[data-theme="dark"]{color-scheme:dark;}
+:root[data-theme="dark"] img[src$="info.svg"]{filter:invert(1);}
+:root[data-theme="dark"] .fig.cut>img[src$=".jpg"]{mix-blend-mode:normal;}
+:root[data-theme="dark"] .fig.cut>img:not([src$=".jpg"]){filter:drop-shadow(0 0 1px rgba(233,231,226,.45));}
+:root[data-theme="dark"] .mv-qr-img{background:#fff; padding:6px;}
+/* the loader's 3D mark is drawn in ink; at night it is turned to the page's ink */
+:root[data-theme="dark"] #loader .ld-3d{filter:invert(1);}

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ALL PROJECTS · STUDIO NEWO</title>
+<meta name="description" content="Every Studio NEWO project in one table: lighting, seating, audio and appliances, plus case studies in research, design for disassembly and transit. Toronto.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+<!-- light by day, dark only at night for a dark system setting: js/theme.js -->
+<script src="js/theme.js?v=1"></script>
+<link rel="canonical" href="https://studionewo.com/all-projects.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://studionewo.com/all-projects.html">
+<meta property="og:site_name" content="Studio NEWO">
+<meta property="og:title" content="ALL PROJECTS · STUDIO NEWO">
+<meta property="og:description" content="Every Studio NEWO project in one table: lighting, seating, audio and appliances, plus case studies in research, design for disassembly and transit. Toronto.">
+<meta property="og:image" content="https://studionewo.com/logo/og-card.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ALL PROJECTS · STUDIO NEWO">
+<meta name="twitter:description" content="Every Studio NEWO project in one table: lighting, seating, audio and appliances, plus case studies in research, design for disassembly and transit. Toronto.">
+<meta name="twitter:image" content="https://studionewo.com/logo/og-card.jpg">
+<link rel="manifest" href="/site.webmanifest">
+<!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
+     one Google uses, and Google wants a size that is a multiple of 48 and a URL
+     that does not change. It carries the whole mark at 66% so Google's circular
+     crop cannot cut the corners off. The .ico / 16 / 32 are the browser-tab
+     icons: the same mark drawn full bleed, with frames for 125% and 150%
+     display scaling. Regenerate all of them with tools/make-icons.py. -->
+<link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="/favicon.ico?v=4" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=4" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=4" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=2" sizes="any" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
+<link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=88">
+<style>
+  /* ALL PROJECTS (Owen's A3 pick, 19 Nov 2026: "projects table is great"; built from mock-all-table.html).
+     The rows are written into the page by tools/make-simple-page.py from js/all-projects-data.js
+     (<!--BAKE:ALL_ROWS-->, <!--BAKE:ALL_PREVIEW-->); the script at the foot only moves the photo, filters and
+     opens the video. One picture frame, one shape (4:3): every photo is cropped to it, never stretched.
+     Every row is two text lines high whether it uses one or two, so the pitch is even; the row is the link,
+     edge to edge. No rules, no boxes. Colours from the tokens only, so dark mode follows. */
+  .al{--g:clamp(10px,1.1vw,20px); --ar:4 / 3;}
+  .al-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 32px; margin:0 0 clamp(28px,3.4vw,56px);}
+  .al-h{font-family:var(--disp); font-style:italic; font-weight:400; font-size:var(--t-h2); line-height:1.2; margin:0;}
+  .al-set{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 18px;}
+  /* text links (the site's one control look); the chosen filter is ink with a red underline */
+  .al-f, .at-vid{font:inherit; font-size:var(--t-label); line-height:1.6; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--red-text);
+    background:none; border:0; border-radius:0; padding:2px 0; margin:0; cursor:pointer; white-space:nowrap; border-bottom:1px solid transparent;}
+  .al-f:hover, .al-f:active, .at-vid:hover, .at-vid:active{border-bottom-color:var(--red);}
+  .al-f[aria-pressed="true"]{color:var(--ink); border-bottom-color:var(--red);}
+  .al-f:focus-visible, .at-vid:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+
+  .at-wrap{display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); column-gap:var(--g); align-items:start;}
+  .at{grid-column:1 / span 8; min-width:0;}
+  .at-r{display:grid; grid-template-columns:150px minmax(0,1fr) 40px 96px 150px 104px; column-gap:var(--g); align-items:baseline;
+    padding:11px 0; min-height:56px; box-sizing:border-box; color:var(--ink); text-decoration:none;}
+  .at-hd{padding:0 0 8px; min-height:0;}
+  .at-hd span, .at-y, .at-t, .at-s{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--ink-2);}
+  .at-n{font-family:var(--disp); font-style:italic; font-size:19px; line-height:1; white-space:nowrap;}
+  .at-k{font-size:var(--t-body); line-height:var(--lh-body); letter-spacing:0;}
+  .at-go{font-size:var(--t-label); letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--red-text); white-space:nowrap; justify-self:end;}
+  .at-go::after{content:""; display:block; height:1px; background:transparent;}
+  a.at-r:hover .at-go::after, a.at-r.cur .at-go::after{background:var(--red);}
+  a.at-r:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  /* a second link on a row (VIDEO): on the row's second line, under the PDF link, same right edge */
+  .at-rw{position:relative;} .at-rw[hidden]{display:none;}
+  .at-vid{position:absolute; right:0; top:31px; line-height:1.36; padding:0;}
+  .at-r .at-th{display:none;}
+
+  /* the photo beside the row under the pointer or the keyboard */
+  .at-pre{grid-column:9 / span 4; position:relative; align-self:stretch;}
+  .at-pre-in{position:absolute; left:0; right:0; top:0; aspect-ratio:var(--ar); overflow:hidden; transform:translateY(var(--y, 0px));
+    transition:transform .45s cubic-bezier(.2,.8,.2,1);}
+  .at-pre-in > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 50%; opacity:0; transition:opacity .25s ease;}
+  .at-pre-in > img.on{opacity:1;}
+  @media (prefers-reduced-motion:reduce){ .at-pre-in, .at-pre-in > img{transition:none;} }
+
+  /* the video viewer: the film on the page colour, CLOSE as a text link */
+  .at-view{position:fixed; inset:0; z-index:300; background:var(--page); display:flex; align-items:center; justify-content:center; padding:var(--tmar);}
+  .at-view-in{display:flex; flex-direction:column; align-items:flex-end; gap:10px; width:min(100%, calc((100vh - 140px) * 16 / 9), 1280px);}
+  .at-view iframe{display:block; width:100%; aspect-ratio:16 / 9; border:0;}
+
+  /* under 1440 the TYPE column goes (the filter and the kind say it); under 1280 the table takes nine columns and the
+     photo three, so no description needs a third line; under 1160 STATUS goes too. Where a row leads always stays. */
+  @media (max-width:1439px){ .at-r{grid-template-columns:142px minmax(0,1fr) 34px 150px 104px;} .at-t, .at-hd span:nth-child(4){display:none;} }
+  @media (max-width:1279px){ .at{grid-column:1 / span 9;} .at-pre{grid-column:10 / span 3;} }
+  @media (max-width:1159px){ .at-r{grid-template-columns:142px minmax(0,1fr) 34px 104px;} .at-s, .at-hd span:nth-child(5){display:none;} }
+  @media (max-width:860px){
+    .at{grid-column:1 / -1;} .at-pre, .at-hd{display:none;}
+    .at-r{min-height:0; grid-template-columns:auto minmax(0,1fr) 96px; grid-template-areas:"n n th" "k k th" "y t th" "s s th" "go go th"; column-gap:12px; row-gap:5px; padding:14px 0; align-items:start;}
+    .at-n{grid-area:n;} .at-y{grid-area:y;} .at-k{grid-area:k;} .at-t{grid-area:t; display:block;} .at-s{grid-area:s; display:block;} .at-go{grid-area:go; justify-self:start;}
+    .at-y:empty, .at-s:empty{display:none;}
+    .at-r .at-th{grid-area:th; display:block; width:96px; height:auto; aspect-ratio:var(--ar); object-fit:cover;}
+    .has-vid .at-r{padding-bottom:34px;} .at-vid{top:auto; bottom:14px; right:auto; left:0;}
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<!-- header landmark (2026-11-03, axe "region"): the three fixed marks sit in it; it has no box of its own.
+     make-simple-page.py copies this shell into solutions, jewelry and photography. -->
+<header>
+<a class="site-home" href="index.html" aria-label="Studio NEWO home">
+  <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
+</a>
+<div class="site-wordmark" role="img" aria-label="NEWO">
+  <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
+</div>
+<button id="burger" aria-label="Open menu">
+  <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
+</button>
+</header>
+<div id="menu-overlay"><a href="all-projects.html">ALL PROJECTS</a><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+
+<main class="page wrap al" id="content" tabindex="-1">
+  <div class="al-head"><h1 class="al-h">All projects</h1><div class="al-set" id="allFilter"></div></div>
+  <div class="at-wrap" id="all">
+    <div class="at">
+      <div class="at-r at-hd" aria-hidden="true"><span>Name</span><span>Kind</span><span>Year</span><span>Type</span><span>Status</span><span></span></div>
+      <div class="at-rw"><a class="at-r" href="kart.html" data-i="0" data-t="Product"><span class="at-n">KART</span><span class="at-k">presence-sensing table lamp</span><span class="at-y">2026</span><span class="at-t">Product</span><span class="at-s">Prototype 01 / V2 in development</span><span class="at-go">View &rarr;</span><img class="at-th" src="projects/kart/sm/hero.jpg" alt="" loading="lazy" decoding="async"></a></div>
+      <div class="at-rw"><a class="at-r" href="neb.html" data-i="1" data-t="Product"><span class="at-n">NEB</span><span class="at-k">flat-pack lounge chair</span><span class="at-y">2024</span><span class="at-t">Product</span><span class="at-s">Prototype 01</span><span class="at-go">View &rarr;</span><img class="at-th" src="projects/neb/sm/hero.jpg" alt="" loading="lazy" decoding="async"></a></div>
+      <div class="at-rw"><a class="at-r" href="omni.html" data-i="2" data-t="Product"><span class="at-n">OMNI</span><span class="at-k">omnidirectional loudspeakers</span><span class="at-y">2025</span><span class="at-t">Product</span><span class="at-s">Prototype 01</span><span class="at-go">View &rarr;</span><img class="at-th" src="projects/omni/sm/hero.jpg" alt="" loading="lazy" decoding="async"></a></div>
+      <div class="at-rw"><a class="at-r" href="halo.html" data-i="3" data-t="Product"><span class="at-n">HALO</span><span class="at-k">plasma lamp</span><span class="at-y">2026</span><span class="at-t">Product</span><span class="at-s">Prototype 01</span><span class="at-go">View &rarr;</span><img class="at-th" src="projects/halo/sm/hero.jpg" alt="" loading="lazy" decoding="async" style="object-position:0% 50%"></a></div>
+      <div class="at-rw"><a class="at-r" href="flow.html" data-i="4" data-t="Product"><span class="at-n">FLOW</span><span class="at-k">crossflow desk fan</span><span class="at-y">2025</span><span class="at-t">Product</span><span class="at-s">Prototype 01</span><span class="at-go">View &rarr;</span><img class="at-th" src="projects/flow/sm/hero.jpg" alt="" loading="lazy" decoding="async"></a></div>
+      <div class="at-rw has-vid"><a class="at-r" href="solutions/sonic-touch.pdf" target="_blank" rel="noopener" data-i="5" data-t="Case study"><span class="at-n">Sonic Touch</span><span class="at-k">A multi-sensory music remote for people living with dementia</span><span class="at-y">2025</span><span class="at-t">Case study</span><span class="at-s">Prototype, tested</span><span class="at-go">PDF, 1.7 MB &rarr;</span><img class="at-th" src="solutions/sm/sonic-touch.jpg" alt="" loading="lazy" decoding="async" style="object-fit:contain;background:#fcfcfa"></a><button class="at-vid" type="button" data-video="v3q0BAfEyOM" aria-label="Sonic Touch, video">Video &rarr;</button></div>
+      <div class="at-rw"><a class="at-r" href="solutions/loots.pdf" target="_blank" rel="noopener" data-i="6" data-t="Case study"><span class="at-n">LOOTS</span><span class="at-k">A collapsible stool from dimensional lumber</span><span class="at-y">2025</span><span class="at-t">Case study</span><span class="at-s">Exhibited 2025</span><span class="at-go">PDF, 2.7 MB &rarr;</span><img class="at-th" src="solutions/sm/loots.jpg" alt="" loading="lazy" decoding="async" style="object-position:50% 62%"></a></div>
+      <div class="at-rw"><a class="at-r" href="solutions/vacancy-to-value.pdf" target="_blank" rel="noopener" data-i="7" data-t="Case study"><span class="at-n">Vacancy to Value</span><span class="at-k">Non-fare revenue proposal for the TTC</span><span class="at-y">2026</span><span class="at-t">Case study</span><span class="at-s">Proposal</span><span class="at-go">PDF, 3.1 MB &rarr;</span><img class="at-th" src="solutions/sm/vacancy-to-value.jpg" alt="" loading="lazy" decoding="async" style="object-position:17% 50%"></a></div>
+    </div>
+    <div class="at-pre" aria-hidden="true"><div class="at-pre-in">
+      <img data-i="0" src="projects/kart/md/hero.jpg" alt="" decoding="async" class="on">
+      <img data-i="1" src="projects/neb/md/hero.jpg" alt="" decoding="async">
+      <img data-i="2" src="projects/omni/md/hero.jpg" alt="" decoding="async">
+      <img data-i="3" src="projects/halo/md/hero.jpg" alt="" decoding="async" style="object-position:0% 50%">
+      <img data-i="4" src="projects/flow/md/hero.jpg" alt="" decoding="async">
+      <img data-i="5" src="solutions/sonic-touch.jpg" alt="" decoding="async" style="object-fit:contain;background:#fcfcfa">
+      <img data-i="6" src="solutions/loots.jpg" alt="" decoding="async" style="object-position:50% 62%">
+      <img data-i="7" src="solutions/vacancy-to-value.jpg" alt="" decoding="async" style="object-position:17% 50%">
+    </div></div>
+  </div>
+</main>
+<!-- Footer, mirroring the header: logo bottom-left, wordmark centre, burger
+     right. Project pages have carried one for a while; these pages just
+     stopped at the end of their content, which on a wide screen left the
+     reader in a field of paper with no way onward except the burger they had
+     to remember was up there. Same markup, same marks, built from the page's
+     own header SVGs by js/main.js so there is one copy of each path. -->
+<footer class="site-foot" data-autofoot>
+  <a class="foot-home" href="index.html" aria-label="Studio NEWO home"></a>
+  <div class="foot-wordmark" role="img" aria-label="NEWO"></div>
+  <button class="foot-burger" type="button" aria-label="Open menu"></button>
+</footer>
+
+
+
+<script src="js/projects-data.js?v=34"></script>
+<script src="js/main.js?v=9"></script>
+<script src="js/menu.js?v=69"></script>
+<script>
+/* ALL PROJECTS: the rows are in the page already (tools/make-simple-page.py, from js/all-projects-data.js).
+   This only: shows the photo of the row under the pointer or the keyboard and moves it level with that row;
+   builds the filter from the types in the table; opens a row's video in a plain viewer. */
+(function(){
+  "use strict";
+  var root = document.getElementById("all"), filt = document.getElementById("allFilter");
+  if(!root) return;
+  var tb = root.querySelector(".at"), pre = root.querySelector(".at-pre-in");
+  var rows = [].slice.call(root.querySelectorAll("a.at-r"));
+  var PLURAL = { "Product":"Products", "Case study":"Case studies" };
+  var curType = "All", curId = null;
+
+  function show(row){
+    var i = row.getAttribute("data-i"); curId = i;
+    [].forEach.call(pre.children, function(c){ c.classList.toggle("on", c.getAttribute("data-i") === i); });
+    rows.forEach(function(r){ r.classList.toggle("cur", r === row); });
+    var max = Math.max(0, tb.offsetHeight - pre.offsetHeight);
+    pre.style.setProperty("--y", Math.round(Math.max(0, Math.min(max, row.parentNode.offsetTop - tb.offsetTop))) + "px");
+  }
+  function applyFilter(){
+    rows.forEach(function(r){ r.parentNode.hidden = !(curType === "All" || r.getAttribute("data-t") === curType); });
+    var vis = rows.filter(function(r){ return !r.parentNode.hidden; });
+    var keep = vis.filter(function(r){ return r.getAttribute("data-i") === curId; })[0];
+    if(keep || vis[0]) show(keep || vis[0]);
+  }
+  rows.forEach(function(r){
+    r.addEventListener("pointerenter", function(e){ if(e.pointerType !== "touch") show(r); });
+    r.addEventListener("focus", function(){ show(r); });
+  });
+
+  /* the filter: All, then one word per type in the table, in table order. Only shown when there is a choice. */
+  var types = [];
+  rows.forEach(function(r){ var t = r.getAttribute("data-t"); if(t && types.indexOf(t) < 0) types.push(t); });
+  if(types.length > 1){
+    filt.setAttribute("role", "group"); filt.setAttribute("aria-label", "Show");
+    ["All"].concat(types).forEach(function(t, i){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "al-f"; b.setAttribute("data-t", t); b.setAttribute("aria-pressed", i ? "false" : "true");
+      b.textContent = PLURAL[t] || t;
+      filt.appendChild(b);
+    });
+    filt.addEventListener("click", function(e){
+      var b = e.target.closest("[data-t]"); if(!b) return; curType = b.getAttribute("data-t");
+      [].forEach.call(filt.children, function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      applyFilter();
+    });
+  }
+
+  /* the viewer: youtube-nocookie, built only when asked for, so the page loads nothing from YouTube until
+     VIDEO is pressed. Esc, CLOSE or a click outside the film closes it; focus goes back to the link. */
+  var vw = null, vwFrom = null;
+  function closeVid(){
+    if(!vw) return; vw.remove(); vw = null;
+    document.removeEventListener("keydown", vidKey); document.removeEventListener("focusin", vidFocus);
+    if(vwFrom) vwFrom.focus();
+  }
+  function vidKey(e){ if(e.key === "Escape") closeVid(); }
+  function vidFocus(e){ if(vw && !vw.contains(e.target)) vw.querySelector("button").focus(); }
+  function openVid(id, from){
+    closeVid(); vwFrom = from;
+    vw = document.createElement("div"); vw.className = "at-view";
+    vw.setAttribute("role", "dialog"); vw.setAttribute("aria-modal", "true"); vw.setAttribute("aria-label", "Video");
+    vw.innerHTML = '<div class="at-view-in"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) +
+      '?autoplay=1&rel=0&modestbranding=1" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>' +
+      '<button class="al-f" type="button">Close</button></div>';
+    vw.addEventListener("click", function(e){ if(e.target === vw || e.target.closest("button")) closeVid(); });
+    document.body.appendChild(vw);
+    document.addEventListener("keydown", vidKey); document.addEventListener("focusin", vidFocus);
+    vw.querySelector("button").focus();
+  }
+  [].forEach.call(root.querySelectorAll(".at-vid"), function(b){
+    var r = b.parentNode.querySelector("a.at-r");
+    b.addEventListener("focus", function(){ show(r); });
+    b.addEventListener("pointerenter", function(e){ if(e.pointerType !== "touch") show(r); });
+    b.addEventListener("click", function(){ openVid(b.getAttribute("data-video"), b); });
+  });
+
+  if(rows[0]) show(rows[0]);
+  window.addEventListener("resize", function(){ var c = root.querySelector("a.at-r.cur"); if(c) show(c); });
+  window.addEventListener("load", function(){ var c = root.querySelector("a.at-r.cur"); if(c) show(c); });
+})();
+</script>
+</body>
+</html>

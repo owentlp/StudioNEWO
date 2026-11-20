@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MATERIALS · STUDIO NEWO</title>
 <meta name="description" content="The materials in Studio NEWO products, each chosen for the full life of the object: lifespan, use and environmental impact.">
+<meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
+<!-- light by day, dark only at night for a dark system setting: js/theme.js -->
+<script src="js/theme.js?v=1"></script>
 <link rel="canonical" href="https://studionewo.com/materials.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/materials.html">
@@ -25,14 +28,14 @@
      icons: the same mark drawn full bleed, with frames for 125% and 150%
      display scaling. Regenerate all of them with tools/make-icons.py. -->
 <link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
-<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
-<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
-<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico?v=4" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=4" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=4" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=2" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=79">
+<link rel="stylesheet" href="css/style.css?v=88">
 <style>
   /* page-specific layout only (rebuilt 2026-10-08). One flat page: every
      material in use is visible on one scroll, no accordions. Each category is
@@ -76,7 +79,7 @@
   .mi-name{display:block; font-family:var(--disp); font-style:italic; font-size:var(--t-tag); line-height:1.08; margin-bottom:4px;}
   .matitem.is-for .mi-name{color:var(--red-text);}
   .mi-in{display:block; font-size:var(--t-body); letter-spacing:0; margin-bottom:6px;}
-  .mi-in a{color:var(--ink); text-decoration:underline; text-decoration-color:rgba(20,20,20,.3); text-underline-offset:2px;}
+  .mi-in a{color:var(--ink); text-decoration:underline; text-decoration-color:light-dark(rgba(20,20,20,.3),rgba(233,231,226,.4)); text-underline-offset:2px;}
   .mi-in a:hover{color:var(--red-text); text-decoration-color:var(--red-text);}
   .matitem-text .desc{max-width:var(--w-desc);}
   /* CLOSING BLOCK (2 Nov 2026, site review finding 2): the page was a dead end.
@@ -123,7 +126,7 @@
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
 </header>
-<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
+<div id="menu-overlay"><a href="all-projects.html">ALL PROJECTS</a><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
 <main class="page matg" id="matg-content" tabindex="-1">
   <!-- Intro (2026-10-08): the label, one lead line that carries the page for
@@ -134,7 +137,66 @@
     <h1 class="lead">Every material is chosen for the full life of the object.</h1>
     <p class="desc">Lifespan, use and environmental impact decide each one. Every product uses as few materials as it needs, which makes it simpler to build, repair and take apart, so it lasts longer.</p>
   </div>
-  <div id="matg-cats"></div>
+  <div id="matg-cats">
+<!-- STATIC COPY BEGIN (tools/make-materials-static.py writes the lines down to STATIC COPY END: the same words as plain HTML, for search engines and link previews that do not run scripts. The page script replaces them. Do not edit by hand.) -->
+<section data-static>
+<h2>WOOD</h2>
+<p>Solid wood where a product is handled every day and can be sanded and refinished for decades. Plywood where stiffness and flatness matter more.</p>
+<h3>Purpleheart</h3>
+<p>Used in: <a href="omni.html">OMNI</a></p>
+<p>Among the densest hardwoods, and stiff. A fresh cut turns deep purple as it oxidizes; UV slowly browns it. Mass and stiffness suit speaker enclosures.</p>
+<h3>Cherry</h3>
+<p>Used in: <a href="kart.html">KART</a></p>
+<p>Medium density, uniform grain. Darkens with UV exposure. High machinability.</p>
+<h3>Solid hardwood</h3>
+<p>Used in: <a href="neb.html">NEB</a>, <a href="halo.html">HALO</a></p>
+<p>Species chosen per piece. Used as solid stock for load-bearing dowels and enclosed bases. Dense, stable and easy to sand back and refinish.</p>
+<h3>Baltic birch plywood</h3>
+<p>Used in: <a href="neb.html">NEB</a></p>
+<p>Void-free cross-banded layers. High structural rigidity for tension mechanics. Edges can remain exposed.</p>
+</section>
+<section data-static>
+<h2>METAL</h2>
+<p>Energy-intensive to make. Used where strength, heat or weight keep a product working for years, long enough to pay that energy back.</p>
+<h3>Cast aluminum (A356)</h3>
+<p>Used in: <a href="omni.html">OMNI</a></p>
+<p>Granular finish. High thermal conductivity. Used for acoustic diffusion and heat sinks.</p>
+<h3>Machined aluminum (6061/7075)</h3>
+<p>Used in: <a href="kart.html">KART</a>, <a href="omni.html">OMNI</a></p>
+<p>High precision tolerances. Used for structural standoffs and rigid chassis.</p>
+<h3>Mild sheet steel</h3>
+<p>Used in: <a href="flow.html">FLOW</a></p>
+<p>Formable, punches clean, welds easily with TIG or MIG. Used for folded housings and weighted bases.</p>
+</section>
+<section data-static>
+<h2>GLASS</h2>
+<p>Used where light has to pass through or be softened. Glass outlasts almost anything if it is not broken.</p>
+<h3>Frosted glass</h3>
+<p>Used in: <a href="kart.html">KART</a></p>
+<p>Acid-etched or sandblasted. Diffuses light output to soften LED hot spots.</p>
+<h3>Borosilicate glass</h3>
+<p>Used in: <a href="halo.html">HALO</a></p>
+<p>Used for components housed near heat sources or high-frequency fields.</p>
+</section>
+<section data-static>
+<h2>PLASTICS</h2>
+<p>Used where it performs best: precise, light and quick to remake. Printed parts are kept small and easy to reprint, so one broken part does not end the product.</p>
+<h3>PLA</h3>
+<p>Used in: <a href="flow.html">FLOW</a></p>
+<p>Polylactic acid, a bio-based thermoplastic. Low glass transition temperature. Used for prototypes and internal brackets. Requires industrial facilities to compost.</p>
+<h3>Rubber sheet</h3>
+<p>Used in: <a href="flow.html">FLOW</a></p>
+<p>Cut from sheet into gaskets and feet. Damps vibration and seals joints without adhesive.</p>
+</section>
+<section data-static>
+<h2>SOFT GOODS</h2>
+<p>Cushions and covers wear faster than the frame around them, so they are made to come off for cleaning or replacement.</p>
+<h3>Polyurethane foam</h3>
+<p>Used in: <a href="neb.html">NEB</a></p>
+<p>The usual cushion foam, cut to standard block sizes, so it can be replaced locally without a proprietary order.</p>
+</section>
+<!-- STATIC COPY END -->
+  </div>
   <div class="matg-close">
     <p class="lead">Any studio product can be made to order in another material from this page, or in another size or finish.</p>
     <a class="inq" href="contact.html?about=Custom">ASK ABOUT CUSTOM &rarr;</a>
@@ -154,9 +216,9 @@
 
 
 <script src="js/materials-data.js?v=12"></script>
-<script src="js/projects-data.js?v=33"></script>
-<script src="js/main.js?v=8"></script>
-<script src="js/menu.js?v=57"></script>
+<script src="js/projects-data.js?v=34"></script>
+<script src="js/main.js?v=9"></script>
+<script src="js/menu.js?v=69"></script>
 <script>
 (function(){
   function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }

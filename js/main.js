@@ -210,6 +210,7 @@
   function realGaps(p, sp){
     var words = [], tw = document.createTreeWalker(p, NodeFilter.SHOW_TEXT), n, rg = document.createRange();
     while((n = tw.nextNode())){
+      if(!own(p, n)) continue;                  // not the words of an info panel inside it
       var t = n.textContent, re = /\S+/g, m;
       while((m = re.exec(t))){
         rg.setStart(n, m.index); rg.setEnd(n, m.index + m[0].length);
@@ -237,13 +238,31 @@
     }
     return { mean: cnt ? sum / cnt : 1, worst: worst || 1 };
   }
+  /* THE PARAGRAPH'S OWN WORDS (16 Nov 2026). A paragraph with a small "i" holds
+     its info panel inside it. The panel's words were counted as the
+     paragraph's: closed, they skewed the width chosen; open, they were measured
+     as lines of the paragraph, so the paragraph was re-fitted every time a
+     panel opened (the word spacing changed on Metal) and on Soft goods each
+     pass undid the last, for ever (the panel jumped up and down). The panel is
+     fitted on its own, as its own block. */
+  function own(p, node){
+    var el = node.nodeType === 1 ? node : node.parentElement;
+    var pan = el && el.closest ? el.closest(".info-panel") : null;
+    return !pan || !p.contains(pan) || pan.contains(p);
+  }
+  function ownText(p){
+    if(!p.querySelector || !p.querySelector(".info-panel")) return p.textContent;
+    var out = "", tw = document.createTreeWalker(p, NodeFilter.SHOW_TEXT), n;
+    while((n = tw.nextNode())) if(own(p, n)) out += n.textContent;
+    return out;
+  }
   function realScore(r){ return (r.mean >= 1.9 ? 100 : 0) + r.worst * 10 + r.mean; }
   function fitOne(p){
     if(p.dataset.fit) p.style.maxWidth = "";
     var cs = getComputedStyle(p);
     if(cs.textAlign !== "justify" || !p.offsetParent) return false;
     var cw = charWidth(cs); if(!cw) return false;
-    var text = p.textContent; if(text.length < MIN_CHARS) return false;
+    var text = ownText(p); if(text.length < MIN_CHARS) return false;
     var maxCols = Math.floor((p.clientWidth + 0.01) / cw); if(maxCols < 16) return false;
     // one of several paragraphs in a block: keep the block's one width
     var sib = p.parentElement ? p.parentElement.children : [];
@@ -274,7 +293,7 @@
     else { p.style.maxWidth = ""; delete p.dataset.fit; }
     return true;
   }
-  var busy = false;
+  var busy = false, selfResize = false, chain = 0;
   function fitAll(){
     if(busy) return; busy = true;
     var changed = false;
@@ -286,14 +305,28 @@
     busy = false;
     // layout that measures paragraph heights (the how-it-works pull on project
     // pages, the 3D model overlap) re-runs on resize, so give it one
-    if(changed) window.dispatchEvent(new Event("resize"));
+    /* that resize comes back here and asks for another pass. One is allowed (a
+       layout that moved may have changed a column); a second in a row is not,
+       so two passes can never undo each other for ever (16 Nov 2026). */
+    if(changed){ selfResize = true; try { window.dispatchEvent(new Event("resize")); } finally { selfResize = false; } }
   }
   var t = null;
   function later(ms){ clearTimeout(t); t = setTimeout(fitAll, ms); }
   window.NEWO_FIT = fitAll;
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function(){ later(0); });
   window.addEventListener("load", function(){ later(50); });
-  window.addEventListener("resize", function(){ if(!busy) later(160); }, { passive:true });
-  // panels that open on click (the small "i", Process and detail) change what is visible
-  document.addEventListener("click", function(){ later(120); });
+  window.addEventListener("resize", function(){
+    if(busy) return;
+    if(selfResize){ if(chain >= 1) return; chain++; } else chain = 0;
+    later(160);
+  }, { passive:true });
+  /* panels that open on click (the small "i", Process and detail) change what is
+     visible. The small "i": its panel is fitted at once, in the same frame it
+     opens (the page's own click handler has already opened it by the time this
+     one, on the document, runs), so its lines never re-break after it shows. */
+  document.addEventListener("click", function(e){
+    chain = 0;
+    if(e.target && e.target.closest && e.target.closest(".info-btn")){ clearTimeout(t); fitAll(); }
+    else later(120);
+  });
 })();

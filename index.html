@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>STUDIO NEWO · Industrial design studio, Toronto</title>
 <meta name="description" content="Industrial design studio in Toronto. Lighting, furniture, audio and appliances built to be opened, repaired and kept, plus renders and drawings for brands.">
-<meta name="theme-color" content="#e9e7e2">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+<!-- light by day, dark only at night for a dark system setting: js/theme.js -->
+<script src="js/theme.js?v=1"></script>
 <link rel="canonical" href="https://studionewo.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://studionewo.com/">
@@ -25,10 +28,10 @@
      icons: the same mark drawn full bleed, with frames for 125% and 150%
      display scaling. Regenerate all of them with tools/make-icons.py. -->
 <link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
-<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
-<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
-<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico?v=4" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=4" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=4" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=2" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
@@ -70,344 +73,129 @@
   } catch(e){}
 })();
 </script>
+<link rel="stylesheet" href="css/style.css?v=88">
 
 <!--
-  STUDIO NEWO · home / index
-  The home IS the project index: one of the camera clips in /videos plays as
-  the full-page background. Project cards live in a bottom dock: mostly
-  hidden below the bottom edge of the window at rest (just a sliver of each
-  image peeking up), rising on hover to sit flush with the bottom of the
-  page and show the title/description. Every card is the same size and
-  built straight off the PROJECTS list, so adding a project is just adding
-  its key to the ORDER array in the script below, no hand-placed coordinates
-  needed. Copy -> js/projects-data.js.
+  STUDIO NEWO · home / index (16 Nov 2026; one screen, 19 Nov 2026)
+  The editorial gallery: the products as photos of different sizes on a
+  12-column grid, on ONE SCREEN with no scroll on a desktop (Owen's A2 picks,
+  19 Nov 2026, docs/SITE_REVIEW_2026-11-18.txt "A2 FINAL"): a statement at
+  body size above the third photo, its top level with the top of the largest;
+  each tile's name, kind and year in one 150px box; two gutters of white
+  between photos; one link to all projects. Built from mock-home.html.
+  No sky behind the page and no weather windows (those stay parked in
+  home-test.html?v=e). The loading screen is the one the project pages use
+  (the logo on the page colour; no sky since 19 Nov 2026).
+
+  Which product is large: the RANK list in the script at the bottom.
+  Where things sit: the LAYOUT list under it. The statement: WORDS, beside
+  them. Copy: js/projects-data.js.
+  The page before this one (the scrolling gallery, name and year only) is in
+  _backup_originals/2026-11-19_home_all_projects/index.html.
 -->
-
-<!-- THE SHARED STYLESHEET, same as every other page.
-     This page used to be entirely self-contained: about 250 lines of inline CSS
-     that re-declared the fonts, the tokens, the loader, the menu panel, the
-     skip link and .vh. A comment further down said the two copies "must be kept
-     in step when either changes". They were not, and the drift was shipping
-     real bugs - the loader sat at z-index 9 here against 60 in the stylesheet,
-     so the burger painted over the loading screen on every visit; the phone
-     header marks were 20px here against 30px everywhere else; the menu type was
-     9px/30px against 8px/clamp(20,2vw,27).
-     It is linked FIRST and the inline block still follows, so everything this
-     page genuinely needs to do differently - the fixed non-scrolling body, the
-     background video, the card dock - still wins on source order. What is gone
-     from below is only the duplicated half. -->
-<script>
-/* LOADING SCREEN BACKGROUND (2026-10-07).
-   1. Coming from a paper page (anything but home) the loader is paper with the
-      ink mark (html.ld-paper, css/style.css). From home, or a fresh visit, it
-      keeps the sky. Either way the loader fades out, so paper to home and home
-      to paper both cross-fade.
-   2. Until js/sky.js has drawn, the #sky box shows its CSS gradient. That was a
-      fixed day blue, which flashed at night. It now uses the last sky colours
-      js/sky.js saved, or a night guess from the clock on a first visit. */
-(function(){
-  var h = document.documentElement;
-  try { var r = document.referrer ? new URL(document.referrer) : null;
-    if(r && r.origin === location.origin && !/\/(index\.html)?$/.test(r.pathname)) h.classList.add("ld-paper"); } catch(e){}
-  var c = null; try { c = JSON.parse(localStorage.getItem("newo-sky-c") || "null"); } catch(e){}
-  if(!c){ var hr = new Date().getHours(); if(hr < 6 || hr >= 20) c = ["rgb(10,13,24)", "rgb(26,30,44)"]; }
-  if(c){ h.style.setProperty("--sky-zen", c[0]); h.style.setProperty("--sky-hor", c[1]); }
-})();
-</script>
-<link rel="stylesheet" href="css/style.css?v=79">
-
 <style>
-/* ---- HOME PAGE ONLY. Anything shared (fonts, tokens, loader, menu panel,
-   skip link, .vh) now comes from css/style.css above and must NOT be
-   re-declared here - that duplication is exactly what drifted. ---- */
-html,body{height:100%;}
-body{font-family:var(--body); color:var(--ink); background:var(--paper); overflow:hidden; letter-spacing:.02em; -webkit-font-smoothing:antialiased;}
+/* ---- HOME PAGE ONLY. Fonts, tokens, loader, header marks, menu, skip link
+   and .vh come from css/style.css and are not re-declared here.
 
-/* full-page background video: two layers of the SAME clip, self-crossfaded
-   so it loops with no seam (see the script). Paper shows until the first
-   frame is ready, then the video fades in over it. */
-/* Height is pinned to 100lvh (LARGE viewport height), not 100%/100vh.
-   On a phone the browser's address bar retracts as you scroll, which shrinks
-   the viewport - and because a fixed element with inset:0 is sized off that
-   viewport, the video box got shorter mid-scroll and object-fit:cover re-cropped
-   it. That re-crop is what read as the background zooming while you scrolled.
-   100lvh is the height with the toolbars RETRACTED and never changes, so the
-   crop stays put. 100vh is the fallback for anything without lvh support. */
-.bgvid{position:fixed; top:0; left:0; z-index:-1; width:100%; height:100vh; height:100lvh; object-fit:cover; opacity:0; transition:opacity 900ms ease; pointer-events:none;}
-.bgvid.show{opacity:1;}
+   THE GRID. 12 columns and 8 rows, outer margin --m. One row is 3/4 of a
+   column, so a 4:3 photo N columns wide is N rows tall. Over 900 wide the
+   whole grid fits the window: the column is the smaller of "what the width
+   allows" and "what the height allows"; when the height is the limit, the
+   spare width goes into column 7 (the empty one between the big photo and
+   the group at the right), so the photos keep both page margins. Column 7
+   is never narrower than a label box. Where each tile sits is data (RANK
+   and LAYOUT in the script), never per-product CSS.
+   TYPE: the statement is body (10.5px, 11px on a phone), kind and year are
+   labels (8.5px, .08em), the names GOST 19px. Nothing else. ---- */
+body.home{--m:clamp(16px,1.67vw,32px); --g:clamp(10px,1.1vw,20px);
+  --mar-edge:var(--m);   /* the logo and the burger stand on the content's own margin: one edge for everything (same size and top as on every page) */
+  font-size:10.5px; line-height:1.36; letter-spacing:0; min-height:100vh; overflow-x:clip;}
+@media (max-width:760px){ body.home{font-size:11px;} }
+/* one screen: nothing to scroll to. A window under 640px tall keeps its scroll (the grid stops shrinking there). */
+@media (min-width:901px) and (min-height:640px){ body.home{overflow-y:hidden;} }
 
+.ix-wrap{container-type:inline-size; margin:0 var(--m); box-sizing:border-box;
+  --vh:max(100svh, 640px);
+  --lw:150px;                         /* the label box, every tile */
+  --G:calc(var(--g) * 2);             /* white between photos: two gutters (Owen 19 Nov, "more breathing room") */
+  --stn:0px;                          /* height the statement needs above the photo under it, set by fitStatement() */
+  --top:calc(var(--hdr-top) + var(--hdr) + clamp(20px,2.4vw,40px)); --bot:48px;
+  height:var(--vh); padding-top:var(--top);}
+.ix{--rg:calc(var(--G) * .75);
+  --cw:min((100cqw - 11 * var(--G)) / 12, (100cqw - 11 * var(--G) - var(--lw)) / 11);
+  --hav:calc(var(--vh) - var(--top) - var(--bot));
+  /* 8 rows of .75 column; row 1 grows if the statement needs more than one row */
+  --ch:min((var(--hav) - 7 * var(--rg)) / 6, (var(--hav) - 6 * var(--rg) - var(--stn)) / 5.25);
+  --c:min(var(--cw), var(--ch)); --r:calc(var(--c) * .75);
+  display:grid; column-gap:var(--G); row-gap:var(--rg);
+  grid-template-columns:repeat(6, var(--c)) minmax(max(var(--c), var(--lw)), 1fr) repeat(5, var(--c));
+  grid-template-rows:max(var(--r), var(--stn) - var(--rg)) repeat(7, var(--r));}
+.ix:focus{outline:none;}
+.ix > *{grid-column:var(--col) / span var(--span); grid-row:var(--row) / span var(--rows); align-self:start; min-width:0;}
 
-/* header marks follow the sky: ink on a light sky, paper on a dark one */
-body[data-sky="dark"] #home, body[data-sky="dark"] #wordmark, body[data-sky="dark"] #burger{color:var(--paper);}
-body.bg-sky #soundToggle{display:none;}
-/* The only words on the page, kept out of the way: a small spine label hanging
-   under the logo, set vertically. A <p>, not a second h1: the hidden h1 in
-   the body is the page's one heading (2 Nov 2026).
-   It never sits over a card. A lifted card's top is at H - max(320px, 44vh)
-   (--dock-rise), so 56vh on anything taller than 727px. The label is 316px
-   long from y=91 and ends at 407px; measured at 1440x900 a raised card's top
-   is y=504. The max-height is the guarantee: the label is cut (with an
-   ellipsis) 20px above the lowest a raised card can come, so there is nothing
-   for a card to reach, and the old rule that faded the label out whenever a
-   card lifted (which meant for most of a first visit) is gone. Windows under
-   765px tall hide it instead, as the 700px rule used to: there the cut would
-   bite into the words (at 765 a raised card's top is y=428). */
-#home-line{position:fixed; z-index:4; top:91px; left:34px; margin:0;
-  font:inherit; font-weight:400; font-size:9px; letter-spacing:.2em; line-height:1; text-transform:uppercase; white-space:nowrap;
-  writing-mode:vertical-rl; color:var(--ink); pointer-events:none;
-  max-height:min(56vh - 111px, 100vh - 431px); overflow:hidden; text-overflow:ellipsis;}
-.home-hdr{display:contents;}
-/* COLOUR (Owen, 4 Nov 2026): the same colour as the logo and wordmark, which
-   follow the sky (ink on a light sky, paper on a dark one), and no band
-   behind it. Replaces the 3 Nov translucent band (a11y A5): Owen preferred
-   the clean words. The span stays in the markup, unstyled. */
-body[data-sky="dark"] #home-line{color:var(--paper);}
-@media (max-height:764px){ #home-line{width:1px; height:1px; overflow:hidden; clip-path:inset(50%); top:0; left:0;} }
-/* PHONES AND TOUCH (the stacked-card layout below): the same words as a
-   one-line strap under the header, in the dock's top padding (the cards start
-   at 108px), scrolling with the page. Over sky, never over a card. */
-@media (max-width:760px), (hover: none) and (max-width:1100px){
-  #home-line{position:absolute; top:68px; left:22px; right:22px; width:auto; height:auto; max-height:none; clip-path:none;
-    writing-mode:horizontal-tb; overflow:hidden; text-overflow:ellipsis; font-size:9px; line-height:1.2; text-align:left;}
+/* a product tile: the box is the photo only, the words hang outside it */
+.tl{position:relative; display:block; color:var(--ink); text-decoration:none; height:100%;}
+/* GROWING FRAMES (Owen, 14 Nov 2026): on hover or keyboard focus the FRAME
+   grows, the photo staying fitted inside it. Transform only; --grow (set per
+   tile in the script) makes every frame 16px wider whatever its size. It grows
+   from its bottom edge: up and to both sides, never down into the name under
+   it. No will-change, nothing toggled on hover. */
+.tl-im{display:block; overflow:hidden; height:100%; transform:scale(1); transform-origin:50% 100%; transition:transform .45s cubic-bezier(.2,.8,.2,1); backface-visibility:hidden;}
+.tl-im img{display:block; width:100%; height:100%; object-fit:cover; transform:scale(1.01); backface-visibility:hidden;}
+@media (hover:hover){
+  .tl:hover .tl-im{transform:scale(var(--grow, 1.02));}
+  .tl:hover{z-index:2;}
 }
+.tl:focus-visible{outline:none; z-index:2;}
+.tl:focus-visible .tl-im{transform:scale(var(--grow, 1.02)); outline:2px solid var(--ink); outline-offset:2px;}   /* the site focus ring */
 
-/* ---- header: real logo (left) · wordmark (centre) · hamburger (right); all the SAME height ---- */
-#home{position:fixed; z-index:5; top:24px; left:34px; display:block; width:45px; height:45px; color:var(--ink); cursor:pointer;}
-#home svg{width:100%; height:100%; display:block; fill:currentColor;}
-#wordmark{position:fixed; z-index:5; top:24px; left:50%; transform:translateX(-50%); height:45px; color:var(--ink); pointer-events:none;}
-#wordmark svg{height:100%; width:auto; display:block; fill:currentColor;}
-/* #burger is the only selector this page shares with css/style.css, and the
-   shared rule sets mix-blend-mode:difference so the mark stays legible over a
-   dark photo on the project pages. This page draws it in solid ink instead, so
-   the blend mode is switched off explicitly - otherwise linking the stylesheet
-   would have quietly changed how the home page looks.
-   (Worth revisiting: over dark footage the solid ink mark is hard to see, and
-   difference blending is what #soundToggle below already uses. That is a design
-   decision, not a refactor, so it is left alone here.) */
-#burger{position:fixed; z-index:50; top:24px; right:34px; width:45px; height:45px; background:none; border:0; padding:0; cursor:pointer; color:var(--ink); mix-blend-mode:normal;}
-#burger svg{width:100%; height:100%; display:block; fill:currentColor;}
+/* THE LABEL (Owen, 19 Nov 2026): name, kind, year, each on its own line, in
+   one box of the same width on every tile, always one gutter (--g) from its
+   photo. Where it goes is `cap` in LAYOUT:
+   under the photo on its left edge (default); "ur" under it on its right
+   edge, words set right; "l" beside it at the left, last line on the photo's
+   bottom edge, words set right; "r" the same at the right, words set left. */
+.tl-cap{position:absolute; left:0; top:calc(100% + var(--g) - 3px); width:var(--lw); display:flex; flex-direction:column; align-items:flex-start; gap:2px;}
+.tl-n{font-family:var(--disp); font-style:italic; font-size:19px; line-height:1; letter-spacing:0; margin-bottom:3px;}
+.tl-k, .tl-y{font-size:8.5px; line-height:1.3; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2);}
+.tl-k{text-wrap:balance;}   /* even lines, no single word left alone */
+.cap-ur .tl-cap{left:auto; right:0; align-items:flex-end; text-align:right;}
+.cap-l .tl-cap{top:auto; bottom:-2px; left:auto; right:calc(100% + var(--g)); align-items:flex-end; text-align:right;}
+.cap-r .tl-cap{top:auto; bottom:-2px; left:calc(100% + var(--g));}
 
-/* sound toggle: a small, deliberately quiet easter egg in the corner, not a
-   real UI control - sound defaults OFF (the videos stay muted) and this is
-   the only way to turn the ambient audio on. Low opacity at rest so it reads
-   as a mark rather than a button, brightens on hover/when on so it's still
-   findable. mix-blend-difference like the other fixed marks so it stays
-   visible over any part of the background video. */
-/* 30px box with the mark drawn at 20px inside it (padding): the visual weight
-   of the easter egg is unchanged, but the tap target clears the 24px minimum
-   instead of being a 20px square on a phone. */
-#soundToggle{position:fixed; z-index:6; bottom:26px; right:34px; width:30px; height:30px; padding:5px; background:none; border:0; cursor:pointer; color:var(--ink); mix-blend-mode:difference; opacity:.32; transition:opacity .25s ease;}
-#soundToggle:hover, #soundToggle.on{opacity:.9;}
-#soundToggle svg{width:100%; height:100%; display:block;}
-#soundToggle .wave{opacity:0; transition:opacity .2s ease;}
-#soundToggle .mute-x{opacity:1; transition:opacity .2s ease;}
-#soundToggle.on .wave{opacity:1;}
-#soundToggle.on .mute-x{opacity:0;}
+/* THE STATEMENT (Owen, 19 Nov 2026): body size, above the photo under it on
+   that photo's left edge, the top of its capitals level with the top of the
+   largest photo. The link to all projects sits under it, a text link. */
+.ix-st{color:var(--ink);}
+.ix-st p{margin:-3px 0 0; font:inherit; max-width:min(36ch, 100%); text-align:justify; text-align-last:left;}   /* 36ch = three even lines */
+.ix-all{display:inline-block; margin-top:10px; padding:2px 0; font-size:8.5px; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;
+  color:var(--red-text); text-decoration:none;}
+.ix-all:hover, .ix-all:active{text-decoration:underline; text-decoration-color:var(--red); text-decoration-thickness:1px; text-underline-offset:4px;}
+.ix-all:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
 
-/* ---- bottom dock: project cards fanned out along the bottom edge,
-   overlapping like a hand of cards, mostly hidden below the window at rest.
-   Rest state shows a sliver of each card set by --dock-peek - the title
-   overlays the top of it (so that sliver is a readable title tab, not a
-   bare strip of photo) with a bit of the photo showing beneath. Hover
-   straightens the card, brings it to the front of the fan, and raises it to
-   sit flush with the bottom of the page at --dock-rise, showing the full
-   title, description, and photo. Every card is the same fixed size, so a
-   new project just adds another card, no hand-placed coordinates needed.
-   The card is taller than the dock's own box and simply overflows below the
-   viewport edge at rest - nothing needs explicit clipping, it's off-canvas
-   until it rises. IMPORTANT: #dock must keep overflow:visible (not auto/
-   scroll on just one axis) - setting overflow-x without also leaving
-   overflow-y as visible makes the browser silently clip overflow-y too
-   (that's a CSS spec rule, not a bug), which stops the hover rise from
-   working at all since it depends on cards extending above the dock's own
-   (short) box. */
-:root{ --dock-peek:clamp(140px,18vh,190px); --dock-rise:clamp(320px,44vh,520px); --dock-w:clamp(255px,27vw,360px); }
-#dock{
-  position:fixed; left:0; right:0; bottom:0; z-index:3; height:var(--dock-peek);
-  display:flex; justify-content:center; align-items:flex-start;
-  padding:0; overflow:visible; pointer-events:none;
-}
-.dc{
-  position:relative; flex:0 0 auto; width:var(--dock-w); height:var(--dock-rise);
-  overflow:hidden; text-decoration:none; color:var(--ink);
-  pointer-events:auto; transform:translateY(0);
-  transition:transform .45s cubic-bezier(.2,.8,.2,1);
-  /* title band on top, photo filling the rest below it (a column, not an
-     overlay) so the title never covers the top of the photo. */
-  display:flex; flex-direction:column;
-}
-/* overlapping stack, flat across the top: every card after the first pulls
-   left under the one before it, tops all in a straight line, no rotation.
-   Later cards sit on top of earlier ones (normal DOM order) and STAY on top
-   even when an earlier card behind them rises - no z-index bump on hover,
-   so a card lower in the stack keeps its bottom corner tucked behind
-   whichever card is already in front of it, rather than snapping above
-   everything. Reads as the card rising up from its place in the stack
-   instead of popping to the front of it. */
-.dc:not(:first-child){ margin-left:min(calc(-1 * var(--dock-w) * .35), calc((100vw - var(--dock-n, 4) * var(--dock-w)) / (var(--dock-n, 4) - 1))); }
-.dc:hover, .dc:focus-visible, .dc.dc-lift{ transform:translateY(calc(var(--dock-peek) - var(--dock-rise))); }
-/* the photo fills whatever height is left under the title band. The title
-   band is a fixed-height sibling (title + date only, no animating text), so
-   the photo doesn't reflow on hover - the whole card just slides up. */
-.dc-media{position:relative; flex:1 1 auto; min-height:0; z-index:0; overflow:hidden;}
-/* Only `transform` is transitioned. `filter` was being animated too, and a
-   filter transition on a large photo cannot run on the compositor - the browser
-   re-rasterises the whole image every frame of the quarter-second fade, on four
-   cards at once if you sweep across the dock. The saturate value still changes
-   on hover, it just switches rather than ramping, which is not something you can
-   see on a 6% shift. The scale, which you can see, stays smooth because
-   transform is compositor-only. */
-/* See the long note on .hero-gallery in css/style.css: only transform and
-   opacity animate on the compositor, so `filter` deliberately snaps rather
-   than transitioning, and the cards are promoted to their own layer only
-   while the pointer is inside the dock - not permanently, which would keep a
-   full-resolution texture per card alive for the life of the page. */
-/* TWO causes of the border flicker during the zoom, both fixed here:
-
-   1. `will-change` was being ADDED on #dock:hover. That makes Chrome rebuild
-      the compositing layer at the instant the animation starts, which shows as
-      a flash along the image edges. It was redundant anyway - translateZ(0)
-      below already promotes the layer permanently. Promote once and leave it.
-
-   2. At scale(1) the image sat EXACTLY flush with .dc-media's overflow:hidden
-      clip. On the first frames of the zoom, subpixel rounding put the image
-      edge right on the clip boundary, so a hairline of background appeared and
-      disappeared frame to frame. Resting at a hair over 1 keeps the edges
-      permanently outside the clip, so there is no boundary to shimmer. The
-      hover value is raised to match, keeping the same visual zoom.
-
-   Do not add contain/will-change back here; both were tried and made it worse. */
-.dc-media img{display:block; width:100%; height:100%; object-fit:cover; object-position:top; filter:saturate(.94); transform:scale(1.015) translateZ(0); backface-visibility:hidden; transition:transform .5s cubic-bezier(.2,.8,.2,1);}
-.dc{backface-visibility:hidden;}
-.dc:hover .dc-media img, .dc:focus-visible .dc-media img, .dc.dc-lift .dc-media img{transform:scale(1.096) translateZ(0);}   /* 3 Nov 2026: no filter change on hover (one re-raster of a promoted photo per hover; the Windows stutter). saturate(.94) stays constant */
-/* title (+ date) is a paper band at the TOP of the card, ABOVE the photo (not
-   over it), so the photo's top is never covered. It's what shows in the peeking
-   sliver at rest, with the photo starting just beneath it. No catch-phrase/
-   teaser line on the home page (that lives on each project page). */
-.dc-body{
-  position:relative; z-index:1; flex:0 0 auto;
-  background:var(--paper);   /* from css/style.css, linked at the top */
-  padding:10px 10px 12px;
-}
-.dc-title{display:block; font-family:var(--disp); font-style:italic; font-size:20px; line-height:1.1;}
-.dc-date{display:block; font-size:11px; letter-spacing:.16em; opacity:.7; margin-top:4px;}
-/* the fan bleeds ~24px off each window edge (sizeDock adds +48). Inset the
-   first card's title so it clears the left edge instead of being clipped. */
-/* DESKTOP ONLY. On desktop the fan bleeds ~24px off each window edge, so the
-   first card's title needs an inset to clear it. On mobile the dock is a plain
-   stacked column with no bleed, so it needs no inset at all.
-
-   This used to be an unconditional rule plus a `padding-left:0` override in
-   the mobile block. That override was written when the mobile .dc-body had no
-   horizontal padding, and it kept winning on specificity (0,3,0 beats 0,1,0)
-   after the mobile padding became 12px - which is why KART, the first card,
-   sat flush against the left edge while every other card was inset. Scoping
-   the rule to desktop means mobile just uses the normal .dc-body padding and
-   there is nothing left to override. */
-@media (min-width:761px){ .dc:first-child .dc-body{padding-left:38px;} }
-.dc:focus-visible{outline:1px solid var(--red); outline-offset:-2px;}
-
-.fade-in{opacity:0; transform:translateY(6px); transition:opacity 700ms ease, transform 700ms ease;}
-body.ready .fade-in{opacity:1; transform:none;}
-/* while js/loader3d.js is holding the logo on screen (body.ld-pinned) nothing
-   else shows: the page is sky + mark only, and the cards come up in the same
-   moment the mark lets go. */
-body.ready.ld-pinned .fade-in{opacity:0; transform:translateY(6px);}
-body.ready .fade-in.d1{transition-delay:.05s;}
-body.ready .fade-in.d2{transition-delay:.2s;}
-/* REDUCED MOTION (3 Nov 2026, a11y A4): a card still rises on hover / focus,
-   because that is how its photo is shown, but it cuts there instead of sliding,
-   and the photo does not zoom. The cards and the strap come in on a fade only. */
+/* reveal: opacity only. While js/loader3d.js holds the logo (body.ld-pinned)
+   nothing else shows; the page comes up as the mark lets go. */
+.ix > *{opacity:0; transition:opacity .6s ease;}
+body.ready .ix > *{opacity:1;}
+body.ready.ld-pinned .ix > *{opacity:0;}
 @media (prefers-reduced-motion:reduce){
-  .dc, .dc-media img{transition:none;}
-  .dc:hover .dc-media img, .dc:focus-visible .dc-media img, .dc.dc-lift .dc-media img{transform:scale(1.015) translateZ(0);}
-  .fade-in, body.ready.ld-pinned .fade-in{transform:none; transition:opacity 700ms ease;}
+  .tl-im{transition:none;} .tl:hover .tl-im, .tl:focus-visible .tl-im{transform:none;}
 }
 
-/* THE TEST IS HOVER, NOT WIDTH.
-   The fan dock works by hovering a card to raise it. This block used to fire at
-   max-width:760px alone - but an iPad in portrait is 768px and a phone in
-   landscape is 844px, so both sailed past it and got the hover layout on a
-   device with no hover. Measured: at 768x1024 a card is 451px tall with 184px
-   visible; at 844x390 it is 320px tall with 140px visible - and because the
-   desktop dock is fixed with the body set to overflow:hidden, there is no way
-   to scroll to the rest of it either. You saw the titles and a strip of photo,
-   and that was the whole home page.
-   `(hover: none) and (max-width:1100px)` catches phones in landscape and
-   iPads, and the plain width term stays for a narrow window on a desktop,
-   where the fan has no room.
-   THE 1100px CAP IS NOT OPTIONAL (2026-10-26). Owen's touchscreen laptop, in
-   Chrome, reports hover:none, any-hover:none, pointer:coarse and no fine
-   pointer at all, at 1829px wide, so (hover: none) alone and (any-hover: none)
-   both gave it the phone stack. Input type cannot be trusted on Windows touch
-   laptops; size can. The touchpad still raises the cards (:hover works
-   whatever the media query says). */
-@media (max-width:760px), (hover: none) and (max-width:1100px){
-  /* scroll vertically only - never sideways. See the matching note in
-     css/style.css: iOS needs the axis pinned explicitly or a stray wide child
-     gives you a dead margin you can drag the page into. */
-  /* THE DOCUMENT SCROLLS, NOT THE BODY (2 Nov 2026, site review). body used to
-     carry overflow-y:auto while html kept overflow:hidden from the desktop rule
-     above, so body became its own scroll container inside a fixed-height
-     window: the browser chrome never collapsed, iOS tap-the-status-bar did
-     nothing and the fixed header marks passed over the card photos. html now
-     scrolls (overflow-x stays clipped, see css/style.css) and body is a plain
-     block that grows with the cards. */
-  html{overflow-x:hidden; overflow-y:auto;}
-  body{overflow:visible; max-width:100%; height:auto; min-height:100%;}
-  /* 30px, matching --hdr in css/style.css at its own phone breakpoint, so the
-     logo / wordmark / burger do not change size between the home page and
-     every other page. 20px was also under the 24px minimum touch target. */
-  #home{top:24px; left:22px; width:30px; height:30px;}
-  /* the burger's mark stays 30px at the same spot; its button is 44px (the
-     padding is the difference, the box pulled out by 7px), the one way to
-     the menu on a phone (3 Nov 2026) */
-  #burger{top:17px; right:15px; width:44px; height:44px; padding:7px;}
-  #wordmark{top:24px; height:30px;}
-  /* the background video plays on mobile now, so the sound toggle has
-     something to control again. It sits above the scrolling dock. */
-  #soundToggle{position:fixed; z-index:6; bottom:22px; right:22px;}
-  /* the peek/rise/fan trick depends on hover, which touch devices don't
-     really have - on mobile the dock just becomes a plain static stack,
-     every card fully visible, no overlap or rotation, title + photo both
-     showing at once, in normal page flow below the header. */
-  #dock{position:static; height:auto; padding:108px 26px 80px; display:flex; flex-direction:column; align-items:stretch; gap:28px; overflow:visible; pointer-events:auto;}
-  /* The WHOLE card gets the paper background, not just the title strip.
-     With the background video now playing on mobile, the titles need something
-     opaque behind them - but backing only the text made it read as a stray bar
-     floating above the photo. Backing the card instead makes each project a
-     paper card sitting on the footage, which is a deliberate-looking object. */
-  .dc{position:static; display:block; width:100% !important; height:auto !important; margin-left:0 !important; transform:none !important; pointer-events:auto; background:var(--paper);}
-  /* THE display:block IS NOT OPTIONAL.
-     .dc-body and .dc-media are <span> elements. On desktop .dc is a flex
-     container, so the browser blockifies them automatically and everything
-     behaves. Switching .dc to display:block above removes that, and the spans
-     fall back to being plain INLINE - at which point aspect-ratio does not
-     apply to .dc-media at all (it is not a valid property on a non-replaced
-     inline box), so the 4/3 photo frame silently vanished and the image sized
-     itself from an inline parent with height:100%. That is what made the cards
-     look wrong on a phone. Declaring them block restores the intended layout. */
-  .dc-body{display:block; position:static; background:none; -webkit-backdrop-filter:none; backdrop-filter:none; padding:10px 12px 8px;}
-  .dc-media{display:block; position:relative; aspect-ratio:4/3; margin:0;}
-  /* THE EXTRA PIXEL IS NOT OPTIONAL - it is the same problem the desktop card
-     solves with its resting scale(1.015), reappearing here because that
-     transform is switched off below.
-     aspect-ratio:4/3 on a card that is 338px wide (a 390px phone, less the
-     dock's 26px side padding) makes this box 253.5px tall. The image is
-     height:100%, so it paints to 253 while the box occupies 253.5 - and .dc
-     behind it is var(--paper), so that half pixel showed as a hairline of
-     paper along the bottom edge of every card. Any card width that is not a
-     multiple of 4 lands on a fraction like this.
-     calc(100% + 1px) puts the image's bottom edge permanently past the clip
-     instead of exactly on it. object-fit:cover with object-position:top takes
-     that pixel off the bottom of the crop, so nothing visible moves. */
-  .dc-media img{transform:none !important; height:calc(100% + 1px);}
+/* phone and narrow windows: six columns, one thing a row, the same size contrast; it scrolls */
+@media (max-width:900px){
+  .ix-wrap{height:auto; padding-top:calc(var(--hdr-top) + var(--hdr) + 28px); padding-bottom:72px;}
+  .ix{--c:calc((100cqw - 5 * var(--g)) / 6); grid-template-columns:repeat(6,minmax(0,1fr)); grid-template-rows:none; grid-auto-rows:auto; column-gap:var(--g); row-gap:40px;}
+  .ix > *{grid-column:var(--pcol) / span var(--pspan); grid-row:var(--prow);}
+  .tl{height:auto;} .tl-im{height:auto; aspect-ratio:4 / 3;}
+  .tl-cap, .cap-l .tl-cap, .cap-r .tl-cap{position:static; align-items:flex-start; text-align:left; margin-top:var(--g);}
+  .cap-ur .tl-cap{position:static; margin-top:var(--g); margin-left:calc(100% - var(--lw));}
+  .ix-st p{max-width:46ch;}
 }
-@media (prefers-reduced-motion:reduce){ .bgvid{display:none;} }
 </style>
 
-<!-- about.html and contact.html are prefetched AFTER the reveal now (see
-     REVEAL below), so they no longer compete with the loader's own files. -->
+<!-- about.html and contact.html are prefetched AFTER the reveal (see REVEAL
+     below), so they do not compete with the loader's own files. -->
 
 <script type="application/ld+json">
 {
@@ -426,415 +214,214 @@ body.ready .fade-in.d2{transition-delay:.2s;}
 </script>
 </head>
 
-<body>
-<a class="skip-link" href="#dock">Skip to content</a>
+<body class="home">
+<a class="skip-link" href="#content">Skip to content</a>
 
-<!-- The home page carried no <h1> at all, which is the one heading search
-     engines and screen readers look for first. The page is deliberately
-     wordless (the wordmark is the only title on screen), so the heading is
-     visually hidden with the same .vh technique about.html and contact.html
-     already use - never display:none, which would hide it from assistive
-     tech too. -->
-<h1 class="vh">Studio NEWO, industrial design studio in Toronto</h1>
-
-<!-- SKY (2026-10-01): the background is drawn for the visitor's local time and
-     weather by js/sky.js. The video layers stay in the markup, unused, so the
-     clips can come back (or be blended in) by setting BG_MODE = "video". -->
-<canvas id="sky" aria-hidden="true"></canvas>
-<div id="sky-clouds" aria-hidden="true"></div>
-<div id="sky-precip" aria-hidden="true"></div>
-<div id="sky-grain" aria-hidden="true"></div>
-<script src="js/sky.js?v=10"></script>
-<video class="bgvid" id="vidA" muted playsinline preload="none"></video>
-<video class="bgvid" id="vidB" muted playsinline preload="none"></video>
-
-<div id="loader" class="ld-sky" aria-hidden="true">
+<!-- the loader is the page colour with the logo in the page's ink (Owen, 19 Nov
+     2026: no sky or weather on the loading screen), as on the project pages. -->
+<div id="loader" aria-hidden="true">
   <div class="ld-mark">
     <svg class="ld-logo" viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
   </div>
 </div>
-<script src="js/loader3d.js?v=19"></script>
+<script src="js/loader3d.js?v=20"></script>
 
-<!-- banner landmark (3 Nov 2026, axe "region"): display:contents, so the
-     marks keep their own fixed positions and nothing moves -->
-<header class="home-hdr">
-<a id="home" class="fade-in d1" href="index.html" aria-label="Studio NEWO home">
+<!-- header landmark: the three marks, as on every other page (css/style.css) -->
+<header>
+<a class="site-home" href="index.html" aria-label="Studio NEWO home">
   <svg viewBox="0 0 280.89 280.89" aria-hidden="true"><path d="M280.89,280.89H0V0h280.89v280.89ZM140.44,0C62.88,0,0,62.88,0,140.44s62.88,140.44,140.44,140.44,140.44-62.88,140.44-140.44S218.01,0,140.44,0Z"/></svg>
 </a>
-
-<div id="wordmark" class="fade-in d1" role="img" aria-label="NEWO">
+<div class="site-wordmark" role="img" aria-label="NEWO">
   <svg viewBox="0 0 689.55 138.02" aria-hidden="true"><path d="M305.53,124.13c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c7.74,0,14.71,3.21,19.72,8.34v-25.56c-5.06,6.06-12.57,9.99-21.08,9.99-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58c8.51,0,16.02,3.93,21.08,9.99V0h-137.92v137.92h137.92v-22.13c-5.01,5.13-11.98,8.34-19.72,8.34Z"/><path d="M72.86,0c.92,2.76,1.54,5.65,1.54,8.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-3.07.62-5.96,1.54-8.72H0v137.92h65.34c-1.2-3.09-1.92-6.43-1.92-9.95,0-15.23,12.35-27.58,27.58-27.58s27.58,12.35,27.58,27.58c0,3.52-.72,6.86-1.92,9.95h21.26V0h-65.06Z"/><path d="M492.85.1c5.13,5.01,8.34,11.98,8.34,19.72,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-7.74,3.21-14.71,8.34-19.72h-25.56c6.06,5.06,9.99,12.57,9.99,21.08,0,15.23-12.35,27.58-27.58,27.58s-27.58-12.35-27.58-27.58c0-8.51,3.93-16.02,9.99-21.08h-20.2v137.92h137.92V.1h-18.48Z"/><path d="M551.63.03v137.92h137.92V.03h-137.92ZM620.59,96.55c-15.23,0-27.58-12.35-27.58-27.58s12.35-27.58,27.58-27.58,27.58,12.35,27.58,27.58-12.35,27.58-27.58,27.58Z"/></svg>
 </div>
-
-<p id="home-line" class="fade-in d2"><span>Industrial design studio, Toronto</span></p>
-
-<button id="burger" class="fade-in d1" aria-label="Open menu">
+<button id="burger" aria-label="Open menu">
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
 </header>
 
-<!-- easter egg: sound is off by default (the background videos stay muted),
-     this is the only way to turn the ambient audio on. Deliberately unlabeled
-     beyond the aria-label, not called out anywhere in the UI. -->
-<button id="soundToggle" class="fade-in d1" aria-label="Toggle ambient sound" aria-pressed="false">
-  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-    <path class="spk" d="M3.5 9.5v5h3.2l4.6 3.6V5.9L6.7 9.5H3.5z" fill="currentColor" stroke="none"/>
-    <path class="wave" d="M15.5 8.3a5.4 5.4 0 0 1 0 7.4"/>
-    <path class="mute-x" d="M16.3 8.3l4.6 4.6m0-4.6l-4.6 4.6"/>
-  </svg>
-</button>
+<div id="menu-overlay"><a href="all-projects.html">ALL PROJECTS</a><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
 
-<!-- BOTTOM DOCK. Cards are built in the script below, straight off PROJECTS
-     in ORDER - add a project's key to ORDER to add its card, nothing else
-     to place by hand. -->
-<main id="dock" class="fade-in d2" tabindex="-1"></main>
+<!-- The page is nearly wordless (the wordmark is the only title on screen), so
+     the one heading search engines and screen readers look for is visually
+     hidden with .vh, never display:none. The tiles are built by the script
+     below from PROJECTS. -->
+<div class="ix-wrap">
+  <main class="ix" id="content" tabindex="-1"><h1 class="vh">Studio NEWO, industrial design studio in Toronto</h1></main>
+</div>
 
-<div id="menu-overlay"><a href="solutions.html">SOLUTIONS</a><a href="solutions.html#services">SERVICES</a><a href="about.html">ABOUT</a><a href="materials.html">MATERIALS</a><a href="contact.html">CONTACT</a></div>
-
-<script src="js/projects-data.js?v=33"></script>
-<!-- main.js: the ?guides / "g" layout overlay, and the page reveal.
-     __DEFER_REVEAL hands the WHEN to this page: the reveal at the bottom of
-     the file waits for the card images and the sky, then calls
-     window.__revealPage(). Without the flag main.js lifts the loader 80ms
-     after the document is parsed, before the cards have loaded. -->
+<script src="js/projects-data.js?v=34"></script>
+<!-- main.js: the ?guides / "g" layout overlay, the header marks on scroll, and
+     the page reveal. __DEFER_REVEAL hands the WHEN to this page: the reveal at
+     the bottom of the file waits for the photos and the fonts, then
+     calls window.__revealPage(). -->
 <script>window.__DEFER_REVEAL = true;
 /* LAST-RESORT REVEAL (2026-10-05). main.js holds the 12s hard cap, so if main.js
    itself fails to arrive (GitHub Pages answered one request with a 503 during a
    deploy), the loading screen never cleared. This one lives in the page. */
 setTimeout(function(){ document.body.classList.add("ready"); }, 15000);</script>
-<script src="js/main.js?v=8"></script>
+<script src="js/main.js?v=9"></script>
 <script src="js/image-sizes.js?v=6"></script>
-<script src="js/menu.js?v=57"></script>
+<script src="js/menu.js?v=69"></script>
 <script>
-/* ==========================================================================
-   BACKGROUND CLIPS - the one array on this page you hand-edit. One is
-   picked at random per load and plays behind everything. To preview a
-   specific clip while tuning, add ?clip=0 (or 1, 2) to the URL.
-   ========================================================================== */
-const CLIPS = [
-  { src: "videos/apple-blossom-baker-web.mp4", mb: 4.9 },
-  { src: "videos/comox-glacier-web.mp4",       mb: 3.2 },
-  { src: "videos/apple-blossom-sky-web.mp4",   mb: 6.2 }
-];
-
-// Every clip is in the rotation on every device, phones included (Owen's call,
-// 2026-07-28 - an earlier version pinned phones to the lightest clip to save
-// cellular data, which cost mobile visitors two thirds of the footage).
-// Data Saver still opts out of video entirely, further down.
-const CLIP_PICK = (function(){
-  var m = location.search.match(/[?&]clip=(\d+)/);
-  if(m){ var n = parseInt(m[1], 10); if(n >= 0 && n < CLIPS.length) return n; }
-  return Math.floor(Math.random() * CLIPS.length);
-})();
-</script>
-
-<script>
-/* build the bottom dock. ORDER controls which projects show and in what
-   order - add a project's key here to give it a card, nothing else to set
-   by hand, every card is the same fixed size (see --dock-peek/--dock-rise
-   in the CSS above). */
 (function(){
-  // chronological, most recent first: kart/halo 2026, omni/flow 2025,
-  // neb 2024. FLOW joined the home page on 2026-10-02 (Owen).
-  var ORDER = ["kart","halo","omni","flow","neb"];
-  document.documentElement.style.setProperty("--dock-n", ORDER.length);
-  function real(s){ return s && String(s).charAt(0)!=="["; }
-  function esc(s){ return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  "use strict";
+  /* ==========================================================================
+     RANK. Best project first. The first name gets the biggest place on the
+     page (slot 1), the second the next biggest, and so on. Reorder this one
+     list to change which product is large. To try an order without editing:
+       index.html?rank=neb,kart,omni,halo,flow
+     ========================================================================== */
+  var RANK = ["kart", "neb", "omni", "halo", "flow"];
+  (function(){
+    var r = "";
+    try { r = new URLSearchParams(location.search).get("rank") || ""; } catch(e){}
+    r = r.split(",").filter(function(k){ return PROJECTS[k]; });
+    if(r.length) RANK = r.concat(RANK.filter(function(k){ return r.indexOf(k) < 0; }));
+  })();
 
-  /* A dock card is only ever ~360px wide, but its image is the project's
-     full-resolution hero (up to 2400px). srcset points the browser at the
-     600px copy in projects/<key>/sm/ instead, with the original still listed
-     as the largest candidate so a high-DPR screen is unaffected. Same
-     mechanism as the project page, see the comment on srcAttrs() there.
-     Dimensions come from js/image-sizes.js; no entry means no srcset and the
-     plain full-size src is used, so a newly added image can never break this.
-     The cards are the page's main content and sit in the viewport at rest, so
-     they are NOT lazy-loaded - lazy would delay the one thing worth seeing. */
+  /* ==========================================================================
+     LAYOUT. Where things sit. One entry per thing on the page.
+       slot   a product place: 1 is the biggest, filled from RANK
+       id     "words" = the statement and the link to all projects
+       col    first column, 1 to 12        span   columns wide
+       row    first row, 1 to 8 (a row is 3/4 of a column, so a photo N
+              columns wide is N rows tall; photos are cropped to 4:3)
+       rows   only for "words": rows tall (photos work theirs out)
+       cap    where name, kind and year go: under the photo on its left edge
+              (default), "ur" = under it on its right edge, "l" or "r" =
+              beside it at that side, last line on the photo's bottom edge
+       ph     phone: [row, first column, columns wide] on a six-column grid
+     The page is one screen: the 12 columns and 8 rows are all there is, so a
+     new place must fit inside them. The statement must stay in row 1 (row 1
+     grows to hold it, fitStatement() below).
+     ========================================================================== */
+  var LAYOUT = [
+    { slot:1,     col:1,  span:6, row:1,                    ph:[2,1,6] },
+    { id:"words", col:8,  span:3, row:1, rows:1,            ph:[1,1,6] },
+    { slot:4,     col:11, span:2, row:1, cap:"ur",          ph:[3,5,2] },
+    { slot:3,     col:8,  span:3, row:2, cap:"l",           ph:[4,1,3] },
+    { slot:5,     col:5,  span:2, row:7, cap:"l",           ph:[5,4,2] },
+    { slot:2,     col:9,  span:4, row:5, cap:"l",           ph:[6,3,4] }
+  ];
+  /* THE STATEMENT. PLACEHOLDER wording from the mock-up (19 Nov 2026): Owen has
+     not written or approved it yet. Third person, sentence case. */
+  var WORDS = "Industrial design studio, Toronto. Lighting, furniture and audio built to be opened, repaired and kept.";
+  var ALL_PROJECTS = "all-projects.html";
+
+  function real(s){ return s && String(s).charAt(0) !== "["; }
+  function esc(s){ return (s == null ? "" : String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
   /* does this IMG_SIZES entry have the sm/ or md/ copy? Optional third element
-     ("sm", "md", "sm md", "") from tools/make-image-variants.py; without it, the
-     width rule (sm when w > 600, md when w > 1200). */
+     from tools/make-image-variants.py; without it, the width rule. */
   function hasTier(d, t){
-    return d.length > 2 ? (" " + d[2] + " ").indexOf(" " + t + " ") >= 0
-                        : d[0] > (t === "sm" ? 600 : 1200);
+    return d.length > 2 ? (" " + d[2] + " ").indexOf(" " + t + " ") >= 0 : d[0] > (t === "sm" ? 600 : 1200);
   }
-  /* sizes (3 Nov 2026, measured): a stacked card is the window less 52px at every
-     phone and touch width (308 at 360, 338 at 390, 768 at 820, 972 at 1024); a fanned
-     desktop card is about 29vw (420 at 1440, 555 at 1920). Was 100vw / 27vw, which
-     sent the 1200px copy to a 390px phone at 1.75x where the 600px one covers it. */
-  function cardSrc(key, file){
-    var dims = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[key]) ? IMG_SIZES[key][file] : null;
-    if(!dims) return "";
-    var w = dims[0], h = dims[1], b = "projects/"+key+"/", set = [];
-    if(hasTier(dims, "sm")) set.push(b + "sm/" + file + " 600w");
-    if(hasTier(dims, "md")) set.push(b + "md/" + file + " 1200w");
-    set.push(b + file + " " + w + "w");
-    return (set.length > 1 ? ' srcset="'+set.join(", ")+'" sizes="(max-width:760px) calc(100vw - 52px), (hover:none) and (max-width:1100px) calc(100vw - 52px), 30vw"' : '') +
-           ' width="'+w+'" height="'+h+'"';
+  /* the sm / md / full ladder, sized to the tile: its share of the 12 columns
+     (of the 6 on a phone). Dimensions come from js/image-sizes.js; no entry
+     means no srcset and the plain src, so a new photo can never break this. */
+  function srcAttrs(key, file, it){
+    var d = (typeof IMG_SIZES !== "undefined" && IMG_SIZES[key]) ? IMG_SIZES[key][file] : null;
+    if(!d) return "";
+    var b = "projects/" + key + "/", set = [];
+    if(hasTier(d, "sm")) set.push(b + "sm/" + file + " 600w");
+    if(hasTier(d, "md")) set.push(b + "md/" + file + " 1200w");
+    set.push(b + file + " " + d[0] + "w");
+    var sizes = "(max-width:900px) " + Math.round(it.ph[2] / 6 * 100) + "vw, " + Math.round(it.span / 12 * 100) + "vw";
+    return (set.length > 1 ? ' srcset="' + set.join(", ") + '" sizes="' + sizes + '"' : "") + ' width="' + d[0] + '" height="' + d[1] + '"';
+  }
+  function place(el, it, rows){
+    el.style.setProperty("--col", it.col);   el.style.setProperty("--span", it.span);
+    el.style.setProperty("--row", it.row);   el.style.setProperty("--rows", rows);
+    el.style.setProperty("--prow", it.ph[0]);
+    el.style.setProperty("--pcol", it.ph[1]); el.style.setProperty("--pspan", it.ph[2]);
   }
 
-  /* ---- WARMING THE PROJECT PAGES ----------------------------------------
-     The mechanism lives in js/menu.js as window.NEWO_WARM (menu.js is the one
-     script every page loads, so the ?v= numbers exist in exactly one place).
-     Read the long note there for what the two tiers are and why the heavy
-     assets wait for a dwell rather than firing on contact.
-     Here: warm the shared shell once the home page has settled, so even a
-     straight click into the first card starts warm, and warm each project when
-     the pointer actually lands on its card. */
-  var WARM = window.NEWO_WARM || { shell:function(){}, project:function(){} };
+  /* WARMING THE PROJECT PAGES: window.NEWO_WARM in js/menu.js (read the note
+     there). The shared shell once the page has settled; each project when the
+     pointer or the keyboard lands on its tile. */
+  var WARM = window.NEWO_WARM || { shell:function(){}, project:function(){}, page:function(){} };
   var whenIdle = window.requestIdleCallback || function(fn){ return setTimeout(fn, 1500); };
   whenIdle(function(){ WARM.shell(); });
 
-  var dock = document.getElementById("dock");
-  ORDER.forEach(function(key, i){
-    var p = PROJECTS[key]; if(!p) return;
-    var date   = real(p.date) ? p.date : "";
-    var first  = (p.gallery && p.gallery[0]) ? p.gallery[0] : "hero.jpg";
-
-    var a = document.createElement("a");
-    a.className = "dc";
-    a.href = key + ".html";   // each project has its own page now
-    a.innerHTML =
-      '<span class="dc-body">' +
-        '<span class="dc-title">'+esc(p.title)+'</span>' +
-        (date ? '<span class="dc-date">'+esc(date)+'</span>' : '') +
-      '</span>' +
-      '<span class="dc-media">' +
-        '<img src="projects/'+key+'/'+first+'"'+cardSrc(key, first)+' alt="'+esc((p.alt && p.alt[first]) || p.title)+'" decoding="async">' +
-      '</span>';
-    /* pointerenter, not mouseenter: it also fires on a touch, which is the
-       only warning a phone ever gives before the tap lands. NOT {once:true} -
-       NEWO_WARM dedupes every URL itself, and re-entering a card has to be able
-       to re-arm the dwell timer for the heavy tier, which leaving cancelled. */
-    a.addEventListener("pointerenter", function(){ WARM.project(a, key); });
-    a.addEventListener("focus", function(){ WARM.project(a, key); });
-    dock.appendChild(a);
-  });
-
-  // size the cards so the overlapping fan spans the full width of the screen.
-  // Each card after the first overlaps the previous by 35% (see the .dc
-  // margin-left rule), so N cards occupy width * (1 + (N-1)*0.65). Solve that
-  // for the viewport width and set --dock-w. Recompute on resize. On mobile
-  // the dock is a plain stacked column (CSS), so leave it to the stylesheet.
-  var STACKED = window.matchMedia("(max-width:760px), (hover: none) and (max-width:1100px)");
-  function sizeDock(){
-    var n = dock.children.length;
-    if(!n) return;
-    /* Must match the CSS media query above exactly, or the script sets a fan
-       width for a layout that is actually a stacked column (and the first
-       card's --dock-w would fight the `width:100% !important` there). */
-    if(STACKED.matches){ dock.style.removeProperty("--dock-w"); return; }
-    // +48px so the fan runs a touch past both window edges (no side gap)
-    var w = (window.innerWidth + 48) / (1 + (n - 1) * 0.65);
-    dock.style.setProperty("--dock-w", Math.ceil(w) + "px");
-  }
-  sizeDock();
-  window.addEventListener("resize", sizeDock);
-  // a phone rotating, or a 2-in-1 folding into tablet mode, changes the answer
-  // without necessarily firing a resize the script would otherwise act on
-  if(STACKED.addEventListener) STACKED.addEventListener("change", sizeDock);
-})();
-</script>
-
-<script>
-/* CARD CYCLE (2026-10-07): once the loader has gone, each card lifts in turn,
-   left to right, so a first-time visitor sees every project without hunting.
-   Desktop fan only (the phone column already shows every photo), once per
-   visit (sessionStorage), never with reduced motion, and it stops the moment
-   the visitor moves onto the cards, scrolls, or presses a key. */
-(function(){
-  var dock = document.getElementById("dock"), loader = document.getElementById("loader");
-  if(window.matchMedia("(max-width:760px), (hover: none) and (max-width:1100px), (prefers-reduced-motion: reduce)").matches) return;
-  try { if(sessionStorage.getItem("newo-cycle")) return; } catch(e){}
-  var HOLD = 900, STEP = 650, timers = [], stopped = false;
-  function stop(){
-    if(stopped) return; stopped = true;
-    timers.forEach(clearTimeout);
-    [].forEach.call(dock.children, function(c){ c.classList.remove("dc-lift"); });
-  }
-  dock.addEventListener("pointerenter", stop);
-  addEventListener("keydown", stop); addEventListener("wheel", stop, {passive:true}); addEventListener("touchstart", stop, {passive:true});
-  var wait = setInterval(function(){
-    if(!document.body.classList.contains("ready") || (loader && getComputedStyle(loader).visibility !== "hidden")) return;
-    clearInterval(wait);
-    if(stopped) return;
-    try { sessionStorage.setItem("newo-cycle", "1"); } catch(e){}
-    [].forEach.call(dock.children, function(c, i){
-      timers.push(setTimeout(function(){ if(!stopped) c.classList.add("dc-lift"); }, 300 + i * STEP));
-      timers.push(setTimeout(function(){ c.classList.remove("dc-lift"); }, 300 + i * STEP + HOLD));
-    });
-  }, 150);
-})();
-</script>
-
-<script>
-/* BACKGROUND MODE: "sky" (js/sky.js, default since 2026-10-01) or "video"
-   (the clips above). ?bg=video previews the old background. */
-var BG_MODE = /[?&]bg=video\b/.test(location.search) ? "video" : "sky";
-document.body.classList.toggle("bg-sky", BG_MODE === "sky");
-if(BG_MODE !== "sky"){ var _sk = document.getElementById("sky"); if(_sk) _sk.remove(); }
-
-/* ---- background video: the picked clip, self-crossfaded in a loop ---- */
-(function(){
-  if(BG_MODE !== "video") return;
-  document.getElementById("vidA").preload = "auto";
-  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  // 2026-07-28: the video used to be skipped entirely under 760px, back when
-  // the clips were 3-25MB each. They are 3-12MB now and the phone gets the
-  // lightest one (see CLIP_PICK), so mobile plays it too. Data saver still
-  // opts out completely - that is an explicit request from the visitor, not a
-  // guess about their connection.
-  if(navigator.connection && navigator.connection.saveData) return;
-
-  /* ONE clip, looped with a crossfade onto itself across two layers. Both
-     layers play the SAME clip offset by FADE: as one layer nears its end the
-     other starts from 0 and fades up underneath it, so the end of the clip
-     dissolves into its own start with no seam and nothing ever hides.
-     Playback is slowed so the motion reads as gentle drift. */
-  var clip = CLIPS[CLIP_PICK].src;
-  var a = document.getElementById("vidA"), c = document.getElementById("vidB");
-  var FADE = 1.4;          // crossfade window, seconds
-  var RATE = 0.6;          // slow the footage so it drifts gently
-  var layers = [a, c];
-  var active = 0, armed = false;
-
-  // Sound: OFF by default and stays off until the visitor finds and clicks
-  // the small #soundToggle mark in the corner (a deliberate easter egg, not
-  // called out anywhere) - fully opt-in. The hidden crossfade layer stays
-  // muted regardless, so the two overlapping copies of the clip never play
-  // audio at once.
-  var AUDIO_VOL = 0.18;
-  var soundOn = false, graphBuilt = false, audioCtx = null;
-
-  // EQ: the raw clips carry low-frequency wind/traffic drone that reads as
-  // noise more than ambience, and the bird activity that IS in them sits
-  // quiet in comparison. Rather than bake an EQ into the mp4s (re-encoding
-  // loses quality and can't be un-done from here), this runs the audio
-  // through the Web Audio API live: a cascaded high-pass cuts the low-end
-  // rumble, a small dip around 350Hz further tames residual mid-low drone,
-  // two presence boosts lift the 3-8kHz band most birdsong sits in, and a
-  // compressor stops those boosts from ever clipping. Applies to both
-  // video layers identically so the crossfade doesn't change the tone.
-  function buildEqChain(ctx, videoEl){
-    var src = ctx.createMediaElementSource(videoEl);
-    var hp1 = ctx.createBiquadFilter(); hp1.type = "highpass"; hp1.frequency.value = 180; hp1.Q.value = 0.7;
-    var hp2 = ctx.createBiquadFilter(); hp2.type = "highpass"; hp2.frequency.value = 180; hp2.Q.value = 0.7;
-    var dip = ctx.createBiquadFilter(); dip.type = "peaking"; dip.frequency.value = 350; dip.Q.value = 1.0; dip.gain.value = -5;
-    var birdMid = ctx.createBiquadFilter(); birdMid.type = "peaking"; birdMid.frequency.value = 4500; birdMid.Q.value = 1.2; birdMid.gain.value = 6;
-    var birdHigh = ctx.createBiquadFilter(); birdHigh.type = "peaking"; birdHigh.frequency.value = 7500; birdHigh.Q.value = 1.2; birdHigh.gain.value = 4;
-    var limiter = ctx.createDynamicsCompressor();
-    limiter.threshold.value = -8; limiter.knee.value = 6; limiter.ratio.value = 4; limiter.attack.value = 0.003; limiter.release.value = 0.15;
-    src.connect(hp1); hp1.connect(hp2); hp2.connect(dip); dip.connect(birdMid); birdMid.connect(birdHigh); birdHigh.connect(limiter); limiter.connect(ctx.destination);
-  }
-  function ensureGraph(){
-    if(graphBuilt) return;
-    graphBuilt = true;
-    try {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if(AC){
-        audioCtx = new AC();
-        layers.forEach(function(v){ buildEqChain(audioCtx, v); });
-      }
-    } catch(e){ /* Web Audio unsupported: falls back to the plain volume below, no EQ */ }
-  }
-  function applySound(){
-    var cur = layers[active];
-    cur.volume = AUDIO_VOL;
-    cur.muted = !soundOn;
-  }
-  var soundBtn = document.getElementById("soundToggle");
-  if(soundBtn){
-    soundBtn.addEventListener("click", function(){
-      ensureGraph();                                    // needs a user gesture to start, this click IS one
-      if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-      soundOn = !soundOn;
-      applySound();
-      soundBtn.classList.toggle("on", soundOn);
-      soundBtn.setAttribute("aria-pressed", soundOn ? "true" : "false");
-    });
-  }
-
-  /* defaultPlaybackRate, NOT just playbackRate. The media load algorithm resets
-     playbackRate to defaultPlaybackRate, so setting the rate and then calling
-     load() threw it away and every clip played at 1.0 - verified live. Setting
-     the default first means load() restores 0.6 instead of overwriting it. */
-  function prep(v){
-    v.src = clip; v.loop = false;
-    v.defaultPlaybackRate = RATE; v.playbackRate = RATE;
-    v.load();
-    v.playbackRate = RATE;
-  }
-
-  function arm(v){
-    // hand off to the other layer: both videos sit at the SAME z-index, so
-    // whichever is later in the DOM always paints on top regardless of which
-    // one is "active." Starting both the fade-out and fade-in at the same
-    // instant, over the same CSS transition length, makes the handoff look
-    // identical every time no matter which layer is in front.
-    var nextI = active ^ 1, next = layers[nextI], cur = layers[active];
-    try { next.currentTime = 0; } catch(e){}
-    // audio follows the visible layer only: unmute the incoming one (if the
-    // visitor has already opted in via #soundToggle) and mute the outgoing
-    // one before it disappears, so the two overlapping copies never sound
-    // at once.
-    if(soundOn){ next.volume = AUDIO_VOL; next.muted = false; }
-    next.classList.add("show");
-    next.play().catch(function(){});
-    cur.classList.remove("show");
-    cur.muted = true;
-    /* PAUSE THE OUTGOING LAYER once it has finished fading out. Without this it
-       kept playing forever at opacity 0, so from the first crossfade onward the
-       page was decoding and compositing TWO full-screen videos at all times
-       while only one was ever visible. That constant double load is what made
-       hovering the project cards feel choppy - the compositor was already busy
-       every frame. The delay must clear the .bgvid opacity transition (900ms)
-       or you would see the outgoing layer freeze before it is gone. It is
-       re-armed safely later: arm() sets currentTime = 0 and calls play() on
-       whichever layer comes back in. */
-    setTimeout(function(){ if(!cur.classList.contains("show")) cur.pause(); }, 1000);
-    active = nextI; armed = false;
-  }
-
-  function tick(v){
-    if(layers[active] !== v) return;
-    if(!v.duration || !isFinite(v.duration)) return;
-    if(!armed && v.currentTime >= v.duration - FADE){ armed = true; arm(v); }
-  }
-  layers.forEach(function(v){ v.addEventListener("timeupdate", function(){ tick(v); }); });
-
-  // start the first layer once its metadata is in, jumping to a random point
-  // so the footage differs on each visit.
-  a.addEventListener("loadedmetadata", function once(){
-    a.removeEventListener("loadedmetadata", once);
-    if(isFinite(a.duration) && a.duration > FADE + 1){
-      try { a.currentTime = Math.random() * (a.duration - FADE - 0.6); } catch(e){}
+  var ix = document.getElementById("content");
+  LAYOUT.forEach(function(it){
+    var el, key = it.slot ? RANK[it.slot - 1] : null;
+    if(it.id === "words"){
+      el = document.createElement("div");
+      el.className = "ix-st";
+      el.innerHTML = "<p>" + esc(WORDS) + '</p><a class="ix-all" href="' + ALL_PROJECTS + '">All projects &rarr;</a>';
+      place(el, it, it.rows || 1);
+      (function(a){
+        function warm(){ if(WARM.page) WARM.page(ALL_PROJECTS); }
+        a.addEventListener("pointerenter", warm); a.addEventListener("focus", warm);
+      })(el.querySelector("a"));
+    } else {
+      var p = PROJECTS[key]; if(!p) return;
+      var file = (p.gallery && p.gallery[0]) ? p.gallery[0] : "hero.jpg";
+      el = document.createElement("a");
+      el.className = "tl" + (it.cap === "r" || it.cap === "l" || it.cap === "ur" ? " cap-" + it.cap : "");
+      el.href = key + ".html";
+      /* not lazy: the tiles are the page */
+      el.innerHTML =
+        '<span class="tl-im"><img src="projects/' + key + '/' + file + '"' + srcAttrs(key, file, it) +
+          ' alt="' + esc((p.alt && p.alt[file]) || p.title) + '" decoding="async"></span>' +
+        '<span class="tl-cap"><span class="tl-n">' + esc(p.title) + '</span>' +
+          (real(p.kind) ? '<span class="tl-k">' + esc(p.kind) + '</span>' : '') +
+          (real(p.date) ? '<span class="tl-y">' + esc(p.date) + '</span>' : '') + '</span>';
+      /* every photo is cropped to 4:3, so N columns wide is N rows tall */
+      place(el, it, it.span);
+      /* pointerenter also fires on a touch, the only warning a phone gives
+         before the tap lands. NEWO_WARM dedupes every URL itself. */
+      (function(a, k){
+        a.addEventListener("pointerenter", function(){ WARM.project(a, k); });
+        a.addEventListener("focus", function(){ WARM.project(a, k); });
+      })(el, key);
     }
-    a.classList.add("show");
-    a.play().catch(function(){});
+    ix.appendChild(el);
   });
-  // layer B keeps preload="metadata" until A is actually playing, so the two
-  // layers don't race each other for the same bytes on page load; it then has
-  // the whole first pass of the clip to buffer before the first crossfade.
-  a.addEventListener("playing", function onceP(){
-    a.removeEventListener("playing", onceP);
-    c.preload = "auto"; c.load();
-  });
-  // stop decoding entirely while the tab is hidden
-  document.addEventListener("visibilitychange", function(){
-    var cur = layers[active];
-    if(document.hidden){ layers.forEach(function(v){ v.pause(); }); }
-    else { cur.play().catch(function(){}); }
-  });
-  prep(a); prep(c);
-})();
 
-(function(){
-  /* REVEAL. Until body.ready the page is the sky and the loading mark, nothing
-     else. It is held until what the visitor is about to see is really there:
-       - every card image downloaded and decoded
-       - the fonts
-       - the sky settled on the real weather (js/sky.js, NEWO_SKY.ready)
-     then the mark fades out as the cards fade in. 4s hard cap so a slow image
-     can never strand the page on the loader. */
+  /* GROWING FRAMES: every frame grows by the same 16px of width, whatever its
+     size, so a large tile does not swell into its neighbours. */
+  function sizeTiles(){
+    [].forEach.call(ix.querySelectorAll(".tl-im"), function(f){
+      var w = f.getBoundingClientRect().width;
+      if(w) f.style.setProperty("--grow", ((w + 16) / w).toFixed(4));
+    });
+  }
+  /* THE STATEMENT'S ROW. The statement sits in row 1 above the photo in row 2.
+     If it is taller than one row, row 1 grows to hold it (--stn = its height
+     + 16px of white above that photo) and the grid re-fits the screen. */
+  function fitStatement(){
+    var wrap = ix.parentNode, st = ix.querySelector(".ix-st"), need = 0, i, h;
+    wrap.style.setProperty("--stn", "0px");
+    if(!st || innerWidth <= 900) return;
+    for(i = 0; i < 4; i++){
+      h = Math.ceil(st.getBoundingClientRect().height) + 16;
+      if(h === need) break;
+      need = h; wrap.style.setProperty("--stn", need + "px");
+    }
+  }
+  /* the tab and reading order follows the page as it is laid out (it differs
+     between the 12 column and the phone layouts) */
+  var laidOut = 0;
+  function readingOrder(){
+    var kids = [].slice.call(ix.children).filter(function(k){ return k.tagName !== "H1"; });
+    var at = kids.map(function(k){ var r = k.getBoundingClientRect(); return { k:k, t:Math.round(r.top), l:Math.round(r.left) }; });
+    var sorted = at.slice().sort(function(a, b){ return (a.t - b.t) || (a.l - b.l); });
+    if(sorted.some(function(x, i){ return x.k !== kids[i]; })){
+      if(ix.contains(document.activeElement)) return;   // never move what has focus
+      sorted.forEach(function(x){ ix.appendChild(x.k); });
+    }
+  }
+  function layout(){ fitStatement(); sizeTiles(); }
+  function relayout(){ layout(); clearTimeout(laidOut); laidOut = setTimeout(readingOrder, 60); }
+  addEventListener("resize", relayout);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
+  layout();
+
+  /* REVEAL. Until body.ready the page is the loading mark, nothing else. It is
+     held until what the visitor is about to see is really there: every photo
+     downloaded and decoded, and the fonts. 4s hard cap so a slow photo can never strand
+     the page on the loader. */
   var done = false;
   function reveal(){
     if(done) return; done = true;
@@ -847,20 +434,17 @@ if(BG_MODE !== "sky"){ var _sk = document.getElementById("sky"); if(_sk) _sk.rem
     }, 1200);
   }
   function decoded(im){ return im.decode ? im.decode().catch(function(){}) : null; }
-  var imgs = [].slice.call(document.querySelectorAll("#dock img")).map(function(im){
+  var imgs = [].map.call(ix.querySelectorAll("img"), function(im){
     if(im.complete) return decoded(im);
     return new Promise(function(res){
       im.addEventListener("load", res, { once:true }); im.addEventListener("error", res, { once:true });
     }).then(function(){ return decoded(im); });
   });
-  var sky = (window.NEWO_SKY && NEWO_SKY.ready) || null;
   var fonts = (document.fonts && document.fonts.ready) || null;
-  Promise.all(imgs.concat([sky, fonts])).then(function(){ setTimeout(reveal, 150); }, reveal);
+  Promise.all(imgs.concat([fonts])).then(function(){ setTimeout(reveal, 150); }, reveal);
   setTimeout(reveal, 4000);                   // hard cap
 })();
-
-/* the top-right dropdown menu (burger toggle, links, close-on-escape) is
-   built and wired by js/menu.js, shared with every other page. */
+/* the menu (burger, links, close on escape) is built and wired by js/menu.js */
 </script>
 </body>
 </html>

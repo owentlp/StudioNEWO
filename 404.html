@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>404 · STUDIO NEWO</title>
 <meta name="description" content="This page does not exist.">
+<meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
+<!-- light by day, dark only at night for a dark system setting: js/theme.js -->
+<script src="/js/theme.js?v=1"></script>
 <meta name="robots" content="noindex">
 <!-- FAVICONS. The 192 is listed first and has a stable URL (no ?v): it is the
      one Google uses, and Google wants a size that is a multiple of 48 and a URL
@@ -14,10 +17,10 @@
      icons: the same mark drawn full bleed, with frames for 125% and 150%
      display scaling. Regenerate all of them with tools/make-icons.py. -->
 <link rel="icon" href="/logo/icon-192.png" sizes="192x192" type="image/png">
-<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 20x20 24x24 32x32 40x40">
-<link rel="icon" href="/logo/favicon-16.png?v=3" sizes="16x16" type="image/png">
-<link rel="icon" href="/logo/favicon-32.png?v=3" sizes="32x32" type="image/png">
-<link rel="icon" href="/logo/favicon.svg?v=1" sizes="any" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico?v=4" sizes="16x16 20x20 24x24 32x32 40x40">
+<link rel="icon" href="/logo/favicon-16.png?v=4" sizes="16x16" type="image/png">
+<link rel="icon" href="/logo/favicon-32.png?v=4" sizes="32x32" type="image/png">
+<link rel="icon" href="/logo/favicon.svg?v=2" sizes="any" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png">
 <link rel="preload" href="/fonts/gost-typeb-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ocr-b.woff2" as="font" type="font/woff2" crossorigin>
@@ -26,7 +29,7 @@
      so relative paths would resolve against the wrong folder and the page would
      arrive unstyled with a broken logo. That is exactly what the old standalone
      version did from anywhere but the site root. -->
-<link rel="stylesheet" href="/css/style.css?v=79">
+<link rel="stylesheet" href="/css/style.css?v=88">
 <style>
   .fourofour{min-height:64vh; display:flex; flex-direction:column; justify-content:center;}
   .fourofour .code{font-family:var(--disp); font-style:italic; font-weight:400;
@@ -51,7 +54,7 @@
   <svg viewBox="0 0 246.99 246.99" aria-hidden="true"><path d="M0,0v246.99h246.99V0H0ZM218.57,217.8H33.33v-37.05h185.24v37.05ZM218.57,142.02H33.33v-37.05h185.24v37.05ZM218.57,66.3H33.33V29.25h185.24v37.05Z"/></svg>
 </button>
 </header>
-<div id="menu-overlay"><a href="/solutions.html">SOLUTIONS</a><a href="/solutions.html#services">SERVICES</a><a href="/materials.html">MATERIALS</a><a href="/about.html">ABOUT</a><a href="/contact.html">CONTACT</a></div>
+<div id="menu-overlay"><a href="/all-projects.html">ALL PROJECTS</a><a href="/solutions.html">SOLUTIONS</a><a href="/solutions.html#services">SERVICES</a><a href="/materials.html">MATERIALS</a><a href="/about.html">ABOUT</a><a href="/contact.html">CONTACT</a></div>
 
 <main class="page wrap fourofour" id="content" tabindex="-1">
   <span class="eyebrow">Error</span>
@@ -82,9 +85,9 @@
 </footer>
 
 
-<script src="/js/projects-data.js?v=33"></script>
-<script src="/js/main.js?v=8"></script>
-<script src="/js/menu.js?v=57"></script>
+<script src="/js/projects-data.js?v=34"></script>
+<script src="/js/main.js?v=9"></script>
+<script src="/js/menu.js?v=69"></script>
 <script>
 /* Echo back the path that missed - handy when a 404 comes from a typo or a
    stale link, since you can see at a glance what was actually requested.

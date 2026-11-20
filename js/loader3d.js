@@ -446,7 +446,7 @@
       cssSize: cssSize,
       hold: Q.count > 0,
       coreUrl: BASE + "loader3d-core.js?v=2",
-      meshUrl: BASE + "loader3d-mesh.js?v=1"
+      meshUrl: BASE + "loader3d-mesh.js?v=2"
     }, [handedOff]);
 
     // tell it when the page is ready; it releases at its next settle
@@ -510,7 +510,7 @@
   Q.send = function(){};
   Q.restingNow = function(){ return fbResting(); };
   loadScript(BASE + "loader3d-core.js?v=2", function(){
-    loadScript(BASE + "loader3d-mesh.js?v=1", function(){
+    loadScript(BASE + "loader3d-mesh.js?v=2", function(){
       if(!pageStillLoading() || capFired){ unpin(); return; }   // the page (or the cap) beat us to it
       CORE = window.LOADER3D_CORE;
       var parsed = CORE && CORE.decodeMesh(window.LOADER3D_MESH);
